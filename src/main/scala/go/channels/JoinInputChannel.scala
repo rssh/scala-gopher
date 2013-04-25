@@ -5,7 +5,7 @@ import java.util.concurrent.locks._
 import scala.concurrent.duration._
 
 
-class JoinInputChannel[A](channels: IndexedSeq[InputChannel[A]])
+class JoinInputChannel[A](channels: List[InputChannel[A]]) extends InputChannel[A]
 {
 
    channels foreach {
@@ -91,13 +91,19 @@ class JoinInputChannel[A](channels: IndexedSeq[InputChannel[A]])
     } else None
    }
 
-   private val readImmediatly: Option[A] =
+   def readImmediatly: Option[A] =
    {
     var r:Option[A] = None
     channels.find{ ch => r=ch.readImmediatly;
                          r.isDefined }
     r
    }
+   
+   def addListener(f: A=> Boolean): Unit =
+   {
+     channels.foreach(_.addListener(f))
+   }
+   
 
    // locked when we have resource, waiting for event
    private val readLock = new ReentrantLock();
@@ -111,4 +117,9 @@ class JoinInputChannel[A](channels: IndexedSeq[InputChannel[A]])
 
 }
 
+class JoinInputChannelBuilder[+A](channels: List[InputChannel[A]])
+{
+  def |[B >:A](x: InputChannel[B]) = new JoinInputChannelBuilder(x::channels)  
 
+  implicit def toChannel: InputChannel[A] = new JoinInputChannel(channels) 
+}

@@ -15,12 +15,12 @@ import scala.concurrent.duration._
 class GBlockedQueue[A: ClassTag](size: Int) extends InputChannel[A] with OutputChannel[A]
 {
 
-     // Members declared in InputChannel
 
      /**
       * called, when we want to deque object to readed.
-      * If listener accepts read, it returns true with given object,
-      * and we delete listener from queue.
+      * If listener accepts read, it returns true with given object.
+      * Queue holds weak referencde to listener, so we stop sending
+      * message to one, when listener is finalized.
       */
       def addReadListener(f: A => Boolean): Unit = 
       {

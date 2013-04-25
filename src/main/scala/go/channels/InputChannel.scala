@@ -41,7 +41,7 @@ trait InputChannel[+A]
   /**
    * add listener, which notifiew when new element is available
    * to get from queue.  Input channel must hold weak reference
-   * to listener, wich will be removed when listener will become
+   * to listener, which will be removed when listener has become
    * weakly unreachable.
    **/
   def addListener(f: A=> Boolean): Unit
