@@ -7,7 +7,7 @@ package go.channels
  * when some of inputs and outputs are non-blockde, than action is performed.
  * I.e. next block of 'go' select:
  * <pre>
- *  select
+ *  select match
  *    case x <- a => f1(x)
  *    case x <- b => f2(x)
  *    case 1 -> c => f3
