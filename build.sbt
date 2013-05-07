@@ -17,7 +17,7 @@ scalacOptions ++= Seq("-unchecked","-deprecation","-P:continuations:enable")
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.1"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.2"
 

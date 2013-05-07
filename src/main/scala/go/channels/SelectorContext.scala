@@ -22,6 +22,15 @@ package go.channels
  *  slc.addIddleAction(f4)
  *  slc.runOnce()
  * </pre>
+ *  (and with help of macroses, can be write as 
+ * <pre>
+ *  selector match {
+ *    case x <- a => f1(x)
+ *    case x <- b => f2(x)
+ *    case 1 -> c => f3
+      case _ => f4
+ *  }
+ * </pre>
  */
 class SelectorContext {
   
