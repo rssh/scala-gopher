@@ -36,10 +36,12 @@ import java.util.concurrent._
  */
 class SelectorContext {
   
+  /**
+   * called before selector context become running.
+   */
   def  addInputAction[A](channel: InputChannel[A], action: A => Boolean): Unit = 
   {
-    // TODO: keep listener in list, for saving from gc
-    channel.addListener{ a => 
+    val l: (A => Boolean) = { a => 
       if (enabled) {
         val retval = action(a);
         //we know that we have at least yet one await
@@ -48,18 +50,21 @@ class SelectorContext {
       } else 
         false
     }   
+    inputListeners = l :: inputListeners 
+    channel addListener l
   }
   
   def  addOutputAction[A](channel: OutputChannel[A], action: () => Option[A]): Unit = 
   {
-    // TODO: keep listener in list, for saving from gc
-    channel.addListener{() =>
+    val l = {() =>
       if (enabled) {
         val retval = action()
         latch.countDown()
         retval
       } else None
     }
+    outputListeners = l :: outputListeners 
+    channel addListener l
   }
   
   def  setIddleAction(action: Unit => Unit) = 
@@ -72,7 +77,7 @@ class SelectorContext {
    */
   def  runForever(): Unit = 
   {
-    while(!shutdown) {
+    while(!shutdowned) {
       runOnce()
     }
   }
@@ -104,20 +109,23 @@ class SelectorContext {
   def shutdown(): Unit =
   {
     enabled=false
-    shutdown=true
+    shutdowned=true
+    inputListeners = Nil
+    outputListeners = Nil
     // TODO: clear gc-ssaving lists.
   }
   
-  
+  private var inputListeners:List[Nothing=>Boolean] = Nil 
+  private var outputListeners:List[()=>Option[Any]] = Nil 
   
   @volatile 
   private var enabled = false;
   
   @volatile
-  private var shutdown = true;
+  private var shutdowned = true;
   
   @volatile
-  private var latch: CountDownLatch = null; // new CountDownLatch(1)
+  private var latch: CountDownLatch = null; 
   
   private val IDLE_MILLISECONDS = 100;
   private var idleAction: Unit => Unit = { (x:Unit) =>  }
