@@ -1,6 +1,7 @@
 package go.channels
 
-import java.util.concurrent._
+import java.util.concurrent.{Future => JavaFuture, _ }
+import scala.concurrent._
 
 /**
  * context, which await of doing one of blocked operations.
@@ -43,9 +44,19 @@ class SelectorContext {
   {
     val l: (A => Boolean) = { a => 
       if (enabled) {
-        val retval = action(a);
-        //we know that we have at least yet one await
-        latch.countDown()
+        val retval = try {
+                      action(a);
+                     } catch {
+                       // TODO: handle non-local return differently ?
+                       //  (when we have value)
+                       case t: Throwable =>
+                         lastException = t
+                         false
+                     }
+        if (retval || lastException!=null) { 
+          //we know that we have at least yet one await
+          latch.countDown()
+        }
         retval
       } else 
         false
@@ -58,8 +69,16 @@ class SelectorContext {
   {
     val l = {() =>
       if (enabled) {
-        val retval = action()
-        latch.countDown()
+        val retval = try {
+                       action()
+                     } catch {
+                       case t: Throwable =>
+                          lastException=t
+                          None
+                     }
+        if (retval.isDefined || lastException!=null) { 
+           latch.countDown()
+        }
         retval
       } else None
     }
@@ -69,30 +88,23 @@ class SelectorContext {
   
   def  setIddleAction(action: Unit => Unit) = 
   {
-    idleAction
+    idleAction = action 
   }
 
-  /**
-   * actually run this in loop with waiter in current thread.
-   */
-  def  runForever(): Unit = 
-  {
-    while(!shutdowned) {
-      runOnce()
-    }
-  }
   
   /**
    * wait for 1-st event 
    */
   def  runOnce(): Unit = 
   {
-    // TODO: handle exception
-    // TODO: 
     latch = new CountDownLatch(1)
+    lastException = null;
     enabled = true
     latch.await(IDLE_MILLISECONDS, TimeUnit.MILLISECONDS)
     enabled = false
+    if (lastException != null) {
+       throw lastException;
+    }
     if (latch.getCount() > 0) {
       latch.countDown()
       idleAction
@@ -104,16 +116,24 @@ class SelectorContext {
   /**
    * enable listeners and outputChannels 
    */
-  def  go(): Unit = ???
+  def  go(implicit ex:ExecutionContext): Future[Unit] = 
+  {
+    Future{ runOnce() } flatMap { (u:Unit) =>
+       if (!shutdowned) go
+       else Future(u)
+    }
+  }
+
   
   def shutdown(): Unit =
   {
     enabled=false
     shutdowned=true
+    // allow gc to cleanup listeners.
     inputListeners = Nil
     outputListeners = Nil
-    // TODO: clear gc-ssaving lists.
   }
+
   
   private var inputListeners:List[Nothing=>Boolean] = Nil 
   private var outputListeners:List[()=>Option[Any]] = Nil 
@@ -126,6 +146,9 @@ class SelectorContext {
   
   @volatile
   private var latch: CountDownLatch = null; 
+
+  @volatile
+  private var lastException: Throwable = null;
   
   private val IDLE_MILLISECONDS = 100;
   private var idleAction: Unit => Unit = { (x:Unit) =>  }
