@@ -22,13 +22,9 @@ object Macroses
   def transformImpl[A](c:Context)(x: c.Expr[A]): c.Expr[A] =
   {
     import c.universe._
-    System.err.println("in Go.transformImpl, x="+x);
-    System.err.println("row:"+showRaw(x));
     if (findDeffered(c)(x.tree)) {
-       System.err.println("DEFER found");
        withDeffered(c)(x)
     } else {
-       System.err.println("DEFER not found");
        x
     }
   }

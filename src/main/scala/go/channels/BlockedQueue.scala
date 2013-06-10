@@ -5,17 +5,18 @@ import java.util.concurrent._
 import java.util.concurrent.locks._
 import java.lang.ref._
 import scala.annotation.tailrec
-import scala.reflect.ClassTag
 import scala.concurrent.duration._
+import scala.reflect._
+
 
 
 /**
  * classical blocked queue, which supports listeners.
  */
-class GBlockedQueue[A: ClassTag](size: Int) extends InputChannel[A] with OutputChannel[A]
+class GBlockedQueue[A : ClassTag ](size: Int) extends InputOutputChannel[A]
 {
 
-
+ 
      /**
       * called, when we want to deque object to readed.
       * If listener accepts read, it returns true with given object.
@@ -244,10 +245,7 @@ class GBlockedQueue[A: ClassTag](size: Int) extends InputChannel[A] with OutputC
    }
   }
 
-  class Async extends InputAsync with OutputAsync
-  {}
-
-  override def async = new Async { }
+  
 
 
 
