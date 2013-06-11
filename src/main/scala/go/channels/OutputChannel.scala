@@ -36,6 +36,7 @@ trait OutputChannel[A]
 
   def addListener(f: () => Option[A] ): Unit
 
+  
 }
 
 

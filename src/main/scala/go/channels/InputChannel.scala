@@ -45,6 +45,7 @@ trait InputChannel[+A]
    * weakly unreachable.
    **/
   def addListener(f: A=> Boolean): Unit
+  
 
 }
 

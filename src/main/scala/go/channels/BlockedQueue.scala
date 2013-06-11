@@ -31,6 +31,17 @@ class GBlockedQueue[A : ClassTag ](size: Int) extends InputOutputChannel[A]
         } finally {
           readListenersLock.unlock()
         }
+        
+        // TODO: process in future ?
+        try {
+          bufferLock.lock();
+          System.err.println("BlockedQueue:addReadListener, count="+count);
+          while(count > 0 && fireNewElementBlocked) {
+            /* read until we can */
+          }
+        } finally {
+          bufferLock.unlock();
+        }
       }
 
       def addListener(f: A => Boolean): Unit = addReadListener(f)
@@ -94,6 +105,17 @@ class GBlockedQueue[A : ClassTag ](size: Int) extends InputOutputChannel[A]
           writeListeners = (new WeakReference(f))::writeListeners
         } finally {
           writeListenersLock.unlock()
+        }
+        
+        // TODO: process in future ?
+        bufferLock.lock();
+        try {
+          System.err.println("BlockedQueue:addReadListener, count="+count+", size="+size);
+          while(count != size && fireNewSpaceBlocked ) {
+            /* nothing */
+          }
+        } finally {
+          bufferLock.unlock();
         }
       }
 
