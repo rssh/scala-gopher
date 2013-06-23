@@ -2,10 +2,12 @@ package go.channels
 
 import java.util.concurrent._
 import java.util.concurrent.locks._
+import scala.concurrent._
 import scala.concurrent.duration._
 
 
-class JoinInputChannel[A](channels: List[InputChannel[A]]) extends InputChannel[A]
+
+class JoinInputChannel[A](channels: List[InputChannel[A]]) extends InputChannel[A] 
 {
 
    channels foreach {
@@ -104,7 +106,8 @@ class JoinInputChannel[A](channels: List[InputChannel[A]]) extends InputChannel[
      channels.foreach(_.addListener(f))
    }
    
-
+   def activate(): Unit = channels.foreach(_.activate())
+   
    // locked when we have resource, waiting for event
    private val readLock = new ReentrantLock();
 

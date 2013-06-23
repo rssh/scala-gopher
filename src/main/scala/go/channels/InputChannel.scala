@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
 
-trait InputChannel[+A]
+trait InputChannel[+A] extends Activable
 {
   
   channel =>
@@ -45,7 +45,7 @@ trait InputChannel[+A]
    * weakly unreachable.
    **/
   def addListener(f: A=> Boolean): Unit
-  
+   
 
 }
 

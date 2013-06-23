@@ -2,6 +2,7 @@ package go.channels
 
 import java.util.concurrent.{Future => JavaFuture, _ }
 import scala.concurrent._
+import scala.collection.immutable._
 
 /**
  * context, which await of doing one of blocked operations.
@@ -10,11 +11,13 @@ import scala.concurrent._
  * when some of inputs and outputs are non-blockde, than action is performed.
  * I.e. next block of 'go' select:
  * <pre>
+ * for(;;) {
  *  select match
  *    case x <- a => f1(x)
  *    case x <- b => f2(x)
  *    case 1 -> c => f3
  *    case _  => f4
+ * }
  * </pre>
  *  is mapped do
  * <pre>
@@ -23,7 +26,7 @@ import scala.concurrent._
  *  slc.addInputAction(b, x=>f2(x))
  *  slc.addOutputAction(c, {f4; Some(1) }
  *  slc.addIddleAction(f4)
- *  slc.runOnce()
+ *  slc.run()
  * </pre>
  *  (and with help of macroses, can be write as 
  * <pre>
@@ -35,7 +38,7 @@ import scala.concurrent._
  *  }
  * </pre>
  */
-class SelectorContext {
+class SelectorContext extends Activable {
   
   /**
    * called before selector context become running.
@@ -63,6 +66,7 @@ class SelectorContext {
     }   
     inputListeners = l :: inputListeners 
     channel addListener l
+    activables = channel :: activables
   }
   
   def  addOutputAction[A](channel: OutputChannel[A], action: () => Option[A]): Unit = 
@@ -83,7 +87,8 @@ class SelectorContext {
       } else None
     }
     outputListeners = l :: outputListeners 
-    channel addListener l
+    channel addListener l 
+    activables = channel :: activables
   }
   
   def  setIddleAction(action: Unit => Unit) = 
@@ -100,6 +105,8 @@ class SelectorContext {
     latch = new CountDownLatch(1)
     lastException = null;
     enabled = true
+    activate()
+    
     latch.await(IDLE_MILLISECONDS, TimeUnit.MILLISECONDS)
     enabled = false
     if (lastException != null) {
@@ -111,6 +118,10 @@ class SelectorContext {
     }
   }
   
+  def activate(): Unit =
+  {
+    activables foreach (_.activate)
+  }
   
   
   /**
@@ -118,8 +129,12 @@ class SelectorContext {
    */
   def  go(implicit ex:ExecutionContext): Future[Unit] = 
   {
-    Future{ runOnce() } flatMap { (u:Unit) =>
-       if (!shutdowned) go
+    Future{ 
+      runOnce() 
+    } flatMap { (u:Unit) =>
+       if (!shutdowned) {
+         go
+       }
        else Future(u)
     }
   }
@@ -138,11 +153,13 @@ class SelectorContext {
   private var inputListeners:List[Nothing=>Boolean] = Nil 
   private var outputListeners:List[()=>Option[Any]] = Nil 
   
+  private var activables: List[Activable] = Nil
+  
   @volatile 
   private var enabled = false;
   
   @volatile
-  private var shutdowned = true;
+  private var shutdowned = false;
   
   @volatile
   private var latch: CountDownLatch = null; 

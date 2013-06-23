@@ -18,7 +18,10 @@ class SelectSuite extends FunSuite
        for( i <- 1 to 1000) {
          { val sc = new SelectorContext()
            sc.addOutputAction(channel,
-                 () => Some(i)
+                 () => {
+                   sc.shutdown
+                   Some(i)
+                 }
                )
            sc.runOnce
          }
@@ -33,28 +36,54 @@ class SelectSuite extends FunSuite
        sc.addInputAction(channel, 
             (i: Int) => { sum = sum + i; 
                           if (i == 1000) {
-                            System.err.println("shutdowned");
                             sc.shutdown()
                           }
-                          System.err.println("received i:"+i)
                           true 
                         }
        )
-       sc.runOnce;
        Await.ready(sc.go, 5.second)
-       System.err.println("after end of sc.go, sum="+sum);
        
      }
    
+     
   
      Await.ready(consumer, 5.second)
 
      val xsum = (1 to 1000).sum
-     System.err.println("xsum="+xsum);
      assert(xsum == sum)
      
      
    }
+
+   test("select with traditional producer") {
+     
+     val channel = makeChannel[Int](100)
+     
+     val producer = Future {
+       for( i <- 1 to 1000) {
+         channel.<~(i)
+       }       
+     }
+          
+     var sum = 0;
+     val consumer = Future {
+       val sc = new SelectorContext()
+       sc.addInputAction(channel, 
+            (i: Int) => { sum = sum + i; 
+                          if (i == 1000) {
+                            sc.shutdown()
+                          }
+                          true 
+                        }
+       )
+       Await.ready(sc.go, 5.second)
+     }
+   
+    
+     Await.ready(consumer, 5.second)
+     
+     
+   }
   
-  
+   
 }

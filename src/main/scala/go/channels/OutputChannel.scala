@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
 
-trait OutputChannel[A]
+trait OutputChannel[-A] extends Activable
 {
 
   channel =>
