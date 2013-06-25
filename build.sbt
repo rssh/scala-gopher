@@ -3,7 +3,7 @@ name:="scala-go"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -11,15 +11,15 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 autoCompilerPlugins := true
 
-libraryDependencies += compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.1")
+libraryDependencies += compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.2")
 
 scalacOptions ++= Seq("-unchecked","-deprecation","-P:continuations:enable")
 
-libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.1"
+libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.2"
 
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.4"
 
 version:="0.0.1-SNAPSHOT"
 
