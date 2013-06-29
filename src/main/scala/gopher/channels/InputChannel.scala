@@ -1,4 +1,4 @@
-package go.channels
+package gopher.channels
 
 import java.util.concurrent.{BlockingQueue => JBlockingQueue}
 import akka.util._

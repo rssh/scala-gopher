@@ -1,8 +1,8 @@
-package go
+package gopher
 
 import language.experimental.macros
 
-package object scope
+package object scope 
 {
 
   def goScoped[A](x: =>A)(implicit sc:ScopeContext[A]) : A

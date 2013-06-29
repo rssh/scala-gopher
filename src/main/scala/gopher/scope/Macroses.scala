@@ -1,4 +1,4 @@
-package x
+package gopher.scope
 
 import language.experimental.macros
 import scala.reflect.macros.Context

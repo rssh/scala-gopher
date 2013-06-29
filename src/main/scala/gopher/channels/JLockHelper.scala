@@ -1,4 +1,4 @@
-package go.channels
+package gopher.channels
 
 import java.util.concurrent._
 import java.util.concurrent.locks._

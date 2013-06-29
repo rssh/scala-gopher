@@ -1,4 +1,4 @@
-package go.channels
+package gopher.channels
 
 import java.util.concurrent.{Future => JavaFuture, _ }
 import scala.concurrent._

@@ -1,4 +1,4 @@
-package go.channels
+package gopher.channels
 
 import org.scalatest._
 import java.util.concurrent._

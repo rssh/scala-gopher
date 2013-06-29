@@ -1,4 +1,4 @@
-package go.scope
+package gopher.scope
 
 import scala.collection.mutable.Stack
 import scala.collection.mutable.Queue

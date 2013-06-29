@@ -1,4 +1,5 @@
-package go.channels
+package gopher.channels
+
 
 import org.scalatest._
 

@@ -1,6 +1,6 @@
-package go.channels
+package gopher.channels
 
-import go._
+import gopher._
 
 import org.scalatest._
 
@@ -13,16 +13,15 @@ class MacroSelectSuite extends FunSuite
 
    test("select emulation with macroses")  {
      
-     pending
      val channel = makeChannel[Int](100)
      
-     _go {
+     go {
        for( i <- 1 to 1000) 
          channel <~ i 
      }
      
      var sum = 0;
-     val consumer = _go {
+     val consumer = go {
        // bug in macro.
        // TODO: report
        for(s <- select) {

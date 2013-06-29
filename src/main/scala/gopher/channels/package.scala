@@ -1,4 +1,4 @@
-package go
+package gopher
 
 import scala.reflect._
 import scala.concurrent._

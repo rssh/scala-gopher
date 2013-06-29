@@ -1,4 +1,4 @@
-package go.scope
+package gopher.scope
 
 import org.scalatest.FunSuite
 import scala.util.continuations._

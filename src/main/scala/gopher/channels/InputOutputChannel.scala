@@ -1,4 +1,4 @@
-package go.channels
+package gopher.channels
 
 trait InputOutputChannel[A] extends InputChannel[A] with OutputChannel[A]
 {

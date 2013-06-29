@@ -1,12 +1,13 @@
 
 import language.experimental.macros
+
 import scala.concurrent.Future
 import scala.reflect.macros.Context
 
-package object go
+package object gopher 
 {
 
-  def _go[A](x:A):Future[A] = macro goImpl[A]
+  def go[A](x:A):Future[A] = macro goImpl[A]
 
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
   {
