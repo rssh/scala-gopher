@@ -26,7 +26,7 @@ class MacroSelectSuite extends FunSuite
        // TODO: report
        for(s <- select) {
           s match {
-             case channel ~> (i:Int) =>
+             case `channel` ~> (i:Int) =>
                      sum = sum + i
                      if (i==1000)  s.shutdown()
           }

@@ -42,7 +42,33 @@ package object gopher
 
   object ~>
   {
-    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???  //macro unapplyImpl
+    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ??? //macro unapplyImpl
+    
+    // TODO: think how to defer macro expansion
+    def unapplyImpl(c: Context)(s:c.Expr[channels.SelectorContext]):c.Expr[Option[(channels.InputChannel[Any],Any)]] =
+    {
+      import c.universe._
+      // need to defer those to macro-expansion. [make error yet one macro ?]
+      //c.error(s.tree.pos, " ~> unapply ourside select for loop")
+      c.Expr[Option[(channels.InputChannel[Any],Any)]](reify(None).tree)
+    }
+    
   } 
 
+  object ? 
+  {
+    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+  }
+  
+  object <~
+  {
+    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+  }
+
+  object ! 
+  {
+    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+  }
+  
+  
 }
