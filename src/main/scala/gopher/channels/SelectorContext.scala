@@ -45,6 +45,7 @@ class SelectorContext extends Activable {
    */
   def  addInputAction[A](channel: InputChannel[A], action: A => Boolean): Unit = 
   {
+    System.err.println("add input action");
     val l: (A => Boolean) = { a => 
       if (enabled) {
         val retval = try {
@@ -139,6 +140,12 @@ class SelectorContext extends Activable {
     }
   }
 
+  def run: Unit =
+  {
+    while(!shutdowned) {
+      runOnce();
+    }
+  }
   
   def shutdown(): Unit =
   {

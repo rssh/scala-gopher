@@ -47,27 +47,23 @@ object SelectorMacroCaller {
                                  nme.CONSTRUCTOR), 
                                  List()))
                                  
-   //  sc.addListener ....
-   val futureName = c.fresh("f")                  
    
+
+   //  sc.addListener ....
+
    //  val f = sc.go
+   val futureName = c.fresh("f")                  
    val run = ValDef(Modifiers(), newTermName(futureName), TypeTree(), Select(Ident(scName), newTermName("go")) )
 
 
-   val rtree = Block(List(
+   val rtree = Block(
                  newScTree,
                  inForEach, 
                  run,
                  reify{ () }.tree  // bug in typechecker - can't accept valdef
                                    // as unit.
-               ):_*)
+               )
 
-  /*
-   val rtree =  Block(
-                  ValDef(Modifiers(),scName, TypeTree(), reify{ 1 }.tree ),
-                  reify{ () }.tree
-                )
-  */
                                  
    System.err.println("rtree="+rtree);
    
@@ -143,17 +139,34 @@ object SelectorMacroCaller {
 
   def transformAddInputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
   {
-    val (channel, argName) = parseChannelArgs(c)(x,l);
+    
+    val (channel, argName, argType) = parseChannelArgs(c)(x,l);
     //  sc.addOutputListener{ channel, argName => { body; true} }
     import c.universe._
-   // val channelType = c.
-    // TODO: extract channelArgType from channel.
-    val channelArgType = Ident(newTypeName("Int"))
+    val channelType = channel.tpe;
+    System.err.println("!!channelType="+channelType+", class="+channelType.getClass()+", argName="+argName+", argType="+showRaw(argType));
+    
+    def extractChannelArgType(channelType: Type): Type =
+      channelType match {
+         case TypeRef(pre,sym,args) => System.err.println("Typeref detected");
+                  args match {
+                    case x::Nil => x
+                    case _ => 
+                              c.error(x.pos, "Channel must have only one type argument");
+                              typeOf[Nothing]  
+                  }
+         case _ => c.error(x.pos, "Channel type is not typeref: can't determinate type of argument");
+                   typeOf[Nothing]
+    }
+    
+    val channelArgType = extractChannelArgType(channelType)
+    
+    
     val retval = Apply(
                     Select(Ident(sc), newTermName("addInputAction")), 
                     List(
                         channel,
-                        Function(List(ValDef(Modifiers(Flag.PARAM), argName, channelArgType/*TypeTree()*/, EmptyTree)), 
+                        Function(List(ValDef(Modifiers(Flag.PARAM), argName, argType /*TypeTree()*/, EmptyTree)), 
                                  Block(body,Literal(Constant(true)))
                                 )
                         )
@@ -163,7 +176,7 @@ object SelectorMacroCaller {
 
   def transformAddOutputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
   {
-    val (channel, argName) = parseChannelArgs(c)(x, l);
+    val (channel, argName, argType) = parseChannelArgs(c)(x, l);
     //  channe.addOutputListener{ () => { body; Some(c) } }
     import c.universe._
     // TODO: add guard supports.
@@ -178,14 +191,18 @@ object SelectorMacroCaller {
   
   
   
-  private def parseChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Pair[c.Tree,c.TermName] =
+  private def parseChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Tuple3[c.Tree,c.TermName,c.Tree] =
   {
     import c.universe._
     System.err.println("parseChannelArgs, l="+l);
     l match {
-      case List(frs,Bind(snd: TermName,something)) => (frs,snd)
-      case _  => c.error(x.pos, "channel unapply list must have exactlry 2 arguments")
-         ???
+      case List(frs,Bind(snd: TermName,typedTree)) => 
+          typedTree match {
+            case Typed(x,typeTree) => (frs,snd,typeTree)
+            case _ => c.abort(x.pos, "type declaration in channel unapply expexted")
+          }
+         
+      case _  => c.abort(x.pos, "channel unapply list must have exactlry 2 arguments")
     }
   }
   

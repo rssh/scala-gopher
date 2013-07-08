@@ -15,6 +15,7 @@ class MacroSelectSuite extends FunSuite
      
      val channel = makeChannel[Int](100)
      
+     
      go {
        for( i <- 1 to 1000) 
          channel <~ i 
@@ -22,16 +23,16 @@ class MacroSelectSuite extends FunSuite
      
      var sum = 0;
      val consumer = go {
-       // bug in macro.
-       // TODO: report
+       System.err.println("macro: consumer begin")
        for(s <- select) {
           s match {
              case `channel` ~> (i:Int) =>
+                     System.err.println("received:"+i)
                      sum = sum + i
                      if (i==1000)  s.shutdown()
           }
        }
-       
+       System.err.println("macro: consumer end")
        sum
      }
 
