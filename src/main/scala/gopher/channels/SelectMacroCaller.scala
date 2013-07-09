@@ -17,24 +17,7 @@ object SelectorMacroCaller {
   {
    import c.universe._
    val xtree = x.tree
-   System.err.println("foreaxh raw="+showRaw(x))
-   /*
-   val tree = Block(List(
-                 ValDef(Modifiers(), newTermName("f"), TypeTree(), xtree)
-                        ), 
-                 Apply(Ident(newTermName("f")), 
-                         List(Apply(
-                               Select(New(
-                                  Select(
-                                    Select(
-                                      Select(Ident(nme.ROOTPKG),
-                                             newTermName("gopher")), 
-                                      newTermName("channels")), 
-                                    newTypeName("SelectorContext"))
-                                  ), nme.CONSTRUCTOR), List()))))
-   System.err.println("foreach output="+show(tree))
-   * 
-   */
+
    val (inForEach, scName) = transformForeachBody(c)(xtree)
    
    //  sc = new SelectorContext()
@@ -47,34 +30,16 @@ object SelectorMacroCaller {
                                  nme.CONSTRUCTOR), 
                                  List()))
                                  
-   
-
-   //  sc.addListener ....
-
-   //  val f = sc.go
-   val futureName = c.fresh("f")                  
-   val run = ValDef(Modifiers(), newTermName(futureName), TypeTree(), Select(Ident(scName), newTermName("go")) )
-
+   // sc.run
+   val run =  Select(Ident(scName),newTermName("run"))                              
 
    val rtree = Block(
-                 newScTree,
-                 inForEach, 
-                 run,
-                 reify{ () }.tree  // bug in typechecker - can't accept valdef
-                                   // as unit.
+                 List(newScTree,inForEach), 
+                 run
                )
-
-                                 
-   System.err.println("rtree="+rtree);
    
    val r1 = c.typeCheck(c.resetAllAttrs(rtree), typeOf[Unit], false)
    
-   //c.typeCheck(tree, pt, silent, withImplicitViewsDisabled, withMacrosDisabled)
-   
-   System.err.println("r1.tpe = "+r1.tpe)
-   
-  
-               
    c.Expr[Unit](r1)
  }
 
@@ -101,17 +66,12 @@ object SelectorMacroCaller {
     val listeners = (for(cd <- cases) yield {
      cd match { 
       case CaseDef(pattern, guard, body) =>
-        System.err.println("pattern raw ="+showRaw(pattern));
-        System.err.println("pattern nraw ="+show(pattern));
         pattern match {
           case UnApply(x,l) => 
-            System.err.println("Unapply catched, x="+x+", l="+l);
             x match {
               case Apply(Select(obj, t /*TermName("unapply")*/),us) =>
-                System.err.println("apply in unapply catched, obj="+obj)
                 val tpe = obj.tpe
                 if (tpe =:= typeOf[ gopher.~>.type ]) {
-                  System.err.println("~> catched !!!")
                   transformAddInputAction(c)(scName, x,l,guard,body);
                 } else if (tpe =:= typeOf[ gopher.?.type ]) {
                   transformAddInputAction(c)(scName,x,l,guard,body);
@@ -134,7 +94,7 @@ object SelectorMacroCaller {
         cd
      }
     })
-    Block(listeners:_*);
+    Block(listeners, reify{ () }.tree );
   }
 
   def transformAddInputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
@@ -167,7 +127,7 @@ object SelectorMacroCaller {
                     List(
                         channel,
                         Function(List(ValDef(Modifiers(Flag.PARAM), argName, argType /*TypeTree()*/, EmptyTree)), 
-                                 Block(body,Literal(Constant(true)))
+                                 Block(List(body),Literal(Constant(true)))
                                 )
                         )
                  )
@@ -184,7 +144,8 @@ object SelectorMacroCaller {
                    Select(Ident(sc), newTermName("addOutputAction")), 
                    List(
                        channel,
-                       Function(List(), Block(body, Apply(Ident(newTermName("Some")), List(Ident(argName)))))
+                       Function(List(), 
+                                Block(List(body), Apply(Ident(newTermName("Some")), List(Ident(argName)))))
                    ))
     retval;
   }

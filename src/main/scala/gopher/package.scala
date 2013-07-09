@@ -7,7 +7,7 @@ import scala.reflect.macros.Context
 package object gopher 
 {
 
-  def go[A](x:A):Future[A] = macro goImpl[A]
+  def go[A](x: =>A):Future[A] = macro goImpl[A]
 
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
   {
@@ -16,21 +16,26 @@ package object gopher
    System.err.println("goImpl, row="+showRaw(x))
    //
    //  Future {
-   //     implicit val _deferrable = new ScopeContext
-   //     val select = go.channels.createChannels
-   //     try {
-   //       transform(t, _deferrable)
-   //     } catch {
-   //       ..
-   //     }
-   //
+   //     goScope(
+   //        x
+   //     )
    //  }
    val tree = Apply(
-                Select(Select(Ident(newTermName("scala")), newTermName("concurrent")), newTermName("Future")), 
-                List(Block(
-                      //ValDef(Modifiers(), newTermName("select"), TypeTree(), Literal(Constant(1))),
-                      c.resetAllAttrs(x.tree)
-                    )     )
+                Select(
+                    Select(
+                        Ident(newTermName("scala")), 
+                        newTermName("concurrent")), 
+                    newTermName("Future")),    
+                List(    
+                  Apply(
+                    Select(
+                            Select(
+                                Ident(nme.ROOTPKG), 
+                                newTermName("gopher")),  
+                            newTermName("goScope")), 
+                     List(c.resetAllAttrs(x.tree))
+                  )
+                )
               )
                       
    System.err.println("goImpl, output="+tree)
@@ -70,5 +75,7 @@ package object gopher
     def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
   }
   
+  
+  def goScope[A](x: =>A): A = x
   
 }
