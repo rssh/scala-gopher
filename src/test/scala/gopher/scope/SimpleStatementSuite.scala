@@ -1,7 +1,6 @@
 package gopher.scope
 
 import org.scalatest.FunSuite
-import scala.util.continuations._
 
 
 class SimpleStatementSuite extends FunSuite
@@ -10,7 +9,7 @@ class SimpleStatementSuite extends FunSuite
   test("goScoped: simple statement without defer must be processed") {
     var x = 0
     implicit val sc = new ScopeContext[Unit]
-    goScoped {
+    goScope {
       x = 1
     }
     assert(x === 1)

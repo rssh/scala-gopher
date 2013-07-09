@@ -101,27 +101,26 @@ object SelectorMacroCaller {
   {
     
     val (channel, argName, argType) = parseChannelArgs(c)(x,l);
-    //  sc.addOutputListener{ channel, argName => { body; true} }
+
     import c.universe._
-    val channelType = channel.tpe;
-    System.err.println("!!channelType="+channelType+", class="+channelType.getClass()+", argName="+argName+", argType="+showRaw(argType));
     
-    def extractChannelArgType(channelType: Type): Type =
-      channelType match {
-         case TypeRef(pre,sym,args) => System.err.println("Typeref detected");
-                  args match {
-                    case x::Nil => x
-                    case _ => 
-                              c.error(x.pos, "Channel must have only one type argument");
-                              typeOf[Nothing]  
-                  }
-         case _ => c.error(x.pos, "Channel type is not typeref: can't determinate type of argument");
-                   typeOf[Nothing]
-    }
-    
-    val channelArgType = extractChannelArgType(channelType)
+  //  def extractChannelArgType(channelType: Type): Type =
+  //    channelType match {
+  //       case TypeRef(pre,sym,args) => System.err.println("Typeref detected");
+  //                args match {
+  //                  case x::Nil => x
+  //                  case _ => 
+  //                            c.error(x.pos, "Channel must have only one type argument");
+  //                            typeOf[Nothing]  
+  //                }
+  //       case _ => c.error(x.pos, "Channel type is not typeref: can't determinate type of argument");
+  //                 typeOf[Nothing]
+  //  }
+  //  
+  //  val channelArgType = extractChannelArgType(channelType)
     
     
+    //  sc.addOutputListener{ channel, (argName:argType) => { body; true} }   
     val retval = Apply(
                     Select(Ident(sc), newTermName("addInputAction")), 
                     List(

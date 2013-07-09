@@ -45,37 +45,59 @@ package object gopher
 
   val select = channels.SelectorMacroCaller
 
+  import scala.reflect.internal.annotations.compileTimeOnly
+  
   object ~>
   {
+    
+    @compileTimeOnly("~> unapply must be used only in select for loop")
     def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ??? //macro unapplyImpl
-    
-    // TODO: think how to defer macro expansion
-    def unapplyImpl(c: Context)(s:c.Expr[channels.SelectorContext]):c.Expr[Option[(channels.InputChannel[Any],Any)]] =
-    {
-      import c.universe._
-      // need to defer those to macro-expansion. [make error yet one macro ?]
-      //c.error(s.tree.pos, " ~> unapply ourside select for loop")
-      c.Expr[Option[(channels.InputChannel[Any],Any)]](reify(None).tree)
-    }
-    
+        
   } 
 
   object ? 
   {
+    @compileTimeOnly("? unapply must be used only in select for loop")
     def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
   }
   
   object <~
   {
+    @compileTimeOnly("<~ unapply must be used only in select for loop")   
     def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
   }
 
   object ! 
   {
+    @compileTimeOnly("! unapply must be used only in select for loop")   
     def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
   }
   
+  import scope.ScopeMacroses
+  def goScope[A](x: =>A): A = macro ScopeMacroses.goScopeImpl[A]
   
-  def goScope[A](x: =>A): A = x
+  import scope.ScopeContext
+  import scope.PanicException
+    
+  @compileTimeOnly("defer outside of go or goScope block")
+  def defer[A](x: =>Unit): A = ???
+   
+
+    
+  @inline def panic[A](s:String)(implicit sc: ScopeContext[A]): Unit = 
+         panic(new PanicException[A](s,sc))
+
+  @inline def panic[E <: Throwable, A](e: E)(implicit sc: ScopeContext[A]): Unit =
+         { throw e }
+
+  @inline def recover[A](r:A)(implicit sc: ScopeContext[A]): Unit =
+         sc.recover(r)
+
+  @inline def suppressedExceptions[A](implicit sc: ScopeContext[A]): Seq[Exception] =
+         sc.suppressedExceptions
+
+  @inline def throwSuppressed[A](implicit sc:ScopeContext[A]): Unit =
+         sc.throwSuppressed
+  
   
 }

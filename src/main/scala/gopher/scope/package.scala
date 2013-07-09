@@ -5,6 +5,8 @@ import language.experimental.macros
 package object scope 
 {
 
+  def goScope[A](x: =>A): A = macro ScopeMacroses.goScopeImpl[A]
+  
   def goScoped[A](x: =>A)(implicit sc:ScopeContext[A]) : A
    =   sc.eval( x )
     
