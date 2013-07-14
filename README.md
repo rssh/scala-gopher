@@ -1,10 +1,14 @@
   
  Implementation of go scopes and channels in scala.
+ =================================================
 
  Requirements:  scala 2.10.2 +
+ ------------
 
 
+ 
  Scope
+ -----
 
  Library define 'goScope'  expression, which allows to use inside
  goScope go-like 'defer', 'panic' and 'recover' expression.
@@ -56,5 +60,6 @@
 
     
   Channels
+  -------
 
     Channels is 
