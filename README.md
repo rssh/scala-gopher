@@ -44,7 +44,15 @@
   *defer* calls to add defered code blocks to list of code blocks, which are
   executed in finalize.  *panic* calls are just throwing exception and 
   *recover* (which can be executed only inside *defer*) is returning a value
-  of recover argument instead rethrowing exception.
+  of recover argument instead rethrowing exception:
+
+    val s = goScope{ 
+                defer{ recover("CCC") } 
+                panic("AAA")
+               "QQQ" 
+            }
+
+  will set *s* to "CCC".
 
     
   Channels
