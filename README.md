@@ -1,6 +1,9 @@
   
  Implementation of go scopes and channels in scala.
 
+ Requirements:  scala 2.10.2 +
+
+
  Scope
 
  Library define 'goScope'  expression, which allows to use inside
@@ -30,6 +33,19 @@
        }
   
     }
+
+  Here statements inside defer block are executed at the end of goScope block
+  in reverse order.
+
+  Take a look at introduction article about go-like control flow constructs:
+                              http://blog.golang.org/defer-panic-and-recover
+
+  Basically, goScope wrap it's argument into try/finalize block and rewrite
+  *defer* calls to add defered code blocks to list of code blocks, which are
+  executed in finalize.  *panic* calls are just throwing exception and 
+  *recover* (which can be executed only inside *defer*) is returning a value
+  of recover argument instead rethrowing exception.
+
     
   Channels
 
