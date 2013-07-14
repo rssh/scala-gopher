@@ -5,9 +5,30 @@ import scala.collection.mutable.Queue
 import scala.annotation.tailrec
 
 /**
- * scope context of go function, which returns A
+ * scope context for scope, wich wrap function returning  R
+ * and provide interface, for implementing go-like scope.
+ * 
+ * Direct usage is something like
+ * <pre>
+ * val scope = new gopher.scope.ScopeContext[X]();
+ * scope.eval {
+ *   val x = openFile()
+ *   scope.defer{ x.close() } 
+ *   ....
+ * }  
+ * </pre>
+ *
+ * It can be sugared by macro interfaces
+ * <pre>
+ *  goScope {
+ *    val x = openFile()
+ *    defer{ x.close() }
+ *    ....
+ *  }  
+ * </pre>
+ * 
  */
-class ScopeContext[R]
+class ScopeContext
 {
 
   def pushDefer(x: => Unit) =
@@ -18,7 +39,7 @@ class ScopeContext[R]
     }
  
 
-  def unwindDefer: Option[R] =
+  def unwindDefer[R]: Option[R] =
   {
     val x = defers.pop()
     try {
@@ -28,13 +49,13 @@ class ScopeContext[R]
       case e: RecoverThrowable[_] if e.sc eq this => Some((e.asInstanceOf[RecoverThrowable[R]]).retval)
       case e: Exception => {
                    // TODO: think about policy to handle exceptions from defer ?
-                   suppressedExceptions += e  
+                   suppressed += e  
                    None
               }
     }
   }
 
-  def unwindDefers: Option[R] =
+  def unwindDefers[R]: Option[R] =
   {
     var r: Option[R] = None
     while(defers.nonEmpty && r.isEmpty) {
@@ -43,7 +64,7 @@ class ScopeContext[R]
     r
   }
 
-  private[scope] final def eval(x: =>R):R =
+  final def eval[R](x: =>R):R =
   {
     var panicEx: Throwable = null;
     var optR: Option[R] = None
@@ -55,7 +76,7 @@ class ScopeContext[R]
                             inPanic = true
     } finally {
       while(defers.nonEmpty) {
-           unwindDefers match {
+           unwindDefers[R] match {
               case x@Some(r) => 
                          if (optR == None) {
                              optR = x
@@ -64,7 +85,7 @@ class ScopeContext[R]
                              // impossible, mark as suppresed exception
                              val e = new IllegalStateException("second recover in defer sequence")
                              e.fillInStackTrace();
-                             suppressedExceptions += e
+                             suppressed += e
                          }
               case None => /* do nothing */
            }
@@ -75,8 +96,12 @@ class ScopeContext[R]
     done = true
     optR getOrElse (throw panicEx)
   }
+  
+  def panic(x:String):Nothing = throw new PanicException(x,this)
 
-  def recover(x: R): Unit =
+  
+  
+  def recover[R](x: R): Unit =
     if (inPanic) {
       throw new RecoverThrowable(x,this);
     } 
@@ -85,12 +110,14 @@ class ScopeContext[R]
    * throw fist suppressed exception if any
    */
   def throwSuppressed: Unit =
-    for(e <- suppressedExceptions.headOption) {
+    for(e <- suppressed.headOption) {
        throw e
     }
+  
+  def suppressedExceptions = suppressed.toList
 
-  val defers: Stack[(Unit=>Unit)] = new Stack()
-  val suppressedExceptions: Queue[Exception] = new Queue()
+  private val defers: Stack[(Unit=>Unit)] = new Stack()
+  private val suppressed: Queue[Exception] = new Queue()
   @volatile private[this] var inPanic:  Boolean = false
   @volatile private[this] var done:  Boolean = false
 

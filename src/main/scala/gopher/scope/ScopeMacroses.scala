@@ -29,20 +29,25 @@ object ScopeMacroses
     // implicit val sc = new ScopeContext()
     val scDef=ValDef(Modifiers(Flag.IMPLICIT), newTermName(scName), TypeTree(), 
                      Apply(
-                         Select(New(Select(Select(Select(Ident(nme.ROOTPKG), 
+                          Select(
+                               New(
+                                   Select(Select(Select(Ident(nme.ROOTPKG), 
                                                          newTermName("gopher")), 
                                                   newTermName("scope")), 
-                                            newTypeName("ScopeContext"))), 
+                                            newTypeName("ScopeContext"))
+                                            
+                                 ), 
                                 nme.CONSTRUCTOR
                            ), 
                            List()
                      ))
-    // goScoped(x)
-    val goScoped = Apply(
+    //    goScoped(x)
+    val goScoped0 = Apply(
                      Select(Select(Select(Ident(nme.ROOTPKG), newTermName("gopher")), 
                                    newTermName("scope")), 
                             newTermName("goScoped")), 
-                            List(transformDefer(c)(x.tree,scName)))                 
+                            List(transformDefer(c)(x.tree,scName)))  
+    val goScoped = Apply(goScoped0,List(Ident(newTermName(scName))))                        
                      
     val tree = Block(
                 List(
@@ -50,18 +55,40 @@ object ScopeMacroses
                 ),
                 goScoped
               )
-    System.err.println("goScope output: tree="+tree)
     c.Expr[A](c.resetAllAttrs(tree))
   } 
 
   
-
-  def findDefer(c:Context)(x: c.Tree): Boolean = 
+  
+  private def matchGopherCall(c:Context)(x:c.Tree): Option[String] =
   {
-    @inline def find(t: c.Tree) = findDeffered(c)(t)
-    @inline def findl(l: List[c.Tree]) = findDeferedInList(c)(l)
-    import c.universe._
-    val DEFER = newTermName("defer")
+     import c.universe._
+     object GopherCallMatch
+     {
+    
+       def unapply(x: c.Tree): Option[String] = 
+        x match {
+          case Select(Select(Ident(cGopher), nme.PACKAGE), cName) =>
+                 if (cGopher.decoded == "gopher") Some(cName.decoded) else None
+          case TypeApply(x1,List(t)) => unapply(x1) 
+          case _ => None       
+        }
+       
+     }
+     x match {
+       case GopherCallMatch(s) => Some(s)
+       case _ => None
+     }
+     
+  }
+        
+     
+    
+    def findDefer(c:Context)(x: c.Tree): Boolean = 
+    {
+    import c.universe._  
+    @inline def find(t: c.Tree) = findDefer(c)(t)
+    @inline def findl(l: List[c.Tree]) = l.exists(findDefer(c))
     x match {
       case ClassDef(_,_,_,_) => false
       case ModuleDef(_,_,_) => false
@@ -81,19 +108,20 @@ object ScopeMacroses
       case Try(block, catches, finalizer) => find(block) || findl(catches) || find(finalizer)
       case Typed(expr, tpt) => find(expr)
       case Apply(fun, args) =>
-            fun match {
-              case Ident(x) => 
-                     if (x==DEFER) {
-                        true
-                     } else false
-              case _ => find(fun) || findl(args)
+            val rNow = matchGopherCall(c)(fun) match {
+              case Some(x) => x == "defer"
+              case None =>  false;
             }
+            if (!rNow) {
+              find(fun) || findl(args)
+            } else rNow
       case Select(qualifier, name) => find(qualifier)
       case Annotated(annot, arg) => find(arg)
       case _ => false
 
     }
-  }
+   }
+  
 
  
   /**
@@ -109,7 +137,7 @@ object ScopeMacroses
     @inline def walkl(l: List[c.Tree]) = l map(transformDefer(c)(_,scName))
     def generateOneArgScCall(funName: String, args: List[c.Tree]):c.Tree =
      args match {
-        case x::Nil => Apply(Select(Ident(newTermName(scName)), newTermName(funName)), args)
+        case x::Nil => Apply(Select(Ident(newTermName(scName)), newTermName(funName)), walkl(args))
         case _ => Apply(Ident(newTermName(funName)),walkl(args))
      }
     x match {
@@ -137,38 +165,28 @@ object ScopeMacroses
       case Typed(expr, tpt) => Typed(walk(expr),tpt)
       case Template(parents,self,body) => Template(parents,self,walkl(body))
       case Apply(fun, args) => 
-            fun match {
-              case Ident(TermName("defer")) => 
-                     generateOneArgScCall("defer", args)
-              case Ident(TermName("panic")) =>      
-                     generateOneArgScCall("panic", args)
-              case Ident(TermName("recover")) =>      
-                     generateOneArgScCall("panic", args)
-              case Ident(TermName("suppressedExceptions")) =>
-                     Select(Ident(newTermName(scName)),newTermName("suppressedExceptions"))
-              case Ident(TermName("throwSuppressed")) => 
-                     Select(Ident(newTermName(scName)),newTermName("throwSuppressed"))
-              case _ => Apply(fun, walkl(args))
+            matchGopherCall(c)(fun) match {
+              case Some(x) => 
+                x match {
+                  case "defer" => generateOneArgScCall("pushDefer", args) 
+                  case "panic" => generateOneArgScCall("panic", args)
+                  case "recover" => generateOneArgScCall("recover", args)
+                  case "suppressedExcetions" =>
+                                    Select(Ident(newTermName(scName)),newTermName("suppressedExceptions"))
+                  case "throwSuppressed" => 
+                                    Select(Ident(newTermName(scName)),newTermName("throwSuppressed"))
+                  case _ => Apply(fun, walkl(args))                  
+                }
+              case None => Apply(walk(fun), walkl(args))
             }
       case Select(qualifier, name) => Select(walk(qualifier),name)
-      case Annotated(annot, arg) => Annotated(annot,walk())
+      case Annotated(annot, arg) => Annotated(annot,walk(arg))
       case _ => x
-
     }
     
     
   }
 
-  
-  def deferImpl[A](c:Context)(x: c.Expr[A]): c.Expr[A] = {
-    import c.universe._
-    // _defer(x)
-    val tree = Apply(Select(Select(Select(Ident(nme.ROOTPKG), newTermName("gopher")), 
-                                   newTermName("scope")), 
-                            newTermName("_defer")), 
-                    List(x.tree))
-    c.Expr[A](tree)              
-  }
-    
+     
 
 }

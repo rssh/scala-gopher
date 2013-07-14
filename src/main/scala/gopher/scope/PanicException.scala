@@ -1,5 +1,5 @@
 package gopher.scope
 
 
-class PanicException[A](val s: String, val sc: ScopeContext[A]) extends Exception
+class PanicException(val s: String, val sc: ScopeContext) extends Exception
 

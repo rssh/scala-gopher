@@ -12,8 +12,6 @@ package object gopher
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
   {
    import c.universe._
-   System.err.println("goImpl, x="+x)
-   System.err.println("goImpl, row="+showRaw(x))
    //
    //  Future {
    //     goScope(
@@ -38,9 +36,7 @@ package object gopher
                 )
               )
                       
-   System.err.println("goImpl, output="+tree)
-
-   c.Expr[Future[A]](tree)           
+    c.Expr[Future[A]](tree)           
   }
 
   val select = channels.SelectorMacroCaller
@@ -80,24 +76,19 @@ package object gopher
   import scope.PanicException
     
   @compileTimeOnly("defer outside of go or goScope block")
-  def defer[A](x: =>Unit): A = ???
-   
+  def defer(x: =>Unit): Unit = ???  
+     
+  @compileTimeOnly("recover outside of go or goScope block")
+  def recover[A](x: A): Unit = ???  
 
-    
-  @inline def panic[A](s:String)(implicit sc: ScopeContext[A]): Unit = 
-         panic(new PanicException[A](s,sc))
+  @compileTimeOnly("panic outside of go or goScope block")
+  def panic(x: String): Unit = ??? 
 
-  @inline def panic[E <: Throwable, A](e: E)(implicit sc: ScopeContext[A]): Unit =
-         { throw e }
-
-  @inline def recover[A](r:A)(implicit sc: ScopeContext[A]): Unit =
-         sc.recover(r)
-
-  @inline def suppressedExceptions[A](implicit sc: ScopeContext[A]): Seq[Exception] =
-         sc.suppressedExceptions
-
-  @inline def throwSuppressed[A](implicit sc:ScopeContext[A]): Unit =
-         sc.throwSuppressed
+  @compileTimeOnly("suppressedExceptions outside of go or goScope block")
+  def suppressedExceptions: List[Exception] = ???
+  
+  @compileTimeOnly("throwSuppressed outside of go or goScope block")
+  def throwSuppressed: Unit = ???
   
   
 }

@@ -7,25 +7,25 @@ package object scope
 
   def goScope[A](x: =>A): A = macro ScopeMacroses.goScopeImpl[A]
   
-  def goScoped[A](x: =>A)(implicit sc:ScopeContext[A]) : A
+  def goScoped[A](x: =>A)(implicit sc:ScopeContext) : A
    =   sc.eval( x )
     
-  def defer[A](x: =>Unit)(implicit sc: ScopeContext[A]) =
+  def _defer[A](x: =>Unit)(implicit sc: ScopeContext) =
      sc.pushDefer(x)
 
-  def panic[A](s:String)(implicit sc: ScopeContext[A]): Unit = 
-         panic(new PanicException[A](s,sc))
+  def _panic[A](s:String)(implicit sc: ScopeContext): Unit = 
+         _panic(new PanicException(s,sc))
 
-  def panic[E <: Throwable, A](e: E)(implicit sc: ScopeContext[A]): Unit =
+  def _panic[E <: Throwable, A](e: E)(implicit sc: ScopeContext): Unit =
          { throw e }
 
-  def recover[A](r:A)(implicit sc: ScopeContext[A]): Unit =
+  def _recover[A](r:A)(implicit sc: ScopeContext): Unit =
          sc.recover(r)
 
-  def suppressedExceptions[A](implicit sc: ScopeContext[A]): Seq[Exception] =
+  def _suppressedExceptions[A](implicit sc: ScopeContext): Seq[Exception] =
          sc.suppressedExceptions
 
-  def throwSuppressed[A](implicit sc:ScopeContext[A]): Unit =
+  def _throwSuppressed[A](implicit sc:ScopeContext): Unit =
          sc.throwSuppressed
 
 }
