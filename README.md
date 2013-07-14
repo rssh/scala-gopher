@@ -52,11 +52,23 @@
 
     val s = goScope{ 
                 defer{ recover("CCC") } 
-                panic("AAA")
+                panic("panic message")
                "QQQ" 
             }
 
   will set *s* to "CCC".
+
+  One question -- what to do if exception is occured inside one of defer blocks (?). By default we assume that statements inside *defer* have cleanup 
+ semantics, so exception inside ones are suppressed. You can override this 
+ semantics by calling special construction *throwSuppressed* inside first 
+ *defer* block (which will evaluated last) i.e.
+
+    goScope{
+      defer{ throwSuppressed }
+      ..........
+    }
+
+ will show 
 
     
   Channels
