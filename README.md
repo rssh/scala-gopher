@@ -95,9 +95,17 @@
     }
   
   have type *Future[A]* and mapped into plain scala as combination of *Future*
-  and *goScope* .
+  and *goScope* . 
 
   Channels
-  -------
+  --------
 
-    Channels is 
+    Channels is a way for organizing go-like message passing. Basically you
+can look on it as on classic blocked queue. Different 'goroutines', executed
+in different flows can exchange messages via channels.
+
+
+
+  Select loop
+  ----------
+
