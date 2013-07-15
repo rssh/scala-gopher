@@ -68,9 +68,35 @@
       ..........
     }
 
- will show 
+ will throw suppressed exceptions if one exists.
+
+ Also we can get list of suppressed using suppressedExceptions construction:
+
+    goScope{
+      defer{ 
+        if (suppressedExceptions.notEmpty) {
+          System.err.println("suppresses exceptions:")
+          for(e <- suppressedExceptions) e.printStackTrace
+        }
+      }
+      ..........
+    }
 
     
+  Go statement
+  ------------
+
+  Go statement starts the execution of expression in independent thread.
+  We map one to Future call which use current implicit execution statement, 
+  so next 'go-like' code
+
+    go {
+      expr:A
+    }
+  
+  have type *Future[A]* and mapped into plain scala as combination of *Future*
+  and *goScope* .
+
   Channels
   -------
 
