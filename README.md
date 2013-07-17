@@ -1,13 +1,13 @@
   
-# Implementation of go scopes and channels in scala.
+ Implementation of go scopes and channels in scala.
  =================================================
 
-## Requirements:  scala 2.10.2 +
+ Requirements:  scala 2.10.2 +
  ------------
 
 
  
-## Scope
+ Scope
  -----
 
  Library define 'goScope'  expression, which allows to use inside
@@ -191,3 +191,7 @@ in different flows can exchange messages via channels.
                                  (implicit as: ActorSystem): ActorRef 
 
 
+   Additional Informatiom
+   ----------------------
+* API reference: http://rssh.github.io/scala-gopher/api/index.html#package
+* source code: https://github.com/rssh/scala-gopher
