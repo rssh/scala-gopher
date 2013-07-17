@@ -186,6 +186,8 @@ in different flows can exchange messages via channels.
    and bind channel to actorsystem, by creating actor which will push all input
    into channel:
 
-    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef 
+    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], 
+                                  name: String)
+                                 (implicit as: ActorSystem): ActorRef 
 
 
