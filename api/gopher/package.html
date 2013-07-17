@@ -39,7 +39,8 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>package wich introduce go-like language constructions into scala.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -200,7 +201,8 @@
         <span class="name">go</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="gopher.go.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.go.A">A</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">spawn execution of x (wrapped into goScope) in separate execution flow.</p><div class="fullcomment"><div class="comment cmt"><p>spawn execution of x (wrapped into goScope) in separate execution flow.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@macroImpl</span><span class="args">(<span>
       
       <span class="defval" name="`macro`(&quot;versionFormat&quot; = 1, &quot;className&quot; = &quot;gopher.package$&quot;, &quot;methodName&quot; = &quot;goImpl&quot;, &quot;signature&quot; = List(-1, -1))[A]">...</span>
@@ -369,7 +371,9 @@
         <a href="package$$$tilde$greater$.html"><span title="gt4s: $tilde$greater" class="name">~&gt;</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">unapply pattern for read case statement in select loop
+<code> channel ~> x </code> transformed to reading from channel
+into variable x.</code></p>
     </li></ol>
             </div>
 
