@@ -1,13 +1,13 @@
   
- Implementation of go scopes and channels in scala.
+# Implementation of go scopes and channels in scala.
  =================================================
 
- Requirements:  scala 2.10.2 +
+## Requirements:  scala 2.10.2 +
  ------------
 
 
  
- Scope
+## Scope
  -----
 
  Library define 'goScope'  expression, which allows to use inside
