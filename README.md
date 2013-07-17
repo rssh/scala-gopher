@@ -131,9 +131,11 @@ in different flows can exchange messages via channels.
   ----------
 
   May-be one of most unusual language constructions in go is 
-  'select statement' which 
+  'select statement' which work in somewhat simular to unix 'select' syscall:
+  from set of blocking operations select one which is ready for input/output
+  and run it.
  
-  In gopher we provide 'select loops':
+  Gopher provides simular functionality with 'select loops':
 
      import gopher._
 
@@ -144,8 +146,35 @@ in different flows can exchange messages via channels.
         case `channelB' ~> (ch: Char) => .. do-something-with-b
       }
    
+  Here we read in loop from channelA or channelB. 
 
-  Body of select loop must consists only from one match statements where 
-  patterns in cases must have form *channel ~> (v:Type)*  (for reading from
-  channel) or *channel <~ v* (for writing).
+  Body of select loop must consists only from one *match* statement where 
+  patterns in *case* clauses must have form *channel ~> (v:Type)*  
+  (for reading from channel) or *channel <~ v* (for writing).
+ 
+  Yet one example: 
+
+     val channel = makeChannel[Int](100)
+     
+     
+     go {
+       for( i <- 1 to 1000) 
+         channel <~ i 
+     }
+     
+     var sum = 0;
+     val consumer = go {
+       for(s <- select) {
+          s match {
+             case `channel` ~> (i:Int) =>
+                     sum = sum + i
+                     if (i==1000)  s.shutdown()
+          }
+       }
+       sum
+     }
+  
+     Await.ready(consumer, 5.second)
+
+   Note the use of *s.shutdown* method for ending select loop. 
 
