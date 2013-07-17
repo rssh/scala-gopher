@@ -53,7 +53,7 @@ object SelectorMacroCaller {
        case _ => {
             // TODO: write hlepr functio which wirite first 255 chars of x raw representation
             c.error(x.pos, "match expected in gopher select loop, we have:"+x);
-            System.err.println("raw x:"+c.universe.showRaw(x));
+            //System.err.println("raw x:"+c.universe.showRaw(x));
             (x,newTermName("<none>"))
        }
     }  
@@ -154,7 +154,7 @@ object SelectorMacroCaller {
   private def parseChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Tuple3[c.Tree,c.TermName,c.Tree] =
   {
     import c.universe._
-    System.err.println("parseChannelArgs, l="+l);
+    //System.err.println("parseChannelArgs, l="+l);
     l match {
       case List(frs,Bind(snd: TermName,typedTree)) => 
           typedTree match {
