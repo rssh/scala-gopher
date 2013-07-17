@@ -5,7 +5,14 @@
  Requirements:  scala 2.10.2 +
  ------------
 
+ Download: 
+ ---------
 
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.9.0"
+
+
+ What-s inside:
+ =============
  
  Scope
  -----
@@ -100,7 +107,7 @@
   Channels
   --------
 
-    Channels is a way for organizing go-like message passing. Basically you
+ Channels is a way for organizing go-like message passing. Basically you
 can look on it as on classic blocked queue. Different 'goroutines', executed
 in different flows can exchange messages via channels.
 
