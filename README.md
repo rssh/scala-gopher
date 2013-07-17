@@ -123,10 +123,6 @@ in different flows can exchange messages via channels.
   blocked.  Unlike go, we also provide 'immediate' and 'timeouted' versions
   of read/write operations.
 
-  <!-- 
-   Internally
-  -->
-
   Select loop
   ----------
 
@@ -177,4 +173,19 @@ in different flows can exchange messages via channels.
      Await.ready(consumer, 5.second)
 
    Note the use of *s.shutdown* method for ending select loop. 
+
+
+  Interaction with Actors
+  -----------------------
+
+   We can bind channel output to actor (i.e. all, what we will write to channel
+  will be readed to actor) with call 
+
+    bindChannelRead[A](read: InputChannel[A], actor: ActorRef)
+
+   and bind channel to actorsystem, by creating actor which will push all input
+   into channel:
+
+    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef 
+
 

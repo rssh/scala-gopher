@@ -90,5 +90,24 @@ package object gopher
   @compileTimeOnly("throwSuppressed outside of go or goScope block")
   def throwSuppressed: Unit = ???
   
+  import scala.concurrent._
+  import scala.reflect._
+  
+  
+  //
+  @inline
+  def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext) = channels.make(capacity)
+
+  // interaction with actors
+  import akka.actor._
+  
+  @inline
+  def bindChannelRead[A](read: channels.InputChannel[A], actor: ActorRef): Unit =
+       channels.bindRead(read,actor)
+  
+  @inline     
+  def bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef =
+       channels.bindWrite(write, name)
+  
   
 }

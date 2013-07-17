@@ -17,7 +17,10 @@ libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.2"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.4"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-channel" % "2.2.0"
+
 
 version:="0.0.1-SNAPSHOT"
 

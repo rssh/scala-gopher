@@ -12,7 +12,7 @@ class SelectSuite extends FunSuite
 
    test("basic select emulation")  {
      
-     val channel = makeChannel[Int](100)
+     val channel = make[Int](100)
      
      val producer = Future {
        
@@ -58,7 +58,7 @@ class SelectSuite extends FunSuite
 
    test("select with traditional producer") {
      
-     val channel = makeChannel[Int](100)
+     val channel = make[Int](100)
      
      val producer = Future {
        for( i <- 1 to 1000) {

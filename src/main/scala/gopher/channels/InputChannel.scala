@@ -47,6 +47,7 @@ trait InputChannel[+A] extends Activable
 
   }
 
+  
   def async: InputAsync = new InputAsync() {}
 
   /**
