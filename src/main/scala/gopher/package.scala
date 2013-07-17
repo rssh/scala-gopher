@@ -4,9 +4,15 @@ import language.experimental.macros
 import scala.concurrent.Future
 import scala.reflect.macros.Context
 
+/**
+ * package wich introduce go-like language constructions into scala.
+ */
 package object gopher 
 {
 
+  /**
+   * spawn execution of x (wrapped into goScope) in separate execution flow.
+   */
   def go[A](x: =>A):Future[A] = macro goImpl[A]
 
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
@@ -43,6 +49,11 @@ package object gopher
 
   import scala.reflect.internal.annotations.compileTimeOnly
   
+  /**
+   * unapply pattern for read case statement in select loop
+   * <code> channel ~> x </code> transformed to reading from channel
+   * into variable x.
+   */
   object ~>
   {
     
