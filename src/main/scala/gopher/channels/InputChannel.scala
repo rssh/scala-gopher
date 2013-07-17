@@ -17,8 +17,19 @@ trait InputChannel[+A] extends Activable
   def readImmediatly: Option[A]
   def readTimeout(timeout: Duration) : Option[A]
 
+  /**
+   * synonym for readBlocked
+   */
   @inline def ? = readBlocked
+  
+  /**
+   * synonym for readTimeout
+   */
   @inline def ?? (implicit timeout: Timeout) = readTimeout(timeout.duration)
+  
+  /**
+   * synonym for readImmediatly
+   */
   @inline def ?! = readImmediatly
 
   // TODO: check that it can extends AnyVal

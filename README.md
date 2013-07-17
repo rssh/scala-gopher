@@ -105,7 +105,47 @@ can look on it as on classic blocked queue. Different 'goroutines', executed
 in different flows can exchange messages via channels.
 
 
+     val channel = makeChannel[Int];
+
+     go {
+       for(i <- 1 to 10) channel <~ i
+     }
+
+     go {
+       val i1 = channel? 
+       val i2 = channel?
+     }
+
+  
+  *channel <~ i* - send i to channel (it is possible to use '!' as synonym, to
+  provide interface, simular to actors), *i = channel ?* - blocked read 
+  of channell. Note, that unlike akka, default read and write operations are
+  blocked.  Unlike go, we also provide 'immediate' and 'timeouted' versions
+  of read/write operations.
+
+  <!-- 
+   Internally
+  -->
 
   Select loop
   ----------
+
+  May-be one of most unusual language constructions in go is 
+  'select statement' which 
+ 
+  In gopher we provide 'select loops':
+
+     import gopher._
+
+
+     for( s <- select ) 
+      s match {
+        case `channelA` ~> (i:Int) => ..do-something-with-i
+        case `channelB' ~> (ch: Char) => .. do-something-with-b
+      }
+   
+
+  Body of select loop must consists only from one match statements where 
+  patterns in cases must have form *channel ~> (v:Type)*  (for reading from
+  channel) or *channel <~ v* (for writing).
 

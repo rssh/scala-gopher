@@ -19,10 +19,30 @@ trait OutputChannel[-A] extends Activable
 
   def writeTimeout(x:A, timeout: Duration): Boolean
 
+  /**
+   * synonym for writeBlocked
+   */
   @inline def   ! (x:A) = writeBlocked(x)
+  
+  /**
+   * synonym for writeImmediatly
+   */
   @inline def  !! (x:A) = writeImmediatly(x)
+  
+  /**
+   * synonym for writeBlocked
+   */
   @inline def <~  (x:A) = writeBlocked(x)
+  
+  /**
+   * synonym for writeImmediatly
+   */
   @inline def <~! (x:A) = writeImmediatly(x)
+  
+  
+  /**
+   * synonym for writeTimeout
+   */
   @inline def <~? (x:A)(implicit timeout: Timeout) = writeTimeout(x,timeout.duration)
 
   trait OutputAsync
