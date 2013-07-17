@@ -1,14 +1,13 @@
   
- Implementation of go scopes and channels in scala.
- =================================================
+# Implementation of go scopes and channels in scala.
 
- Requirements:  scala 2.10.2 +
- ------------
+## Requirements:  scala 2.10.2 +
+   ------------
 
 
  
- Scope
- -----
+## Scope
+   -----
 
  Library define 'goScope'  expression, which allows to use inside
  goScope go-like 'defer', 'panic' and 'recover' expression.
@@ -186,6 +185,10 @@ in different flows can exchange messages via channels.
    and bind channel to actorsystem, by creating actor which will push all input
    into channel:
 
-    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef 
+    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], 
+                                  name: String)
+                                       (implicit as: ActorSystem): ActorRef 
+
+
 
 
