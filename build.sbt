@@ -20,7 +20,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
 
 
-version:="0.9.0"
+version:="0.9.1-SNAPSHOT"
 
 
 publishMavenStyle := true

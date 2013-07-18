@@ -83,6 +83,34 @@ class SelectSuite extends FunSuite
     
      Await.ready(consumer, 5.second)
      
+   }
+  
+   test("select with queue type") {
+
+     val channel = make[Int](100)
+
+     val producer = Future {
+       for( i <- 1 to 1000) {
+         channel <~ i 
+       }       
+     }
+          
+     var sum = 0;
+     val consumer = Future {
+       val sc = new SelectorContext()
+       sc.addInputAction(channel, 
+            (i: channel.OutputElement) => { sum = sum + i; 
+                          if (i == 1000) {
+                            sc.shutdown()
+                          }
+                          true 
+                        }
+       )
+       Await.ready(sc.go, 5.second)
+     }
+   
+    
+     Await.ready(consumer, 5.second)
      
    }
   

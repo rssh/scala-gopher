@@ -13,6 +13,8 @@ trait OutputChannel[-A] extends Activable
 
   channel =>
 
+  type OutputElement = A
+
   def writeBlocked(x:A):Unit 
 
   def writeImmediatly(x:A): Boolean 

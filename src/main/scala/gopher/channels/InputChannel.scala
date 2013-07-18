@@ -13,6 +13,8 @@ trait InputChannel[+A] extends Activable
   
   channel =>
 
+  type InputElement = A;
+
   def readBlocked: A 
   def readImmediatly: Option[A]
   def readTimeout(timeout: Duration) : Option[A]
