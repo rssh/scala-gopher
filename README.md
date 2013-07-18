@@ -54,7 +54,7 @@
                               http://blog.golang.org/defer-panic-and-recover
 
   Basically, goScope wrap it's argument into try/finalize block and rewrite
-  *defer* calls to add defered code blocks to list of code blocks, which are
+  *defer* calls to construction of list of code blocks, which are
   executed in finalize.  *panic* calls are just throwing exception and 
   *recover* (which can be executed only inside *defer*) is returning a value
   of recover argument instead rethrowing exception:
