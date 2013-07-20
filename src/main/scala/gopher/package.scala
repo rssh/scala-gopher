@@ -49,6 +49,13 @@ package object gopher
 
   import scala.reflect.internal.annotations.compileTimeOnly
   
+  
+  type InputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
+  type OutputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
+  
+  
+  
+  
   /**
    * unapply pattern for read case statement in select loop
    * <code> channel ~> x </code> transformed to reading from channel
@@ -58,26 +65,28 @@ package object gopher
   {
     
     @compileTimeOnly("~> unapply must be used only in select for loop")
-    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ??? //macro unapplyImpl
+    def unapply(s: channels.SelectorContext): Option[InputChannelPair[_]] = ??? //macro unapplyImpl
         
-  } 
-
+  }
+  
+  
+  
   object ? 
   {
     @compileTimeOnly("? unapply must be used only in select for loop")
-    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+    def unapply(s: channels.SelectorContext): Option[InputChannelPair[_]] = ???
   }
   
   object <~
   {
     @compileTimeOnly("<~ unapply must be used only in select for loop")   
-    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+    def unapply(s: channels.SelectorContext): Option[OutputChannelPair[_]] = ???
   }
 
   object ! 
   {
     @compileTimeOnly("! unapply must be used only in select for loop")   
-    def unapply(s: channels.SelectorContext): Option[(channels.InputChannel[Any],Any)] = ???
+    def unapply(s: channels.SelectorContext): Option[OutputChannelPair[_]] = ???
   }
   
   import scope.ScopeMacroses

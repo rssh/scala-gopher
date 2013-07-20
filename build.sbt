@@ -11,7 +11,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 autoCompilerPlugins := true
 
-scalacOptions ++= Seq("-unchecked","-deprecation" /*,"-Ymacro-debug-lite"*/ )
+scalacOptions ++= Seq("-unchecked","-deprecation" /*,"-Ymacro-debug-lite" */ )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.2"
 
