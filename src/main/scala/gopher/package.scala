@@ -5,8 +5,29 @@ import scala.concurrent.Future
 import scala.reflect.macros.Context
 
 /**
- * package wich introduce go-like language constructions into scala.
- */
+  * package wich introduce go-like language constructions into scala:
+  * 
+  * goroutines 
+  *  <ul>
+  *   <li>[[gopher.go go]] </li>
+  *  </ul>
+  *  
+  *  go scope support:
+  *   <ul>
+  *    <li> [[gopher.goScope goScope]] </li>
+  *    <li> [[gopher.defer defer]] </li>  
+  *    <li> [[gopher.panic panic]] </li>   
+  *    <li> [[gopher.recover recover]] </li>
+  *   </ul>
+  *  
+  *    
+  *  channels and select statement support:
+  *   <ul>
+  *    <li> [[gopher.makeChannel makeChannel]] </li>
+  *    <li> [[gopher.select select]] </li>
+  *  </ul>
+  *   
+  */
 package object gopher 
 {
 
@@ -15,6 +36,10 @@ package object gopher
    */
   def go[A](x: =>A):Future[A] = macro goImpl[A]
 
+  /**
+   * implementation of go. public as imlementation details.
+   * @see go
+   */
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
   {
    import c.universe._
@@ -45,6 +70,25 @@ package object gopher
     c.Expr[Future[A]](tree)           
   }
 
+  /**
+   * select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
+   * i.e. next go code:
+   * {{{
+   *  select
+   *    case channelA -> x : do-something-with-x
+   *    case channelB -> y : do-something-with-y
+   * }}}
+   *  will looks in scala as
+   * <pre>
+   * for(s <- select) 
+   *  s match {
+   *    case `channelA` ~> (x: XType) => do-something-with-x
+   *    case `channelB` ~> (y: YType) => do-something-with-y
+   *  }
+   * </pre>
+   * @see [[gopher.channels.SelectorContext]]
+   * @see [[gopher.~>]]
+   */
   val select = channels.SelectorMacroCaller
 
   import scala.reflect.internal.annotations.compileTimeOnly
@@ -69,20 +113,33 @@ package object gopher
         
   }
   
-  
-  
+  /**
+   * unapply pattern for read case statement in select loop
+   * <code> channel ? x </code> transformed to reading from channel
+   * into variable x (end evaluating block in case statement if read was successful)
+   */  
   object ? 
   {
     @compileTimeOnly("? unapply must be used only in select for loop")
     def unapply(s: channels.SelectorContext): Option[InputChannelPair[_]] = ???
   }
   
+  /**
+   * unapply pattern for write case statement in select loop
+   * <code> `channel` <~ `x` </code> transformed to write from channel
+   * into variable x (and evaluating block if write was successful).
+   */    
   object <~
   {
     @compileTimeOnly("<~ unapply must be used only in select for loop")   
     def unapply(s: channels.SelectorContext): Option[OutputChannelPair[_]] = ???
   }
 
+  /**
+   * unapply pattern for write case statement in select loop
+   * <code> `channel` <~ `x` </code> transformed to write from channel
+   * into variable x (and evaluating block if write was successful).
+   */      
   object ! 
   {
     @compileTimeOnly("! unapply must be used only in select for loop")   
@@ -90,14 +147,22 @@ package object gopher
   }
   
   import scope.ScopeMacroses
+  
+  /**
+   * block of code inside goScope is processed for support of 'defer', 'panic' and 'recover' constructions.
+   */
   def goScope[A](x: =>A): A = macro ScopeMacroses.goScopeImpl[A]
   
   import scope.ScopeContext
   import scope.PanicException
     
+  /**
+   * defer statement: push x to be executed at the end of [[gopher.goScope goScope]] or [[gopher.go go]] block. 
+   */
   @compileTimeOnly("defer outside of go or goScope block")
   def defer(x: =>Unit): Unit = ???  
      
+  
   @compileTimeOnly("recover outside of go or goScope block")
   def recover[A](x: A): Unit = ???  
 
