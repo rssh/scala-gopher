@@ -74,13 +74,22 @@ package object gopher
    * select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
    * i.e. next go code:
    * {{{
+   * for(;;) {
    *  select
    *    case channelA -> x : do-something-with-x
    *    case channelB -> y : do-something-with-y
+   * }   
    * }}}
    *  will looks in scala as
    * <pre>
    * for(s <- select) 
+   *  s match {
+   *    case `channelA` ~> (x: XType) => do-something-with-x
+   *    case `channelB` ~> (y: YType) => do-something-with-y
+   *  }
+   * </pre>
+   * and plain select (without enclosing loop) as
+   * for(s <- select.once) 
    *  s match {
    *    case `channelA` ~> (x: XType) => do-something-with-x
    *    case `channelB` ~> (y: YType) => do-something-with-y
@@ -162,16 +171,28 @@ package object gopher
   @compileTimeOnly("defer outside of go or goScope block")
   def defer(x: =>Unit): Unit = ???  
      
-  
+  /**
+   * recover statement: if x (situated inside defer block) will be executed in process of exception handling,
+   *  inside go scope block, than block will return value of x instead throwing exception.
+   */
   @compileTimeOnly("recover outside of go or goScope block")
   def recover[A](x: A): Unit = ???  
 
+  /**
+   * throw PanicException
+   */
   @compileTimeOnly("panic outside of go or goScope block")
   def panic(x: String): Unit = ??? 
 
+  /**
+   * Access to list of exceptions from defer blocks, which was suppressed during handling of some other 'first' exception.
+   */
   @compileTimeOnly("suppressedExceptions outside of go or goScope block")
   def suppressedExceptions: List[Exception] = ???
   
+  /**
+   * throw suppresses exception instead first.
+   */
   @compileTimeOnly("throwSuppressed outside of go or goScope block")
   def throwSuppressed: Unit = ???
   
@@ -179,17 +200,25 @@ package object gopher
   import scala.reflect._
   
   
-  //
+  /**
+   * Make channel: create go-like channel with given capacity.
+   */
   @inline
   def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext) = channels.make(capacity)
 
   // interaction with actors
   import akka.actor._
   
+  /**
+   * Bind 'read' of channel to actor, i.e. when message sent to channel, it's passed to actor.
+   */
   @inline
   def bindChannelRead[A](read: channels.InputChannel[A], actor: ActorRef): Unit =
        channels.bindRead(read,actor)
   
+  /**
+   * bind write of channel to actor, i.e. create actor, which will put all received messages into channel.
+   */
   @inline     
   def bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef =
        channels.bindWrite(write, name)
