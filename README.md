@@ -139,6 +139,9 @@ in different flows can exchange messages via channels.
   'select statement' which work in somewhat simular to unix 'select' syscall:
   from set of blocking operations select one which is ready for input/output
   and run it.
+
+  The common pattern of channel processing in go language is wrap select 
+  operarion into endless loop.
  
   Gopher provides simular functionality with 'select loops':
 
@@ -182,6 +185,18 @@ in different flows can exchange messages via channels.
      Await.ready(consumer, 5.second)
 
    Note the use of *s.shutdown* method for ending select loop. 
+
+   For using select operation not enclosed in loop, scala-gopher provide
+   *select.once* syntax:
+   
+
+    for(s <- select.once) s match {
+       case `channelA` ~> (i:Type) => ...do read ..
+       case `channelB` <~ 1 => .. when writed .. 
+    }
+
+   Which is corresponding to one plain select in go language.
+
 
 
   Interaction with Actors

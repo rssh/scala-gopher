@@ -11,9 +11,23 @@ object SelectorMacroCaller {
 
   def  foreach(x:SelectorContext => Unit):Unit = macro foreachImpl
 
-  def  run(x:SelectorContext => Unit):Unit = macro foreachImpl
+  
+  def  once = Once
+  
+  object Once {
+    def  foreach(x:SelectorContext => Unit):Unit = macro foreachOnceImpl
+  }
+  
+  //def  run(x:SelectorContext => Unit):Unit = macro foreachImpl
 
   def foreachImpl(c:Context)(x: c.Expr[SelectorContext=>Unit]):c.Expr[Unit] =
+    foreachGenImpl(c)(x,"run")
+  
+  def foreachOnceImpl(c:Context)(x: c.Expr[SelectorContext=>Unit]):c.Expr[Unit] =
+    foreachGenImpl(c)(x,"runOnce")
+    
+  
+  def foreachGenImpl(c:Context)(x: c.Expr[SelectorContext=>Unit], lastOp: String):c.Expr[Unit] =
   {
    import c.universe._
    val xtree = x.tree
@@ -31,7 +45,7 @@ object SelectorMacroCaller {
                                  List()))
                                  
    // sc.run
-   val run =  Select(Ident(scName),newTermName("run"))                              
+   val run =  Select(Ident(scName),newTermName(lastOp))                              
 
    val rtree = Block(
                  List(newScTree,inForEach), 
@@ -70,6 +84,7 @@ object SelectorMacroCaller {
           case UnApply(x,l) => 
             x match {
               case Apply(Select(obj, t /*TermName("unapply")*/),us) =>
+                // TODO: cjange to syntax matching ?
                 val tpe = obj.tpe
                 if (tpe =:= typeOf[ gopher.~>.type ]) {
                   transformAddInputAction(c)(scName, x,l,guard,body);
@@ -100,27 +115,10 @@ object SelectorMacroCaller {
   def transformAddInputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
   {
     
-    val (channel, argName, argType) = parseChannelArgs(c)(x,l);
-
-    import c.universe._
-    
-  //  def extractChannelArgType(channelType: Type): Type =
-  //    channelType match {
-  //       case TypeRef(pre,sym,args) => System.err.println("Typeref detected");
-  //                args match {
-  //                  case x::Nil => x
-  //                  case _ => 
-  //                            c.error(x.pos, "Channel must have only one type argument");
-  //                            typeOf[Nothing]  
-  //                }
-  //       case _ => c.error(x.pos, "Channel type is not typeref: can't determinate type of argument");
-  //                 typeOf[Nothing]
-  //  }
-  //  
-  //  val channelArgType = extractChannelArgType(channelType)
-    
-    
-    //  sc.addOutputListener{ channel, (argName:argType) => { body; true} }   
+    val (channel, argName, argType) = parseInputChannelArgs(c)(x,l);
+    import c.universe._    
+   
+    //  sc.addInputAction{ channel, (argName:argType) => { body; true} }   
     val retval = Apply(
                     Select(Ident(sc), newTermName("addInputAction")), 
                     List(
@@ -135,7 +133,7 @@ object SelectorMacroCaller {
 
   def transformAddOutputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
   {
-    val (channel, argName, argType) = parseChannelArgs(c)(x, l);
+    val (channel, arg) = parseOutputChannelArgs(c)(x, l);
     //  channe.addOutputListener{ () => { body; Some(c) } }
     import c.universe._
     // TODO: add guard supports.
@@ -144,28 +142,37 @@ object SelectorMacroCaller {
                    List(
                        channel,
                        Function(List(), 
-                                Block(List(body), Apply(Ident(newTermName("Some")), List(Ident(argName)))))
+                                Block(List(body), Apply(Ident(newTermName("Some")), List(arg))))
                    ))
     retval;
   }
   
   
   
-  private def parseChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Tuple3[c.Tree,c.TermName,c.Tree] =
+  private def parseInputChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Tuple3[c.Tree,c.TermName,c.Tree] =
   {
     import c.universe._
-    System.err.println("parseChannelArgs, l="+l);
+    //System.err.println("parseInputChannelArgs, l="+l);
     l match {
       case List(frs,Bind(snd: TermName,typedTree)) => 
           typedTree match {
-            case Typed(x,typeTree) => (frs,snd,typeTree)
-            case _ => c.abort(x.pos, "type declaration in channel unapply expexted")
+            case Typed(x,typeTree) => (frs,snd, typeTree)
+            case _ => c.abort(typedTree.pos, "type declaration in channel unapply expexted")
           }
-         
+      case List(frs,snd) => c.abort(snd.pos, "second argument of channel read in case must be typed")
       case _  => c.abort(x.pos, "channel unapply list must have exactlry 2 arguments")
     }
   }
   
+  private def parseOutputChannelArgs(c:Context)(x:c.Tree, l:List[c.Tree]):Tuple2[c.Tree,c.Tree] =
+  {
+    import c.universe._
+    //System.err.println("parseOutpurChannelArgs, l="+l);
+    l match {
+      case List(frs,snd) => (frs,snd)
+      case _  => c.abort(x.pos, "channel unapply list must have exactlry 2 arguments")
+    }
+  }
   
   
   

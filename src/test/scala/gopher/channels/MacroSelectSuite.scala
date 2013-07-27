@@ -79,5 +79,27 @@ class MacroSelectSuite extends FunSuite
 
    }
    
+   test("select with run-once")  {
+     val channel1 = makeChannel[Int](100)
+     val channel2 = makeChannel[Int](100)
+
+
+     var nWrites=0;
+     for(s <- select.once) 
+      s match {
+       case `channel1` <~ 1 => nWrites = nWrites + 1
+       case `channel2` <~ 1 => nWrites = nWrites + 1
+     }
+
+     var nReads=0;
+     for(s <- select.once) 
+      s match {
+       case `channel1` ~> (x:Int) => nReads = nReads + 1
+       case `channel2` ~> (x:Int) => nReads = nReads + 1
+     }
+
+
+   }
+
    
 }
