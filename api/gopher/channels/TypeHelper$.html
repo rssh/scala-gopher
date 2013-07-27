@@ -2,9 +2,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>SelectorContext - gopher.channels.SelectorContext</title>
-          <meta name="description" content="SelectorContext - gopher.channels.SelectorContext" />
-          <meta name="keywords" content="SelectorContext gopher.channels.SelectorContext" />
+          <title>TypeHelper - gopher.channels.TypeHelper</title>
+          <meta name="description" content="TypeHelper - gopher.channels.TypeHelper" />
+          <meta name="keywords" content="TypeHelper gopher.channels.TypeHelper" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -12,7 +12,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../../index.html';
-            var hash = 'gopher.channels.SelectorContext';
+            var hash = 'gopher.channels.TypeHelper$';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -22,58 +22,26 @@
    	  </script>
     
         </head>
-        <body class="type">
+        <body class="value">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
+        <img src="../../lib/object_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
-        <h1>SelectorContext</h1>
+        <h1>TypeHelper</h1>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">SelectorContext</span><span class="result"> extends <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></span>
+        <span class="name">TypeHelper</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>context, which await of doing one of blocked operations.
-We can look on one as on implementation of go select statement:
-we can add to context pairs of inputs and outputs, and then
-when some of inputs and outputs are non-blockde, than action is performed.
-I.e. next block of 'go' select:
-<pre>
-for(;;) {
- select match
-   case x <- a => f1(x)
-   case x <- b => f2(x)
-   case 1 -> c => f3
-   case _  => f4
-}
-</pre>
- is mapped do
-<pre>
- slc = new SelectorContext()
- slc.addInputAction(a, x=>f1(x))
- slc.addInputAction(b, x=>f2(x))
- slc.addOutputAction(c, {f4; Some(1) }
- slc.addIddleAction(f4)
- slc.run()
-</pre>
- (and with help of macroses, can be write as
-<pre>
- selector match {
-   case x <- a => f1(x)
-   case x <- b => f2(x)
-   case 1 -> c => f3
-    case _ => f4
- }
-</pre>
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -91,7 +59,7 @@ for(;;) {
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.channels.SelectorContext"><span>SelectorContext</span></li><li class="in" name="gopher.channels.Activable"><span>Activable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.channels.TypeHelper"><span>TypeHelper</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -109,23 +77,7 @@ for(;;) {
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="gopher.channels.SelectorContext#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():gopher.channels.SelectorContext"></a>
-      <a id="&lt;init&gt;:SelectorContext"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">SelectorContext</span><span class="params">()</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -198,45 +150,6 @@ for(;;) {
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="gopher.channels.SelectorContext#activate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="activate():Unit"></a>
-      <a id="activate():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">activate</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.SelectorContext">SelectorContext</a> → <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></dd></dl></div>
-    </li><li name="gopher.channels.SelectorContext#addInputAction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addInputAction[A](channel:gopher.channels.InputChannel[A],action:A=&gt;Boolean):Unit"></a>
-      <a id="addInputAction[A](InputChannel[A],(A)⇒Boolean):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">addInputAction</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="channel">channel: <a href="InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.channels.SelectorContext.addInputAction.A">A</span>]</span>, <span name="action">action: (<span class="extype" name="gopher.channels.SelectorContext.addInputAction.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">called before selector context become running.</p>
-    </li><li name="gopher.channels.SelectorContext#addOutputAction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addOutputAction[A](channel:gopher.channels.OutputChannel[A],action:()=&gt;Option[A]):Unit"></a>
-      <a id="addOutputAction[A](OutputChannel[A],()⇒Option[A]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">addOutputAction</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="channel">channel: <a href="OutputChannel.html" class="extype" name="gopher.channels.OutputChannel">OutputChannel</a>[<span class="extype" name="gopher.channels.SelectorContext.addOutputAction.A">A</span>]</span>, <span name="action">action: () ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="gopher.channels.SelectorContext.addOutputAction.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -327,20 +240,6 @@ for(;;) {
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.channels.SelectorContext#go" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="go(implicitex:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]"></a>
-      <a id="go(ExecutionContext):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">go</span><span class="params">(<span class="implicit">implicit </span><span name="ex">ex: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">enable listeners and outputChannels
-</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -406,59 +305,6 @@ for(;;) {
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="gopher.channels.SelectorContext#run" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="run:Unit"></a>
-      <a id="run:Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">run</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="gopher.channels.SelectorContext#runOnce" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="runOnce():Unit"></a>
-      <a id="runOnce():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">runOnce</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">wait for 1-st event
-</p>
-    </li><li name="gopher.channels.SelectorContext#setIddleAction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="setIddleAction(action:Unit=&gt;Unit):Unit"></a>
-      <a id="setIddleAction((Unit)⇒Unit):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setIddleAction</span><span class="params">(<span name="action">action: (<span class="extype" name="scala.Unit">Unit</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="gopher.channels.SelectorContext#shutdown" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="shutdown():Unit"></a>
-      <a id="shutdown():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">shutdown</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -485,6 +331,45 @@ for(;;) {
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.channels.TypeHelper#typeClassSym" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="typeClassSym(c:scala.reflect.macros.Context)(sym:c.Symbol):c.Tree"></a>
+      <a id="typeClassSym(Context)(scala.reflect.macros.Context.Symbol):scala.reflect.macros.Context.Tree"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeClassSym</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.Context">Context</span></span>)</span><span class="params">(<span name="sym">sym: <span class="extype" name="scala.reflect.macros.Aliases.Symbol">scala.reflect.macros.Context.Symbol</span></span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.Context.Tree</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="gopher.channels.TypeHelper#typeTermTree" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="typeTermTree(c:scala.reflect.macros.Context)(tpe:c.Type):c.Tree"></a>
+      <a id="typeTermTree(Context)(scala.reflect.macros.Context.Type):scala.reflect.macros.Context.Tree"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeTermTree</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.Context">Context</span></span>)</span><span class="params">(<span name="tpe">tpe: <span class="extype" name="scala.reflect.macros.Aliases.Type">scala.reflect.macros.Context.Type</span></span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.Context.Tree</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="gopher.channels.TypeHelper#typeTree" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="typeTree(c:scala.reflect.macros.Context)(tpe:c.Type):c.Tree"></a>
+      <a id="typeTree(Context)(scala.reflect.macros.Context.Type):scala.reflect.macros.Context.Tree"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeTree</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.Context">Context</span></span>)</span><span class="params">(<span name="tpe">tpe: <span class="extype" name="scala.reflect.macros.Aliases.Type">scala.reflect.macros.Context.Type</span></span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.Context.Tree</span></span>
+      </span>
+      </h4>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -551,9 +436,7 @@ for(;;) {
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="gopher.channels.Activable">
-              <h3>Inherited from <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

@@ -39,8 +39,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>package wich introduce go-like language constructions into scala.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>package wich introduce go-like language constructions into scala:</p><p>goroutines</p><ul><li><a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a></li></ul><p> go scope support:</p><ul><li> <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a></li><li> <a href="#defer(x:=&gt;Unit):Unit" class="extmbr" name="gopher#defer">defer</a></li><li> <a href="#panic(x:String):Unit" class="extmbr" name="gopher#panic">panic</a></li><li> <a href="#recover[A](x:A):Unit" class="extmbr" name="gopher#recover">recover</a></li></ul><p> channels and select statement support:</p><ul><li> <a href="#makeChannel[A](capacity:Int)(implicitevidence$1:scala.reflect.ClassTag[A],implicitec:scala.concurrent.ExecutionContext):gopher.channels.InputOutputChannel[A]" class="extmbr" name="gopher#makeChannel">makeChannel</a></li><li> <a href="#select:gopher.channels.SelectorMacroCaller.type" class="extmbr" name="gopher#select">select</a></li></ul></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -80,7 +79,36 @@
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="gopher.InputChannelPair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InputChannelPair[A]=(gopher.channels.InputChannel[A],A)"></a>
+      <a id="InputChannelPair[A]:(InputChannel[A],A)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">InputChannelPair</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> = (<a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.InputChannelPair.A">A</span>], <span class="extype" name="gopher.InputChannelPair.A">A</span>)</span>
+      </span>
+      </h4>
+      
+    </li><li name="gopher.OutputChannelPair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OutputChannelPair[A]=(gopher.channels.InputChannel[A],A)"></a>
+      <a id="OutputChannelPair[A]:(InputChannel[A],A)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OutputChannelPair</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> = (<a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.OutputChannelPair.A">A</span>], <span class="extype" name="gopher.OutputChannelPair.A">A</span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -98,7 +126,9 @@
         <a href="package$$$bang$.html"><span title="gt4s: $bang" class="name">!</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">unapply pattern for write case statement in select loop
+<code> `channel` <~ `x` </code> transformed to write from channel
+into variable x (and evaluating block if write was successful).</code></p>
     </li><li name="gopher.&lt;~" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;~"></a>
       <a id="&lt;~:&lt;~"></a>
@@ -111,7 +141,9 @@
         <a href="package$$$less$tilde$.html"><span title="gt4s: $less$tilde" class="name">&lt;~</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">unapply pattern for write case statement in select loop
+<code> `channel` <~ `x` </code> transformed to write from channel
+into variable x (and evaluating block if write was successful).</code></p>
     </li><li name="gopher.?" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="?"></a>
       <a id="?:?"></a>
@@ -124,7 +156,10 @@
         <a href="package$$$qmark$.html"><span title="gt4s: $qmark" class="name">?</span></a>
       </span>
       </h4>
-      
+      <p class="comment cmt">unapply pattern for read case statement in select loop
+<code> channel ? x </code> transformed to reading from channel
+into variable x (end evaluating block in case statement if read was successful)
+</code></p>
     </li><li name="gopher.package#bindChannelRead" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bindChannelRead[A](read:gopher.channels.InputChannel[A],actor:akka.actor.ActorRef):Unit"></a>
       <a id="bindChannelRead[A](InputChannel[A],ActorRef):Unit"></a>
@@ -137,7 +172,8 @@
         <span class="name">bindChannelRead</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="read">read: <a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.bindChannelRead.A">A</span>]</span>, <span name="actor">actor: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Bind 'read' of channel to actor, i.</p><div class="fullcomment"><div class="comment cmt"><p>Bind 'read' of channel to actor, i.e. when message sent to channel, it's passed to actor.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@inline</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -153,7 +189,8 @@
         <span class="name">bindChannelWrite</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="write">write: <a href="channels/OutputChannel.html" class="extype" name="gopher.channels.OutputChannel">OutputChannel</a>[<span class="extype" name="gopher.bindChannelWrite.A">A</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.bindChannelWrite.A">A</span>]</span>, <span name="as">as: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>)</span><span class="result">: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">bind write of channel to actor, i.</p><div class="fullcomment"><div class="comment cmt"><p>bind write of channel to actor, i.e. create actor, which will put all received messages into channel.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@inline</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -182,7 +219,8 @@
         <span class="name">defer</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">defer statement: push x to be executed at the end of <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a> or <a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a> block.</p><div class="fullcomment"><div class="comment cmt"><p>defer statement: push x to be executed at the end of <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a> or <a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a> block.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;defer outside of go or goScope block&quot;">...</span>
@@ -209,7 +247,7 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.package#goImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.package#goImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="goImpl[A](c:scala.reflect.macros.Context)(x:c.Expr[A]):c.Expr[scala.concurrent.Future[A]]"></a>
       <a id="goImpl[A](Context)(scala.reflect.macros.Context.Expr[A]):scala.reflect.macros.Context.Expr[Future[A]]"></a>
       <h4 class="signature">
@@ -221,7 +259,8 @@
         <span class="name">goImpl</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.Context">Context</span></span>)</span><span class="params">(<span name="x">x: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.Context.Expr</span>[<span class="extype" name="gopher.goImpl.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.Context.Expr</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goImpl.A">A</span>]]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">implementation of go.</p><div class="fullcomment"><div class="comment cmt"><p>implementation of go. public as imlementation details.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>go
+</p></span></dd></dl></div>
     </li><li name="gopher.package#goScope" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="goScope[A](x:=&gt;A):A"></a>
       <a id="goScope[A](⇒A):A"></a>
@@ -234,7 +273,8 @@
         <span class="name">goScope</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="gopher.goScope.A">A</span></span>)</span><span class="result">: <span class="extype" name="gopher.goScope.A">A</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">block of code inside goScope is processed for support of 'defer', 'panic' and 'recover' constructions.</p><div class="fullcomment"><div class="comment cmt"><p>block of code inside goScope is processed for support of 'defer', 'panic' and 'recover' constructions.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@macroImpl</span><span class="args">(<span>
       
       <span class="defval" name="`macro`(&quot;versionFormat&quot; = 1, &quot;className&quot; = &quot;gopher.scope.ScopeMacroses&quot;, &quot;methodName&quot; = &quot;goScopeImpl&quot;, &quot;signature&quot; = List(-1, -1))[A]">...</span>
@@ -253,7 +293,8 @@
         <span class="name">makeChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.makeChannel.A">A</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <a href="channels/InputOutputChannel.html" class="extype" name="gopher.channels.InputOutputChannel">InputOutputChannel</a>[<span class="extype" name="gopher.makeChannel.A">A</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Make channel: create go-like channel with given capacity.</p><div class="fullcomment"><div class="comment cmt"><p>Make channel: create go-like channel with given capacity.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@inline</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -269,7 +310,9 @@
         <span class="name">panic</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">throw PanicException
+</p><div class="fullcomment"><div class="comment cmt"><p>throw PanicException
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;panic outside of go or goScope block&quot;">...</span>
@@ -288,7 +331,10 @@
         <span class="name">recover</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: <span class="extype" name="gopher.recover.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">recover statement: if x (situated inside defer block) will be executed in process of exception handling,
+ inside go scope block, than block will return value of x instead throwing exception.</p><div class="fullcomment"><div class="comment cmt"><p>recover statement: if x (situated inside defer block) will be executed in process of exception handling,
+ inside go scope block, than block will return value of x instead throwing exception.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;recover outside of go or goScope block&quot;">...</span>
@@ -308,7 +354,7 @@
       </span>
       </h4>
       
-    </li><li name="gopher.package#select" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.package#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="select:gopher.channels.SelectorMacroCaller.type"></a>
       <a id="select:SelectorMacroCaller.type"></a>
       <h4 class="signature">
@@ -320,7 +366,27 @@
         <span class="name">select</span><span class="result">: <a href="channels/SelectorMacroCaller$.html" class="extype" name="gopher.channels.SelectorMacroCaller">SelectorMacroCaller</a>.type</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.</p><div class="fullcomment"><div class="comment cmt"><p>select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
+i.e. next go code:</p><pre><span class="kw">for</span>(;;) {
+select
+  <span class="kw">case</span> channelA -&gt; x : <span class="kw">do</span>-something-<span class="kw">with</span>-x
+  <span class="kw">case</span> channelB -&gt; y : <span class="kw">do</span>-something-<span class="kw">with</span>-y
+}</pre><p> will looks in scala as
+<pre>
+for(s <- select)
+ s match {
+   case `channelA` ~> (x: XType) => do-something-with-x
+   case `channelB` ~> (y: YType) => do-something-with-y
+ }
+</pre>
+and plain select (without enclosing loop) as
+for(s &lt;- select.once)
+ s match {
+   case <code>channelA</code> ~&gt; (x: XType) =&gt; do-something-with-x
+   case <code>channelB</code> ~&gt; (y: YType) =&gt; do-something-with-y
+ }
+</pre></p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="package$$$tilde$greater$.html" class="extype" name="gopher.~&gt;">gopher.~&gt;</a>
+</p></span><span class="cmt"><p><a href="channels/SelectorContext.html" class="extype" name="gopher.channels.SelectorContext">gopher.channels.SelectorContext</a></p></span></dd></dl></div>
     </li><li name="gopher.package#suppressedExceptions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="suppressedExceptions:List[Exception]"></a>
       <a id="suppressedExceptions:List[Exception]"></a>
@@ -333,7 +399,8 @@
         <span class="name">suppressedExceptions</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Exception">Exception</span>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Access to list of exceptions from defer blocks, which was suppressed during handling of some other 'first' exception.</p><div class="fullcomment"><div class="comment cmt"><p>Access to list of exceptions from defer blocks, which was suppressed during handling of some other 'first' exception.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;suppressedExceptions outside of go or goScope block&quot;">...</span>
@@ -352,7 +419,8 @@
         <span class="name">throwSuppressed</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">throw suppresses exception instead first.</p><div class="fullcomment"><div class="comment cmt"><p>throw suppresses exception instead first.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;throwSuppressed outside of go or goScope block&quot;">...</span>

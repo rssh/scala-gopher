@@ -39,7 +39,10 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>unapply pattern for write case statement in select loop
+<code> `channel` <~ `x` </code> transformed to write from channel
+into variable x (and evaluating block if write was successful).
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -332,15 +335,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="gopher.&lt;~#unapply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="unapply(s:gopher.channels.SelectorContext):Option[(gopher.channels.InputChannel[Any],Any)]"></a>
-      <a id="unapply(SelectorContext):Option[(InputChannel[Any],Any)]"></a>
+      <a id="unapply(s:gopher.channels.SelectorContext):Option[gopher.package.OutputChannelPair[_]]"></a>
+      <a id="unapply(SelectorContext):Option[OutputChannelPair[_]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unapply</span><span class="params">(<span name="s">s: <a href="channels/SelectorContext.html" class="extype" name="gopher.channels.SelectorContext">SelectorContext</a></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[(<a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="scala.Any">Any</span>], <span class="extype" name="scala.Any">Any</span>)]</span>
+        <span class="name">unapply</span><span class="params">(<span name="s">s: <a href="channels/SelectorContext.html" class="extype" name="gopher.channels.SelectorContext">SelectorContext</a></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="package.html#OutputChannelPair[A]=(gopher.channels.InputChannel[A],A)" class="extmbr" name="gopher.OutputChannelPair">OutputChannelPair</a>[_]]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
