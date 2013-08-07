@@ -51,7 +51,7 @@ object SelectorMacroCaller {
                  List(newScTree,inForEach), 
                  run
                )
-   
+
    val r1 = c.typeCheck(c.resetAllAttrs(rtree), typeOf[Unit], false)
    
    c.Expr[Unit](r1)
@@ -62,8 +62,9 @@ object SelectorMacroCaller {
     x match {
        case Function(List(ValDef(_,paramName,_,_)),Match(x,cases)) => 
                                                   // TODO: check and pass paramName there
-           
-                                                  (transformMatch(c)(paramName,x,cases),paramName);
+                                                  (transformMatch(c)(paramName,x,cases, Nil),paramName);
+       case Function(List(ValDef(_,paramName,_,_)),Block(preCase,Match(caseVar,cases))) =>                                           
+                                                 (transformMatch(c)(paramName,x,cases, preCase),paramName);            
        case _ => {
             // TODO: write hlepr functio which wirite first 255 chars of x raw representation
             c.error(x.pos, "match expected in gopher select loop, we have:"+x);
@@ -73,7 +74,7 @@ object SelectorMacroCaller {
     }  
   }
   
-  def transformMatch(c:Context)(scName: c.TermName, x: c.Tree, cases: List[c.Tree]): c.Tree =
+  def transformMatch(c:Context)(scName: c.TermName, x: c.Tree, cases: List[c.Tree], preCase:List[c.Tree]): c.Tree =
   {
     import c.universe._
     //TODO: check that x is ident(s)
@@ -87,13 +88,13 @@ object SelectorMacroCaller {
                 // TODO: cjange to syntax matching ?
                 val tpe = obj.tpe
                 if (tpe =:= typeOf[ gopher.~>.type ]) {
-                  transformAddInputAction(c)(scName, x,l,guard,body);
+                  transformAddInputAction(c)(scName, x,l,guard,body,preCase);
                 } else if (tpe =:= typeOf[ gopher.?.type ]) {
-                  transformAddInputAction(c)(scName,x,l,guard,body);
+                  transformAddInputAction(c)(scName,x,l,guard,body,preCase);
                 } else if (tpe =:= typeOf[ gopher.<~.type ]) {
-                  transformAddOutputAction(c)(scName,x,l,guard,body);
+                  transformAddOutputAction(c)(scName,x,l,guard,body,preCase);
                 } else if (tpe =:= typeOf[ gopher.!.type ]) {
-                  transformAddOutputAction(c)(scName,x,l,guard,body);
+                  transformAddOutputAction(c)(scName,x,l,guard,body,preCase);
                 } else {
                   c.error(x.pos,"only ~> [?] or <~ [!] operations can be in match in gopher channel loop")
                   body
@@ -112,7 +113,8 @@ object SelectorMacroCaller {
     Block(listeners, reify{ () }.tree );
   }
 
-  def transformAddInputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
+  def transformAddInputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, 
+                                         body: c.Tree, preBody: List[c.Tree]) =
   {
     
     val (channel, argName, argType) = parseInputChannelArgs(c)(x,l);
@@ -124,14 +126,15 @@ object SelectorMacroCaller {
                     List(
                         channel,
                         Function(List(ValDef(Modifiers(Flag.PARAM), argName, argType /*TypeTree()*/, EmptyTree)), 
-                                 Block(List(body),Literal(Constant(true)))
+                                 Block( preBody:+ body,Literal(Constant(true)))
                                 )
                         )
                  )
     retval;
   }
 
-  def transformAddOutputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, body: c.Tree) =
+  def transformAddOutputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, 
+                                          body: c.Tree, preBody: List[c.Tree]) =
   {
     val (channel, arg) = parseOutputChannelArgs(c)(x, l);
     //  channe.addOutputListener{ () => { body; Some(c) } }
@@ -141,8 +144,8 @@ object SelectorMacroCaller {
                    Select(Ident(sc), newTermName("addOutputAction")), 
                    List(
                        channel,
-                       Function(List(), 
-                                Block(List(body), Apply(Ident(newTermName("Some")), List(arg))))
+                       Function(List(),
+                                Block(preBody :+ body, Apply(Ident(newTermName("Some")), List(arg))))
                    ))
     retval;
   }
