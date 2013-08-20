@@ -19,7 +19,9 @@ trait OutputChannel[-A] extends Activable
 
   def writeImmediatly(x:A): Boolean 
 
-  def writeTimeout(x:A, timeout: Duration): Boolean
+  def writeBlockedTimeout(x:A, timeout: Duration): Boolean
+  
+  def writeAsync(x:A): Future[Unit]
 
   /**
    * synonym for writeBlocked
@@ -43,21 +45,26 @@ trait OutputChannel[-A] extends Activable
   
   
   /**
-   * synonym for writeTimeout
+   * synonym for writeBlockedTimeout
    */
-  @inline def <~? (x:A)(implicit timeout: Timeout) = writeTimeout(x,timeout.duration)
+  @inline def <~? (x:A)(implicit timeout: Timeout) = writeBlockedTimeout(x,timeout.duration)
 
+  /**
+   * synonym for writeAsync
+   */
+  @inline def <~* (x:A) = writeAsync(x)
+
+  
   trait OutputAsync
   {
-     def write(x:A)(implicit ec:ExecutionContext): Future[Unit] = Future(channel.writeBlocked(x))
+     def write(x:A): Future[Unit] = channel.writeAsync(x)
 
-     @inline def <~ (x:A)(implicit ec: ExecutionContext) = write(x) 
+     @inline def <~ (x:A) = write(x) 
   }
 
   def async: OutputAsync = new OutputAsync() {}
-
-  def addListener(f: () => Option[A] ): Unit
-
+  
+ 
   
 }
 

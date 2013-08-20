@@ -1,10 +1,7 @@
-package gopher.channels
+package gopher.channels.naive
 
 import language.experimental.macros
-import scala.concurrent.Future
 import scala.reflect.macros.Context
-
-
 
 
 object SelectorMacroCaller {
@@ -36,11 +33,12 @@ object SelectorMacroCaller {
    
    //  sc = new SelectorContext()
    val newScTree =  ValDef(Modifiers(),scName, TypeTree(), 
-                           Apply(Select(New(Select(Select(Select(
+                           Apply(Select(New(Select(Select(Select(Select(
                                                   Ident(nme.ROOTPKG), 
                                                      newTermName("gopher")), 
                                                        newTermName("channels")), 
-                                                         newTypeName("SelectorContext"))), 
+                                                         newTermName("naive")),
+                                                           newTypeName("SelectorContext"))), 
                                  nme.CONSTRUCTOR), 
                                  List()))
                                  
@@ -119,7 +117,7 @@ object SelectorMacroCaller {
     
     val (channel, argName, argType) = parseInputChannelArgs(c)(x,l);
     import c.universe._    
-   
+      
     //  sc.addInputAction{ channel, (argName:argType) => { body; true} }   
     val retval = Apply(
                     Select(Ident(sc), newTermName("addInputAction")), 
@@ -137,8 +135,11 @@ object SelectorMacroCaller {
                                           body: c.Tree, preBody: List[c.Tree]) =
   {
     val (channel, arg) = parseOutputChannelArgs(c)(x, l);
-    //  channe.addOutputListener{ () => { body; Some(c) } }
     import c.universe._
+     
+   
+    //  channel.addOutputListener{ () => { body; Some(c) } }
+   
     // TODO: add guard supports.
     val retval = Apply(
                    Select(Ident(sc), newTermName("addOutputAction")), 

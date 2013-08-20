@@ -1,7 +1,7 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
+import gopher.channels.Naive._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest._
@@ -53,7 +53,6 @@ object ReadCoroutines {
   
   def generateInteger: Int =
     resume ?
-  
   
   
 }

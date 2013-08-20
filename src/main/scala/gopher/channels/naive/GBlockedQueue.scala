@@ -1,17 +1,25 @@
-package gopher.channels
+package gopher.channels.naive
 
-import java.util.concurrent.{ Future => JFuture, _ }
+import java.util.concurrent.{Future=>JFuture,_}
 import java.util.concurrent.locks._
+import java.util.{LinkedList => JLinkedList}
 import java.lang.ref._
-import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.reflect._
 import scala.concurrent._
+import gopher.channels._
+import gopher.util.JLockHelper
+import akka.actor._
 
 /**
  * classical blocked queue, which supports listeners.
  */
-class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputOutputChannel[A] with JLockHelper {
+class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputOutputChannel[A] 
+                                                                   with NaiveInputChannel[A]
+                                                                   with NaiveOutputChannel[A]
+                                                                  with JLockHelper
+{
+                                                                      
 
   /**
    * called, when we want to deque object to readed.
@@ -19,15 +27,13 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
    * Queue holds weak referencde to listener, so we stop sending
    * message to one, when listener is finalized.
    */
-  def addReadListener(f: A => Boolean): Unit =
+  def addReadListener(tie: NaiveTie, f: ReadAction[A]): Unit =
     {
-      inLock(readListenersLock) {
-        readListeners = (new WeakReference(f)) :: readListeners
-      }
+      readListeners.add((tie,new WeakReference(f)))
       tryDoStepAsync();
     }
 
-  def addListener(f: A => Boolean): Unit = addReadListener(f)
+ // def addListener(f: A => Boolean): Unit = addReadListener(f)
 
   def readBlocked: A =
     {
@@ -46,11 +52,30 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       retval
     }
 
+  def readAsync: Future[A] = 
+  {
+    implicit val ec = executionContext
+    Future({
+      // TODO: rewrite.
+      readBlocked
+    })
+  }
+  
+  def readAsyncTimeout(timeout: Duration): Future[Option[A]] = 
+  {
+    implicit val ec = executionContext
+    Future({
+      // TODO: rewrite.
+      readBlockedTimeout(timeout)
+    })
+  }
+  
+  
   def readImmediatly: Option[A] =
     optTryDoStepAsync(inTryLock(bufferLock)(readElementBlocked, None))
 
   // guess that we work in millis resolution.
-  def readTimeout(timeout: Duration): Option[A] =
+  def readBlockedTimeout(timeout: Duration): Option[A] =
     optTryDoStepAsync {
       val endOfLock = System.currentTimeMillis() + timeout.unit.toMillis(timeout.length)
       inTryLock(bufferLock, timeout)({
@@ -63,14 +88,11 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       }, None)
     }
 
-  // Members declared in go.OutputChannel
-  def addListener(f: () => Option[A]): Unit =
-    {
-      inLock(writeListenersLock) {
-        writeListeners = (new WeakReference(f)) :: writeListeners
-      }
+  def addWriteListener(tie: NaiveTie, f: WriteAction[A]): Unit =
+  {
+      writeListeners.add((tie,new WeakReference(f)))
       tryDoStepAsync()
-    }
+  }
 
   def writeBlocked(x: A): Unit =
     {
@@ -93,7 +115,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       inTryLock(bufferLock)(
         writeElementBlocked(x), false))
 
-  def writeTimeout(x: A, timeout: Duration): Boolean =
+  def writeBlockedTimeout(x: A, timeout: Duration): Boolean =
     condTryDoStepAsync {
       val endOfLock = System.currentTimeMillis() + timeout.unit.toMillis(timeout.length)
       inTryLock(bufferLock, timeout)({
@@ -105,10 +127,39 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
         writeElementBlocked(x)
       }, false)
     }
+  
+  def writeAsync(x:A): Future[Unit] =
+  {
+    // TODO: rewrite
+    implicit val ec = executionContext
+    Future{ writeBlocked(x) }
+  }
 
   def shutdown() {
     shutdowned = true;
   }
+  
+  
+  /**
+   * pass all output, which can be readed from this channel, to given actor.
+   */
+  def bindRead(tie: NaiveTie, actor: ActorRef): Unit = 
+  {
+    // TODO: will be garbage-collected. do somehting with this.
+    addReadListener(tie,
+       new ReadAction[A] {
+        def apply(input: ReadActionInput[A]): ReadActionOutput =
+           { actor ! input.value; ReadActionOutput(true, true) }
+      }       
+    )
+  }
+  
+  def bindWrite(name: String)(implicit as: ActorSystem): ActorRef =
+  {
+    FromActorToChannel.create(this, name);
+  }
+  
+  
 
   @inline
   private[this] def condTryDoStepAsync(x: Boolean): Boolean =
@@ -127,7 +178,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
     }
 
   private[this] def tryDoStepAsync() =
-    inTryLock(bufferLock)(doStepAsync(), ())
+    inTryLock(doStepLock)(doStepAsync(), ())
 
   def activate() = tryDoStepAsync  
     
@@ -136,22 +187,36 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
    * execution context, passed in channel initializer;
    *
    */
-  def doStepAsync() {
-    implicit val ec = executionContext;
+  def doStepAsync(): Unit = {
+    //implicit val ec = executionContext;
+    executionContext.execute(new Runnable(){
+      def run() {
+        val toContinue = inTryLock(doStepLock)( 
+                            { doStep() }, false 
+                          );
+        if (toContinue && ! shutdowned) {
+           doStepAsync()
+        }
+      }
+    });
+    /*
     Future {
       val wasContinue = doStep();
       if (wasContinue && !shutdowned) {
         doStepAsync()
       }
     }
+    * 
+    */
   }
 
   /**
    * Run chunk of queue event loop inside current thread.
    *
    */
-  def doStep(maxN: Int = 10000): Boolean =
+  private def doStep(maxN: Int = 1000): Boolean =
     inLock(bufferLock) {
+     inLock(doStepLock) {
       var toContinue = true
       var wasContinue = false;
       var n = maxN;
@@ -170,59 +235,67 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
         toContinue &&= (n > 0)
       }
       wasContinue
+     } 
     }
 
   private def fireNewSpaceBlocked: Boolean =
     {
-      var c = writeListeners
-      var nNulls = 0;
-      var retval = false;
-      while (c != Nil) {
-        val h = c.head
-        c = c.tail
-        val writeListener = h.get
-        if (!(writeListener eq null)) {
-          writeListener.apply() match {
-            case None =>
-            case Some(a) =>
-              writeElementBlocked(a)
-              retval = true
-              c = Nil
-          }
-        } else {
-          nNulls += 1
+      var done = false;
+      var nexts: JLinkedList[(NaiveTie,WeakReference[WriteAction[A]])] = new JLinkedList();
+      var nNulls = 0
+      while(!writeListeners.isEmpty() && !done) {
+        var h = writeListeners.poll()
+        if (h!=null) {
+           val writeListener = h._2.get
+           if (!(writeListener eq null)) {
+             var input = WriteActionInput(h._1,this)
+             var output = writeListener(input)
+             if (output.continue || !output.writed.isDefined) {
+               nexts.add(h)
+             }
+             output.writed foreach { a =>
+               writeElementBlocked(a)
+               done = true;
+             }
+           } else {
+              nNulls = nNulls + 1
+           }
         }
       }
-      if (nNulls > 1) {
-        cleanupWriteListenersRefs
-      }
-      retval
+      writeListeners.addAll(nexts);
+     // if (nNulls > 0) {
+     //   System.err.println("witeActions, nNulls:"+nNulls);
+     // }
+            
+      done
     }
 
   private def fireNewElementBlocked: Boolean =
     {
-      var c = readListeners
-      var nNulls = 0;
-      var retval = false;
-      while (c != Nil) {
-        val h = c.head
-        c = c.tail
-        val readListener = h.get
-        if (!(readListener eq null)) {
-          if (readListener.apply(buffer(readIndex))) {
-            freeElementBlocked
-            retval = true
-            c = Nil
-          }
-        } else {
-          nNulls = nNulls + 1
-        }
+      var nexts: JLinkedList[(NaiveTie,WeakReference[ReadAction[A]])] = new JLinkedList();
+      var done = false
+      var nNulls = 0
+      while(!readListeners.isEmpty() && !done) {
+         var h = readListeners.poll();
+         if (h!=null) {
+           val readListener = h._2.get
+           if (!(readListener eq null)) {
+             val input = ReadActionInput(h._1,this,buffer(readIndex))
+             val output = readListener(input)
+             if (output.continue || !output.readed) {
+                nexts.add(h)
+             }
+             if (output.readed) {
+               freeElementBlocked
+               done = true
+             }
+           } else {
+             nNulls = nNulls + 1
+           }
+         }
       }
-      // TODO: - move when unblocked.
-      if (nNulls > 0) {
-        cleanupReadListenersRefs
-      }
-      retval;
+      readListeners.addAll(nexts);
+      done
     }
 
   private def freeElementBlocked =
@@ -253,25 +326,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       }
     }
 
-  private def cleanupReadListenersRefs: Unit =
-    {
-      readListenersLock.lock()
-      try {
-        readListeners = readListeners.filter(_.get eq null)
-      } finally {
-        readListenersLock.unlock()
-      }
-    }
 
-  private def cleanupWriteListenersRefs: Unit =
-    {
-      writeListenersLock.lock()
-      try {
-        writeListeners = writeListeners.filter(_.get eq null)
-      } finally {
-        writeListenersLock.unlock()
-      }
-    }
 
   private[this] val buffer: Array[A] = new Array[A](size)
 
@@ -283,17 +338,20 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   private[this] var count: Int = 0;
   @volatile
   private[this] var shutdowned: Boolean = false;
+  
+ 
 
   private[this] val bufferLock = new ReentrantLock();
+  private[this] val doStepLock = new ReentrantLock();
   private[this] val readPossibleCondition = bufferLock.newCondition
   private[this] val writePossibleCondition = bufferLock.newCondition
 
-  private[this] var readListenersLock = new ReentrantLock();
-  private[this] var readListeners: List[WeakReference[A => Boolean]] = Nil
-
-  private[this] var writeListenersLock = new ReentrantLock();
-  private[this] var writeListeners: List[WeakReference[() => Option[A]]] = Nil
-
+  private val readListeners: ConcurrentLinkedQueue[(NaiveTie,WeakReference[ReadAction[A]])] 
+                          = new ConcurrentLinkedQueue();
+  
+  private val writeListeners: ConcurrentLinkedQueue[(NaiveTie,WeakReference[WriteAction[A]])] 
+                          = new ConcurrentLinkedQueue();
+  
   private[this] val executionContext: ExecutionContext = ec;
 
   private[this] final var emptyA: A = _

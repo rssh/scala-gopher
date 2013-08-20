@@ -1,9 +1,10 @@
-package gopher.channels
+package gopher.channels.naive
 
 import scala.concurrent._
 import scala.reflect._
 import akka._
 import akka.actor._
+import gopher.channels.OutputChannel
 
 
 class FromActorToChannel[A](out: OutputChannel[A], atag:ClassTag[A]) extends Actor 

@@ -3,25 +3,31 @@ package gopher
 import scala.reflect._
 import scala.concurrent._
 import akka.actor._
+import gopher.channels.naive.GBlockedQueue
 
 package object channels {
 
-  def make[A: ClassTag](capacity:  Int = 1000)(implicit ec: ExecutionContext): InputOutputChannel[A] = 
+  object Naive
+  {
+    implicit val api = _root_.gopher.channels.naive.NaiveChannelAPI
+    
+    type IChannel[A] = api.IChannel[A]
+    type OChannel[A] = api.OChannel[A]
+    type IOChannel[A] = api.IChannel[A]
+    
+  }
+  
+  
+  
+  def make[A: ClassTag](capacity:  Int = 1000)(implicit ec: ExecutionContext, api:ChannelsAPI): api.IOChannel[A] = 
     {
-      val retval = new GBlockedQueue[A](capacity,ec);
+      val retval = api.makeChannel[A](capacity)
+      //  val retval = new GBlockedQueue[A](capacity,ec);
       //retval.process(executionContext);
       retval;
     }
   
-  def bindRead[A](read: InputChannel[A], actor: ActorRef): Unit =
-  {
-    read.addListener( a => { actor ! a; true })
-  }
   
-  def bindWrite[A: ClassTag](write: OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef =
-  {
-    FromActorToChannel.create(write, name);
-  }
   
   
 }

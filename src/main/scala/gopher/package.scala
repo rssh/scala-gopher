@@ -4,6 +4,8 @@ import language.experimental.macros
 import scala.concurrent.Future
 import scala.reflect.macros.Context
 
+import gopher.channels.ChannelsAPI
+
 /**
   * package wich introduce go-like language constructions into scala:
   * 
@@ -98,15 +100,13 @@ package object gopher
    * @see [[gopher.channels.SelectorContext]]
    * @see [[gopher.~>]]
    */
-  val select = channels.SelectorMacroCaller
+  val select = gopher.channels.naive.SelectorMacroCaller
 
   import scala.reflect.internal.annotations.compileTimeOnly
   
   
   type InputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
   type OutputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
-  
-  
   
   
   /**
@@ -118,7 +118,7 @@ package object gopher
   {
     
     @compileTimeOnly("~> unapply must be used only in select for loop")
-    def unapply(s: channels.SelectorContext): Option[InputChannelPair[_]] = ??? //macro unapplyImpl
+    def unapply(s: gopher.channels.naive.SelectorContext): Option[InputChannelPair[_]] = ??? //macro unapplyImpl
         
   }
   
@@ -130,7 +130,7 @@ package object gopher
   object ? 
   {
     @compileTimeOnly("? unapply must be used only in select for loop")
-    def unapply(s: channels.SelectorContext): Option[InputChannelPair[_]] = ???
+    def unapply(s: gopher.channels.naive.SelectorContext): Option[InputChannelPair[_]] = ???
   }
   
   /**
@@ -141,7 +141,7 @@ package object gopher
   object <~
   {
     @compileTimeOnly("<~ unapply must be used only in select for loop")   
-    def unapply(s: channels.SelectorContext): Option[OutputChannelPair[_]] = ???
+    def unapply(s: gopher.channels.naive.SelectorContext): Option[OutputChannelPair[_]] = ???
   }
 
   /**
@@ -152,7 +152,7 @@ package object gopher
   object ! 
   {
     @compileTimeOnly("! unapply must be used only in select for loop")   
-    def unapply(s: channels.SelectorContext): Option[OutputChannelPair[_]] = ???
+    def unapply(s: gopher.channels.naive.SelectorContext): Option[OutputChannelPair[_]] = ???
   }
   
   import scope.ScopeMacroses
@@ -204,24 +204,9 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext) = channels.make(capacity)
-
-  // interaction with actors
-  import akka.actor._
-  
-  /**
-   * Bind 'read' of channel to actor, i.e. when message sent to channel, it's passed to actor.
-   */
-  @inline
-  def bindChannelRead[A](read: channels.InputChannel[A], actor: ActorRef): Unit =
-       channels.bindRead(read,actor)
-  
-  /**
-   * bind write of channel to actor, i.e. create actor, which will put all received messages into channel.
-   */
-  @inline     
-  def bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], name: String)(implicit as: ActorSystem): ActorRef =
-       channels.bindWrite(write, name)
-  
+  def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext, api:ChannelsAPI): api.IOChannel[A] = {
+    api.makeChannel[A](capacity)
+  }
+ 
   
 }

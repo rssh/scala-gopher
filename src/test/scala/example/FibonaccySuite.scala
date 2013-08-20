@@ -2,6 +2,7 @@ package example
 
 import gopher._
 import gopher.channels._
+import gopher.channels.Naive._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -16,7 +17,7 @@ import org.scalatest._
 object Fibonaccy {
 
   
-  def fibonacci(c: InputOutputChannel[Long], quit: InputChannel[Int]): Unit = {
+  def fibonacci(c: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)
      for(s <- select) {
       val z = x 
@@ -37,7 +38,6 @@ object Fibonaccy {
     val quit = makeChannel[Int](1);
     val r = go {
       for (i <- 1 to n) {
-        //Console.println(c?)
         acceptor(c?)
       }
       quit <~ 0
@@ -54,7 +54,7 @@ class FibonaccySuite extends FunSuite
   
   test("fibonaccy must be processed up to 50") {
     var last:Long = 0;
-    Fibonaccy.run(50, last = _)
+    Fibonaccy.run(50, last = _ )
     assert(last != 0)
   }
 
