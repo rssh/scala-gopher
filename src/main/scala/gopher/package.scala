@@ -5,6 +5,7 @@ import scala.concurrent.Future
 import scala.reflect.macros.Context
 
 import gopher.channels.ChannelsAPI
+import gopher.util._
 
 /**
   * package wich introduce go-like language constructions into scala:
@@ -43,6 +44,9 @@ package object gopher
    * @see go
    */
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
+    MacroHelper.implicitChannelApi(c).transformGo(c)(x)
+
+    /*
   {
    import c.universe._
    //
@@ -71,6 +75,8 @@ package object gopher
                       
     c.Expr[Future[A]](tree)           
   }
+  * 
+  */
 
   /**
    * select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
@@ -100,7 +106,6 @@ package object gopher
    * @see [[gopher.channels.SelectorContext]]
    * @see [[gopher.~>]]
    */
-  //def select = gopher.channels.naive.SelectorMacroCaller
   def select = channels.ForSelectTransformer
   
   import scala.reflect.internal.annotations.compileTimeOnly
@@ -208,6 +213,7 @@ package object gopher
   def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext, api:ChannelsAPI): api.IOChannel[A] = {
     api.makeChannel[A](capacity)
   }
- 
+
+     
   
 }
