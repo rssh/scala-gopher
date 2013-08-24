@@ -100,8 +100,9 @@ package object gopher
    * @see [[gopher.channels.SelectorContext]]
    * @see [[gopher.~>]]
    */
-  val select = gopher.channels.naive.SelectorMacroCaller
-
+  //def select = gopher.channels.naive.SelectorMacroCaller
+  def select = channels.ForSelectTransformer
+  
   import scala.reflect.internal.annotations.compileTimeOnly
   
   

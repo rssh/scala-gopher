@@ -121,7 +121,7 @@ class SelectSuite extends FunSuite
                           true 
                         }
        )
-       Await.ready(sc.go, 10.second)
+       Await.ready(sc.go, 5.second)
      }
    
     

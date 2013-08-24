@@ -22,6 +22,11 @@ trait ChannelsAPI {
   
   def  gAwait[A](f: GFuture[A], d: Duration)(implicit ec: ExecutionContext): A
  
-  def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[GFuture[A]]
+  
+  def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[Future[A]]
     
+  def  transformForSelect(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit]
+  
+  def  transformForSelectOnce(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit]
+  
 }

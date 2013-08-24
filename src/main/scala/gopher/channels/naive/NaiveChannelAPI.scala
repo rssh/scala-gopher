@@ -59,9 +59,14 @@ object NaiveChannelAPI extends ChannelsAPI
                       
     c.Expr[Future[A]](tree)           
   }
-    
+   
   
+  def  transformForSelect(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit] =
+    SelectorMacroCaller.foreachImpl(c)(code)
   
+  def  transformForSelectOnce(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit] =
+    SelectorMacroCaller.foreachOnceImpl(c)(code)
+ 
  
   
 }

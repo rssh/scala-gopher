@@ -7,6 +7,7 @@ import java.lang.ref._
 import scala.concurrent.duration._
 import scala.reflect._
 import scala.concurrent._
+import scala.util._
 import gopher.channels._
 import gopher.util.JLockHelper
 import akka.actor._
@@ -19,7 +20,8 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
                                                                    with NaiveOutputChannel[A]
                                                                   with JLockHelper
 {
-                                                                      
+                  
+  thisGBlockedQueue =>
 
   /**
    * called, when we want to deque object to readed.
@@ -37,11 +39,14 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
 
   def readBlocked: A =
     {
+    // TODO: think about emulation 'go' policy
       if (shutdowned) {
         throw new IllegalStateException("quue is shutdowned")
       }
+      
       val retval = inLock(bufferLock) {
         while (count == 0) {
+          // TODO:  wrap in blocked to help fork0java cle
           readPossibleCondition.await()
         }
         val retval = buffer(readIndex)
@@ -55,14 +60,21 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   def readAsync: Future[A] = 
   {
     implicit val ec = executionContext
-    Future({
-      // TODO: rewrite.
-      readBlocked
-    })
+    val p = Promise[A]()
+    val f = new ReadAction[A] {
+      def apply(input: ReadActionInput[A]): ReadActionOutput =
+      {
+        p complete Success(input.value)
+        ReadActionOutput(readed=true,continue=false)
+      }
+    }
+    addReadListener(internalTie, f)
+    p.future
   }
   
   def readAsyncTimeout(timeout: Duration): Future[Option[A]] = 
   {
+    //TODO: use akka scheduler 
     implicit val ec = executionContext
     Future({
       // TODO: rewrite.
@@ -130,9 +142,16 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   
   def writeAsync(x:A): Future[Unit] =
   {
-    // TODO: rewrite
-    implicit val ec = executionContext
-    Future{ writeBlocked(x) }
+    val p = Promise[Unit]()
+    val f = new WriteAction[A] {
+      def apply(input: WriteActionInput[A]): WriteActionOutput[A] =
+      {
+        p complete Success(())
+        WriteActionOutput(writed=Some(x),continue=false)
+      }
+    }
+    addWriteListener(internalTie, f)
+    p.future
   }
 
   def shutdown() {
@@ -199,15 +218,6 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
         }
       }
     });
-    /*
-    Future {
-      val wasContinue = doStep();
-      if (wasContinue && !shutdowned) {
-        doStepAsync()
-      }
-    }
-    * 
-    */
   }
 
   /**
@@ -340,7 +350,48 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   private[this] var shutdowned: Boolean = false;
   
  
+  private[this] val internalTie = new NaiveTie() {
+  
+     def addReadAction[B](ch: api.IChannel[B], action: ReadAction[B]): Unit =
+     {
+       if (! (ch eq thisGBlockedQueue)) {
+         throw new IllegalArgumentException("internal tie accept tasks only for this channel")
+       }
+       thisGBlockedQueue.addReadListener(this, action.asInstanceOf[ReadAction[A]])
+     }
+  
+     def addWriteAction[B](ch: api.OChannel[B], action: WriteAction[B]): Unit =
+     {
+       if (! (ch eq thisGBlockedQueue)) {
+         throw new IllegalArgumentException("internal tie accept tasks only for this channel")
+       }
+       thisGBlockedQueue.addWriteListener(this, action.asInstanceOf[WriteAction[A]])      
+     }
+  
+     def setIdleAction(action: IdleAction): Unit =
+     {
+       throw new IllegalArgumentException("IdleAction is not applicable for GBlockedQueue Tie")
+     }
+    
+     def start() {
+       thisGBlockedQueue.activate();
+     }
+  
+  
+     def shutdown() {
+       thisGBlockedQueue.shutdown();
+     }
+  
+     /**
+      * Wait shutdowm.  Can utilize current thread for message processing.
+      */
+     def waitShutdown() = ???
 
+   
+    
+  }
+  
+  
   private[this] val bufferLock = new ReentrantLock();
   private[this] val doStepLock = new ReentrantLock();
   private[this] val readPossibleCondition = bufferLock.newCondition
