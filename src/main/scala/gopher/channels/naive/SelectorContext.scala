@@ -5,6 +5,7 @@ import scala.concurrent._
 import scala.collection.immutable._
 import scala.util.control._
 import gopher.channels._
+import scala.util._
 
 
 /**
@@ -45,7 +46,7 @@ class SelectorContext extends Activable with NaiveTie {
 
   selectorContextTie =>
   
-  def addReadAction[A](ch: api.IChannel[A], action: ReadAction[A]): Unit =
+  def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): Unit =
     {
       ch.addReadListener(this, action)
       inputListeners = action :: inputListeners
@@ -79,7 +80,7 @@ class SelectorContext extends Activable with NaiveTie {
       addReadAction(channel, l)
     }
 
-  def addWriteAction[A](ch: api.OChannel[A], action: WriteAction[A]): Unit =
+  def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): Unit =
     {
       ch.addWriteListener(this, action)
       outputListeners = action :: outputListeners
@@ -116,7 +117,7 @@ class SelectorContext extends Activable with NaiveTie {
   def setIdleAction(a: Unit => Unit): Unit =
     {
       val action = new IdleAction{
-        def apply(tie: Tie): Boolean =
+        def apply(tie: TieJoin): Boolean =
         { a(); true }
       }
       setIdleAction(action)
@@ -164,13 +165,15 @@ class SelectorContext extends Activable with NaiveTie {
    */
   def go(implicit ex: ExecutionContext): Future[Unit] =
     {
-      Future {
-        runOnce()
-      } flatMap { (u: Unit) =>
-        if (!shutdowned) {
-          go
-        } else Future(u)
-      }
+      ex.execute(new Runnable(){
+        def run(): Unit = {
+          runOnce()
+          if (!shutdowned) {
+            ex.execute(this)
+          }
+        }
+      })
+      shutdownPromise.future
     }
 
   def run: Unit =
@@ -189,8 +192,32 @@ class SelectorContext extends Activable with NaiveTie {
       // allow gc to cleanup listeners.
       inputListeners = Nil
       outputListeners = Nil
+      shutdownPromise.complete(Success(()))
     }
 
+  // TODO: revice exception flow
+  def processExclusive[A](f: => A,whenLocked: => A): A = 
+  {
+    if (latch==null) latch = new CountDownLatch(1);
+    //TODO:  think - how to unify countDown and getCount in one operation.
+    if (latch.getCount() > 0) {
+       latch.countDown();
+       try {
+         f
+       }catch{
+         case ex: Exception =>
+           lastException = ex
+           throw ex
+       }
+    }else{
+      whenLocked
+    }
+  }
+  
+  def shutdownFuture: scala.concurrent.Future[Unit] = shutdownPromise.future
+
+  
+  
   private var inputListeners: List[ReadAction[_]] = Nil
   private var outputListeners: List[WriteAction[_]] = Nil
 
@@ -211,4 +238,6 @@ class SelectorContext extends Activable with NaiveTie {
   private val IDLE_MILLISECONDS = 100;
   private var idleAction: Option[IdleAction] = None; /*IdleAction.doNothing;*/
 
+  private val shutdownPromise = Promise[Unit]()
+  
 }

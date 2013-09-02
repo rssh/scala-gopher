@@ -2,7 +2,7 @@ package gopher.channels.naive
 
 import gopher.channels._
 
-trait NaiveInputChannel[A] extends InputChannel[A] {
+trait NaiveInputChannel[+A] extends InputChannel[A] {
  
   
   

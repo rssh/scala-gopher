@@ -156,6 +156,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
 
   def shutdown() {
     shutdowned = true;
+    shutdownPromise.complete(Success(shutdowned))
   }
   
   
@@ -258,7 +259,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
         if (h!=null) {
            val writeListener = h._2.get
            if (!(writeListener eq null)) {
-             var input = WriteActionInput(h._1,this)
+             var input = WriteActionInput(h._1.writeJoin(this),this)
              var output = writeListener(input)
              if (output.continue || !output.writed.isDefined) {
                nexts.add(h)
@@ -290,7 +291,8 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
          if (h!=null) {
            val readListener = h._2.get
            if (!(readListener eq null)) {
-             val input = ReadActionInput(h._1,this,buffer(readIndex))
+             val input = ReadActionInput(
+                              h._1.readJoin(this),this,buffer(readIndex))
              val output = readListener(input)
              if (output.continue || !output.readed) {
                 nexts.add(h)
@@ -348,11 +350,12 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   private[this] var count: Int = 0;
   @volatile
   private[this] var shutdowned: Boolean = false;
+  private val shutdownPromise: Promise[Unit] = Promise();
   
  
   private[this] val internalTie = new NaiveTie() {
-  
-     def addReadAction[B](ch: api.IChannel[B], action: ReadAction[B]): Unit =
+    
+     def addReadAction[B](ch: API#IChannel[B], action: ReadAction[B]): Unit =
      {
        if (! (ch eq thisGBlockedQueue)) {
          throw new IllegalArgumentException("internal tie accept tasks only for this channel")
@@ -360,7 +363,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
        thisGBlockedQueue.addReadListener(this, action.asInstanceOf[ReadAction[A]])
      }
   
-     def addWriteAction[B](ch: api.OChannel[B], action: WriteAction[B]): Unit =
+     def addWriteAction[B](ch: API#OChannel[B], action: WriteAction[B]): Unit =
      {
        if (! (ch eq thisGBlockedQueue)) {
          throw new IllegalArgumentException("internal tie accept tasks only for this channel")
@@ -387,7 +390,9 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       */
      def waitShutdown() = ???
 
-   
+     def processExclusive[A](f: => A,whenLocked: => A): A = f
+     
+     def shutdownFuture: scala.concurrent.Future[Unit] = shutdownPromise.future
     
   }
   

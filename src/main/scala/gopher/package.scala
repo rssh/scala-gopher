@@ -4,7 +4,7 @@ import language.experimental.macros
 import scala.concurrent.Future
 import scala.reflect.macros.Context
 
-import gopher.channels.ChannelsAPI
+import gopher.channels._
 import gopher.util._
 
 /**
@@ -46,38 +46,7 @@ package object gopher
   def goImpl[A](c:Context)(x: c.Expr[A]):c.Expr[Future[A]] =
     MacroHelper.implicitChannelApi(c).transformGo(c)(x)
 
-    /*
-  {
-   import c.universe._
-   //
-   //  Future {
-   //     goScope(
-   //        x
-   //     )
-   //  }
-   val tree = Apply(
-                Select(
-                    Select(
-                        Ident(newTermName("scala")), 
-                        newTermName("concurrent")), 
-                    newTermName("Future")),    
-                List(    
-                  Apply(
-                    Select(
-                            Select(
-                                Ident(nme.ROOTPKG), 
-                                newTermName("gopher")),  
-                            newTermName("goScope")), 
-                     List(c.resetAllAttrs(x.tree))
-                  )
-                )
-              )
-                      
-    c.Expr[Future[A]](tree)           
-  }
-  * 
-  */
-
+ 
   /**
    * select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
    * i.e. next go code:
@@ -210,10 +179,16 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeChannel[A:ClassTag](capacity: Int = 1000)(implicit ec:ExecutionContext, api:ChannelsAPI): api.IOChannel[A] = {
+  def makeChannel[A:ClassTag](capacity: Int = 1)(implicit ec:ExecutionContext, api:ChannelsAPI[_]): api.IOChannel[A] = {
     api.makeChannel[A](capacity)
   }
 
+  /**
+   * Make channel: create go-like channel with given capacity.
+   */
+  @inline
+  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API): StartTieBuilder[API] = new StartTieBuilder(api)
      
+  
   
 }

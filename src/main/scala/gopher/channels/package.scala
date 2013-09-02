@@ -9,7 +9,7 @@ package object channels {
 
   object Naive
   {
-    implicit val api = _root_.gopher.channels.naive.NaiveChannelAPI
+    implicit val api = _root_.gopher.channels.naive.NaiveChannelsAPI.instance
     
     type IChannel[A] = api.IChannel[A]
     type OChannel[A] = api.OChannel[A]
@@ -19,7 +19,7 @@ package object channels {
   
   
   
-  def make[A: ClassTag](capacity:  Int = 1000)(implicit ec: ExecutionContext, api:ChannelsAPI): api.IOChannel[A] = 
+  def make[A: ClassTag](capacity:  Int = 1000)(implicit ec: ExecutionContext, api:ChannelsAPI[_]): api.IOChannel[A] = 
     {
       val retval = api.makeChannel[A](capacity)
       //  val retval = new GBlockedQueue[A](capacity,ec);

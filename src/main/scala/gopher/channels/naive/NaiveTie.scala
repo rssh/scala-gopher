@@ -2,8 +2,10 @@ package gopher.channels.naive
 
 import gopher.channels._
 
-trait NaiveTie extends Tie {
+trait NaiveTie extends Tie[NaiveChannelsAPI] {
 
-  val api = NaiveChannelAPI
+  type API = NaiveChannelsAPI
+  
+  val api = NaiveChannelsAPI
   
 }

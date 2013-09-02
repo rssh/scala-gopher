@@ -8,13 +8,14 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.reflect._
 import scala.reflect.macros.Context
+import akka.actor._
 
 
-object NaiveChannelAPI extends ChannelsAPI
+class NaiveChannelsAPI extends ChannelsAPI[NaiveChannelsAPI]
 {
 
-  type IChannel[A] = NaiveInputChannel[A]
-  type OChannel[A] = NaiveOutputChannel[A]
+  type IChannel[+A] = NaiveInputChannel[A]
+  type OChannel[-A] = NaiveOutputChannel[A]
   type IOChannel[A] = GBlockedQueue[A]
     
   def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext): IOChannel[A] =
@@ -22,7 +23,7 @@ object NaiveChannelAPI extends ChannelsAPI
   
   type GTie = NaiveTie
   
-  def makeTie(implicit ec:ExecutionContext): GTie =
+  def makeRealTie(implicit ec:ExecutionContext, as: ActorSystem): GTie =
     new SelectorContext()
   
   type GFuture[A] = Future[A]
@@ -61,12 +62,17 @@ object NaiveChannelAPI extends ChannelsAPI
   }
    
   
-  def  transformForSelect(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit] =
+  def  transformForSelect(c:Context)(code: c.Expr[NaiveChannelsAPI#GTie => Unit]): c.Expr[Unit] =
     SelectorMacroCaller.foreachImpl(c)(code)
   
-  def  transformForSelectOnce(c:Context)(code: c.Expr[Tie => Unit]): c.Expr[Unit] =
+  def  transformForSelectOnce(c:Context)(code: c.Expr[NaiveChannelsAPI#GTie => Unit]): c.Expr[Unit] =
     SelectorMacroCaller.foreachOnceImpl(c)(code)
  
  
   
 }
+
+object NaiveChannelsAPI {
+  val instance = new NaiveChannelsAPI
+} 
+
