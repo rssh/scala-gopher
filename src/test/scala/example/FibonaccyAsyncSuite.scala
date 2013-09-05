@@ -11,17 +11,15 @@ object FibonaccyAsync {
   
   def fibonacci(ch: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)
-    /*
+    //val tie = makeTie;
     makeTie.forever.writing(ch){ 
                   val z = x
                   x = y
                   y = z + y
                   y
-       }.reading(quit) {x =>
-                       tie.shutdown               
+       }.reading(quit).withTie { (tie, x) =>
+                            tie.shutdown               
        }.go
-       * 
-       */
   }
   
   def run(n:Int, acceptor: Long => Unit ): Unit =

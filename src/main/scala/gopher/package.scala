@@ -75,7 +75,7 @@ package object gopher
    * @see [[gopher.channels.SelectorContext]]
    * @see [[gopher.~>]]
    */
-  def select = channels.ForSelectTransformer
+  def select[API <: ChannelsAPI[API]](implicit api: API) = new channels.ForSelectTransformer[API]
   
   import scala.reflect.internal.annotations.compileTimeOnly
   

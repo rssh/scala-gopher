@@ -16,10 +16,23 @@ trait TieBuilder[API <: ChannelsAPI[API]] extends JLockHelper  {
     this
   }
   
+  class ReadAcceptor[T <: TieBuilder[API],A](t: T, ch: API#IChannel[A])
+  {
+    // TODO: make macro
+    def apply(f: A => Unit): T = t.xReading(ch)(f)
+    def withTie(f: (TieReadJoin[A], A) => Unit): T  = ???
+      
+  }
+  
   // TODO: insert async here.
-  def reading[A](ch: API#IChannel[A])(f: A => Unit ): this.type =
+  def reading[A](ch: API#IChannel[A]): ReadAcceptor[this.type,A] =
+    new ReadAcceptor(this,ch)
+  
+ 
+  def xReading[A](ch: API#IChannel[A])(f: A => Unit): this.type =
     condReading[A](ch){a => f(a); true}
    
+  
   
   def condWriting[A](ch: API#OChannel[A])(f: Unit => Option[A]): this.type =
   {
@@ -108,6 +121,21 @@ trait TieBuilder[API <: ChannelsAPI[API]] extends JLockHelper  {
   
   
   
+}
+
+
+
+object TieBuilder
+{
+  
+  trait ReadingMagnit[A]
+  {
+    def acct: ReadAction[A] = ???
+  }
+  
+  implicit def  fromFun1[A](f: A => Unit): ReadingMagnit[A] = ???
+  implicit def  fromFun2[A](f: (TieReadJoin[A], A) => Unit): ReadingMagnit[A] = ???
+
 }
 
 
