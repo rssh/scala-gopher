@@ -97,7 +97,7 @@ trait TieBuilder[API <: ChannelsAPI[API]] extends JLockHelper  {
   }
   
    
-  def go(implicit ec: ExecutionContext, as: ActorSystem): Future[Unit] =
+  def go(implicit ec: ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem): Future[Unit] =
   {
    // TODO: hand;e before.
     val tie = api.makeRealTie

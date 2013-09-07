@@ -25,7 +25,7 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
         
   def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext): IOChannel[A]
   
-  def makeRealTie(implicit ec:ExecutionContext, as: ActorSystem): GTie
+  def makeRealTie(implicit ec:ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem ): GTie
   
   def  makeTie = new StartTieBuilder[ChannelsAPISelf](this,None)
   
