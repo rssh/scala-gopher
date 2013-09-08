@@ -5,6 +5,8 @@ import akka.actor._
 import gopher.util._
 
 trait TieBuilder[API <: ChannelsAPI[API]] extends JLockHelper  {
+ 
+  thisTieBuilder =>
   
   val api: API
   
@@ -41,10 +43,19 @@ trait TieBuilder[API <: ChannelsAPI[API]] extends JLockHelper  {
     this
   }
   
+  
+  class WriteAcceptor[T <: TieBuilder[API],A](t:T, ch: API#OChannel[A])
+  {
+    def apply(f: => A): T = t.xWriting(ch)(f)
+  }
+  
   // TODO: insert async here.
-  def writing[A](ch: API#OChannel[A])(f: => A): this.type =
+  def xWriting[A](ch: API#OChannel[A])(f: => A): this.type =
     condWriting(ch){ unit => Some(f) }
-      
+
+  def writing[A](ch: API#OChannel[A]): WriteAcceptor[this.type,A] =
+    new WriteAcceptor(this,ch)
+  
  
   def exclusive: this.type =
   {

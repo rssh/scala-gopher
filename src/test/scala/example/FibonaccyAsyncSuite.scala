@@ -27,24 +27,10 @@ object FibonaccyAsync {
     val c = makeChannel[Long](1);
     val quit = makeChannel[Int](1);
     
-    makeTie.zip(1 to 10, c) { (i,x) => 
+    makeTie.zip(1 to n, c) { (i,x) => 
                               { Console.print("%d, %d".format(i,x)); true }
-    } `then` writing(quit)( x => 1)
+    }.andThen.writing(quit)(1)
     
-    //c.read(1 to 10) then quit
-    
-    /*
-    c.read{
-      accept
-    }.loop(1 to 10).map(quit.write(0)).go
-    * 
-    */
-    /*
-    for (i <- 1 to n;
-          v <- c.read;
-          x <- quit.write(0)
-         ) { accept(v) }
-    */  
     fibonacci(c,quit)
   }
   

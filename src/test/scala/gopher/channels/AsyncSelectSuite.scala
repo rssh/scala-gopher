@@ -1,5 +1,12 @@
 package gopher.channels
 
+import org.scalatest._
+
+import gopher._
+import gopher.channels.Naive.api
+import scala.concurrent.ExecutionContext.Implicits.global
+
+
 class AsyncSelectSuite extends FunSuite {
 
      test("async base select emulation")  {
@@ -15,10 +22,9 @@ class AsyncSelectSuite extends FunSuite {
      
      var sum = 0;
      
-     val consumerTie = makeTie;
-     val consumer = consumerTie.reading(channel) { i =>
+     val consumer = makeTie.reading(channel).withTie { (t,i) =>
        sum = sum + i
-       if (i==1000) consumerTie.shutdown()
+       if (i==1000) t.shutdown()
      }.go
      
      //val consumer = go {
