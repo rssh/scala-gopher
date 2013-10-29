@@ -56,25 +56,32 @@ class SelectorContext extends Activable with NaiveTie {
   /**
    * called before selector context become running.
    */
-  def addInputAction[A](channel: NaiveInputChannel[A], action: A => Boolean): Unit =
+  def addInputAction[A](channel: NaiveInputChannel[A], action: A => Future[Boolean])(implicit ec: ExecutionContext): Unit =
     {
       val l: ReadAction[A] = new ReadAction[A] {
-        def apply(input: ReadActionInput[A]): ReadActionOutput =
+        def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
           if (enabled) {
             val retval = try {
-              ReadActionOutput(action(input.value), true);
+               val future = action(input.value) map {x => 
+                 ReadActionOutput(true)
+               }
+               future onComplete { x =>
+                 latch.countDown()
+                 x match {
+                   case Failure(ex) => lastException = ex
+                   case _ =>
+                 }
+               }
+               Some(future)
             } catch {
               case t: Throwable =>
                 lastException = t
-                ReadActionOutput(t.isInstanceOf[ControlThrowable], false)
-            }
-            if (retval.readed || lastException != null) {
-              //we know that we have at least yet one await
-              latch.countDown()
+                latch.countDown();
+                None
             }
             retval
           } else {
-            ReadActionOutput(false, false)
+            None
           }
       }
       addReadAction(channel, l)
@@ -87,24 +94,29 @@ class SelectorContext extends Activable with NaiveTie {
       activables = ch :: activables
     }
 
-  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Option[A]): Unit =
+  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Future[Option[A]])(implicit ec: ExecutionContext): Unit =
     {
       val l = new WriteAction[A] {
-        def apply(input: WriteActionInput[A]): WriteActionOutput[A] = {
+        def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] = {
           if (enabled) {
-            val retval = try {
-              action()
+            try {
+              val future = action() map(  WriteActionOutput(_,true) )
+              future.onComplete{ x =>
+                latch.countDown();
+                x match {
+                  case Failure(t) => lastException = t
+                  case Success(_) => 
+                }
+              }
+              Some(future)
             } catch {
               case t: Throwable =>
                 lastException = t
+                latch.countDown();
                 None
             }
-            if (retval.isDefined || lastException != null) {
-              latch.countDown()
-            }
-            WriteActionOutput(retval,lastException==null)
           } else { 
-            WriteActionOutput(None,false)
+            None
           }
         }
       }
@@ -114,11 +126,11 @@ class SelectorContext extends Activable with NaiveTie {
   def setIdleAction(action:IdleAction): Unit =
     idleAction = Some(action)
   
-  def setIdleAction(a: Unit => Unit): Unit =
+  def setIdleAction(a: Unit => Unit)(implicit ec: ExecutionContext): Unit =
     {
       val action = new IdleAction{
-        def apply(tie: TieJoin): Boolean =
-        { a(); true }
+        def apply(tie: TieJoin): Future[Boolean] =
+         Future{ a(); true } 
       }
       setIdleAction(action)
     }

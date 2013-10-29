@@ -6,20 +6,21 @@ import akka.actor._
 import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
+import gopher.channels.naive.Activable
 
 
-trait InputChannel[+A] extends Activable
+trait InputChannel[+A] 
 {
   
-  channel =>
+  inputChannel =>
 
   type InputElement = A;
 
   def readImmediatly: Option[A]
   def readBlocked: A 
-  def readBlockedTimeout(timeout: Duration) : Option[A]
+  def readBlockedTimeout(timeout: FiniteDuration) : Option[A]
   def readAsync: Future[A]
-  def readAsyncTimeout(timeout: Duration) : Future[Option[A]]
+  def readAsyncTimeout(timeout: FiniteDuration) : Future[Option[A]]
   
   /**
    * synonym for readBlocked
@@ -47,10 +48,10 @@ trait InputChannel[+A] extends Activable
   trait InputAsync
   {
      @inline
-     def read: Future[A] = channel.readAsync
+     def read: Future[A] = inputChannel.readAsync
      
      @inline
-     def readTimeout(d: Duration): Future[Option[A]] = channel.readAsyncTimeout(d)
+     def readTimeout(d: FiniteDuration): Future[Option[A]] = inputChannel.readAsyncTimeout(d)
                      
      @inline def ? = read
 
@@ -59,6 +60,8 @@ trait InputChannel[+A] extends Activable
   
   def async: InputAsync = new InputAsync() {}
 
+  //TODO:
+  //def readWhile[C](p: A => Boolean)(implicit val CanBuildFrom[C])
 
   /**
    * pass all output, which can be readed from this channel, to given actor.

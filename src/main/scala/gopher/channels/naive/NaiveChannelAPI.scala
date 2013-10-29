@@ -18,20 +18,20 @@ class NaiveChannelsAPI extends ChannelsAPI[NaiveChannelsAPI]
   type OChannel[-A] = NaiveOutputChannel[A]
   type IOChannel[A] = GBlockedQueue[A]
     
-  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext): IOChannel[A] =
-                                            new GBlockedQueue[A](capacity,ec);
+  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext, as: ActorSystem): IOChannel[A] =
+                                            new GBlockedQueue[A](capacity,ec,as);
   
   type GTie = NaiveTie
   
-  def makeRealTie(implicit ec:ExecutionContext, as: ActorSystem): GTie =
+  def makeTie(implicit ec:ExecutionContext, as: ActorSystem): GTie =
     new SelectorContext()
   
-  type GFuture[A] = Future[A]
+  type GFuture[T, A] = Future[A]
  
-  def  gAwait[A](f: GFuture[A], d: Duration)(implicit ec: ExecutionContext) =
+  def  gAwait[A](f: GFuture[NaiveChannelsAPI, A], d: Duration)(implicit ec: ExecutionContext, as: ActorSystem) =
     Await.result(f, d)
  
-  def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[GFuture[A]] =
+  def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[GFuture[NaiveChannelsAPI,A]] =
   {
    import c.universe._
    //

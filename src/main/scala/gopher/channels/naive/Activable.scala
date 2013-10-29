@@ -1,4 +1,4 @@
-package gopher.channels
+package gopher.channels.naive
 
 
 trait Activable {

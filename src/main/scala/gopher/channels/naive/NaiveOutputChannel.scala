@@ -1,14 +1,16 @@
 package gopher.channels.naive
 
 import gopher.channels._
+import scala.concurrent._
 import akka.actor._
 
-trait NaiveOutputChannel[-A] extends OutputChannel[A] {
+trait NaiveOutputChannel[-A] extends OutputChannel[A] with Activable {
 
-  def addWriteListener(tie: NaiveTie, f: () => Option[A] ): Unit =
+  def addWriteListener(tie: NaiveTie, f: () => Future[Option[A]] )(implicit ec: ExecutionContext): Unit =
   {
     addWriteListener(tie, new WriteAction[A]{
-      def apply(input:WriteActionInput[A]) = WriteActionOutput[A](f(),true)
+      def apply(input:WriteActionInput[A]) = 
+          Some(f() map (x => WriteActionOutput[A](x,true)))
     })
   }
   

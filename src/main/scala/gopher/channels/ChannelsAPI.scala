@@ -21,15 +21,15 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
   type IOChannel[A] <: InputOutputChannel[A]
 
   type GTie <: Tie[T]
-  type GFuture[A] <: Future[A]
+  type GFuture[T, A] <: Future[A]
         
-  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext): IOChannel[A]
+  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem): IOChannel[A]
   
-  def makeRealTie(implicit ec:ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem ): GTie
+  def makeTie(implicit ec:ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem ): GTie
   
-  def  makeTie = new StartTieBuilder[ChannelsAPISelf](this,None)
+ //def  makeTie = new StartTieBuilder[ChannelsAPISelf](this,None)
   
-  def  gAwait[A](f: GFuture[A], d: Duration)(implicit ec: ExecutionContext): A
+  //def  gAwait[A](f: GFuture[A], d: Duration)(implicit ec: ExecutionContext): A
  
   def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[Future[A]]
     

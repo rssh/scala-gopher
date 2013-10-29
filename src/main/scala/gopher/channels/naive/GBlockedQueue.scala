@@ -15,7 +15,7 @@ import akka.actor._
 /**
  * classical blocked queue, which supports listeners.
  */
-class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputOutputChannel[A] 
+class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSystem) extends InputOutputChannel[A] 
                                                                    with NaiveInputChannel[A]
                                                                    with NaiveOutputChannel[A]
                                                                   with JLockHelper
@@ -31,7 +31,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
    */
   def addReadListener(tie: NaiveTie, f: ReadAction[A]): Unit =
     {
-      readListeners.add((tie,new WeakReference(f)))
+      readListeners.add((tie, f))
       tryDoStepAsync();
     }
 
@@ -59,27 +59,54 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
 
   def readAsync: Future[A] = 
   {
-    implicit val ec = executionContext
     val p = Promise[A]()
     val f = new ReadAction[A] {
-      def apply(input: ReadActionInput[A]): ReadActionOutput =
+      def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
       {
         p complete Success(input.value)
-        ReadActionOutput(readed=true,continue=false)
+        Some(p.future.map(x => ReadActionOutput(continue=false) ))
       }
     }
     addReadListener(internalTie, f)
     p.future
   }
   
-  def readAsyncTimeout(timeout: Duration): Future[Option[A]] = 
+  def readAsyncTimeout(timeout: FiniteDuration): Future[Option[A]] = 
   {
-    //TODO: use akka scheduler 
-    implicit val ec = executionContext
-    Future({
-      // TODO: rewrite.
-      readBlockedTimeout(timeout)
-    })
+    val p = Promise[Option[A]]()
+    val f = new ReadAction[A] {
+      def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
+      {
+        val notCompleted = if (!p.isCompleted) {
+                             try {
+                              p complete Success(Some(input.value))
+                              true
+                             }catch{
+                               case ex: IllegalStateException =>
+                                   false
+                             }
+                           } else false
+        Some(Promise.successful(
+            ReadActionOutput(continue=false)
+        ).future)
+      }      
+    }
+    
+    actorSystem.scheduler.scheduleOnce(timeout)(
+           if (!p.isCompleted) {
+             try {
+                p complete Success(None)
+             }catch{
+               case e: IllegalStateException =>
+                 /* promise was already completed, do nothing */
+             }
+           }    
+    )
+    
+    addReadListener(internalTie, f)
+    
+    p.future
+ 
   }
   
   
@@ -87,7 +114,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
     optTryDoStepAsync(inTryLock(bufferLock)(readElementBlocked, None))
 
   // guess that we work in millis resolution.
-  def readBlockedTimeout(timeout: Duration): Option[A] =
+  override def readBlockedTimeout(timeout: FiniteDuration): Option[A] =
     optTryDoStepAsync {
       val endOfLock = System.currentTimeMillis() + timeout.unit.toMillis(timeout.length)
       inTryLock(bufferLock, timeout)({
@@ -102,7 +129,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
 
   def addWriteListener(tie: NaiveTie, f: WriteAction[A]): Unit =
   {
-      writeListeners.add((tie,new WeakReference(f)))
+      writeListeners.add((tie,f))
       tryDoStepAsync()
   }
 
@@ -127,7 +154,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
       inTryLock(bufferLock)(
         writeElementBlocked(x), false))
 
-  def writeBlockedTimeout(x: A, timeout: Duration): Boolean =
+  override def writeBlockedTimeout(x: A, timeout: FiniteDuration): Boolean =
     condTryDoStepAsync {
       val endOfLock = System.currentTimeMillis() + timeout.unit.toMillis(timeout.length)
       inTryLock(bufferLock, timeout)({
@@ -144,13 +171,38 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   {
     val p = Promise[Unit]()
     val f = new WriteAction[A] {
-      def apply(input: WriteActionInput[A]): WriteActionOutput[A] =
+      def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] =
       {
         p complete Success(())
-        WriteActionOutput(writed=Some(x),continue=false)
+        Some(Promise.successful(WriteActionOutput(value=Some(x),continue=false)).future)
       }
     }
     addWriteListener(internalTie, f)
+    p.future
+  }
+  
+  def writeAsyncTimeout(x:A, timeout: FiniteDuration): Future[Boolean] =
+  {
+    val p = Promise[Boolean]()
+    val f = new WriteAction[A] {
+      override def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] =
+      {
+        p complete Success(true)
+        Some(
+            Promise successful WriteActionOutput(value=Some(x),continue=false) future
+        )
+      }
+    }
+    addWriteListener(internalTie, f)
+    val t = as.scheduler.scheduleOnce(timeout){
+      if (!p.isCompleted) {
+        try {
+          p.success(false)
+        }catch{
+          case ex: IllegalStateException =>
+        }
+      }
+    }
     p.future
   }
 
@@ -168,8 +220,10 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
     // TODO: will be garbage-collected. do somehting with this.
     addReadListener(tie,
        new ReadAction[A] {
-        def apply(input: ReadActionInput[A]): ReadActionOutput =
-           { actor ! input.value; ReadActionOutput(true, true) }
+        override def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
+           { actor ! input.value; 
+             Some(Promise successful ReadActionOutput(true) future) 
+           }
       }       
     )
   }
@@ -252,61 +306,58 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   private def fireNewSpaceBlocked: Boolean =
     {
       var done = false;
-      var nexts: JLinkedList[(NaiveTie,WeakReference[WriteAction[A]])] = new JLinkedList();
-      var nNulls = 0
       while(!writeListeners.isEmpty() && !done) {
         var h = writeListeners.poll()
         if (h!=null) {
-           val writeListener = h._2.get
-           if (!(writeListener eq null)) {
+             val writeListener = h._2
              var input = WriteActionInput(h._1.writeJoin(this),this)
-             var output = writeListener(input)
-             if (output.continue || !output.writed.isDefined) {
-               nexts.add(h)
-             }
-             output.writed foreach { a =>
-               writeElementBlocked(a)
-               done = true;
-             }
-           } else {
-              nNulls = nNulls + 1
-           }
+             for(outputFuture <- writeListener(input)) {
+                if (outputFuture.isCompleted) {
+                   val output = Await.result(outputFuture, Duration.Zero)
+                   output.value.foreach(writeElementBlocked(_))
+                   done = true
+                   if (output.continue) {
+                     writeListeners.add(h)
+                   }
+                } else {
+                   // call me back when finish...
+                   val finalAction = new WriteAction[A]() {
+                       override def apply(in:WriteActionInput[A]) =
+                         Some(outputFuture)
+                   }
+                   outputFuture.onComplete{ unused =>
+                       this.addWriteListener(h._1, finalAction)
+                   }
+                }
+             }             
         }
       }
-      writeListeners.addAll(nexts);
-     // if (nNulls > 0) {
-     //   System.err.println("witeActions, nNulls:"+nNulls);
-     // }
-            
       done
     }
 
+  
   private def fireNewElementBlocked: Boolean =
     {
-      var nexts: JLinkedList[(NaiveTie,WeakReference[ReadAction[A]])] = new JLinkedList();
       var done = false
       var nNulls = 0
       while(!readListeners.isEmpty() && !done) {
          var h = readListeners.poll();
          if (h!=null) {
-           val readListener = h._2.get
-           if (!(readListener eq null)) {
-             val input = ReadActionInput(
-                              h._1.readJoin(this),this,buffer(readIndex))
-             val output = readListener(input)
-             if (output.continue || !output.readed) {
-                nexts.add(h)
-             }
-             if (output.readed) {
-               freeElementBlocked
-               done = true
-             }
-           } else {
-             nNulls = nNulls + 1
-           }
+           val readListener = h._2
+           val elementToRead = buffer(readIndex)
+           val input = ReadActionInput(
+                              h._1.readJoin(this),this,elementToRead)
+           readListener(input) match {
+               case Some(outputFuture) =>
+                 freeElementBlocked
+                 done = true
+                 for(output <- outputFuture) {
+                   if (output.continue) readListeners.add(h)
+                 }
+               case None => // do nothing   
+           }          
          }
       }
-      readListeners.addAll(nexts);
       done
     }
 
@@ -402,13 +453,14 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext) extends InputO
   private[this] val readPossibleCondition = bufferLock.newCondition
   private[this] val writePossibleCondition = bufferLock.newCondition
 
-  private val readListeners: ConcurrentLinkedQueue[(NaiveTie,WeakReference[ReadAction[A]])] 
+  private val readListeners: ConcurrentLinkedQueue[(NaiveTie,ReadAction[A])] 
                           = new ConcurrentLinkedQueue();
   
-  private val writeListeners: ConcurrentLinkedQueue[(NaiveTie,WeakReference[WriteAction[A]])] 
+  private val writeListeners: ConcurrentLinkedQueue[(NaiveTie,WriteAction[A])] 
                           = new ConcurrentLinkedQueue();
   
-  private[this] val executionContext: ExecutionContext = ec;
+  private[this] implicit val executionContext: ExecutionContext = ec;
+  private[this] val actorSystem: ActorSystem = as;
 
   private[this] final var emptyA: A = _
 

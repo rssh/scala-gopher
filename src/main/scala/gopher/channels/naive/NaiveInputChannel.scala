@@ -1,15 +1,15 @@
 package gopher.channels.naive
 
 import gopher.channels._
+import scala.concurrent._
 
-trait NaiveInputChannel[+A] extends InputChannel[A] {
+trait NaiveInputChannel[+A] extends InputChannel[A] with Activable {
  
-  
   
   def addReadListener(tie: NaiveTie,f: A => Boolean): Unit =
     addReadListener(tie,new ReadAction[A] {
-      def apply(input:ReadActionInput[A]): ReadActionOutput =
-        ReadActionOutput(f(input.value),true)
+      override def apply(input:ReadActionInput[A]): Option[Future[ReadActionOutput]] =
+        Some(Promise successful ReadActionOutput(true) future)
     } )
   
   /**

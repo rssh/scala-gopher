@@ -187,8 +187,10 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API): StartTieBuilder[API] = new StartTieBuilder(api)
+  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API, ec: ExecutionContext): Tie[API] =
+    api.makeTie
      
-  
+
+  implicit def toOutputPut[API <: ChannelsAPI[API],A](ch: API#OChannel[A]) = new OutputPut(ch)
   
 }

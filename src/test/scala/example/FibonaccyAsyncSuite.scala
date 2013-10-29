@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits._
 
 object FibonaccyAsync {
 
-  
+/*  
   def fibonacci(ch: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)
     //val tie = makeTie;
@@ -34,7 +34,7 @@ object FibonaccyAsync {
     fibonacci(c,quit)
   }
   
-  
+  */
   
 }
 

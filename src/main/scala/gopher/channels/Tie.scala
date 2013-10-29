@@ -1,6 +1,7 @@
 package gopher.channels
 
 import scala.concurrent._
+import scala.util._
 
 
 /**
@@ -44,15 +45,10 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
   def start()
   
   /**
-   * shutdown tea.
+   * shutdown tea  (and activate next tie if set)
    */
   def shutdown();
-  
-  /**
-   * Wait shutdowm.  Can utilize current thread for message processing or erased by enclosed go macros.
-   */
-  def waitShutdown();
- 
+   
   /**
    *  return Future which is fired when tie is shutdowned.
    */ 
@@ -60,8 +56,17 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
   
   /**
    * If tie is exclusive, try or run f, if nothing is running
-   * in the same exclusive mode or perform <codde> whenLocked </code>
+   * in the same exclusive mode or perform <code> whenLocked </code>
    */
   def processExclusive[A](f: => A, whenLocked: =>A):A
+  
+  /**
+   * put tie, which will activated after shutdown of this tie.
+   */
+  def putAfter(next: Tie[API])(implicit ec: ExecutionContext) = shutdownFuture.onComplete{
+    case Success(x) => next.start
+    case Failure(ex) => // TODO: keep exception here [?]
+                        // for now: do noting
+  }
   
 }

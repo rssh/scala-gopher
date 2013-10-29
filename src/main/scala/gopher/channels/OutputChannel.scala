@@ -1,6 +1,5 @@
 package gopher.channels
 
-import java.util.concurrent.{BlockingQueue => JBlockingQueue}
 import akka.util._
 import akka.actor._
 import scala.concurrent._
@@ -8,20 +7,22 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
 
-trait OutputChannel[-A] extends Activable
+trait OutputChannel[-A] 
 {
 
-  channel =>
+  outputChannel =>
 
   type OutputElement = A
 
-  def writeBlocked(x:A):Unit 
+  def writeBlocked(x:A): Unit
 
   def writeImmediatly(x:A): Boolean 
 
-  def writeBlockedTimeout(x:A, timeout: Duration): Boolean
+  def writeBlockedTimeout(x:A, timeout: FiniteDuration): Boolean
   
   def writeAsync(x:A): Future[Unit]
+  
+  def writeAsyncTimeout(x:A, timeout: FiniteDuration): Future[Boolean]
 
   /**
    * synonym for writeBlocked
@@ -57,14 +58,14 @@ trait OutputChannel[-A] extends Activable
   
   trait OutputAsync
   {
-     def write(x:A): Future[Unit] = channel.writeAsync(x)
+     def write(x:A): Future[Unit] = outputChannel.writeAsync(x)
 
      @inline def <~ (x:A) = write(x) 
   }
 
   def async: OutputAsync = new OutputAsync() {}
   
- 
+    
   
 }
 
