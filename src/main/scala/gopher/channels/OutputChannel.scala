@@ -38,6 +38,8 @@ trait OutputChannel[-A]
    * synonym for writeBlocked
    */
   @inline def <~  (x:A) = writeBlocked(x)
+
+  
   
   /**
    * synonym for writeImmediatly
@@ -55,6 +57,18 @@ trait OutputChannel[-A]
    */
   @inline def <~* (x:A) = writeAsync(x)
 
+  /**
+   * synonym for writeAsync
+   */
+  @inline def <<~  (x:A) = writeAsync(x)
+  
+  
+  /**
+   * synonym for writeAsyncTimeout
+   */
+  @inline def <~*? (x:A)(implicit timeout: Timeout) = writeAsyncTimeout(x, timeout.duration)
+  
+  
   
   trait OutputAsync
   {

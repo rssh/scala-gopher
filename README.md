@@ -3,8 +3,13 @@
  --------------------------------------------------
  --------------------------------------------------
 
- Requirements:  scala 2.10.2 +
+ Requirements:    
  ------------
+ 
+ * scala 2.10.3 +
+ * scala-async plugin which you must install by hands from 
+    https://github.com/scala/async.git  (on the time of writing this document
+    livrary was not yet published).
 
  Download: 
  ---------

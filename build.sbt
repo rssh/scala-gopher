@@ -3,7 +3,7 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -13,7 +13,9 @@ autoCompilerPlugins := true
 
 scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
-libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.2"
+libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.3"
+
+libraryDependencies += "org.scala-lang.modules.async" %% "scala-async" % "1.0.0-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
