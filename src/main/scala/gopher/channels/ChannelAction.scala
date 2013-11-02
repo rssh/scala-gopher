@@ -10,7 +10,39 @@ trait ReadAction[-A] extends ChannelAction
   
 case class ReadActionInput[+A]( tie: TieReadJoin[A] , channel: InputChannel[A], value: A)
 case class ReadActionOutput(continue: Boolean)
+
+object ReadAction
+{
   
+  def apply[A](f: ReadActionInput[A] => Option[Future[ReadActionOutput]]):ReadAction[A] =
+    new ReadAction[A]{ 
+      override def apply(in:ReadActionInput[A]):Option[Future[ReadActionOutput]] = 
+         f(in)  
+   }
+  
+  
+}
+
+trait PlainReadAction[-A] extends ReadAction[A]
+{
+  
+  override def apply(in: ReadActionInput[A]):Option[Future[ReadActionOutput]] =
+    Some(Promise.successful(ReadActionOutput(plainApply(in))).future)
+    
+  def plainApply(in: ReadActionInput[A]): Boolean  
+
+}
+
+object PlainReadAction
+{
+
+   def apply[A](f: ReadActionInput[A] => Boolean):ReadAction[A] =
+    new PlainReadAction[A]{ 
+      override def plainApply(in:ReadActionInput[A]):Boolean = f(in)  
+    }
+
+
+}
 
 trait WriteAction[A] extends ChannelAction
   with (WriteActionInput[A] => Option[Future[WriteActionOutput[A]]])

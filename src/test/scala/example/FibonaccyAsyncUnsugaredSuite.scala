@@ -40,8 +40,8 @@ class FibonaccyAsyncUnsugaredSuite {
   
   def run(n:Int, acceptor: Long => Unit ): Unit =
   {
-    val c = makeChannel[Long];
-    val quit = makeChannel[Int];
+    val c = makeChannel[Long]();
+    val quit = makeChannel[Int]();
     
     c.readZip(1 to n) {
       (i,n) => System.out.println("${i}:${ch}");

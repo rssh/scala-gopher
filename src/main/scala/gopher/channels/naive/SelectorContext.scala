@@ -46,11 +46,12 @@ class SelectorContext extends Activable with NaiveTie {
 
   selectorContextTie =>
   
-  def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): Unit =
+  def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): this.type =
     {
       ch.addReadListener(this, action)
       inputListeners = action :: inputListeners
       activables = ch :: activables
+      this
     }
 
   /**
@@ -87,14 +88,15 @@ class SelectorContext extends Activable with NaiveTie {
       addReadAction(channel, l)
     }
 
-  def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): Unit =
+  def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): this.type =
     {
       ch.addWriteListener(this, action)
       outputListeners = action :: outputListeners
       activables = ch :: activables
+      this
     }
 
-  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Future[Option[A]])(implicit ec: ExecutionContext): Unit =
+  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Future[Option[A]])(implicit ec: ExecutionContext): this.type =
     {
       val l = new WriteAction[A] {
         def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] = {
@@ -123,8 +125,11 @@ class SelectorContext extends Activable with NaiveTie {
       addWriteAction(channel,l)
    }
 
-  def setIdleAction(action:IdleAction): Unit =
+  def setIdleAction(action:IdleAction): this.type =
+  {
     idleAction = Some(action)
+    this
+  }
   
   def setIdleAction(a: Unit => Unit)(implicit ec: ExecutionContext): Unit =
     {
@@ -170,7 +175,10 @@ class SelectorContext extends Activable with NaiveTie {
       activables foreach (_.activate)
     }
   
-  def start: Unit = activate()
+  def start() = {
+    activate()
+    this
+  }
 
   /**
    * enable listeners and outputChannels

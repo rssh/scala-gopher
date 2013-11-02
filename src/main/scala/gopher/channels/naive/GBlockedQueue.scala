@@ -406,29 +406,32 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
  
   private[this] val internalTie = new NaiveTie() {
     
-     def addReadAction[B](ch: API#IChannel[B], action: ReadAction[B]): Unit =
+     def addReadAction[B](ch: API#IChannel[B], action: ReadAction[B]): this.type =
      {
        if (! (ch eq thisGBlockedQueue)) {
          throw new IllegalArgumentException("internal tie accept tasks only for this channel")
        }
        thisGBlockedQueue.addReadListener(this, action.asInstanceOf[ReadAction[A]])
+       this
      }
   
-     def addWriteAction[B](ch: API#OChannel[B], action: WriteAction[B]): Unit =
+     def addWriteAction[B](ch: API#OChannel[B], action: WriteAction[B])  =
      {
        if (! (ch eq thisGBlockedQueue)) {
          throw new IllegalArgumentException("internal tie accept tasks only for this channel")
        }
-       thisGBlockedQueue.addWriteListener(this, action.asInstanceOf[WriteAction[A]])      
+       thisGBlockedQueue.addWriteListener(this, action.asInstanceOf[WriteAction[A]])
+       this
      }
   
-     def setIdleAction(action: IdleAction): Unit =
+     def setIdleAction(action: IdleAction) =
      {
        throw new IllegalArgumentException("IdleAction is not applicable for GBlockedQueue Tie")
      }
     
-     def start() {
+     def start() = {
        thisGBlockedQueue.activate();
+       this
      }
   
   

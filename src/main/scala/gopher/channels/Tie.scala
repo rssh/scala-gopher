@@ -12,11 +12,11 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
  
   thisTie =>
   
-  def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): Unit
+  def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): this.type
   
-  def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): Unit
+  def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): this.type
   
-  def setIdleAction(action: IdleAction): Unit
+  def setIdleAction(action: IdleAction): this.type
   
   def readJoin[A](ch:API#IChannel[A]) = new TieReadJoin[A] {
     @inline
@@ -42,12 +42,11 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
    * If implementation require starting of tie before action (for example - when tie contains
    *  thread), than do this action.  In some implementations can do nothing.
    */
-  def start()
-  
+  def start(): this.type
   /**
    * shutdown tea  (and activate next tie if set)
    */
-  def shutdown();
+  def shutdown(): Unit
    
   /**
    *  return Future which is fired when tie is shutdowned.
@@ -63,10 +62,14 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
   /**
    * put tie, which will activated after shutdown of this tie.
    */
-  def putAfter(next: Tie[API])(implicit ec: ExecutionContext) = shutdownFuture.onComplete{
+  def putAfter(next: Tie[API])(implicit ec: ExecutionContext): Tie[API] =
+  {
+   shutdownFuture.onComplete{
     case Success(x) => next.start
     case Failure(ex) => // TODO: keep exception here [?]
                         // for now: do noting
+   }
+   next
   }
   
 }
