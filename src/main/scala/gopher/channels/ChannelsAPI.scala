@@ -16,9 +16,9 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
 
   type ChannelsAPISelf = T  
     
-  type IChannel[+A] <: InputChannel[A]
+  type IChannel[+A] <: InputChannel[A] with InputChannelOps[T,A]
   type OChannel[-A] <: OutputChannel[A]
-  type IOChannel[A] <: InputOutputChannel[A]
+  type IOChannel[A] <: InputOutputChannel[A] with InputChannelOps[T,A]
 
   type GTie <: Tie[T]
   type GFuture[T, A] <: Future[A]

@@ -43,7 +43,7 @@ class FibonaccyAsyncUnsugaredSuite {
     val c = makeChannel[Long]();
     val quit = makeChannel[Int]();
     
-    c.readZip(1 to n) {
+    c.readZipped(1 to n) {
       (i,n) => System.out.println("${i}:${ch}");
     } andThan {
       //quit <~~ 0

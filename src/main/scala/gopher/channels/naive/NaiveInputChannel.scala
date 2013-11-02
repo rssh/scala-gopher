@@ -3,7 +3,9 @@ package gopher.channels.naive
 import gopher.channels._
 import scala.concurrent._
 
-trait NaiveInputChannel[+A] extends InputChannel[A] with Activable {
+trait NaiveInputChannel[+A] extends InputChannel[A] 
+                                 with InputChannelOps[NaiveChannelsAPI,A]
+                                 with Activable {
  
   
   def addReadListener(tie: NaiveTie,f: A => Boolean): Unit =
