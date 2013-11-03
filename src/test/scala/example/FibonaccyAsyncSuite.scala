@@ -38,6 +38,8 @@ object FibonaccyAsync {
   
 }
 
+
+
 class FibonaccyAsyncSuite extends FunSuite
 {
   

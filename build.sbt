@@ -11,6 +11,8 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 autoCompilerPlugins := true
 
+addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full )
+
 scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.3"

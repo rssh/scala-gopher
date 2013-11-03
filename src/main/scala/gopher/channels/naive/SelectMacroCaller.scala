@@ -118,17 +118,10 @@ object SelectorMacroCaller {
     val (channel, argName, argType) = parseInputChannelArgs(c)(x,l);
     import c.universe._    
       
-    //  sc.addInputAction{ channel, (argName:argType) => { body; true} }   
-    val retval = Apply(
-                    Select(Ident(sc), newTermName("addInputAction")), 
-                    List(
-                        channel,
-                        Function(List(ValDef(Modifiers(Flag.PARAM), argName, argType /*TypeTree()*/, EmptyTree)), 
-                                 Block( preBody:+ body,Literal(Constant(true)))
-                                )
-                        )
-                 )
-    retval;
+    val retval = q"""
+       ${sc}.addInputAction( ${channel}, (${argName}:${argType}) => scala.async.Async.async{ ${body}; true }  )
+    """
+    retval
   }
 
   def transformAddOutputAction(c:Context)(sc: c.TermName, x: c.Tree, l: List[c.Tree], guard: c.Tree, 
@@ -138,16 +131,13 @@ object SelectorMacroCaller {
     import c.universe._
      
    
-    //  channel.addOutputListener{ () => { body; Some(c) } }
-   
-    // TODO: add guard supports.
-    val retval = Apply(
-                   Select(Ident(sc), newTermName("addOutputAction")), 
-                   List(
-                       channel,
-                       Function(List(),
-                                Block(preBody :+ body, Apply(Ident(newTermName("Some")), List(arg))))
-                   ))
+    // TODO: transform async    
+     
+    val retval = q"""
+      ${sc}.addOutputAction(${channel},{ 
+          () => scala.async.Async.async(Some( ${Block(preBody :+ body, arg )}) ) 
+      })
+    """
     retval;
   }
   

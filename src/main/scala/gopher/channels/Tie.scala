@@ -2,6 +2,7 @@ package gopher.channels
 
 import scala.concurrent._
 import scala.util._
+import akka.actor._
 
 
 /**
@@ -60,16 +61,26 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
   def processExclusive[A](f: => A, whenLocked: =>A):A
   
   /**
+   * 
+   */
+  def next(implicit api: ChannelsAPI[API], ec: ExecutionContext, ac: ActorSystem = ChannelsActorSystemStub.defaultSystem): Tie[API] =
+  {
+    val n = api.makeTie
+    shutdownFuture.onSuccess{ case _ => n.start() }
+    n
+  }
+  
+  /**
    * put tie, which will activated after shutdown of this tie.
    */
-  def putAfter(next: Tie[API])(implicit ec: ExecutionContext): Tie[API] =
-  {
-   shutdownFuture.onComplete{
-    case Success(x) => next.start
-    case Failure(ex) => // TODO: keep exception here [?]
-                        // for now: do noting
-   }
-   next
-  }
+ // def putAfter(next: Tie[API])(implicit ec: ExecutionContext): Tie[API] =
+ // {
+ //  shutdownFuture.onComplete{
+ //   case Success(x) => next.start
+ //   case Failure(ex) => // TODO: keep exception here [?]
+ //                       // for now: do noting
+ //  }
+ //  next
+ // }
   
 }

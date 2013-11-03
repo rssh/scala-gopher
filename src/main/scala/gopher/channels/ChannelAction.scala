@@ -33,7 +33,7 @@ trait PlainReadAction[-A] extends ReadAction[A]
 
 }
 
-object PlainReadAction
+object PlainReadAction 
 {
 
    def apply[A](f: ReadActionInput[A] => Boolean):ReadAction[A] =
@@ -49,7 +49,30 @@ trait WriteAction[A] extends ChannelAction
   
 case class WriteActionInput[A](tie: TieWriteJoin[A], channel: OutputChannel[A])
 case class WriteActionOutput[A](value: Option[A], continue: Boolean)
+
+object WriteAction
+{
+
+   def apply[A](f: WriteActionInput[A] => Option[Future[WriteActionOutput[A]]]): WriteAction[A] =
+    new WriteAction[A]{ 
+      override def apply(in:WriteActionInput[A]):Option[Future[WriteActionOutput[A]]] = 
+         f(in)  
+   }
+ 
+}
+
+trait PlainWriteAction[A] extends WriteAction[A]
+{
+  
+  override def apply(in: WriteActionInput[A]):Option[Future[WriteActionOutput[A]]] =
+    Some(Promise.successful(plainApply(in)).future)
     
+  def plainApply(in: WriteActionInput[A]): WriteActionOutput[A]  
+
+}
+
+
+
 trait IdleAction extends ChannelAction
     with (TieJoin => Future[Boolean])
 

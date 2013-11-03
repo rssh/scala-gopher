@@ -4,7 +4,9 @@ import gopher._
 import gopher.channels._
 import gopher.channels.Naive._
 import scala.async.Async._
+import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest._
 
 class FibonaccyAsyncUnsugaredSuite {
 
@@ -45,10 +47,13 @@ class FibonaccyAsyncUnsugaredSuite {
     
     c.readZipped(1 to n) {
       (i,n) => System.out.println("${i}:${ch}");
-    } andThan {
-      //quit <~~ 0
-      quit <~* 0
-    }
+    }.next.addWriteAction(quit,
+        new PlainWriteAction[Int] {
+          override def plainApply(in: WriteActionInput[Int]): WriteActionOutput[Int] = {
+            WriteActionOutput(Some(1),false)         
+          } 
+       }
+    )
         
     fibonacci(c,quit)
   }
