@@ -4,7 +4,6 @@ import gopher._
 import gopher.channels._
 import gopher.channels.Naive._
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 import org.scalatest._
@@ -16,6 +15,7 @@ import org.scalatest._
 
 object Fibonaccy {
 
+  import scala.concurrent.ExecutionContext.Implicits.global
   
   def fibonacci(c: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)

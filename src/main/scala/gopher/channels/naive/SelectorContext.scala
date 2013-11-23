@@ -6,6 +6,7 @@ import scala.collection.immutable._
 import scala.util.control._
 import gopher.channels._
 import scala.util._
+import akka.actor._
 
 
 /**
@@ -42,10 +43,16 @@ import scala.util._
  *  }
  * </pre>
  */
-class SelectorContext extends Activable with NaiveTie {
+class SelectorContext(
+    val executionContextProvider: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
+    val actorSystemProvider: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider)
+                                extends Activable with NaiveTie {
 
   selectorContextTie =>
-  
+
+  implicit def executionContext: ExecutionContext = executionContextProvider.executionContext
+  implicit def actorSystem: ActorSystem = actorSystemProvider.actorSystem
+    
   def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): this.type =
     {
       ch.addReadListener(this, action)
@@ -57,7 +64,7 @@ class SelectorContext extends Activable with NaiveTie {
   /**
    * called before selector context become running.
    */
-  def addInputAction[A](channel: NaiveInputChannel[A], action: A => Future[Boolean])(implicit ec: ExecutionContext): Unit =
+  def addInputAction[A](channel: NaiveInputChannel[A], action: A => Future[Boolean]): Unit =
     {
       val l: ReadAction[A] = new ReadAction[A] {
         def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
@@ -96,7 +103,7 @@ class SelectorContext extends Activable with NaiveTie {
       this
     }
 
-  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Future[Option[A]])(implicit ec: ExecutionContext): this.type =
+  def addOutputAction[A](channel: NaiveOutputChannel[A], action: () => Future[Option[A]]): this.type =
     {
       val l = new WriteAction[A] {
         def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] = {
@@ -131,7 +138,7 @@ class SelectorContext extends Activable with NaiveTie {
     this
   }
   
-  def setIdleAction(a: Unit => Unit)(implicit ec: ExecutionContext): Unit =
+  def setIdleAction(a: Unit => Unit): Unit =
     {
       val action = new IdleAction{
         def apply(tie: TieJoin): Future[Boolean] =
@@ -150,7 +157,9 @@ class SelectorContext extends Activable with NaiveTie {
       var toQuit = latch.getCount()>0
       while(!toQuit) {
         enabled=true
+        //System.err.println("selectorContext - beofre lanch wait, this="+this)        
         latch.await(IDLE_MILLISECONDS, TimeUnit.MILLISECONDS)
+        //System.err.println("selectorContext - after lanch wait, this="+this) 
         enabled = false
         if (lastException != null) {
            throw lastException;
@@ -176,20 +185,22 @@ class SelectorContext extends Activable with NaiveTie {
     }
   
   def start() = {
+    System.err.println("tie start");
     activate()
+    go
     this
   }
 
   /**
    * enable listeners and outputChannels
    */
-  def go(implicit ex: ExecutionContext): Future[Unit] =
+  def go: Future[Unit] =
     {
-      ex.execute(new Runnable(){
+      executionContext.execute(new Runnable(){
         def run(): Unit = {
           runOnce()
           if (!shutdowned) {
-            ex.execute(this)
+            executionContext.execute(this)
           }
         }
       })
@@ -216,21 +227,26 @@ class SelectorContext extends Activable with NaiveTie {
     }
 
   // TODO: revice exception flow
-  def processExclusive[A](f: => A,whenLocked: => A): A = 
+  def processExclusive[A](f: => Future[A],whenLocked: => A): Future[A] = 
   {
     if (latch==null) latch = new CountDownLatch(1);
     //TODO:  think - how to unify countDown and getCount in one operation.
     if (latch.getCount() > 0) {
        latch.countDown();
        try {
-         f
+         val r = f
+         r.onComplete{
+           case Success(x) => /* all ok */
+           case Failure(ex) => lastException = ex  
+         }
+         r
        }catch{
          case ex: Exception =>
            lastException = ex
            throw ex
        }
     }else{
-      whenLocked
+      Promise successful whenLocked future
     }
   }
   

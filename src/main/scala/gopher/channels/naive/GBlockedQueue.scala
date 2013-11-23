@@ -15,7 +15,10 @@ import akka.actor._
 /**
  * classical blocked queue, which supports listeners.
  */
-class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSystem) extends InputOutputChannel[A] 
+class GBlockedQueue[A: ClassTag](size: Int, 
+                                 override val executionContextProvider: ChannelsExecutionContextProvider, 
+                                 override val actorSystemProvider: ChannelsActorSystemProvider) 
+                                                                   extends InputOutputChannelBase[A] 
                                                                    with NaiveInputChannel[A]
                                                                    with NaiveOutputChannel[A]
                                                                   with JLockHelper
@@ -64,7 +67,8 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
       def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]] =
       {
         p complete Success(input.value)
-        Some(p.future.map(x => ReadActionOutput(continue=false) ))
+        // compiler bug 
+        Some(p.future.map(x => ReadActionOutput(continue=false))(thisGBlockedQueue.executionContext))
       }
     }
     addReadListener(internalTie, f)
@@ -194,7 +198,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
       }
     }
     addWriteListener(internalTie, f)
-    val t = as.scheduler.scheduleOnce(timeout){
+    val t = actorSystem.scheduler.scheduleOnce(timeout){
       if (!p.isCompleted) {
         try {
           p.success(false)
@@ -279,7 +283,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
    * Run chunk of queue event loop inside current thread.
    *
    */
-  private def doStep(maxN: Int = 1000): Boolean =
+  private def doStep(maxN: Int = 100): Boolean =
     inLock(bufferLock) {
      inLock(doStepLock) {
       var toContinue = true
@@ -308,6 +312,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
       var done = false;
       while(!writeListeners.isEmpty() && !done) {
         var h = writeListeners.poll()
+        System.err.println("poll writeListeners, h="+h)
         if (h!=null) {
              val writeListener = h._2
              var input = WriteActionInput(h._1.writeJoin(this),this)
@@ -315,7 +320,6 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
                 if (outputFuture.isCompleted) {
                    val output = Await.result(outputFuture, Duration.Zero)
                    output.value.foreach(writeElementBlocked(_))
-                   done = true
                    if (output.continue) {
                      writeListeners.add(h)
                    }
@@ -327,8 +331,10 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
                    }
                    outputFuture.onComplete{ unused =>
                        this.addWriteListener(h._1, finalAction)
+                       tryDoStepAsync
                    }
                 }
+                done = true
              }             
         }
       }
@@ -342,6 +348,7 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
       var nNulls = 0
       while(!readListeners.isEmpty() && !done) {
          var h = readListeners.poll();
+          System.err.println("poll readListeners, h="+h)
          if (h!=null) {
            val readListener = h._2
            val elementToRead = buffer(readIndex)
@@ -352,7 +359,10 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
                  freeElementBlocked
                  done = true
                  for(output <- outputFuture) {
-                   if (output.continue) readListeners.add(h)
+                   if (output.continue) {
+                      readListeners.add(h)
+                      tryDoStepAsync
+                   }
                  }
                case None => // do nothing   
            }          
@@ -444,10 +454,14 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
       */
      def waitShutdown() = ???
 
-     def processExclusive[A](f: => A,whenLocked: => A): A = f
+     def processExclusive[A](f: => Future[A],whenLocked: => A): Future[A] = f
      
      def shutdownFuture: scala.concurrent.Future[Unit] = shutdownPromise.future
     
+     def executionContext: ExecutionContext = thisGBlockedQueue.executionContext
+
+     def actorSystem: ActorSystem = thisGBlockedQueue.actorSystem    
+     
   }
   
   
@@ -462,9 +476,12 @@ class GBlockedQueue[A: ClassTag](size: Int, ec: ExecutionContext, as: ActorSyste
   private val writeListeners: ConcurrentLinkedQueue[(NaiveTie,WriteAction[A])] 
                           = new ConcurrentLinkedQueue();
   
-  private[this] implicit val executionContext: ExecutionContext = ec;
-  private[this] val actorSystem: ActorSystem = as;
+  
+  private[this] implicit val executionContext = executionContextProvider.executionContext;
+  private[this] val actorSystem = actorSystemProvider.actorSystem;
 
+  override def api = NaiveChannelsAPI.instance
+  
   private[this] final var emptyA: A = _
 
 }

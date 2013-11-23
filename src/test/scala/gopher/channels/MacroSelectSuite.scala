@@ -7,11 +7,13 @@ import org.scalatest._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import ExecutionContext.Implicits.global
 
 class MacroSelectSuite extends FunSuite 
 {
 
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+  
    test("select emulation with macroses")  {
      
      val channel = makeChannel[Int](100)

@@ -31,18 +31,10 @@ object SelectorMacroCaller {
 
    val (inForEach, scName) = transformForeachBody(c)(xtree)
    
-   //  sc = new SelectorContext()
-   val newScTree =  ValDef(Modifiers(),scName, TypeTree(), 
-                           Apply(Select(New(Select(Select(Select(Select(
-                                                  Ident(nme.ROOTPKG), 
-                                                     newTermName("gopher")), 
-                                                       newTermName("channels")), 
-                                                         newTermName("naive")),
-                                                           newTypeName("SelectorContext"))), 
-                                 nme.CONSTRUCTOR), 
-                                 List()))
-                                 
-   // sc.run
+   val newScTree = q"""val ${scName} = new _root_.gopher.channels.naive.SelectorContext(
+                                       )
+                    """
+   
    val run =  Select(Ident(scName),newTermName(lastOp))                              
 
    val rtree = Block(

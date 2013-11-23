@@ -1,8 +1,15 @@
 package gopher.channels
 
+import scala.concurrent._
+import akka.actor._
+
 trait TieJoin {
   
-  def processExclusive[A](f: =>A, whenLocked: =>A): A
+  def processExclusive[A](f: => Future[A], whenLocked: =>A): Future[A]
+  
+  implicit def executionContext: ExecutionContext
+  
+  implicit def actorSystem: ActorSystem
   
   def shutdown(): Unit
   
@@ -11,7 +18,6 @@ trait TieJoin {
 trait TieReadJoin[+A] extends TieJoin {
 
   def putNext(action: ReadAction[A]): Unit
-  
   
 }
 

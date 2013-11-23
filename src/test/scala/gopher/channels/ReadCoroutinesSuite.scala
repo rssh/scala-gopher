@@ -2,10 +2,10 @@ package gopher.channels
 
 import gopher._
 import gopher.channels.Naive._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /*
  * Go analog:
@@ -36,7 +36,7 @@ import org.scalatest._
    */
 object ReadCoroutines {
   
-  def integers:InputOutputChannel[Int] =
+  def integers:InputOutputChannelBase[Int] =
   {
     val y = makeChannel[Int]()
     var count = 0

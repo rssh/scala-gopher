@@ -7,10 +7,8 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
 
-trait OutputChannel[-A] 
+trait OutputChannelBase[-A] 
 {
-
-  outputChannel =>
 
   type OutputElement = A
 
@@ -69,17 +67,7 @@ trait OutputChannel[-A]
   @inline def <~*? (x:A)(implicit timeout: Timeout) = writeAsyncTimeout(x, timeout.duration)
   
   
-  
-  trait OutputAsync
-  {
-     def write(x:A): Future[Unit] = outputChannel.writeAsync(x)
-
-     @inline def <~ (x:A) = write(x) 
-  }
-
-  def async: OutputAsync = new OutputAsync() {}
-  
-    
+   
   
 }
 

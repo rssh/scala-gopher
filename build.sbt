@@ -23,6 +23,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
 
+//
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
 version:="0.9.1"
 

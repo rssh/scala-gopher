@@ -75,13 +75,14 @@ package object gopher
    * @see [[gopher.channels.SelectorContext]]
    * @see [[gopher.~>]]
    */
-  def select[API <: ChannelsAPI[API]](implicit api: API) = new channels.ForSelectTransformer[API]
+  def select[API <: ChannelsAPI[API]](implicit api: API) 
+      = new channels.ForSelectTransformer[API]
   
   import scala.reflect.internal.annotations.compileTimeOnly
   
   
-  type InputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
-  type OutputChannelPair[A] = Tuple2[channels.InputChannel[A], A]
+  type InputChannelPair[A] = Tuple2[channels.InputChannelBase[A], A]
+  type OutputChannelPair[A] = Tuple2[channels.InputChannelBase[A], A]
   
   
   /**
@@ -179,7 +180,11 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeChannel[A:ClassTag](capacity: Int = 1)(implicit ec:ExecutionContext, api:ChannelsAPI[_]): api.IOChannel[A] = {
+  def makeChannel[A:ClassTag](capacity: Int = 1)
+     (implicit api:ChannelsAPI[_],
+               ecp:ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider,
+               asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider): api.IOChannel[A] = 
+  {
     api.makeChannel[A](capacity)
   }
 
@@ -187,10 +192,11 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API, ec: ExecutionContext): Tie[API] =
+  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API, 
+                                                            ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider,
+                                                            asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider
+                                                            ): Tie[API] =
     api.makeTie
      
-
-  implicit def toOutputPut[API <: ChannelsAPI[API],A](ch: API#OChannel[A]) = new OutputPut(ch)
   
 }

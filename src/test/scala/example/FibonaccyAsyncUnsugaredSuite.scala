@@ -5,13 +5,18 @@ import gopher.channels._
 import gopher.channels.Naive._
 import scala.async.Async._
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest._
 
-class FibonaccyAsyncUnsugaredSuite {
+import ExecutionContext.Implicits.global
 
+import tags._
+
+class FibonaccyAsyncUnsugaredSuite extends FunSuite {
+
+  
   object Fibonaccy {
 
+  
  
   def fibonacci(c: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)
@@ -46,7 +51,8 @@ class FibonaccyAsyncUnsugaredSuite {
     val quit = makeChannel[Int]();
     
     c.readZipped(1 to n) {
-      (i,n) => System.out.println("${i}:${ch}");
+      (i,n) => System.out.println(s"${i}:${n}");
+      acceptor(n)
     }.next.addWriteAction(quit,
         new PlainWriteAction[Int] {
           override def plainApply(in: WriteActionInput[Int]): WriteActionOutput[Int] = {
@@ -58,20 +64,16 @@ class FibonaccyAsyncUnsugaredSuite {
     fibonacci(c,quit)
   }
   
-  
-  
-}
 
-class FibonaccySuite extends FunSuite
-{
-  
-  test("fibonaccy must be processed up to 50") {
+  }
+ 
+ test("fibonaccy must be processed up to 50", Now) {
     var last:Long = 0;
     Fibonaccy.run(50, last = _ )
     assert(last != 0)
   }
+  
+}
 
-}
   
-  
-}
+

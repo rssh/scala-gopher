@@ -8,7 +8,7 @@ trait ChannelAction
 trait ReadAction[-A] extends ChannelAction
    with (ReadActionInput[A] => Option[Future[ReadActionOutput]])
   
-case class ReadActionInput[+A]( tie: TieReadJoin[A] , channel: InputChannel[A], value: A)
+case class ReadActionInput[+A]( tie: TieReadJoin[A] , channel: InputChannelBase[A], value: A)
 case class ReadActionOutput(continue: Boolean)
 
 object ReadAction
@@ -47,7 +47,7 @@ object PlainReadAction
 trait WriteAction[A] extends ChannelAction
   with (WriteActionInput[A] => Option[Future[WriteActionOutput[A]]])
   
-case class WriteActionInput[A](tie: TieWriteJoin[A], channel: OutputChannel[A])
+case class WriteActionInput[A](tie: TieWriteJoin[A], channel: OutputChannelBase[A])
 case class WriteActionOutput[A](value: Option[A], continue: Boolean)
 
 object WriteAction

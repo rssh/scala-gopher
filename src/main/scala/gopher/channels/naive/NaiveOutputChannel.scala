@@ -4,7 +4,9 @@ import gopher.channels._
 import scala.concurrent._
 import akka.actor._
 
-trait NaiveOutputChannel[-A] extends OutputChannel[A] with Activable {
+trait NaiveOutputChannel[-A] extends OutputChannelBase[A] 
+                                  with OutputChannelOps[NaiveChannelsAPI,A] 
+                                  with Activable {
 
   def addWriteListener(tie: NaiveTie, f: () => Future[Option[A]] )(implicit ec: ExecutionContext): Unit =
   {

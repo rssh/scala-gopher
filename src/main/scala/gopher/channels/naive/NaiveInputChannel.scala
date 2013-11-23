@@ -3,7 +3,7 @@ package gopher.channels.naive
 import gopher.channels._
 import scala.concurrent._
 
-trait NaiveInputChannel[+A] extends InputChannel[A] 
+trait NaiveInputChannel[+A] extends InputChannelBase[A] 
                                  with InputChannelOps[NaiveChannelsAPI,A]
                                  with Activable {
  

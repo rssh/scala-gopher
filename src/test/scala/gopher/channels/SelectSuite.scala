@@ -4,7 +4,6 @@ package gopher.channels
 import org.scalatest._
 import scala.concurrent._
 import scala.concurrent.duration._
-import ExecutionContext.Implicits.global
 import gopher.channels.Naive._
 import gopher.channels.naive.SelectorContext
 
@@ -14,46 +13,31 @@ class SelectSuite extends FunSuite
  
    test("basic select emulation")  {
      
+     System.err.println("started basic select emulation")
+     
      val channel = make[Int](100)
      
-     val producer = Future {
+     val producer = channel.put(1 to 1000).shutdownFuture
        
-       for( i <- 1 to 1000) {
-         { val sc = new SelectorContext()
-           sc.addOutputAction(channel,
-                 () => {
-            //       System.err.println("sending:"+i);
-                   sc.shutdown
-                   Some(i)
-                 }
-               )
-           sc.runOnce
-         }
-       }
-       channel
-       
-     }
-     
      @volatile var sum = 0;
-     val consumer = Future {
+     val consumer = {
        val sc = new SelectorContext()
-       sc.addInputAction(channel, 
+       sc.addInputAction(channel,  
             (i: Int) => { sum = sum + i; 
-                         // System.err.println("received:"+i+", now sum:"+sum);
+                          System.err.println("received:"+i+", now sum:"+sum);
                           if (i == 1000) {
-                           // System.err.println("shutdowned");
+                            System.err.println("shutdowned");
                             sc.shutdown()
                           }
-                          true 
+                          Promise successful true future 
                         }
        )
-       Await.ready(sc.go, 5.second)
-       
+       sc.start.shutdownFuture
      }
    
      
-  
-     Await.ready(consumer, 5.second)
+     
+     Await.ready(consumer, 1000.second)
 
     // System.err.println("sum="+sum);
      
@@ -65,7 +49,7 @@ class SelectSuite extends FunSuite
    }
     
    
-
+/*
   
    test("select with traditional producer") {
      
@@ -88,14 +72,14 @@ class SelectSuite extends FunSuite
                           if (i == 1000) {
                             sc.shutdown()
                           }
-                          true 
+                          Promise successful true future 
                         }
        )
        Await.ready(sc.go, 5.second)
      }
    
     
-     Await.ready(consumer, 5.second)
+     Await.ready(consumer, 1000.second)
      
    }
   
@@ -118,18 +102,18 @@ class SelectSuite extends FunSuite
                           if (i == 1000) {
                             sc.shutdown()
                           }
-                          true 
+                          Promise successful true future 
                         }
        )
-       Await.ready(sc.go, 5.second)
+       Await.ready(sc.go, 1000.second)
      }
    
     
-     Await.ready(consumer, 5.second)
+     Await.ready(consumer, 1000.second)
      
    }
     
-   
+  */ 
   
    
 }

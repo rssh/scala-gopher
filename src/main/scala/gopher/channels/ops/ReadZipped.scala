@@ -11,7 +11,9 @@ class ReadZipped[A,B](it: Iterator[B],f:(A,B)=>Unit) extends PlainReadAction[A] 
        in.tie.shutdown()
        false
     } else {
-       f(in.value,it.next)
+       val x = it.next
+       System.err.println("it="+it+", after next="+x)
+       f(in.value,x)
        true
     }
   }

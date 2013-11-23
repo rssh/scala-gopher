@@ -16,16 +16,17 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
 
   type ChannelsAPISelf = T  
     
-  type IChannel[+A] <: InputChannel[A] with InputChannelOps[T,A]
-  type OChannel[-A] <: OutputChannel[A]
-  type IOChannel[A] <: InputOutputChannel[A] with InputChannelOps[T,A]
+  type IChannel[+A] <: InputChannelBase[A] with InputChannelOps[T,A]
+  type OChannel[-A] <: OutputChannelBase[A] with OutputChannelOps[T,A]
+  type IOChannel[A] <: InputOutputChannelBase[A] with InputChannelOps[T,A] 
+                                                 with OutputChannelOps[T,A]
 
   type GTie <: Tie[T]
   type GFuture[T, A] <: Future[A]
         
-  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem): IOChannel[A]
+  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ChannelsExecutionContextProvider, as: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider ): IOChannel[A]
   
-  def makeTie(implicit ec:ExecutionContext, as: ActorSystem = ChannelsActorSystemStub.defaultSystem ): GTie
+  def makeTie(implicit ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider ): GTie
   
  //def  makeTie = new StartTieBuilder[ChannelsAPISelf](this,None)
   
@@ -39,7 +40,5 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
    
   type ReadActionRecord[A] = (ChannelsAPISelf#IChannel[A], ReadAction[A])
   type WriteActionRecord[A] = (ChannelsAPISelf#OChannel[A], WriteAction[A])
-
-  
   
 }

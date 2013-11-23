@@ -9,10 +9,9 @@ import java.util.concurrent.TimeUnit
 import gopher.channels.naive.Activable
 
 
-trait InputChannel[+A] 
+trait InputChannelBase[+A]
 {
   
-  inputChannel =>
 
   type InputElement = A;
 
@@ -44,22 +43,6 @@ trait InputChannel[+A]
     
   
   
-  // sugar
-  trait InputAsync
-  {
-     @inline
-     def read: Future[A] = inputChannel.readAsync
-     
-     @inline
-     def readTimeout(d: FiniteDuration): Future[Option[A]] = inputChannel.readAsyncTimeout(d)
-                     
-     @inline def ? = read
-
-  }
-
-  
-  def async: InputAsync = new InputAsync() {}
-
   //TODO:
   //def readWhile[C](p: A => Boolean)(implicit val CanBuildFrom[C])
 

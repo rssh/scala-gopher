@@ -19,11 +19,12 @@ package object channels {
   
   
   
-  def make[A: ClassTag](capacity:  Int = 1000)(implicit ec: ExecutionContext, api:ChannelsAPI[_]): api.IOChannel[A] = 
+  def make[A: ClassTag](capacity:  Int = 1000)
+       (implicit api: ChannelsAPI[_], 
+        ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider,
+        asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider ): api.IOChannel[A] = 
     {
       val retval = api.makeChannel[A](capacity)
-      //  val retval = new GBlockedQueue[A](capacity,ec);
-      //retval.process(executionContext);
       retval;
     }
   
