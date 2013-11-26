@@ -16,8 +16,10 @@ import akka.actor._
  * classical blocked queue, which supports listeners.
  */
 class GBlockedQueue[A: ClassTag](size: Int, 
+                                 settedName: String,
                                  override val executionContextProvider: ChannelsExecutionContextProvider, 
-                                 override val actorSystemProvider: ChannelsActorSystemProvider) 
+                                 override val actorSystemProvider: ChannelsActorSystemProvider,
+                                 override val loggerFactory: ChannelsLoggerFactory) 
                                                                    extends InputOutputChannelBase[A] 
                                                                    with NaiveInputChannel[A]
                                                                    with NaiveOutputChannel[A]
@@ -258,7 +260,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
   private[this] def tryDoStepAsync() =
     inTryLock(doStepLock)(doStepAsync(), ())
 
-  def activate() = tryDoStepAsync  
+  def activate() = {
+    tryDoStepAsync  
+  }
     
   /**
    * Run chunk of queue event loop inside thread, specified by
@@ -319,6 +323,7 @@ class GBlockedQueue[A: ClassTag](size: Int,
              for(outputFuture <- writeListener(input)) {
                 if (outputFuture.isCompleted) {
                    val output = Await.result(outputFuture, Duration.Zero)
+                   System.err.println("receive write output"+output);
                    output.value.foreach(writeElementBlocked(_))
                    if (output.continue) {
                      writeListeners.add(h)
@@ -326,8 +331,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
                 } else {
                    // call me back when finish...
                    val finalAction = new WriteAction[A]() {
-                       override def apply(in:WriteActionInput[A]) =
+                       override def apply(in:WriteActionInput[A]) = {
                          Some(outputFuture)
+                       }
                    }
                    outputFuture.onComplete{ unused =>
                        this.addWriteListener(h._1, finalAction)
@@ -460,10 +466,17 @@ class GBlockedQueue[A: ClassTag](size: Int,
     
      def executionContext: ExecutionContext = thisGBlockedQueue.executionContext
 
-     def actorSystem: ActorSystem = thisGBlockedQueue.actorSystem    
+     def actorSystem: ActorSystem = thisGBlockedQueue.actorSystem   
+     
+     def channelsLoggerFactory = thisGBlockedQueue.loggerFactory
+     
+     def logger  = thisGBlockedQueue.logger
+
+     def tag: String = thisGBlockedQueue.tag
      
   }
-  
+
+  override protected def tag: String = Option(settedName).getOrElse(this.toString());
   
   private[this] val bufferLock = new ReentrantLock();
   private[this] val doStepLock = new ReentrantLock();
@@ -477,10 +490,12 @@ class GBlockedQueue[A: ClassTag](size: Int,
                           = new ConcurrentLinkedQueue();
   
   
+  
   private[this] implicit val executionContext = executionContextProvider.executionContext;
   private[this] val actorSystem = actorSystemProvider.actorSystem;
-
+  
   override def api = NaiveChannelsAPI.instance
+  override def logger = loggerFactory.logger(classOf[GBlockedQueue[A]], tag) 
   
   private[this] final var emptyA: A = _
 

@@ -26,7 +26,7 @@ class AsyncSelectSuite extends FunSuite {
      
      var sum = 0;
      
-     val consumer = makeTie.addReadAction(channel, PlainReadAction{ 
+     val consumer = makeTie().addReadAction(channel, PlainReadAction{ 
         (in: ReadActionInput[Int]) => sum = sum + in.value
         val toContinue = (in.value < MAX_N)
         if (!toContinue) {

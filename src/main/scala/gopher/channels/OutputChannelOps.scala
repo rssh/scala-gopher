@@ -26,7 +26,7 @@ trait OutputChannelOps[API <: ChannelsAPI[API],-A] extends ChannelBase[API]
   
   def put(c:Iterable[A]) =
   {
-   makeTie.addWriteAction(this, new OutputPutAction(c.iterator))
+   makeTie("put").addWriteAction(this, new OutputPutAction(c.iterator))
   }
 
 }

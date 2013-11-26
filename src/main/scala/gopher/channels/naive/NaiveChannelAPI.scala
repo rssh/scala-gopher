@@ -18,14 +18,19 @@ class NaiveChannelsAPI extends ChannelsAPI[NaiveChannelsAPI]
   type OChannel[-A] = NaiveOutputChannel[A]
   type IOChannel[A] = GBlockedQueue[A]
     
-  def makeChannel[A: ClassTag](capacity: Int)(implicit ecp: ChannelsExecutionContextProvider, asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider): IOChannel[A] =
-                                            new GBlockedQueue[A](capacity,ecp,asp);
+  override def makeChannel[A: ClassTag](capacity: Int, name: String)(implicit 
+                                                                   ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
+                                                                   asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+                                                                   lf:  ChannelsLoggerFactory = DefaultChannelsLoggerFactory): IOChannel[A] =
+                                            new GBlockedQueue[A](capacity,name,ecp,asp,lf);
   
   type GTie = NaiveTie
   
-  def makeTie(implicit ecp:ChannelsExecutionContextProvider=DefaultChannelsExecutionContextProvider, 
-              asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider): GTie =
-    new SelectorContext()
+  override def makeTie(name:String)(implicit ecp:ChannelsExecutionContextProvider=DefaultChannelsExecutionContextProvider, 
+                                             asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+                                             clf:  ChannelsLoggerFactory = DefaultChannelsLoggerFactory
+                                              ): GTie =
+    new SelectorContext(name,ecp,asp,clf)
   
   type GFuture[T, A] = Future[A]
  

@@ -3,6 +3,8 @@ package gopher.channels
 import scala.concurrent._
 import scala.util._
 import akka.actor._
+import ch.qos.logback.classic.{Logger=>LogbackLogger}
+
 
 
 /**
@@ -79,14 +81,37 @@ trait Tie[ API <: ChannelsAPI[API] ] extends TieJoin {
   {
     implicit val ec = executionContext
     implicit val ac = actorSystem
-    val n = api.makeTie
-    shutdownFuture.onSuccess{ case _ => n.start() }
+    implicit val lf = channelsLoggerFactory
+    val nn = tag+"*"
+    val n = api.makeTie(nn);
+    if (logger.isTraceEnabled()) {
+      logger.trace(s"created next tie ${nn}");
+    }
+    shutdownFuture.onSuccess{
+      case _ => 
+         if (logger.isTraceEnabled()) {
+           logger.trace(s"success shutdown of channel ${tag}, start next");
+         }
+         n.start() 
+    }
     n
   }
   
+  /**
+   * Tag, used for debug purposes.   
+   */
+  def tag: String 
+
+  /*
+   * Logback logger, used for this wiht this tag.  
+   * We use logback instead slf4j to be able setup log levels and
+   * add appenders to logger.
+   */
+  def logger: LogbackLogger
+  
+  def executionContext : ExecutionContext
+  def actorSystem: ActorSystem
+  def channelsLoggerFactory: ChannelsLoggerFactory
+  
    
-   def executionContext : ExecutionContext
-   def actorSystem: ActorSystem
-  
-  
 }

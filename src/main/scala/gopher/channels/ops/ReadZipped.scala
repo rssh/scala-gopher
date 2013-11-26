@@ -3,7 +3,7 @@ package gopher.channels.ops
 import scala.concurrent._
 import gopher.channels._
 
-class ReadZipped[A,B](it: Iterator[B],f:(A,B)=>Unit) extends PlainReadAction[A] {
+class ReadZipped[A,B](it: Iterator[B],f:(B,A)=>Unit) extends PlainReadAction[A] {
 
   override def plainApply(in: ReadActionInput[A]):Boolean =
   {
@@ -12,8 +12,8 @@ class ReadZipped[A,B](it: Iterator[B],f:(A,B)=>Unit) extends PlainReadAction[A] 
        false
     } else {
        val x = it.next
-       System.err.println("it="+it+", after next="+x)
-       f(in.value,x)
+       System.err.println("it="+it+", after next="+x+"in.value="+in.value)
+       f(x,in.value)
        true
     }
   }

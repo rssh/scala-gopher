@@ -180,23 +180,25 @@ package object gopher
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeChannel[A:ClassTag](capacity: Int = 1)
+  def makeChannel[A:ClassTag](capacity: Int = 1, tag: String = null)
      (implicit api:ChannelsAPI[_],
                ecp:ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider,
-               asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider): api.IOChannel[A] = 
+               asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+               clf:ChannelsLoggerFactory = DefaultChannelsLoggerFactory): api.IOChannel[A] = 
   {
-    api.makeChannel[A](capacity)
+    api.makeChannel[A](capacity,tag)
   }
 
   /**
    * Make channel: create go-like channel with given capacity.
    */
   @inline
-  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](implicit api: API, 
+  def makeTie[A:ClassTag, API <: ChannelsAPI[API]](tag: String = null)(implicit api: API, 
                                                             ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider,
-                                                            asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider
+                                                            asp:ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+                                                            clf:ChannelsLoggerFactory = DefaultChannelsLoggerFactory
                                                             ): Tie[API] =
-    api.makeTie
+    api.makeTie(tag)
      
   
 }

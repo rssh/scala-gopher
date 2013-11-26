@@ -24,13 +24,16 @@ trait ChannelsAPI[T <: ChannelsAPI[T]] {
   type GTie <: Tie[T]
   type GFuture[T, A] <: Future[A]
         
-  def makeChannel[A: ClassTag](capacity: Int)(implicit ec: ChannelsExecutionContextProvider, as: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider ): IOChannel[A]
+  def makeChannel[A: ClassTag](capacity: Int = 1, tag: String=null)(implicit ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
+                                                                              asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+                                                                              clf: ChannelsLoggerFactory = DefaultChannelsLoggerFactory
+                                                                    ): IOChannel[A]
   
-  def makeTie(implicit ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider ): GTie
+  def makeTie(tag:String=null)(
+             implicit ecp: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
+                      asp: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+                      clf: ChannelsLoggerFactory = DefaultChannelsLoggerFactory ): GTie
   
- //def  makeTie = new StartTieBuilder[ChannelsAPISelf](this,None)
-  
-  //def  gAwait[A](f: GFuture[A], d: Duration)(implicit ec: ExecutionContext): A
  
   def  transformGo[A](c:Context)(code: c.Expr[A]): c.Expr[Future[A]]
     

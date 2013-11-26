@@ -44,8 +44,10 @@ import akka.actor._
  * </pre>
  */
 class SelectorContext(
+         settedName: String = null,
     val executionContextProvider: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
-    val actorSystemProvider: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider)
+    val actorSystemProvider: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
+    override val channelsLoggerFactory: ChannelsLoggerFactory = DefaultChannelsLoggerFactory)
                                 extends Activable with NaiveTie {
 
   selectorContextTie =>
@@ -55,7 +57,12 @@ class SelectorContext(
     
   def addReadAction[A](ch: API#IChannel[A], action: ReadAction[A]): this.type =
     {
-      ch.addReadListener(this, action)
+      ch.addReadListener(this, new ReadAction[A](){
+        def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]]=
+        {
+          if (enabled) action(input) else None 
+        }
+      })
       inputListeners = action :: inputListeners
       activables = ch :: activables
       this
@@ -97,7 +104,10 @@ class SelectorContext(
 
   def addWriteAction[A](ch: API#OChannel[A], action: WriteAction[A]): this.type =
     {
-      ch.addWriteListener(this, action)
+      ch.addWriteListener(this, new WriteAction[A]() {
+        def apply(input: WriteActionInput[A]): Option[Future[WriteActionOutput[A]]] =
+          if (enabled) action(input) else None
+      })
       outputListeners = action :: outputListeners
       activables = ch :: activables
       this
@@ -185,7 +195,8 @@ class SelectorContext(
     }
   
   def start() = {
-    System.err.println("tie start");
+    System.err.println("tie start, this="+this);
+    enabled=true
     activate()
     go
     this
@@ -252,6 +263,10 @@ class SelectorContext(
   
   def shutdownFuture: scala.concurrent.Future[Unit] = shutdownPromise.future
 
+
+  def logger = channelsLoggerFactory.logger(classOf[SelectorContext], tag)
+
+  def tag: String = Option(settedName).getOrElse(this.toString())
   
   
   private var inputListeners: List[ReadAction[_]] = Nil

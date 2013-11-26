@@ -1,5 +1,6 @@
 package gopher.channels
 
+import ch.qos.logback.classic.{Logger=>LogbackLogger}
 
 trait ChannelBase[API <: ChannelsAPI[API]] {
 
@@ -7,9 +8,15 @@ trait ChannelBase[API <: ChannelsAPI[API]] {
   
    protected def actorSystemProvider: ChannelsActorSystemProvider
    
+   protected def loggerFactory: ChannelsLoggerFactory
+   
+   protected def logger: LogbackLogger
+   
+   protected def tag: String
+   
    def api: ChannelsAPI[API]
    
-   protected def makeTie = api.makeTie(executionContextProvider, actorSystemProvider)
+   protected def makeTie(name: String) = api.makeTie(this.tag+"/"+name)(executionContextProvider, actorSystemProvider, loggerFactory)
 
    
 }

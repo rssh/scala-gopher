@@ -23,6 +23,13 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
 
+libraryDependencies += "ch.qos.logback" % "logback-core" % "1.0.13"
+
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13"
+
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5"
+
+
 //
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 

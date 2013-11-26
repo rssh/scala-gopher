@@ -31,8 +31,9 @@ object SelectorMacroCaller {
 
    val (inForEach, scName) = transformForeachBody(c)(xtree)
    
-   val newScTree = q"""val ${scName} = new _root_.gopher.channels.naive.SelectorContext(
-                                       )
+   def posName= xtree.pos.show
+   
+   val newScTree = q"""val ${scName} = new _root_.gopher.channels.naive.SelectorContext( ${posName})
                     """
    
    val run =  Select(Ident(scName),newTermName(lastOp))                              
