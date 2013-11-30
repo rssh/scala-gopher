@@ -44,7 +44,7 @@ import akka.actor._
  * </pre>
  */
 class SelectorContext(
-         settedName: String = null,
+    override val tag: String = "",
     val executionContextProvider: ChannelsExecutionContextProvider = DefaultChannelsExecutionContextProvider, 
     val actorSystemProvider: ChannelsActorSystemProvider = DefaultChannelsActorSystemProvider,
     override val channelsLoggerFactory: ChannelsLoggerFactory = DefaultChannelsLoggerFactory)
@@ -60,7 +60,9 @@ class SelectorContext(
       ch.addReadListener(this, new ReadAction[A](){
         def apply(input: ReadActionInput[A]): Option[Future[ReadActionOutput]]=
         {
-          if (enabled) action(input) else None 
+          if (enabled) action(input) 
+            else 
+          None 
         }
       })
       inputListeners = action :: inputListeners
@@ -186,16 +188,20 @@ class SelectorContext(
       }    
     }
   
-  
-    
-
   def activate(): Unit =
     {
-      activables foreach (_.activate)
+      activables foreach {a =>
+        if (logger.isTraceEnabled()) {
+          logger.trace(s"activate $a")
+        }  
+        a.activate;
+      }
     }
   
   def start() = {
-    System.err.println("tie start, this="+this);
+    if (logger.isTraceEnabled()) {
+        logger.trace(s"start [this=$this]")
+    }
     enabled=true
     activate()
     go
@@ -265,9 +271,6 @@ class SelectorContext(
 
 
   def logger = channelsLoggerFactory.logger(classOf[SelectorContext], tag)
-
-  def tag: String = Option(settedName).getOrElse(this.toString())
-  
   
   private var inputListeners: List[ReadAction[_]] = Nil
   private var outputListeners: List[WriteAction[_]] = Nil

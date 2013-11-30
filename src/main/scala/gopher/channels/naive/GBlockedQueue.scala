@@ -135,6 +135,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
 
   def addWriteListener(tie: NaiveTie, f: WriteAction[A]): Unit =
   {
+      if (logger.isTraceEnabled()) {
+        logger.trace(s"addTraceListener ${f} from ${tie} with tag ${tie.tag}")
+      }
       writeListeners.add((tie,f))
       tryDoStepAsync()
   }
@@ -258,9 +261,16 @@ class GBlockedQueue[A: ClassTag](size: Int,
     }
 
   private[this] def tryDoStepAsync() =
-    inTryLock(doStepLock)(doStepAsync(), ())
+    inTryLock(doStepLock)(doStepAsync(), 
+        if (logger.isTraceEnabled()) {
+          logger.trace(s"tryDoStepAsync for $this: stepLock is blocked.")
+        }
+    )
 
   def activate() = {
+    if (logger.isTraceEnabled()) {
+      logger.trace(s"activate $this, tag=$tag")
+    }
     tryDoStepAsync  
   }
     
@@ -271,10 +281,19 @@ class GBlockedQueue[A: ClassTag](size: Int,
    */
   def doStepAsync(): Unit = {
     //implicit val ec = executionContext;
+    if (logger.isTraceEnabled()) {
+        logger.trace("doStepAsyn - planning step")
+    }
     executionContext.execute(new Runnable(){
       def run() {
         val toContinue = inTryLock(doStepLock)( 
-                            { doStep() }, false 
+                            { doStep() }, 
+                            {
+                              if (logger.isTraceEnabled()) {
+                                 logger.trace("in doStepAsync - doStep is locked, leaving")
+                              }
+                              false;
+                            }
                           );
         if (toContinue && ! shutdowned) {
            doStepAsync()
@@ -288,8 +307,12 @@ class GBlockedQueue[A: ClassTag](size: Int,
    *
    */
   private def doStep(maxN: Int = 100): Boolean =
-    inLock(bufferLock) {
+  {   
+    inLock(bufferLock) { 
      inLock(doStepLock) {
+      if (logger.isTraceEnabled()) {
+         logger.trace(s"doStep - after locks, count=${count} size=${size}")
+      } 
       var toContinue = true
       var wasContinue = false;
       var n = maxN;
@@ -310,40 +333,78 @@ class GBlockedQueue[A: ClassTag](size: Int,
       wasContinue
      } 
     }
+  }
 
   private def fireNewSpaceBlocked: Boolean =
     {
       var done = false;
+      val toAdd = new JLinkedList[(NaiveTie,WriteAction[A])]()
       while(!writeListeners.isEmpty() && !done) {
         var h = writeListeners.poll()
-        System.err.println("poll writeListeners, h="+h)
+        if (logger.isTraceEnabled()) {
+           logger.trace("poll writeListeners, h="+h)
+        }
         if (h!=null) {
              val writeListener = h._2
              var input = WriteActionInput(h._1.writeJoin(this),this)
-             for(outputFuture <- writeListener(input)) {
+             writeListener(input) match {
+               case None => toAdd.add(h)
+               case Some(outputFuture) =>
                 if (outputFuture.isCompleted) {
                    val output = Await.result(outputFuture, Duration.Zero)
-                   System.err.println("receive write output"+output);
-                   output.value.foreach(writeElementBlocked(_))
-                   if (output.continue) {
-                     writeListeners.add(h)
+                   if (logger.isTraceEnabled()) {
+                      logger.trace(s"write:complete, output.value=${output.value} count=${count}")
+                   }
+                   val norec = output.value match {
+                     case None => true
+                     case Some(x) => writeElementBlocked(x)
+                   }
+                   if (norec) {
+                     if (output.continue) {
+                        writeListeners.add(h)
+                     }
+                   } else {
+                     // x was not writed becouse we have no free place now.
+                     // so, add writeListener back
+                     val finalAction = new WriteAction[A]() {
+                        override def apply(in:WriteActionInput[A]):Option[Future[WriteActionOutput[A]]] = 
+                           Some(outputFuture)   
+                     }
+                     if (logger.isTraceEnabled()) {
+                       logger.trace("resubmitting write")
+                     }
+                     this.addWriteListener(h._1,finalAction)
                    }
                 } else {
-                   // call me back when finish...
-                   val finalAction = new WriteAction[A]() {
-                       override def apply(in:WriteActionInput[A]) = {
-                         Some(outputFuture)
+                   outputFuture.onComplete{ output =>
+                       //i.e. call me again when I will be completed.
+                       val finalAction = new WriteAction[A]() {
+                          override def apply(in:WriteActionInput[A]):Option[Future[WriteActionOutput[A]]] = 
+                          {
+                            output match {
+                              case Failure(f) => Some(outputFuture)
+                              case Success(x) =>
+                                if (x.continue) {
+                                  // put original action in queue instead final 
+                                  addWriteListener(h._1,h._2)
+                                }
+                                // Promise.true
+                                Some(Promise successful WriteActionOutput[A](x.value,false) future)
+                            }
+                          }
                        }
-                   }
-                   outputFuture.onComplete{ unused =>
-                       this.addWriteListener(h._1, finalAction)
+                       if (logger.isTraceEnabled()) {
+                         logger.trace("resubmitting uncomplete write")
+                       }
+                       this.addWriteListener(h._1,finalAction)
                        tryDoStepAsync
-                   }
+                   }(executionContext)
                 }
                 done = true
              }             
         }
       }
+      writeListeners.addAll(toAdd)
       done
     }
 
@@ -351,10 +412,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
   private def fireNewElementBlocked: Boolean =
     {
       var done = false
-      var nNulls = 0
+      val toAdd = new JLinkedList[(NaiveTie,ReadAction[A])]()
       while(!readListeners.isEmpty() && !done) {
          var h = readListeners.poll();
-          System.err.println("poll readListeners, h="+h)
          if (h!=null) {
            val readListener = h._2
            val elementToRead = buffer(readIndex)
@@ -364,21 +424,26 @@ class GBlockedQueue[A: ClassTag](size: Int,
                case Some(outputFuture) =>
                  freeElementBlocked
                  done = true
-                 for(output <- outputFuture) {
+                 outputFuture.foreach{ output =>
                    if (output.continue) {
                       readListeners.add(h)
                       tryDoStepAsync
                    }
-                 }
-               case None => // do nothing   
+                 }(executionContext)
+               case None => 
+                   toAdd.add(h)
            }          
          }
       }
+      readListeners.addAll(toAdd)
       done
     }
 
   private def freeElementBlocked =
     {
+      if (logger.isTraceEnabled()) {
+        logger.trace(s"free element blocked for ${this}");
+      }
       buffer(readIndex) = emptyA
       readIndex = ((readIndex + 1) % size)
       count -= 1
@@ -386,6 +451,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
 
   private def readElementBlocked: Option[A] =
     {
+      if (logger.isTraceEnabled()) {
+           logger.trace(s"readElementBlocked")
+      }
       if (count > 0) {
         val retval = buffer(readIndex)
         freeElementBlocked
@@ -395,7 +463,7 @@ class GBlockedQueue[A: ClassTag](size: Int,
 
   private def writeElementBlocked(a: A): Boolean =
     {
-      if (count < size) {
+     val r = if (count < size) {
         buffer(writeIndex) = a
         writeIndex = ((writeIndex + 1) % size)
         count += 1
@@ -403,6 +471,10 @@ class GBlockedQueue[A: ClassTag](size: Int,
       } else {
         false
       }
+      if (logger.isTraceEnabled()) {
+           logger.trace(s"writeElementBlocked ${a} ${r}")
+      }
+      r
     }
 
 

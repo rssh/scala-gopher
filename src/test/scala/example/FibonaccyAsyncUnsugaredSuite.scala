@@ -19,7 +19,9 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
   object Fibonaccy {
  
   def fibonacci(c: OChannel[Long], quit: IChannel[Int]): Unit = {
-    var (x,y) = (0L,1L)
+    // bug - compiler bug, locted in context. 
+    @volatile var (x,y) = (0L,1L)
+    System.err.println(s"initial assignment, x=$x, y=$y")
     val tie = makeTie("generation")
     tie.logger.setLevel(ch.qos.logback.classic.Level.TRACE)
     tie.logger.error("A1")
@@ -28,7 +30,7 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
       new WriteAction[Long] {
         override def apply(in: WriteActionInput[Long]) =
          Some(async {
-                System.err.println(s"write-action, x=$x, y=$x z=$x")
+                tie.logger.trace(s"write-action, x=$x, y=$y")
                 val z = x
                 //await{c <~* z}
                 //System.err.println(s"after-await-in-write-action, z=$z")
@@ -53,11 +55,12 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
   
   def run(n:Int, acceptor: Long => Unit ): Unit =
   {
-    val c = makeChannel[Long]();
+    val c = makeChannel[Long](1,"c");
+    c.logger.setLevel(ch.qos.logback.classic.Level.TRACE)
     val quit = makeChannel[Int]();
     
     val consumer = c.readZipped(1 to n) {
-      (i,n) => System.out.println(s"${i}:${n}");
+      (i,n) => System.out.println(s"received:${i}:${n}");
       acceptor(n)
     }.next.addWriteAction(quit,
         new PlainWriteAction[Int] {

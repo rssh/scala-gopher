@@ -17,7 +17,7 @@ scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.3"
 
-libraryDependencies += "org.scala-lang.modules.async" %% "scala-async" % "1.0.0-SNAPSHOT"
+libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.0-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
