@@ -5,14 +5,13 @@ import gopher._
 import gopher.channels._
 import gopher.channels.Naive._
 import scala.concurrent.ExecutionContext.Implicits._
+import tags._
 
 object FibonaccyAsync {
 
-/*  
   def fibonacci(ch: OChannel[Long], quit: IChannel[Int]): Unit = {
     var (x,y) = (0L,1L)
-    //val tie = makeTie;
-    makeTie.forever.writing(ch){ 
+    makeTie.writing(ch){ 
                   val z = x
                   x = y
                   y = z + y
@@ -43,7 +42,7 @@ object FibonaccyAsync {
 class FibonaccyAsyncSuite extends FunSuite
 {
   
-  test("async fibonaccy must be processed up to 50") {
+  test("async fibonaccy must be processed up to 50", Now) {
     pending
     /*var last:Long = 0;
     FibonaccyAsync.run(50, last = _)

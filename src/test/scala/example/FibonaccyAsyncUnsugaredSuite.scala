@@ -81,7 +81,7 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
 
   }
  
- test("fibonaccy must be processed up to 50", Now) {
+ test("fibonaccy must be processed up to 50") {
     var last:Long = 0;
     Fibonaccy.run(50, last = _ )
     assert(last != 0)

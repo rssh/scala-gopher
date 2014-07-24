@@ -5,6 +5,7 @@ import gopher._
 
 object CopyFile {
 
+/*
   def main(args:Array[String]):Unit =
   {
    if (args.length < 3) {
@@ -21,5 +22,6 @@ object CopyFile {
     defer{ out.close() }
     out.getChannel() transferFrom(in.getChannel(), 0, Long.MaxValue)
   }
+*/
   
 }

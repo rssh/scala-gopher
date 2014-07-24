@@ -7,6 +7,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 import org.scalatest._
+import tags._
 
 /*
  * code from go tutorial: http://tour.golang.org/#66

@@ -33,7 +33,7 @@ object SelectorMacroCaller {
    
    def posName= xtree.pos.show
    
-   val newScTree = q"""val ${scName} = new _root_.gopher.channels.naive.SelectorContext( ${posName})
+   val newScTree = q"""val ${scName} = new _root_.gopher.channels.naive.SelectorContext( ${posName} )
                     """
    
    val run =  Select(Ident(scName),newTermName(lastOp))                              

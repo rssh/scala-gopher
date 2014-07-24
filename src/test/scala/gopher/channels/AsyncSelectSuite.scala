@@ -9,7 +9,7 @@ import tags._
 
 class AsyncSelectSuite extends FunSuite {
 
-     test("async base select emulation")  {
+     test("async base select emulation", Now)  {
      
      val MAX_N=1000  
        

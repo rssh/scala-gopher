@@ -53,6 +53,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
         while (count == 0) {
           // TODO:  wrap in blocked to help fork0java cle
           readPossibleCondition.await()
+          if (shutdowned) {
+            throw new IllegalStateException("quue is shutdowned");
+          }
         }
         val retval = buffer(readIndex)
         freeElementBlocked
@@ -149,6 +152,9 @@ class GBlockedQueue[A: ClassTag](size: Int,
         while (!writed) {
           while (count == size) {
             writePossibleCondition.await()
+            if (shutdowned) {
+              throw new IllegalArgumentException("queue has been shutdowned")
+            }
           }
           writed = writeElementBlocked(x)
         }
@@ -218,6 +224,7 @@ class GBlockedQueue[A: ClassTag](size: Int,
   def shutdown() {
     shutdowned = true;
     shutdownPromise.complete(Success(shutdowned))
+    this.bufferLock.notifyAll();
   }
   
   
