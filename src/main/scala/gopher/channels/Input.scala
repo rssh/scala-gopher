@@ -9,7 +9,13 @@ import scala.concurrent._
 trait Input[A]
 {
 
-  def  read[B](f: (A, ContRead[A,B]) => Future[Continuated[B]] ): Future[Continuated[B]]
+  def  aread[B](f: (A, ContRead[A,B]) => Future[Continuated[B]] ): Future[Continuated[B]]
+
+  def  read:Future[A] = {
+    val p = Promise[A]()
+    aread[Unit]{(a, self) => p.success(a); Future.successful(Done(())) }
+    p.future
+  }
 
   def  closed: Boolean
 
