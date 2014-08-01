@@ -10,15 +10,39 @@ class Selector(processor: ActorRef)
 
   thisSelector =>
 
-  def addReaderOnce[A](input:Input[A], f: A => Future[Unit], priority: Int ): Unit =
+  def addReaderOnce[A,B](input:Input[A], f: A => Future[B], priority: Int ): Future[B] =
+  {
+      val p = Promise[B]()
       processor ! makeLocked(
-          ContRead( ((a:A,self:ContRead[A,Unit]) =>  f(a) map( Done(_))) , input), 
+          ContRead( ((a:A,self:ContRead[A,B]) =>  f(a) map( x=>
+                                                            {p.success(x);Done(x)}
+                                                          )
+                    ) , input), 
           priority)
+      p.future
+  }
 
   def addReaderForever[A](input:Input[A], f: A => Future[Unit], priority: Int ): Unit =
       processor ! makeLocked(
           ContRead( ((a:A,self:ContRead[A,Unit]) =>  f(a) map( x => self)) , input), 
           priority)
+
+  def addWriterForever[A](output:Output[A], f: Unit => Future[Option[A]], priority: Int ): Unit =
+      processor ! makeLocked(
+          ContWrite( ((self:ContWrite[A,Unit]) => f(()) map ((_,self)))   , output), 
+          priority)
+
+  def addWriterOnce[A,B](output:Output[A], f: Unit => Future[(Option[A],B)], priority: Int ): Future[B] =
+  {
+      val p = Promise[B]()
+      processor ! makeLocked(
+          ContWrite( ((self:ContWrite[A,B]) => f(()) map { case (x,y) => 
+                                                            p.success(y); (x, Done(y)) 
+                                                         } 
+                     ), output), 
+          priority)
+      p.future
+  }
 
   private def makeLocked[A](block: Continuated[A], priority: Int): Continuated[A] =
       block match {
