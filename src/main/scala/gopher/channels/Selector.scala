@@ -1,22 +1,33 @@
 package gopher.channels
 
+import akka.actor._
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Selector
+class Selector(processor: ActorRef)
 {
 
   thisSelector =>
 
+  def addReaderOnce[A](input:Input[A], f: A => Future[Unit], priority: Int ): Unit =
+      processor ! makeLocked(
+          ContRead( ((a:A,self:ContRead[A,Unit]) =>  f(a) map( Done(_))) , input), 
+          priority)
+
+  def addReaderForever[A](input:Input[A], f: A => Future[Unit], priority: Int ): Unit =
+      processor ! makeLocked(
+          ContRead( ((a:A,self:ContRead[A,Unit]) =>  f(a) map( x => self)) , input), 
+          priority)
+
   private def makeLocked[A](block: Continuated[A], priority: Int): Continuated[A] =
       block match {
-           case cr@ContRead(_) => 
+           case cr@ContRead(_,ch) => 
                            // lazy is a workarround for https://issues.scala-lang.org/browse/SI-6278
                            lazy val f1: (cr.El, ContRead[cr.El,cr.R]) => Future[Continuated[cr.R]]  = { 
                              (a,cont) =>
                              if (tryLock()) {
-                                cont.f(a, ContRead(f1) ) map {   x => 
+                                cont.f(a, ContRead(f1, ch) ) map {   x => 
                                   if (unlock()) {
                                      makeLocked(x, priority)
                                   } else {
@@ -25,7 +36,7 @@ class Selector
                                 } 
                              } else makeWaitLocked(cont, priority)
                            }
-                           ContRead(f1)
+                           ContRead(f1,ch)
            case cw@ContWrite(_,ch) => 
                             lazy val f2: ContWrite[cw.El,cw.R] => Future[(Option[cw.El],Continuated[cw.R])] = 
                                { (cont) =>

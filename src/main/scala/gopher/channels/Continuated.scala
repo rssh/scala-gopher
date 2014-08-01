@@ -17,7 +17,7 @@ case class Done[A](r:A) extends Continuated[A]
 /**
  * read A and compute B as result.
  */
-case class ContRead[A,B](f: (A, ContRead[A,B]) => Future[Continuated[B]]) extends Continuated[B]
+case class ContRead[A,B](f: (A, ContRead[A,B]) => Future[Continuated[B]], ch: Input[A]) extends Continuated[B]
 {
   type El = A
 }
