@@ -9,6 +9,6 @@ import scala.concurrent._
 trait Output[A]
 {
 
-  def  write[B](a: A, cont: Continuated[B] ): Future[Continuated[B]]
+  def  awrite[B](a: A, cont: Continuated[B] ): Future[Continuated[B]]
 
 }

@@ -118,7 +118,7 @@ class Selector(processor: ActorRef)
          waiters.take match {
           case Some(wr) =>
                         wr.promise.success(wr.value)
-                        // TODO: put into processor ?
+                        processor!wr.value
           case None => //  do nothibg.
          }
        }
