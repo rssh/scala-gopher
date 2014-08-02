@@ -9,6 +9,18 @@ import scala.concurrent._
 trait Output[A]
 {
 
-  def  awrite[B](a: A, cont: Continuated[B] ): Future[Continuated[B]]
+  def  awrite[B](f: ContWrite[A,B] => Option[Future[(A,Continuated[B])]]): Future[Continuated[B]] 
+
+  def  write(a:A):Future[Unit] =
+  {
+   val p = Promise[Unit]()
+   awrite[Unit]( cont => {
+            p success (())
+            Some(Future.successful((a,Done(()))))
+          }
+         )
+   p.future
+  }
+  
 
 }
