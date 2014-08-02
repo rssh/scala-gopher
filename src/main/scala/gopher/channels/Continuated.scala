@@ -17,7 +17,7 @@ case class Done[A](r:A) extends Continuated[A]
 /**
  * read A and compute B as result.
  */
-case class ContRead[A,B](f: (A, ContRead[A,B]) => Future[Continuated[B]], ch: Input[A]) extends Continuated[B]
+case class ContRead[A,B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], ch: Input[A]) extends Continuated[B]
 {
   type El = A
 }
@@ -26,7 +26,7 @@ case class ContRead[A,B](f: (A, ContRead[A,B]) => Future[Continuated[B]], ch: In
 /**
  * write A and compute B as result
  */
-case class ContWrite[A,B](f: ContWrite[A,B] => Future[(Option[A], Continuated[B])], ch: Output[A]) extends Continuated[B]
+case class ContWrite[A,B](f: ContWrite[A,B] => Option[Future[(Option[A], Continuated[B])]], ch: Output[A]) extends Continuated[B]
 {
   type El = A
 }
@@ -34,7 +34,7 @@ case class ContWrite[A,B](f: ContWrite[A,B] => Future[(Option[A], Continuated[B]
 /**
  * skip (i.e. do 'empty operation')
  */
-case class Skip[A](f: Skip[A] => Future[Continuated[A]]) extends Continuated[A]
+case class Skip[A](f: Skip[A] => Option[Future[Continuated[A]]]) extends Continuated[A]
 
 
 /**
