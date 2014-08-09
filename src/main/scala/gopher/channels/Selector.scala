@@ -10,44 +10,6 @@ class Selector(processor: ActorRef)
 
   thisSelector =>
 
-  def addReaderOnce[A,B](input:Input[A], f: A => Option[Future[B]], priority: Int ): Future[B] =
-  {
-      val p = Promise[B]()
-      processor ! makeLocked(
-          ContRead( ((a:A,self:ContRead[A,B]) =>  f(a) map ( _ map
-                                                               {x => p.success(x);Done(x)}
-                                                          )
-                    ) , input), 
-          priority)
-      p.future
-  }
-
-  def addReaderOnce1[A,B](input:Input[A], f: A => Future[B],  priority: Int ): Future[B] =
-       addReaderOnce(input, ((a:A) => Some(f(a))), priority)
-
-  def addReaderForever[A](input:Input[A], f: A => Option[Future[Unit]], priority: Int ): Unit =
-      processor ! makeLocked(
-          ContRead( ((a:A,self:ContRead[A,Unit]) =>  f(a) map(_ map( x => self))) , input), 
-          priority)
-
-  def addWriterForever[A](output:Output[A], f: Unit => Option[Future[Option[A]]], priority: Int ): Unit =
-      processor ! makeLocked(
-          ContWrite( ((self:ContWrite[A,Unit]) => f(()) map (r => r map(q => (q,self))))   , output), 
-          priority)
-
-  def addWriterOnce[A,B](output:Output[A], f: Unit => Option[Future[(Option[A],B)]], priority: Int ): Future[B] =
-  {
-      val p = Promise[B]()
-      processor ! makeLocked(
-          ContWrite( ((self:ContWrite[A,B]) => f(()) map ( _ map { case (x,y) => 
-                                                                    p.success(y); (x, Done(y)) 
-                                                                 } 
-                                                         )
-                     ), output), 
-          priority)
-      p.future
-  }
-
   private def makeLocked[A](block: Continuated[A], priority: Int): Continuated[A] =
       block match {
            case cr@ContRead(_,ch) => 
@@ -69,16 +31,16 @@ class Selector(processor: ActorRef)
                            }
                ContRead(f1,ch)
            case cw@ContWrite(_,ch) => 
-               lazy val f2: ContWrite[cw.El,cw.R] => Option[Future[(Option[cw.El],Continuated[cw.R])]] = 
+               lazy val f2: ContWrite[cw.El,cw.R] => Option[(cw.El,Future[Continuated[cw.R]])] = 
                                { (cont) =>
                                   if (tryLock()) {
-                                     cont.f(ContWrite(f2,ch)) map( r => r map { case (el, x) =>
+                                     cont.f(ContWrite(f2,ch)) map{ case (el, x) =>
                                        if (unlock()) {
-                                          (el, makeLocked(x, priority))
+                                          (el, x map( r=> makeLocked(r, priority)))
                                        } else {
                                           throw new IllegalStateException("other fiber occypied select 'lock'");
                                        }
-                                     })
+                                     }
                                   } else {
                                     makeWaitLocked(cont, priority) 
                                     None

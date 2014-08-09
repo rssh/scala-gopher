@@ -9,14 +9,17 @@ import scala.concurrent._
 trait Output[A]
 {
 
-  def  awrite[B](f: ContWrite[A,B] => Option[Future[(A,Continuated[B])]]): Future[Continuated[B]] 
+  /**
+   * apply f and send result to channels processor.
+   */
+  def  awrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])]): Unit
 
   def  write(a:A):Future[Unit] =
   {
    val p = Promise[Unit]()
    awrite[Unit]( cont => {
             p success (())
-            Some(Future.successful((a,Done(()))))
+            Some((a,Future.successful(Done(()))))
           }
          )
    p.future

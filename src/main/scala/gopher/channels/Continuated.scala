@@ -26,7 +26,7 @@ case class ContRead[A,B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
 /**
  * write A and compute B as result
  */
-case class ContWrite[A,B](f: ContWrite[A,B] => Option[Future[(Option[A], Continuated[B])]], ch: Output[A]) extends Continuated[B]
+case class ContWrite[A,B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], ch: Output[A]) extends Continuated[B]
 {
   type El = A
 }

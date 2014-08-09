@@ -9,7 +9,10 @@ import scala.concurrent._
 trait Input[A]
 {
 
-  def  aread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]] ): Future[Continuated[B]]
+  /**
+   * apply f, when input will be ready and send result to API processor
+   */
+  def  aread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]] ): Unit
 
   def  read:Future[A] = {
     val p = Promise[A]()
@@ -17,6 +20,5 @@ trait Input[A]
     p.future
   }
 
-  def  closed: Boolean
 
 }
