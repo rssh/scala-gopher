@@ -5,7 +5,7 @@ import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Selector(processor: ActorRef)
+class Selector(processor: ActorRef, api: API)
 {
 
   thisSelector =>
@@ -103,11 +103,10 @@ class Selector(processor: ActorRef)
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
 
   val waiters: WaitPriorityQueue = new WaitPriorityQueue();
-  implicit val executionContext: ExecutionContext = ???
+  implicit val executionContext: ExecutionContext = api.executionContext
 
 }
 
 
-// TODO: (low level) let's lock flag keep the id of fiber...
 
 
