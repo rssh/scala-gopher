@@ -12,12 +12,12 @@ sealed trait Continuated[+A]
 }
 
 
-case class Done[A](r:A) extends Continuated[A]
+case class Done[A](r:A, ft: FlowTermination[A]) extends Continuated[A]
 
 /**
  * read A and compute B as result.
  */
-case class ContRead[A,B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], ch: Input[A]) extends Continuated[B]
+case class ContRead[A,B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], ch: Input[A], flwt: FlowTermination[B]) extends Continuated[B]
 {
   type El = A
 }
@@ -26,7 +26,7 @@ case class ContRead[A,B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
 /**
  * write A and compute B as result
  */
-case class ContWrite[A,B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], ch: Output[A]) extends Continuated[B]
+case class ContWrite[A,B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], ch: Output[A], flwt: FlowTermination[B]) extends Continuated[B]
 {
   type El = A
 }
@@ -34,7 +34,7 @@ case class ContWrite[A,B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])
 /**
  * skip (i.e. do 'empty operation')
  */
-case class Skip[A](f: Skip[A] => Option[Future[Continuated[A]]]) extends Continuated[A]
+case class Skip[A](f: Skip[A] => Option[Future[Continuated[A]]], flwt: FlowTermination[A]) extends Continuated[A]
 
 
 /**

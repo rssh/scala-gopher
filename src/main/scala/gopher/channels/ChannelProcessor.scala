@@ -7,10 +7,14 @@ class ChannelProcessor(api: API) extends Actor
 {
 
    def receive = {
-      case Done(r) => /* do nothing */
-      case sk@Skip(f) =>  f(sk).foreach(cont(_))
-      case cr@ContRead(f,ch) => ch.aread[cr.R]( (x,s) => f(x,s) )
-      case cw@ContWrite(f,ch) => ch.awrite[cw.R]( f )
+      case Done(r,ft) => ft.doExit(r)
+      case sk@Skip(f,ft) =>  try {
+                               f(sk).foreach(cont(_))
+                             }catch{
+                                case ex: Throwable => ft.doThrow(ex)
+                             }
+      case cr@ContRead(f,ch, ft) => ch.aread[cr.R]( (x,s) => f(x,s), ft )
+      case cw@ContWrite(f,ch, ft) => ch.awrite[cw.R]( f , ft)
       case Never => /* do nothing */
    }
 

@@ -12,15 +12,21 @@ trait Output[A]
   /**
    * apply f and send result to channels processor.
    */
-  def  awrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])]): Unit
+  def  awrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], ft: FlowTermination[B]): Unit
 
   def  write(a:A):Future[Unit] =
   {
    val p = Promise[Unit]()
+   val ft = new FlowTermination[Unit]()
+   {
+     def doThrow(ex:Throwable) = p.failure(ex)
+     def doExit(u:Unit):Unit = { } 
+   }
    awrite[Unit]( cont => {
             p success (())
-            Some((a,Future.successful(Done(()))))
-          }
+            Some((a,Future.successful(Done((),ft))))
+          }, 
+          ft
          )
    p.future
   }

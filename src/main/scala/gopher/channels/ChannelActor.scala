@@ -12,7 +12,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: API) extends Actor
 
   // TODO: check case when f() fail [throw exception]
   def receive = {
-    case cw@ContWrite(f,_) =>
+    case cw@ContWrite(f,_,_) =>
             val cwa = cw.asInstanceOf[ContWrite[A,_]]
             if (nElements==capacity) {
                writers = writers :+ cwa
@@ -22,7 +22,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: API) extends Actor
                  processReaders
                }
             }
-    case cr@ContRead(f,_) =>
+    case cr@ContRead(f,_,_) =>
             val cra = cr.asInstanceOf[ContRead[A,_]]
             if (nElements==0) {
                readers = readers :+ cra
