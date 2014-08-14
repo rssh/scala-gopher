@@ -1,7 +1,7 @@
 package gopher.channels
 
 
-trait FlowTermination[A]
+trait FlowTermination[-A]
 {
 
   def doThrow(e: Throwable): Unit

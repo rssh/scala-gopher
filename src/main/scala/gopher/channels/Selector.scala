@@ -5,12 +5,31 @@ import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Selector(processor: ActorRef, api: API)
+class Selector[A](api: API) extends FlowTermination[A]
 {
 
   thisSelector =>
 
-  private def makeLocked[A](block: Continuated[A], priority: Int): Continuated[A] =
+  def addReader[E](ch:Input[E],f: (E, ContRead[E,A]) => Option[Future[Continuated[A]]], priority:Int): Unit =
+  {
+   waiters.put(makeLocked(ContRead(f, ch, this), priority),priority)
+  }
+ 
+  def doThrow(ex: Throwable): Unit =
+   resultPromise failure ex 
+
+  def doExit(a:A): Unit =
+  {
+   resultPromise success a
+  }
+
+  def run:Future[A] =
+  {
+    sendWaits
+    resultPromise.future
+  }
+  
+  private def makeLocked(block: Continuated[A], priority: Int): Continuated[A] =
       block match {
            case cr@ContRead(_,ch, ft) => 
                // lazy is a workarround for https://issues.scala-lang.org/browse/SI-6278
@@ -89,8 +108,9 @@ class Selector(processor: ActorRef, api: API)
            case Never => Never // TODO: make never locked (?)
       }
 
-  def makeWaitLocked[A](block:Continuated[A], priority:Int): Future[Continuated[A]] =
+  def makeWaitLocked(block:Continuated[A], priority:Int): Future[Continuated[A]] =
   {
+   // TODO: check for end
    val locked = makeLocked(block, priority)
    waiters.put(locked,priority)
   }
@@ -103,23 +123,35 @@ class Selector(processor: ActorRef, api: API)
   {
      val retval = lockFlag.compareAndSet(true,false)
      if (retval) {
-       while(waiters.nonEmpty && !lockFlag.get()) {
-         waiters.take match {
-          case Some(wr) =>
-                        wr.promise.success(wr.value)
-                        processor!wr.value
-          case None => //  do nothibg.
-         }
-       }
+        sendWaits()
      }
      retval
+  }
+
+
+  private[this] def sendWaits(): Unit =
+  {
+     while(waiters.nonEmpty && !lockFlag.get()) {
+         waiters.take match {
+           case Some(wr) =>
+                        wr.promise.success(wr.value)
+                        processor!wr.value
+           case None => //  do nothibg.
+         }
+     }
   }
 
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
 
-  val waiters: WaitPriorityQueue = new WaitPriorityQueue();
+  private[this] val resultPromise = Promise[A]
+
+  val waiters: WaitPriorityQueue = new WaitPriorityQueue()
+
+  val processor = api.continuatedProcessorRef
+
   implicit val executionContext: ExecutionContext = api.executionContext
+  
 
 }
 
