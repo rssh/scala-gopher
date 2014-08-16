@@ -15,6 +15,16 @@ class Selector[A](api: API) extends FlowTermination[A]
    waiters.put(makeLocked(ContRead(f, ch, this), priority),priority)
   }
  
+  def addWriter[E](ch:Output[E],f: ContWrite[E,A] => Option[(E,Future[Continuated[A]])], priority:Int ): Unit =
+  {
+   waiters.put(makeLocked(ContWrite(f,ch,this), priority), priority)
+  }
+
+  def addSkip(f: Skip[A] => Option[Future[Continuated[A]]], priority: Int): Unit =
+  {
+   waiters.put(makeLocked(Skip(f,this), priority), priority)
+  }
+
   def doThrow(ex: Throwable): Unit =
    resultPromise failure ex 
 

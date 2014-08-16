@@ -3,19 +3,19 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.2"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-autoCompilerPlugins := true
+//autoCompilerPlugins := true
 
 //addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full )
 
 scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
-libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.0"
+libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
