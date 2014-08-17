@@ -33,6 +33,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: API) extends Actor
                }
             }
      case ChannelClose =>
+            // TODO: remove name from system.
             closed=true
   }
 

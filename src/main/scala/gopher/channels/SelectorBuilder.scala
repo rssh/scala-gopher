@@ -57,6 +57,7 @@ class SelectorBuilder[A](api: API)
      this
    }
 
+   def go: Future[A] = selector.run
 
    implicit def ec: ExecutionContext = api.executionContext
 
@@ -106,11 +107,32 @@ class ForeverSelectorBuilder(api: API) extends SelectorBuilder[Unit](api)
 //            macro ForeverSelectorBuilder.onReadImpl
  
 
-
 }
 
 object ForeverSelectorBuilder
 {
 
 
+}
+
+class OnceSelectorBuilder[+A](api: API) extends SelectorBuilder[A@annotation.unchecked.uncheckedVariance](api)
+{
+
+   def onReadAsync[E, B >: A](ch:Input[E])(f: E => Future[B] ): 
+                                           OnceSelectorBuilder[B] =
+   {
+     val f1: ((E,ContRead[E,B]) => Option[Future[Continuated[B]]]) =
+           { (e, cr) => Some(f(e) map( Done(_,cr.flwt))) }
+     selector.asInstanceOf[Selector[B]].addReader(ch,f1,priority) 
+     this.asInstanceOf[OnceSelectorBuilder[B]]
+   }
+
+}
+
+
+class SelectFactory(api: API)
+{
+  def loop: ForeverSelectorBuilder = new ForeverSelectorBuilder(api)
+
+  def once: OnceSelectorBuilder[Nothing] = new OnceSelectorBuilder(api)
 }

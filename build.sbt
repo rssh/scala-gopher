@@ -23,7 +23,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.4"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
 
 //libraryDependencies += "ch.qos.logback" % "logback-core" % "1.0.13"
 
