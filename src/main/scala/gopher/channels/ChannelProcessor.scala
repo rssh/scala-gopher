@@ -3,7 +3,7 @@ package gopher.channels
 import akka.actor._
 import scala.concurrent._
 
-class ChannelProcessor(api: API) extends Actor
+class ChannelProcessor(api: GopherAPI) extends Actor
 {
 
    def receive = {

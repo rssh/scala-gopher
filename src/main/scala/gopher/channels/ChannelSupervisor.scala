@@ -6,7 +6,7 @@ import scala.concurrent._
 case class NewChannel(id: Long, capacity: Int)
 case class CloseChannel(id: Long)
 
-class ChannelSupervisor(api: API) extends Actor
+class ChannelSupervisor(api: GopherAPI) extends Actor
 {
 
    def receive = {

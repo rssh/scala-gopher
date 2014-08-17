@@ -46,7 +46,7 @@ case class AsyncFullSkipSelectorArgument[A](
 }
 
 
-class SelectorBuilder[A](api: API)
+class SelectorBuilder[A](api: GopherAPI)
 {
 
 
@@ -68,7 +68,7 @@ class SelectorBuilder[A](api: API)
 }
 
 
-class ForeverSelectorBuilder(api: API) extends SelectorBuilder[Unit](api)
+class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 {
 
    def onReadAsync[E](ch:Input[E])(f: E => Future[Unit] ): this.type =
@@ -115,7 +115,7 @@ object ForeverSelectorBuilder
 
 }
 
-class OnceSelectorBuilder[+A](api: API) extends SelectorBuilder[A@annotation.unchecked.uncheckedVariance](api)
+class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotation.unchecked.uncheckedVariance](api)
 {
 
    def onReadAsync[E, B >: A](ch:Input[E])(f: E => Future[B] ): 
@@ -130,7 +130,7 @@ class OnceSelectorBuilder[+A](api: API) extends SelectorBuilder[A@annotation.unc
 }
 
 
-class SelectFactory(api: API)
+class SelectFactory(api: GopherAPI)
 {
   def loop: ForeverSelectorBuilder = new ForeverSelectorBuilder(api)
 

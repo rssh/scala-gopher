@@ -5,7 +5,7 @@ import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Selector[A](api: API) extends FlowTermination[A]
+class Selector[A](api: GopherAPI) extends FlowTermination[A]
 {
 
   thisSelector =>

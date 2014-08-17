@@ -7,7 +7,7 @@ import scala.collection.immutable._
 case object ChannelClose
 
 
-class ChannelActor[A](id:Long, capacity:Int, api: API) extends Actor
+class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
 
   // TODO: check case when f() fail [throw exception]

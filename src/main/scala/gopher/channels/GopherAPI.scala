@@ -4,7 +4,7 @@ import akka.actor._
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 
-class API(as: ActorSystem, es: ExecutionContext)
+class GopherAPI(as: ActorSystem, es: ExecutionContext)
 {
 
   def select: SelectFactory =
