@@ -1,6 +1,9 @@
   
  Implementation of go scopes and channels in scala.
  --------------------------------------------------
+
+ // for development, look at async-unsugared branch: https://github.com/rssh/scala-gopher/tree/async-unsugared
+
  --------------------------------------------------
 
  Requirements:  scala 2.10.2 +
