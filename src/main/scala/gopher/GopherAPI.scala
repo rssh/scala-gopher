@@ -1,6 +1,7 @@
-package gopher.channels
+package gopher
 
 import akka.actor._
+import gopher.channels._
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 
@@ -23,17 +24,17 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def executionContext: ExecutionContext = es
 
-  private[channels] val continuatedProcessorRef: ActorRef = {
+  private[gopher] val continuatedProcessorRef: ActorRef = {
     val props = Props(classOf[ChannelProcessor], this)
     actorSystem.actorOf(props,name="channelProcessor")
   }
 
-  private[channels] val channelSupervisorRef: ActorRef = {
+  private[gopher] val channelSupervisorRef: ActorRef = {
     val props = Props(classOf[ChannelSupervisor], this)
     actorSystem.actorOf(props,name="channels")
   }
 
-  private[channels] def newChannelId: Long =
+  private[gopher] def newChannelId: Long =
                         channelIdCounter.getAndIncrement
 
   private[this] val channelIdCounter = new AtomicLong(0L)

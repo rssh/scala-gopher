@@ -2,6 +2,7 @@ package gopher.channels
 
 import akka.actor._
 import scala.concurrent._
+import gopher._
 
 case class NewChannel(id: Long, capacity: Int)
 case class CloseChannel(id: Long)

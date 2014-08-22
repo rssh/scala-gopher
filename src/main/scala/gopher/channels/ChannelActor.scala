@@ -3,6 +3,7 @@ package gopher.channels
 import akka.actor._
 import scala.concurrent._
 import scala.collection.immutable._
+import gopher._
 
 case object ChannelClose
 

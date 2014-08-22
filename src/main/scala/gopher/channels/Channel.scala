@@ -7,13 +7,13 @@ class IOChannel[A](channelSelection: ActorSelection) extends Input[A] with Outpu
 {
 
 
-  def  aread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
+  def  cbread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
      channelSelection ! ContRead(f,this, flwt)
 
   private def  contRead[B](x:ContRead[A,B]): Unit =
      channelSelection ! x
 
-  def  awrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = 
+  def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = 
     if (closed) {
      throw new IllegalStateException("channel is closed");
     } else {

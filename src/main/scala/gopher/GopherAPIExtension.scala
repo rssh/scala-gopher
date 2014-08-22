@@ -1,8 +1,9 @@
-package gopher.channels
+package gopher
 
-import scala.concurrent._
 import akka.actor._
 import com.typesafe.config._
+import scala.concurrent._
+import gopher.channels._
 import java.util.concurrent.Executors
 
 class GopherAPIExtensionImpl(system: ExtendedActorSystem) 

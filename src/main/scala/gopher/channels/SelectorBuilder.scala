@@ -1,5 +1,6 @@
 package gopher.channels
 
+import gopher._
 import scala.concurrent._
 
 sealed trait ReadSelectorArgument[A,B]

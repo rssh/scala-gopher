@@ -1,11 +1,12 @@
 package gopher.channels
 
+import gopher._
 import akka.actor._
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Selector[A](api: GopherAPI) extends FlowTermination[A]
+class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 {
 
   thisSelector =>
@@ -25,20 +26,12 @@ class Selector[A](api: GopherAPI) extends FlowTermination[A]
    waiters.put(makeLocked(Skip(f,this), priority), priority)
   }
 
-  def doThrow(ex: Throwable): Unit =
-   resultPromise failure ex 
-
-  def doExit(a:A): Unit =
-  {
-   resultPromise success a
-  }
-
   def run:Future[A] =
   {
     sendWaits
-    resultPromise.future
+    future
   }
-  
+
   private def makeLocked(block: Continuated[A], priority: Int): Continuated[A] =
       block match {
            case cr@ContRead(_,ch, ft) => 
@@ -153,8 +146,6 @@ class Selector[A](api: GopherAPI) extends FlowTermination[A]
 
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
-
-  private[this] val resultPromise = Promise[A]
 
   val waiters: WaitPriorityQueue = new WaitPriorityQueue()
 
