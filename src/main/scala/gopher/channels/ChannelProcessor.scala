@@ -14,7 +14,7 @@ class ChannelProcessor(api: GopherAPI) extends Actor
                              }catch{
                                 case ex: Throwable => ft.doThrow(ex)
                              }
-      case cr@ContRead(f,ch, ft) => ch.cbread[cr.R]( (x,s) => f(x,s), ft )
+      case cr@ContRead(f,ch, ft) => ch.cbread[cr.R]( f, ft )
       case cw@ContWrite(f,ch, ft) => ch.cbwrite[cw.R]( f , ft)
       case Never => /* do nothing */
    }

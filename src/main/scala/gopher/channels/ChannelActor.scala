@@ -29,7 +29,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
                readers = readers :+ cra
             } else {
                val prevNElements = nElements
-               if (processReaders && prevNElements==capacity) {
+               if (processReader(cra) && prevNElements==capacity) {
                  checkWriters
                }
             }

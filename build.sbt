@@ -33,7 +33,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
 
 
 //
-testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
+//testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
 version:="0.9.1"
 

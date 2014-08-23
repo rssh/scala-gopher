@@ -22,6 +22,13 @@ case class AsyncNoOptionReadSelectorArgument[A,B](
   def normalizedFun = ( (a,c) => Some(f(a,c)) )
 }
 
+case class SyncReadSelectorArgument[A,B](
+                   f: (A, ContRead[A,B]) => Continuated[B]
+               ) extends ReadSelectorArgument[A,B]
+{
+  def normalizedFun = ( (a,c) => Some( Future successful f(a,c) ) )
+}
+
 sealed trait WriteSelectorArgument[A,B]
 {
   def normalizedFun: ContWrite[A,B] => Option[(A,Future[Continuated[B]])]
@@ -64,7 +71,6 @@ class SelectorBuilder[A](api: GopherAPI)
 
    var selector=new Selector[A](api)
    var priority = 1
-
 
 }
 
@@ -137,3 +143,4 @@ class SelectFactory(api: GopherAPI)
 
   def once: OnceSelectorBuilder[Nothing] = new OnceSelectorBuilder(api)
 }
+
