@@ -68,7 +68,7 @@ class AsyncSelectSuite extends FunSuite {
      val process = gopherApi.select.loop.
       onRead(channel){  
         (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
-        System.err.println("received:"+a)
+        //System.err.println("received:"+a)
         if (a < MAX_N) {
            cont
         } else {
@@ -77,7 +77,6 @@ class AsyncSelectSuite extends FunSuite {
       }.onWrite(channel){
         cont:ContWrite[Int,Unit] => 
           curA = curA+1
-          System.err.println("write:"+curA)
           if (curA < MAX_N) {
              (curA, cont)
           } else {

@@ -11,4 +11,6 @@ trait FlowTermination[-A]
 
   def defer(body: =>Unit)(implicit ec: ExecutionContext):Unit
 
+  def isCompleted: Boolean
+
 }

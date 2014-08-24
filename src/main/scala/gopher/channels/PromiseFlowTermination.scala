@@ -17,6 +17,8 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
   def future =
     p future
 
+  def isCompleted = p.isCompleted
+
   val p = Promise[A]()
 
 }

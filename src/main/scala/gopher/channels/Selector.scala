@@ -39,9 +39,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                // lazy is a workarround for https://issues.scala-lang.org/browse/SI-6278
                lazy val f1: (cr.El, ContRead[cr.El,cr.R]) => Option[Future[Continuated[cr.R]]]  = { 
                              (a,cont) =>
-                             System.err.println("handle read before lock");
                              if (tryLock()) {
-                                System.err.println("read: read succesfull");
                                 try {
                                   f(a, ContRead(f, ch, ft) ) match {
                                     case None => 
@@ -67,7 +65,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                    None
                                 }
                              } else {
-                               System.err.println("read: lock unssuccesful");
                                // return to waiters.
                                toWaiters(cont,priority)
                                None
@@ -77,9 +74,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
            case cw@ContWrite(f,ch, ft) => 
                lazy val f2: ContWrite[cw.El,cw.R] => Option[(cw.El,Future[Continuated[cw.R]])] = 
                                { (cont) =>
-                                  System.err.println("handle write before lock");
                                   if (tryLock()) {
-                                   System.err.println("write: lock succesfull");
                                    try {
                                      f(ContWrite(f,ch,ft)) match {
                                        case None => if (mustUnlock("write",cont.flwt)) {
@@ -103,7 +98,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                      None
                                    }
                                   } else {
-                                    System.err.println("write: lock unsuccesfull, wait more");
                                     toWaiters(cont,priority)
                                     None
                                   }
@@ -162,7 +156,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      if (retval) {
         sendWaits()
      }
-     System.err.println(s" ${debugFrom} unlock, retval=${retval}")
      retval
   }
 
