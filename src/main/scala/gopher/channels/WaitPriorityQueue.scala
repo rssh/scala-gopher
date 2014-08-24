@@ -2,18 +2,16 @@ package gopher.channels
 
 import scala.concurrent._
 
-case class WaitRecord[A](priority:Int, promise: Promise[A], value: A)
+case class WaitRecord[A](priority:Int, value: A)
 
 
 class WaitPriorityQueue
 {
     import java.util.{PriorityQueue=>JPriorityQueue}
 
-    def  put[A](x:Continuated[A], priority: Int): Future[Continuated[A]] =
+    def  put[A](x:Continuated[A], priority: Int): Unit =
     {
-      val p = Promise[Continuated[A]]()
-      queue add WaitRecord(priority,p, x)
-      p.future
+      queue add WaitRecord(priority, x)
     }
 
     def  take[A]: Option[WaitRecord[Continuated[A]]] = 

@@ -9,17 +9,11 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-//autoCompilerPlugins := true
-
-//addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full )
-
 scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
-
-//libraryDependencies += "org.scalamacros" %% "quasiquotes" % "2.0.0-SNAPSHOT" cross CrossVersion.full
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
@@ -32,8 +26,8 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
 //libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5"
 
 
-//
-//testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
+
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
 version:="0.9.1"
 

@@ -2,18 +2,18 @@ package gopher.channels
 
 import org.scalatest._
 import gopher._
+import gopher.tags._
 import akka.actor._
 import scala.concurrent._
 import scala.concurrent.duration._
-//import tags._
 
 class AsyncSelectSuite extends FunSuite {
 
      
-
-     test("async base select emulation")  {
-     
      val MAX_N=100  
+
+     test("async base: channel write, select read")  {
+     
        
      val channel = gopherApi.makeChannel[Int](10)
      
@@ -58,6 +58,38 @@ class AsyncSelectSuite extends FunSuite {
      assert(xsum == sum)
      
    }
+
+   test("async base: select write, select read", Now)  {
+
+     val channel = gopherApi.makeChannel[Int](10)
+
+     var sum=0
+     var curA=0
+     val process = gopherApi.select.loop.
+      onRead(channel){  
+        (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
+        System.err.println("received:"+a)
+        if (a < MAX_N) {
+           cont
+        } else {
+           Done((),cont.flwt)
+        }
+      }.onWrite(channel){
+        cont:ContWrite[Int,Unit] => 
+          curA = curA+1
+          System.err.println("write:"+curA)
+          if (curA < MAX_N) {
+             (curA, cont)
+          } else {
+             (curA,Done((),cont.flwt))
+          }
+      }.go
+     
+      Await.ready(process, 10000.second)
+
+      assert(curA == MAX_N)
+
+    }
 
     val actorSystem = ActorSystem.create("system")
     val gopherApi = GopherAPIExtension(actorSystem)

@@ -10,12 +10,15 @@ class ChannelProcessor(api: GopherAPI) extends Actor
    def receive = {
       case Done(r,ft) => ft.doExit(r)
       case sk@Skip(f,ft) =>  try {
+                               System.err.println("receive skip:"+sk)
                                f(sk).foreach(cont(_))
                              }catch{
                                 case ex: Throwable => ft.doThrow(ex)
                              }
       case cr@ContRead(f,ch, ft) => ch.cbread[cr.R]( f, ft )
-      case cw@ContWrite(f,ch, ft) => ch.cbwrite[cw.R]( f , ft)
+      case cw@ContWrite(f,ch, ft) => System.err.println("receive conWrite: "+cw)
+                                      ch.cbwrite[cw.R]( f , ft)
+                                    
       case Never => /* do nothing */
    }
 

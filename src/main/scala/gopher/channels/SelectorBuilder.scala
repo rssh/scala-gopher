@@ -41,6 +41,24 @@ case class AsyncFullWriteSelectorArgument[A,B](
   def normalizedFun = f
 }
 
+case class AsyncNoOptWriteSelectorArgument[A,B](
+                   f: ContWrite[A,B] => (A,Future[Continuated[B]])
+              )  extends WriteSelectorArgument[A,B]
+{
+  def normalizedFun = (c => Some(f(c)))
+}
+
+case class SyncWriteSelectorArgument[A,B](
+                   f: ContWrite[A,B] => (A,Continuated[B])
+              )  extends WriteSelectorArgument[A,B]
+{
+  def normalizedFun = {c => 
+     val (a, next) = f(c) 
+     Some((a,Future successful next))
+  }
+
+}
+
 sealed trait SkipSelectorArgument[A]
 {
   def normalizedFun: Skip[A] => Option[Future[Continuated[A]]]
@@ -61,6 +79,13 @@ class SelectorBuilder[A](api: GopherAPI)
    def onRead[E](ch:Input[E])(arg: ReadSelectorArgument[E,A]): this.type =
    {
      selector.addReader(ch,arg.normalizedFun,priority)
+     priority += 1
+     this
+   }
+
+   def onWrite[E](ch:Output[E])(arg: WriteSelectorArgument[E,A]): this.type =
+   {
+     selector.addWriter(ch,arg.normalizedFun,priority)
      priority += 1
      this
    }
@@ -118,7 +143,6 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 
 object ForeverSelectorBuilder
 {
-
 
 }
 
