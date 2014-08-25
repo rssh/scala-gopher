@@ -103,18 +103,24 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                   }
                                 }
                                 ContWrite(f2,ch,ft)
-           case sk@Skip(_,ft) => lazy val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
+           case sk@Skip(f,ft) => lazy val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
                              cont =>
                              if (tryLock()) {
                                try {
-                                cont.f(Skip(f3,ft)) map( _ map { 
-                                  x => 
-                                  if (unlock("skip")) {
-                                     makeLocked(x,priority);
-                                  } else {
-                                     throw new IllegalStateException("other fiber occypied select 'lock'");
-                                  }
-                                })
+                                f(Skip(f,ft)) match {
+                                   case None => if (mustUnlock("skip",cont.flwt)) {
+                                                    waiters.put(cont,priority)
+                                                }
+                                                None
+                                   case Some(future) =>
+                                       Some(future.transform(
+                                                next => { if (mustUnlock("skip",cont.flwt)) {
+                                                                makeLocked(next, priority)
+                                                          } else Never 
+                                                        },
+                                                ex =>   { mustUnlock( "skip", cont.flwt); ex }
+                                           )                )
+                                }
                                } catch {
                                 case ex: Throwable => ft.doThrow(ex)
                                                       None
@@ -127,7 +133,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                            Skip(f3,ft)
            case dn@Done(_,ft) => val f4: Skip[dn.R] => Option[Future[Continuated[dn.R]]] = {
                                  cont => 
-                                 unlock("Done"); // we don't care about result.
+                                 unlock("done"); // we don't care about result.
                                  Some(Promise successful dn future)
                               }
                               Skip(f4,ft)
