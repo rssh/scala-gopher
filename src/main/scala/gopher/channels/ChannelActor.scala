@@ -11,7 +11,6 @@ case object ChannelClose
 class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
 
-  // TODO: check case when f() fail [throw exception]
   def receive = {
     case cw@ContWrite(f,_,_) =>
             val cwa = cw.asInstanceOf[ContWrite[A,_]]
@@ -50,7 +49,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   }
 
   private[this] def processReader[B](reader:ContRead[A,B]): Boolean =
-   reader.f(elementAt(readIndex),reader) match {
+   reader.function(elementAt(readIndex),reader) match {
        case Some(cont) => 
               nElements-=1
               readIndex+=1
@@ -73,7 +72,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   }
 
   private[this] def processWriter[B](writer:ContWrite[A,B]): Boolean =
-   writer.f(writer) match {
+   writer.function(writer) match {
        case Some((a,cont)) =>
                 nElements+=1
                 setElementAt(writeIndex,a)

@@ -28,10 +28,12 @@ class AsyncSelectSuite extends FunSuite {
      
      val consumer = gopherApi.select.loop.onRead(channel){  
         (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
+        System.err.println("received:"+a)
         if (a < MAX_N) {
            cont
         } else {
-           Done((),cont.flwt)
+           System.err.println("sending done")
+           Done((),cont.flowTermination)
         }
      }.go
      
@@ -59,7 +61,7 @@ class AsyncSelectSuite extends FunSuite {
      
    }
 
-   test("async base: select write, select read", Now)  {
+   test("async base: select write, select read")  {
 
      val channel = gopherApi.makeChannel[Int](10)
 
@@ -72,7 +74,7 @@ class AsyncSelectSuite extends FunSuite {
         if (a < MAX_N) {
            cont
         } else {
-           Done((),cont.flwt)
+           Done((),cont.flowTermination)
         }
       }.onWrite(channel){
         cont:ContWrite[Int,Unit] => 
@@ -80,7 +82,7 @@ class AsyncSelectSuite extends FunSuite {
           if (curA < MAX_N) {
              (curA, cont)
           } else {
-             (curA,Done((),cont.flwt))
+             (curA,Done((),cont.flowTermination))
           }
       }.go
      
@@ -89,6 +91,37 @@ class AsyncSelectSuite extends FunSuite {
       assert(curA == MAX_N)
 
     }
+
+    test("async base: select read, default action", Now)  {
+
+       val channel = gopherApi.makeChannel[Int](10)
+
+       val consumer = channel.atake(100)
+
+       var i = 1
+       var d = 1
+       val process = gopherApi.select.loop[Int].onWrite(channel) {
+                       cont:ContWrite[Int,Int] => i=i+1
+                                                  (i,cont)
+                     }.onIdle{
+                       cont:Skip[Int] =>        
+                           if (i < 100) {
+                             System.err.println("skip, i="+i)
+                             d=d+1
+                             cont
+                           } else {
+                             Done(d,cont.flowTermination)
+                           }
+                     }.go
+
+       Await.ready(process, 10000.second)
+
+       assert(consumer.isCompleted)
+       assert(i>100)
+       System.err.println("d="+d)
+
+    }
+
 
     val actorSystem = ActorSystem.create("system")
     val gopherApi = GopherAPIExtension(actorSystem)

@@ -2,8 +2,12 @@ package gopher.channels
 
 import gopher._
 import akka.actor._
+import akka.pattern._
 import scala.concurrent._
+import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.ConcurrentLinkedQueue
 
 
 class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
@@ -36,14 +40,13 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   {
       block match {
            case cr@ContRead(f,ch, ft) => 
-               // lazy is a workarround for https://issues.scala-lang.org/browse/SI-6278
-               lazy val f1: (cr.El, ContRead[cr.El,cr.R]) => Option[Future[Continuated[cr.R]]]  = { 
+               val f1: (cr.El, ContRead[cr.El,cr.R]) => Option[Future[Continuated[cr.R]]]  = { 
                              (a,cont) =>
                              if (tryLock()) {
                                 try {
                                   f(a, ContRead(f, ch, ft) ) match {
                                     case None => 
-                                      if (mustUnlock("read", cont.flwt)) {
+                                      if (mustUnlock("read", cont.flowTermination)) {
                                          // leave one in the same queue.
                                          waiters.put(cont,priority)
                                       }
@@ -51,13 +54,13 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                     case Some(future) =>  
                                       Some(future.transform( 
                                          next => { 
-                                                   if (mustUnlock("read-2",cont.flwt)) {
+                                                   if (mustUnlock("read-2",cont.flowTermination)) {
                                                      makeLocked(next, priority)
                                                    } else {
                                                      Never
                                                    } 
                                                  },
-                                         ex => { mustUnlock("read-3",cont.flwt); ex }
+                                         ex => { mustUnlock("read-3",cont.flowTermination); ex }
                                       ))
                                   }
                                 } catch {
@@ -72,24 +75,24 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                            }
                ContRead(f1,ch, ft)
            case cw@ContWrite(f,ch, ft) => 
-               lazy val f2: ContWrite[cw.El,cw.R] => Option[(cw.El,Future[Continuated[cw.R]])] = 
+               val f2: ContWrite[cw.El,cw.R] => Option[(cw.El,Future[Continuated[cw.R]])] = 
                                { (cont) =>
                                   if (tryLock()) {
                                    try {
                                      f(ContWrite(f,ch,ft)) match {
-                                       case None => if (mustUnlock("write",cont.flwt)) {
-                                                      waiters.put(cont,priority)
+                                       case None => if (mustUnlock("write",cont.flowTermination)) {
+                                                        waiters.put(cont,priority)
                                                     }
                                                     None
                                        case Some((a,future)) =>
                                              Some((a,future.transform(
-                                                    next => { if (mustUnlock("write-2",cont.flwt)) {
-                                                                makeLocked(next, priority)
+                                                    next => { if (mustUnlock("write-2",cont.flowTermination)) {
+                                                                 makeLocked(next, priority)
                                                               } else {
-                                                                Never
+                                                                 Never
                                                               }
                                                             },
-                                                    ex => { mustUnlock("write-3",cont.flwt); ex }
+                                                    ex => { mustUnlock("write-3",cont.flowTermination); ex }
                                                  ))               )
                                                     
                                      }
@@ -103,22 +106,22 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                   }
                                 }
                                 ContWrite(f2,ch,ft)
-           case sk@Skip(f,ft) => lazy val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
+           case sk@Skip(f,ft) => val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
                              cont =>
                              if (tryLock()) {
                                try {
                                 f(Skip(f,ft)) match {
-                                   case None => if (mustUnlock("skip",cont.flwt)) {
+                                   case None => if (mustUnlock("skip",cont.flowTermination)) {
                                                     waiters.put(cont,priority)
                                                 }
                                                 None
                                    case Some(future) =>
                                        Some(future.transform(
-                                                next => { if (mustUnlock("skip",cont.flwt)) {
+                                                next => { if (mustUnlock("skip",cont.flowTermination)) {
                                                                 makeLocked(next, priority)
                                                           } else Never 
                                                         },
-                                                ex =>   { mustUnlock( "skip", cont.flwt); ex }
+                                                ex =>   { mustUnlock( "skip", cont.flowTermination); ex }
                                            )                )
                                 }
                                } catch {
@@ -131,19 +134,18 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                              }
                            }
                            Skip(f3,ft)
-           case dn@Done(_,ft) => val f4: Skip[dn.R] => Option[Future[Continuated[dn.R]]] = {
-                                 cont => 
-                                 unlock("done"); // we don't care about result.
-                                 Some(Promise successful dn future)
-                              }
-                              Skip(f4,ft)
-           case Never => Never // TODO: make never locked (?)
+           case dn@Done(_,_) => dn
+           case Never => Never 
       }
   }
 
+
+
   private[this] def toWaiters(cont:Continuated[A],priority:Int):Unit=
   {
-   waiters.put(cont, priority) 
+   this.synchronized {
+     waiters.put(cont, priority) 
+   }
    if (!lockFlag.get()) {
       // possible, when we call waiters.put locked, but then in other thread it was 
       // unlocked and queue cleaned before waiters modify one.
@@ -180,19 +182,40 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   private[this] def sendWaits(): Unit =
   {
+   // concurrent structure fpr priority queue
+   var skips = List[WaitRecord[Continuated[A]]]()
+   var nSend = 0
+   this synchronized {
      while(waiters.nonEmpty && !lockFlag.get()) {
          waiters.take match {
            case Some(wr) =>
-                        processor!wr.value
+              nSend = nSend + 1
+              wr.value match {
+                case sk@Skip(_,_) => 
+                                  skips = wr.asInstanceOf[WaitRecord[Continuated[A]]]::skips
+                case _ =>
+                        processor ! wr.value
+              }
            case None => //  do nothibg.
          }
      }
-  }
+   }
+   if (!lockFlag.get) {
+       //planIdle
+       //TODO: plan instead direct send.
+       for(wr <- skips) {
+             (processor.ask(wr.value)(10 seconds)).foreach(x =>
+                        waiters.put(x.asInstanceOf[Continuated[A]], wr.priority)
+             )
+       }
+     }
+   }
 
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
 
   val waiters: WaitPriorityQueue = new WaitPriorityQueue()
+  val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
   val processor = api.continuatedProcessorRef
 

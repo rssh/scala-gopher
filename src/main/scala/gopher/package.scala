@@ -29,5 +29,18 @@ import gopher.channels._
                    f: ContWrite[A,B] => (A,Continuated[B])
               ): WriteSelectorArgument[A,B] = SyncWriteSelectorArgument(f)
 
+ implicit def toAsyncFullSkipSelectorArgument[A](
+                   f: Skip[A] => Option[Future[Continuated[A]]]
+              ):SkipSelectorArgument[A] = AsyncFullSkipSelectorArgument(f)
+
+ implicit def toAsyncNoOptSkipSelectorArgument[A](
+                   f: Skip[A] => Future[Continuated[A]]
+              ):SkipSelectorArgument[A] = AsyncNoOptSkipSelectorArgument(f)
+
+ implicit def toSyncSelectorArgument[A](
+                   f: Skip[A] => Continuated[A]
+              ):SkipSelectorArgument[A] = SyncSelectorArgument(f)
+
 
 }
+

@@ -8,10 +8,18 @@ class ChannelProcessor(api: GopherAPI) extends Actor
 {
 
    def receive = {
-      case Done(r,ft) => if (!ft.isCompleted) ft.doExit(r)
+      case Done(r,ft) => if (!ft.isCompleted) {
+                            ft.doExit(r)
+                         }
       case sk@Skip(f,ft) =>  if (!ft.isCompleted)  {
                               try{
-                               f(sk).foreach(cont(_))
+                               f(sk) match {
+                                 case Some(cont) => {
+                                   val nowSender = sender
+                                   cont.foreach( nowSender ! _ )
+                                 }
+                                 case None => /* do nothing */
+                               }
                               }catch{
                                 case ex: Throwable => ft.doThrow(ex)
                               }

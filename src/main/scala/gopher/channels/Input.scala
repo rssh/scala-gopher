@@ -20,5 +20,26 @@ trait Input[A]
     ft.future
   }
 
+  def atake(n:Int):Future[IndexedSeq[A]] =
+  {
+    if (n==0) {
+      Future successful IndexedSeq()
+    } else {
+       val ft = PromiseFlowTermination[IndexedSeq[A]]
+       var i = 1;
+       var r: IndexedSeq[A] = IndexedSeq()
+       cbread({
+        (a:A, c:ContRead[A,IndexedSeq[A]]) => 
+          i=i+1
+          r = r :+ a
+          if (i<n) {
+             Some(Future successful c)
+          } else {
+             Some(Future successful Done(r,ft))
+          }
+        },ft)
+        ft.future
+    }
+  }
 
 }

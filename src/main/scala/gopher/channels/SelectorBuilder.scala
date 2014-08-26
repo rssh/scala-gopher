@@ -71,6 +71,19 @@ case class AsyncFullSkipSelectorArgument[A](
   def normalizedFun = f
 }
 
+case class AsyncNoOptSkipSelectorArgument[A](
+                   f: Skip[A] => Future[Continuated[A]]
+              )  extends SkipSelectorArgument[A]
+{
+  def normalizedFun = { c => Some(f(c)) }
+}
+
+case class SyncSelectorArgument[A](
+                   f: Skip[A] => Continuated[A]
+              )  extends SkipSelectorArgument[A]
+{
+  def normalizedFun = { c => Some(Future successful f(c)) }
+}
 
 class SelectorBuilder[A](api: GopherAPI)
 {
@@ -89,6 +102,13 @@ class SelectorBuilder[A](api: GopherAPI)
      priority += 1
      this
    }
+
+   def onIdle(arg: SkipSelectorArgument[A]): this.type =
+   {
+     selector.addSkip(arg.normalizedFun,Int.MaxValue)
+     this
+   }
+
 
    def go: Future[A] = selector.run
 
@@ -153,7 +173,7 @@ class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotati
                                            OnceSelectorBuilder[B] =
    {
      val f1: ((E,ContRead[E,B]) => Option[Future[Continuated[B]]]) =
-           { (e, cr) => Some(f(e) map( Done(_,cr.flwt))) }
+           { (e, cr) => Some(f(e) map( Done(_,cr.flowTermination))) }
      selector.asInstanceOf[Selector[B]].addReader(ch,f1,priority) 
      this.asInstanceOf[OnceSelectorBuilder[B]]
    }
@@ -163,8 +183,18 @@ class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotati
 
 class SelectFactory(api: GopherAPI)
 {
-  def loop: ForeverSelectorBuilder = new ForeverSelectorBuilder(api)
+ 
+  /**
+   * forever builder. 
+   *@Seee ForeverSelectorBuilder
+   */
+  def forever: ForeverSelectorBuilder = new ForeverSelectorBuilder(api)
 
   def once: OnceSelectorBuilder[Nothing] = new OnceSelectorBuilder(api)
+
+  /**
+   * generic selector builder
+   */
+  def loop[A]: SelectorBuilder[A] = new SelectorBuilder[A](api)
 }
 
