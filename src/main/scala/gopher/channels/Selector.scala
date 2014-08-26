@@ -40,106 +40,65 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   {
       block match {
            case cr@ContRead(f,ch, ft) => 
-               val f1: (cr.El, ContRead[cr.El,cr.R]) => Option[Future[Continuated[cr.R]]]  = { 
-                             (a,cont) =>
-                             if (tryLock()) {
-                                try {
-                                  f(a, ContRead(f, ch, ft) ) match {
-                                    case None => 
-                                      if (mustUnlock("read", cont.flowTermination)) {
-                                         // leave one in the same queue.
-                                         waiters.put(cont,priority)
-                                      }
-                                      None 
-                                    case Some(future) =>  
-                                      Some(future.transform( 
-                                         next => { 
-                                                   if (mustUnlock("read-2",cont.flowTermination)) {
-                                                     makeLocked(next, priority)
-                                                   } else {
-                                                     Never
-                                                   } 
-                                                 },
-                                         ex => { mustUnlock("read-3",cont.flowTermination); ex }
-                                      ))
-                                  }
-                                } catch {
-                                   case ex: Throwable => ft.doThrow(ex)
-                                   None
-                                }
-                             } else {
-                               // return to waiters.
-                               toWaiters(cont,priority)
-                               None
-                             }
-                           }
+               val f1 : (cr.El, ContRead[cr.El,cr.R]) => Option[Future[Continuated[cr.R]]]  = { 
+                             (a,cont) => 
+                               tryLocked(f(a,ContRead(f,ch,ft)),cont,priority,"read") map {
+                                  unlockAfter(_,cont,priority,"read")
+                               }
+               }
                ContRead(f1,ch, ft)
            case cw@ContWrite(f,ch, ft) => 
                val f2: ContWrite[cw.El,cw.R] => Option[(cw.El,Future[Continuated[cw.R]])] = 
                                { (cont) =>
-                                  if (tryLock()) {
-                                   try {
-                                     f(ContWrite(f,ch,ft)) match {
-                                       case None => if (mustUnlock("write",cont.flowTermination)) {
-                                                        waiters.put(cont,priority)
-                                                    }
-                                                    None
-                                       case Some((a,future)) =>
-                                             Some((a,future.transform(
-                                                    next => { if (mustUnlock("write-2",cont.flowTermination)) {
-                                                                 makeLocked(next, priority)
-                                                              } else {
-                                                                 Never
-                                                              }
-                                                            },
-                                                    ex => { mustUnlock("write-3",cont.flowTermination); ex }
-                                                 ))               )
-                                                    
-                                     }
-                                   }catch{
-                                     case ex: Throwable => ft.doThrow(ex)
-                                     None
-                                   }
-                                  } else {
-                                    toWaiters(cont,priority)
-                                    None
+                                 tryLocked(f(ContWrite(f,ch,ft)), cont, priority, "write") map {
+                                       case (a,future) =>
+                                            (a,unlockAfter(future,cont,priority,"write"))
+                                 }
+                               }
+                               ContWrite(f2,ch,ft)
+           case sk@Skip(f,ft) => val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
+                                cont =>
+                                  tryLocked(f(Skip(f,ft)),cont, priority, "skip") map {
+                                      unlockAfter(_,cont,priority,"skip")
                                   }
                                 }
-                                ContWrite(f2,ch,ft)
-           case sk@Skip(f,ft) => val f3: Skip[sk.R] => Option[Future[Continuated[sk.R]]] = { 
-                             cont =>
-                             if (tryLock()) {
-                               try {
-                                f(Skip(f,ft)) match {
-                                   case None => if (mustUnlock("skip",cont.flowTermination)) {
-                                                    waiters.put(cont,priority)
-                                                }
-                                                None
-                                   case Some(future) =>
-                                       Some(future.transform(
-                                                next => { if (mustUnlock("skip",cont.flowTermination)) {
-                                                                makeLocked(next, priority)
-                                                          } else Never 
-                                                        },
-                                                ex =>   { mustUnlock( "skip", cont.flowTermination); ex }
-                                           )                )
-                                }
-                               } catch {
-                                case ex: Throwable => ft.doThrow(ex)
-                                                      None
-                               }
-                             } else {
-                               toWaiters(cont, priority) 
-                               None
-                             }
-                           }
-                           Skip(f3,ft)
+                                Skip(f3,ft)
            case dn@Done(_,_) => dn
            case Never => Never 
       }
   }
 
+  
+  @inline
+  private[this] def tryLocked[X](body: => Option[X], cont: FlowContinuated[A], priority: Int, dstr: String):Option[X] =
+       if (tryLock()) {
+           try {
+             body match {
+               case None => if (mustUnlock(dstr,cont.flowTermination)) {
+                               waiters.put(cont,priority)
+                            }
+                            None
+               case sx@Some(x) => sx
+             }
+           }catch{
+             case ex: Throwable => cont.flowTermination.doThrow(ex)
+             None
+           }
+        } else {
+           toWaiters(cont,priority)
+           None
+        }
+            
 
+  @inline
+  private[this] def unlockAfter(f:Future[Continuated[A]], cont: FlowContinuated[A], priority: Int, dstr: String): Future[Continuated[A]] =
+    f.transform(
+         next => { if (mustUnlock(dstr,cont.flowTermination)) {
+                         makeLocked(next, priority)
+                   } else Never 
+                 },
+         ex =>   { mustUnlock( dstr, cont.flowTermination); ex }
+    )
 
   private[this] def toWaiters(cont:Continuated[A],priority:Int):Unit=
   {
