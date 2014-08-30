@@ -91,21 +91,19 @@ class SelectorBuilder[A](api: GopherAPI)
 
    def onRead[E](ch:Input[E])(arg: ReadSelectorArgument[E,A]): this.type =
    {
-     selector.addReader(ch,arg.normalizedFun,priority)
-     priority += 1
+     selector.addReader(ch,arg.normalizedFun)
      this
    }
 
    def onWrite[E](ch:Output[E])(arg: WriteSelectorArgument[E,A]): this.type =
    {
-     selector.addWriter(ch,arg.normalizedFun,priority)
-     priority += 1
+     selector.addWriter(ch,arg.normalizedFun)
      this
    }
 
    def onIdle(arg: SkipSelectorArgument[A]): this.type =
    {
-     selector.addSkip(arg.normalizedFun,Int.MaxValue)
+     selector.addSkip(arg.normalizedFun)
      this
    }
 
@@ -114,8 +112,7 @@ class SelectorBuilder[A](api: GopherAPI)
 
    implicit def ec: ExecutionContext = api.executionContext
 
-   var selector=new Selector[A](api)
-   var priority = 1
+   val selector=new Selector[A](api)
 
 }
 
@@ -128,8 +125,7 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
      // TODO: check that channel is closed or flowTermination is terminated
      val f1: ((E,ContRead[E,Unit]) => Option[Future[Continuated[Unit]]]) =
            { (e, cr) => Some(f(e) map Function.const(cr)) }
-     selector.addReader(ch,f1,priority) 
-     priority += 1
+     selector.addReader(ch,f1) 
      this
    }
 
@@ -142,8 +138,7 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
              val (e,n) = f
              Some((e, n map Function.const(cw)))
           }
-     selector.addWriter(ch, f1, priority)
-     priority += 1
+     selector.addWriter(ch, f1)
      this
    }
 
@@ -151,7 +146,7 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
    {
      val f1: Skip[Unit] => Option[Future[Continuated[Unit]]] =
        { s => Some(f map Function.const(s)) }
-     selector.addSkip(f1,Int.MaxValue)
+     selector.addSkip(f1)
      this
    }
 
@@ -174,7 +169,7 @@ class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotati
    {
      val f1: ((E,ContRead[E,B]) => Option[Future[Continuated[B]]]) =
            { (e, cr) => Some(f(e) map( Done(_,cr.flowTermination))) }
-     selector.asInstanceOf[Selector[B]].addReader(ch,f1,priority) 
+     selector.asInstanceOf[Selector[B]].addReader(ch,f1) 
      this.asInstanceOf[OnceSelectorBuilder[B]]
    }
 
