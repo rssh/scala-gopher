@@ -103,7 +103,7 @@ class SelectorBuilder[A](api: GopherAPI)
 
    def onIdle(arg: SkipSelectorArgument[A]): this.type =
    {
-     selector.addSkip(arg.normalizedFun)
+     selector.addIdleSkip(arg.normalizedFun)
      this
    }
 
@@ -142,11 +142,11 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
      this
    }
 
-   def onDefaultAsync(f: => Future[Unit]): this.type =
+   def onIdleAsync(f: => Future[Unit]): this.type =
    {
      val f1: Skip[Unit] => Option[Future[Continuated[Unit]]] =
        { s => Some(f map Function.const(s)) }
-     selector.addSkip(f1)
+     selector.addIdleSkip(f1)
      this
    }
 

@@ -19,28 +19,16 @@ class AsyncSelectSuite extends FunSuite {
      
      channel.awriteAll(1 to MAX_N)
      
-     //go {
-     //  for( i <- 1 to 1000) 
-     //    channel <~ i 
-     //}
-     
      var sum = 0;
      
      val consumer = gopherApi.select.loop.onRead(channel){  
         (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
-        System.err.println("received:"+a)
         if (a < MAX_N) {
            cont
         } else {
-           System.err.println("sending done")
            Done((),cont.flowTermination)
         }
      }.go
-     
-     //val consumer = makeTie.reading(channel).withTie { (t,i) =>
-     //  sum = sum + i
-     //  if (i==1000) t.shutdown()
-     //}.go
      
      //val consumer = go {
      //  for(s <- select) {
@@ -102,6 +90,7 @@ class AsyncSelectSuite extends FunSuite {
        var d = 1
        val process = gopherApi.select.loop[Int].onWrite(channel) {
                        cont:ContWrite[Int,Int] => i=i+1
+                                                  System.err.println("onWrite, i="+i);
                                                   (i,cont)
                      }.onIdle{
                        cont:Skip[Int] =>        
@@ -110,6 +99,7 @@ class AsyncSelectSuite extends FunSuite {
                              d=d+1
                              cont
                            } else {
+                             System.err.println("done, i="+i)
                              Done(d,cont.flowTermination)
                            }
                      }.go
@@ -122,8 +112,30 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
+    test("async base: catch exception in read", Now)  {
+      val ERROR_N = 10
+      var lastReaded = 0
+      val channel = gopherApi.makeChannel[Int](10)
+      val process = gopherApi.select.loop.
+                  onRead(channel){  
+                       (a:Int, cont:ContRead[Int,Unit]) => lastReaded=a
+                       if (a == ERROR_N) {
+                           throw new IllegalStateException("qqq")
+                       }
+                       cont
+                  }.go
 
-    val actorSystem = ActorSystem.create("system")
-    val gopherApi = GopherAPIExtension(actorSystem)
+      channel.awriteAll(1 to MAX_N)
+
+      Await.ready(process, 10000.second)
+
+      intercept[IllegalStateException]{
+          Await.result(process, 10000.second)
+      }
+
+    }
+
+    def actorSystem = CommonTestObjects.actorSystem
+    def gopherApi = CommonTestObjects.gopherApi
   
 }

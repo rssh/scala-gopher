@@ -1,8 +1,10 @@
 package gopher
 
 import akka.actor._
+import akka.pattern._
 import gopher.channels._
 import scala.concurrent._
+import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicLong
 
 class GopherAPI(as: ActorSystem, es: ExecutionContext)
@@ -14,15 +16,19 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def makeChannel[A](capacity: Int = 1) =
     {
      val nextId = newChannelId
-     channelSupervisorRef ! NewChannel(nextId, capacity)
-     val newChannelPath = channelSupervisorRef.path / nextId.toString
-     val selection = actorSystem.actorSelection(newChannelPath)
-     new IOChannel[A](selection)
+     val futureChannelRef = (channelSupervisorRef.ask(
+                                  NewChannel(nextId, capacity)
+                             )(10 seconds)
+                              .asInstanceOf[Future[ActorRef]]
+                            )
+     new IOChannel[A](futureChannelRef, this)
     }
 
   def actorSystem: ActorSystem = as
 
   def executionContext: ExecutionContext = es
+
+  private[gopher] val idleDetector = new IdleDetector(this)
 
   private[gopher] val continuatedProcessorRef: ActorRef = {
     val props = Props(classOf[ChannelProcessor], this)

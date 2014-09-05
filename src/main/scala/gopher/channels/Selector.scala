@@ -25,18 +25,28 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    waiters add makeLocked(ContWrite(f,ch,this))
   }
 
-  def addSkip(f: Skip[A] => Option[Future[Continuated[A]]]): Unit =
+  def addIdleSkip(f: Skip[A] => Option[Future[Continuated[A]]]): Unit =
   {
-   waiters add makeLocked(Skip(f,this))
+   idleWaiters add makeLocked(Skip(f,this))
   }
 
   def run:Future[A] =
   {
-    sendWaits
+    sendWaits()
+    api.idleDetector put this
     future
   }
 
-  private def makeLocked(block: Continuated[A]): Continuated[A] =
+  private[channels]  def startIdles: Unit =
+  {
+    if (idleWaiters.isEmpty) {
+       api.idleDetector.remove(this)
+    } else {
+       sendWaits(idleWaiters) 
+    }
+  }
+
+  private[this] def makeLocked(block: Continuated[A]): Continuated[A] =
   {
       block match {
            case cr@ContRead(f,ch, ft) => 
@@ -78,7 +88,10 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                waiters add cont
                             }
                             None
-               case sx@Some(x) => sx
+               case sx@Some(x) => {
+                            nOperations.incrementAndGet()
+                            sx
+                            }
              }
            }catch{
              case ex: Throwable => cont.flowTermination.doThrow(ex)
@@ -111,7 +124,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   }
 
 
-  private[this] def isLocked: Boolean = lockFlag.get();
+  def isLocked: Boolean = lockFlag.get();
 
   private[this] def tryLock(): Boolean = lockFlag.compareAndSet(false,true)
 
@@ -137,7 +150,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
     } else true
   }
 
-  private[this] def sendWaits(): Unit =
+  private[this] def sendWaits(waiters: ConcurrentLinkedQueue[Continuated[A]] = waiters): Unit =
   {
    // concurrent structure fpr priority queue
    var skips = List[Continuated[A]]()
@@ -165,16 +178,23 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      }
    }
 
+ 
+
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
 
-  val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
-  val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
+  // number of operations, increased during each lock/unlock.
+  //  used for idle detection.
+  private[channels] val nOperations = new AtomicLong();
 
-  val processor = api.continuatedProcessorRef
+  private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
+  private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
-  implicit val executionContext: ExecutionContext = api.executionContext
+  private[this] val processor = api.continuatedProcessorRef
+
+  private[this] implicit val executionContext: ExecutionContext = api.executionContext
   
+
 
 }
 
