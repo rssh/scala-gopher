@@ -42,7 +42,7 @@ class AsyncSelectSuite extends FunSuite {
      //  sum
      //}
 
-     Await.ready(consumer, 1000.second)
+     Await.ready(consumer, 10.second)
 
      val xsum = (1 to MAX_N).sum
      assert(xsum == sum)
@@ -80,7 +80,7 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
-    test("async base: select read, default action", Now)  {
+    test("async base: select read, default action")  {
 
        val channel = gopherApi.makeChannel[Int](10)
 
@@ -104,7 +104,7 @@ class AsyncSelectSuite extends FunSuite {
                            }
                      }.go
 
-       Await.ready(process, 10000.second)
+       Await.ready(process, 10.second)
 
        assert(consumer.isCompleted)
        assert(i>100)
@@ -112,7 +112,7 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
-    test("async base: catch exception in read", Now)  {
+    test("async base: catch exception in read")  {
       val ERROR_N = 10
       var lastReaded = 0
       val channel = gopherApi.makeChannel[Int](10)

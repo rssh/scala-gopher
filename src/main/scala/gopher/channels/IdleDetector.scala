@@ -17,12 +17,14 @@ class IdleDetector(api: GopherAPI)
           System.err.println("schedule detect fun")
           idleDetectorActive=true
           // TODO: get from config.
-          val cancelable = api.actorSystem.scheduler.schedule(
-             10 milliseconds,
-             50 milliseconds){
-                       () => { System.err.println("ss"); detect }
+          val scheduler = api.actorSystem.scheduler
+          System.err.println("scheduler: "+scheduler)
+          val cancelable = scheduler.schedule(
+             100 milliseconds,
+             500 milliseconds){
+                         detect 
              }(api.executionContext)
-          System.err.println("received cancelable")
+          System.err.println("received cancelable: "+cancelable)
      }
    }
 

@@ -17,7 +17,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
 //libraryDependencies += "ch.qos.logback" % "logback-core" % "1.0.13"
 
@@ -27,7 +27,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
 
 
 
-testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
+//testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
 version:="0.9.1"
 
