@@ -73,7 +73,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                   }
                                 }
                                 Skip(f3,ft)
-           case dn@Done(_,_) => dn
+           case dn@Done(f,ft) => dn
            case Never => Never 
       }
   }

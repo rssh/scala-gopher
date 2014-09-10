@@ -14,17 +14,14 @@ class IdleDetector(api: GopherAPI)
    {
      selectors add SelectorRecord(0L,s)
      if (!idleDetectorActive) {
-          System.err.println("schedule detect fun")
           idleDetectorActive=true
           // TODO: get from config.
           val scheduler = api.actorSystem.scheduler
-          System.err.println("scheduler: "+scheduler)
           val cancelable = scheduler.schedule(
              100 milliseconds,
              500 milliseconds){
                          detect 
              }(api.executionContext)
-          System.err.println("received cancelable: "+cancelable)
      }
    }
 
@@ -42,32 +39,29 @@ class IdleDetector(api: GopherAPI)
 
    private[this] def detect: Unit =
    {
-    System.err.println("Idle detector:detect start");
     var q=false;
-    var nonIdles = new JLinkedList[SelectorRecord]()
+    var nexts = new JLinkedList[SelectorRecord]()
     while(!q) {
       val sr = selectors.poll()
       if (sr==null) {
-        System.err.println("no records in selector list");
         q=true
       } else {
         val s = sr.selector
-        System.err.println("processing selector "+s);
         if (!s.isCompleted) {
-          if (s.isLocked) {
-           nonIdles add sr
-          } else {
+          var next = sr
+          if (!s.isLocked) {
            val nOps = s.nOperations.get
            if (nOps != sr.prevNOperations) {
-              nonIdles add SelectorRecord(nOps,s)
+              next = SelectorRecord(nOps,s)
            } else {
               s.startIdles
            }
           }
+          nexts add next
         }
       }
     }
-    selectors.addAll(nonIdles)
+    selectors.addAll(nexts)
    }
 
 

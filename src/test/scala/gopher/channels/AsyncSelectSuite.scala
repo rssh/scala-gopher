@@ -80,7 +80,7 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
-    test("async base: select read, default action")  {
+    test("async base: select read, default action", Now)  {
 
        val channel = gopherApi.makeChannel[Int](10)
 
@@ -104,9 +104,11 @@ class AsyncSelectSuite extends FunSuite {
                            }
                      }.go
 
+       System.err.println("before-wait, process="+process)
        Await.ready(process, 10.second)
 
        assert(consumer.isCompleted)
+       assert(process.isCompleted)
        assert(i>100)
        System.err.println("d="+d)
 
