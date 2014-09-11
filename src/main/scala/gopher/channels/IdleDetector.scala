@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.{LinkedList => JLinkedList}
+import com.typesafe.config._
 
 class IdleDetector(api: GopherAPI)
 {
@@ -15,11 +16,11 @@ class IdleDetector(api: GopherAPI)
      selectors add SelectorRecord(0L,s)
      if (!idleDetectorActive) {
           idleDetectorActive=true
-          // TODO: get from config.
           val scheduler = api.actorSystem.scheduler
+          val tick = idleDetectionTick
           val cancelable = scheduler.schedule(
-             100 milliseconds,
-             500 milliseconds){
+             tick/2 milliseconds,
+             tick milliseconds){
                          detect 
              }(api.executionContext)
      }
@@ -64,6 +65,14 @@ class IdleDetector(api: GopherAPI)
     selectors.addAll(nexts)
    }
 
+   /**
+    * tick duration of idle detection in ms.
+    */
+   def idleDetectionTick = try {
+                    api.config.getInt("idle-detection-tick")
+                  } catch {
+                    case ex: ConfigException.Missing => 100
+                  }
 
 
    case class SelectorRecord(

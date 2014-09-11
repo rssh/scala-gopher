@@ -1,12 +1,12 @@
   
- Implementation of go scopes and channels in scala.
- --------------------------------------------------
- --------------------------------------------------
+ Fully asyncronics implementation of go-like channels/selectors in scala
+ -----------------------------------------------------------------------
+ -----------------------------------------------------------------------
 
  Requirements:    
  ------------
  
- * scala 2.10.3 +
+ * scala 2.11.2 +
  * scala-async plugin which you must install by hands from 
     https://github.com/scala/async.git  (on the time of writing this document
     livrary was not yet published).

@@ -90,27 +90,22 @@ class AsyncSelectSuite extends FunSuite {
        var d = 1
        val process = gopherApi.select.loop[Int].onWrite(channel) {
                        cont:ContWrite[Int,Int] => i=i+1
-                                                  System.err.println("onWrite, i="+i);
                                                   (i,cont)
                      }.onIdle{
                        cont:Skip[Int] =>        
                            if (i < 100) {
-                             System.err.println("skip, i="+i)
                              d=d+1
                              cont
                            } else {
-                             System.err.println("done, i="+i)
                              Done(d,cont.flowTermination)
                            }
                      }.go
 
-       System.err.println("before-wait, process="+process)
        Await.ready(process, 10.second)
 
        assert(consumer.isCompleted)
        assert(process.isCompleted)
        assert(i>100)
-       System.err.println("d="+d)
 
     }
 
@@ -134,6 +129,21 @@ class AsyncSelectSuite extends FunSuite {
       intercept[IllegalStateException]{
           Await.result(process, 10000.second)
       }
+
+    }
+
+    test("async base: catch exception in idle")  {
+      val process = gopherApi.select.loop.onIdle(
+                      (cont: Skip[Int]) =>
+                        if (true) {
+                           throw new IllegalStateException("qqq")
+                        } else cont
+                    ).go
+
+      Await.ready(process, 10000.second)
+
+      assert(process.value.get.isFailure)
+      
 
     }
 

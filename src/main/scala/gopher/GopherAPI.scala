@@ -6,6 +6,7 @@ import gopher.channels._
 import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicLong
+import com.typesafe.config._
 
 class GopherAPI(as: ActorSystem, es: ExecutionContext)
 {
@@ -27,6 +28,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def actorSystem: ActorSystem = as
 
   def executionContext: ExecutionContext = es
+
+  def config: Config = as.settings.config.atKey("gopher")
 
   private[gopher] val idleDetector = new IdleDetector(this)
 
