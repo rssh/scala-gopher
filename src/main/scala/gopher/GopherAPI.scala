@@ -31,6 +31,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def config: Config = as.settings.config.atKey("gopher")
 
+  def currentFlow = CurrentFlowTermination
+
   private[gopher] val idleDetector = new IdleDetector(this)
 
   private[gopher] val continuatedProcessorRef: ActorRef = {
