@@ -1,6 +1,10 @@
 package gopher.channels
 
 import scala.concurrent._
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+import scala.reflect.api._
+
 
 /**
  * Entity, which can read (or generate, as you prefer) objects of type A,
@@ -19,6 +23,8 @@ trait Input[A]
     cbread[A]( (a, self) => { Some(Future.successful(Done(a,ft))) }, ft )
     ft.future
   }
+
+  def  read:A = macro InputMacro.read[A]
 
   def atake(n:Int):Future[IndexedSeq[A]] =
   {
@@ -40,6 +46,18 @@ trait Input[A]
         },ft)
         ft.future
     }
+  }
+
+
+}
+
+object InputMacro
+{
+
+  def read[A](c:Context):c.Expr[A] =
+  {
+   import c.universe._
+   c.Expr[A](q"{scala.async.Async.await(${c.prefix}.aread)}")
   }
 
 }

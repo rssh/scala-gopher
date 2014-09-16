@@ -3,6 +3,10 @@ package object gopher {
 import scala.concurrent._
 import gopher.channels._
 
+//
+// magnetic arguments for selector-builder unsugared API
+//
+
  implicit def toAsyncFullReadSelectorArgument[A,B](
                    f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
               ): ReadSelectorArgument[A,B] = AsyncFullReadSelectorArgument(f)  
@@ -40,6 +44,13 @@ import gopher.channels._
  implicit def toSyncSelectorArgument[A](
                    f: Skip[A] => Continuated[A]
               ):SkipSelectorArgument[A] = SyncSelectorArgument(f)
+
+//
+// Time from time we forgott to set 'go' in selector builder. 
+// Let's transform one automatically
+//    TODO: make 'go' nilpotent before this. 
+//
+// implicit def toFuture[A](sb:SelectorBuilder[A]):Future[A] = sb.go
 
 
 }

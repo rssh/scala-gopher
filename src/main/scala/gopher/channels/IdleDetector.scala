@@ -49,6 +49,7 @@ class IdleDetector(api: GopherAPI)
       } else {
         val s = sr.selector
         if (!s.isCompleted) {
+          System.err.println("idel-detector:detect, !completed s = "+s);
           var next = sr
           if (!s.isLocked) {
            val nOps = s.nOperations.get
@@ -57,6 +58,8 @@ class IdleDetector(api: GopherAPI)
            } else {
               s.startIdles
            }
+          } else {
+            System.err.println("idel-detector:detect: is-locked");
           }
           nexts add next
         }
