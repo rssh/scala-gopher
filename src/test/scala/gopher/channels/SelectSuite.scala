@@ -128,33 +128,40 @@ class SelectSuite extends FunSuite
    
    test("basic compound select with apply", Now)  {
 
+     import scala.concurrent.ExecutionContext.Implicits.global
+
      val channel1 = gopherApi.makeChannel[Int](1)
      val channel2 = gopherApi.makeChannel[Int](1)
      val channel3 = gopherApi.makeChannel[Int](1)
+     val channel4 = gopherApi.makeChannel[Int](1)
 
      val producer = channel1.awriteAll(1 to 1000)
 
      @volatile var x=0
      @volatile var nw=0
      @volatile var q = false
-
+     @volatile var ch1s=0
  
      val selector = gopherApi.select.forever.reading(channel1) { i =>
-                                   Console.println(s"reading from chl and writing to ch2, i=${i}")
-                                   channel2.write(i)
-                                   Console.println(s"after write")
+                                   // read ch1 in selector
+                                   channel4.awrite(i)
+                                   ch1s=i           
                                  }.reading(channel2) { i =>
                                   {}; // workarround for https://issues.scala-lang.org/browse/SI-8846
                                   x=i
-                                  Console.println(s"reading from ch2, i=${i}")
+                                  //Console.println(s"reading from ch2, i=${i}")
                                 }.writing(channel3,x) {
+                                  {};
                                   nw=nw+1        
-                                  Console.println(s"writing ${x} to ch3, nw=${nw}")
+                                  //Console.println(s"writing ${x} to ch3, nw=${nw}")
                                 }.idle {
-                                  Console.println(s"idle, exiting")
+                                  //Console.println(s"idle, exiting")
+                                  {};
                                   q=true
                                   gopherApi.currentFlow.exit(())
                                 }.go
+
+     for(c <- channel4) channel2.write(c)
 
      Await.ready(selector, 10.second)
      assert(selector.isCompleted)

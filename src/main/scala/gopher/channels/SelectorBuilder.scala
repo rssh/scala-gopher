@@ -145,7 +145,6 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 
    } 
 
-
    def writing[A](ch: Output[A], x: =>A) = new Writing[A](ch,x)
 
    class Writing[E](ch: Output[E], x: =>E) 
@@ -215,6 +214,7 @@ object ForeverSelectorBuilder
       c.Expr[ForeverSelectorBuilder](c.untypecheck(newTree))
    }
 
+
    def readingWithFlowTerminationImpl[A](c:Context)(f:c.Expr[(A,FlowTermination[Unit])=>Unit]):
                                                                    c.Expr[ForeverSelectorBuilder] =
    {
@@ -254,8 +254,6 @@ object ForeverSelectorBuilder
                     }
              case Apply(Select(obj,member), args) =>
                     if (obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
-                       System.err.println("apply, obj="+obj.tpe)
-                       System.err.println("apply, member="+member)
                        member match {
                           case TermName("exit") => 
                                    Apply(Select(obj,TermName("exitDelayed")),args)
@@ -294,14 +292,6 @@ object ForeverSelectorBuilder
 class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotation.unchecked.uncheckedVariance](api)
 {
 
-   def onReadAsync[E, B >: A](ch:Input[E])(f: E => Future[B] ): 
-                                           OnceSelectorBuilder[B] =
-   {
-     val f1: ((E,ContRead[E,B]) => Option[Future[Continuated[B]]]) =
-           { (e, cr) => Some(f(e) map( Done(_,cr.flowTermination))) }
-     selector.asInstanceOf[Selector[B]].addReader(ch,f1) 
-     this.asInstanceOf[OnceSelectorBuilder[B]]
-   }
 
 }
 
