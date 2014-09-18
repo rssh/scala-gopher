@@ -5,6 +5,7 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
 import scala.concurrent._
+import scala.annotation.unchecked._
 
 class SelectorBuilder[A](api: GopherAPI)
 {
@@ -104,12 +105,12 @@ object ForeverSelectorBuilder
      val transformer = new Transformer {
         override def transform(tree:Tree): Tree =
           tree match {
-             case Apply(TypeApply(Select(obj,TermName("implicitly")),objType), args) =>
+             case Apply(TypeApply(Select(obj,TermName("implicitly")),List(objType)), args) =>
                     if (obj.tpe =:= typeOf[Predef.type] ) {
                        // unresolve implicit references.
                        System.err.println("objType="+objType)
-                       System.err.println("objType.head.tpe="+objType.head.tpe)
-                       TypeApply(Select(obj,TermName("implicitly")),objType)
+                       System.err.println("objType.tpe="+objType.tpe)
+                       TypeApply(Select(obj,TermName("implicitly")),List(objType))
                     } else {
                        super.transform(tree)
                     }
@@ -144,13 +145,14 @@ object ForeverSelectorBuilder
                                  lastFun: (List[c.universe.ValDef], c.Tree) => c.Tree): c.Expr[ForeverSelectorBuilder] =
    {
      import c.universe._
-     val ftParam = ValDef(Modifiers(Flag.PARAM),TermName("ft"),TypeTree(),EmptyTree)
-     val ecParam = ValDef(Modifiers(Flag.PARAM),TermName("ec"),TypeTree(),EmptyTree)
+     val Seq(ft, ft1, ec, ec1) = Seq("ft","ft","ec","ec1") map (x => TermName(c.freshName(x)))
+     val ftParam = ValDef(Modifiers(Flag.PARAM),ft,TypeTree(),EmptyTree)
+     val ecParam = ValDef(Modifiers(Flag.PARAM),ec,TypeTree(),EmptyTree)
      val nvaldefs = ecParam::ftParam::valdefs
      val nbody = q"""{
-                      implicit val ft1: gopher.FlowTermination[Unit] = ft;
-                      implicit val ec1 = ec;
-                      scala.async.Async.async(${transformDelayedMacroses(c)(body)})(ec)
+                      implicit val ${ft1} = ${ft}
+                      implicit val ${ec1} = ${ec}
+                      scala.async.Async.async(${transformDelayedMacroses(c)(body)})(${ec})
                      }
                   """
      val newTree = lastFun(nvaldefs,nbody)
@@ -185,9 +187,29 @@ object ForeverSelectorBuilder
 
 }
 
-class OnceSelectorBuilder[+A](api: GopherAPI) extends SelectorBuilder[A@annotation.unchecked.uncheckedVariance](api)
+class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@uncheckedVariance](api)
 {
 
+   def reading[A](ch: Input[A])(f: A=>T): OnceSelectorBuilder[T] =
+        macro OnceSelectorBuilder.readingImpl[T,A]
+
+   def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): OnceSelectorBuilder[T] =
+   {
+     val f1: ((A,ContRead[A,T]) => Option[Future[Continuated[T]]]) =
+                            { (e, cr) => Some(f(ec,cr.flowTermination,e) map ( Done(_,cr.flowTermination))) }
+     selector.addReader(ch,f1) 
+     this
+   }
+
+ 
+
+}
+
+object OnceSelectorBuilder
+{
+
+   def readingImpl[T,A](c:Context)(ch:c.Expr[Input[A]])(f:c.Expr[A=>T]):c.Expr[OnceSelectorBuilder[T]] =
+      ???
 
 }
 
