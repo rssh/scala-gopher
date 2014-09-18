@@ -52,6 +52,8 @@ import gopher.channels._
 //
 // implicit def toFuture[A](sb:SelectorBuilder[A]):Future[A] = sb.go
 
+ @scala.annotation.compileTimeOnly("AAA")
+ implicit def ft[A]: FlowTermination[A] = ???
 
 }
 

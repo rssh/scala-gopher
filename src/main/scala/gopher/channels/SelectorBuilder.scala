@@ -6,88 +6,6 @@ import scala.reflect.api._
 import gopher._
 import scala.concurrent._
 
-sealed trait ReadSelectorArgument[A,B]
-{
-  def normalizedFun: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
-}
-
-case class AsyncFullReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
-              )  extends ReadSelectorArgument[A,B]
-{
-  def normalizedFun = f
-}
-
-case class AsyncNoOptionReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Future[Continuated[B]]
-               ) extends ReadSelectorArgument[A,B]
-{
-  def normalizedFun = ( (a,c) => Some(f(a,c)) )
-}
-
-case class SyncReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Continuated[B]
-               ) extends ReadSelectorArgument[A,B]
-{
-  def normalizedFun = ( (a,c) => Some( Future successful f(a,c) ) )
-}
-
-sealed trait WriteSelectorArgument[A,B]
-{
-  def normalizedFun: ContWrite[A,B] => Option[(A,Future[Continuated[B]])]
-}
-
-case class AsyncFullWriteSelectorArgument[A,B](
-                   f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])]
-              )  extends WriteSelectorArgument[A,B]
-{
-  def normalizedFun = f
-}
-
-case class AsyncNoOptWriteSelectorArgument[A,B](
-                   f: ContWrite[A,B] => (A,Future[Continuated[B]])
-              )  extends WriteSelectorArgument[A,B]
-{
-  def normalizedFun = (c => Some(f(c)))
-}
-
-case class SyncWriteSelectorArgument[A,B](
-                   f: ContWrite[A,B] => (A,Continuated[B])
-              )  extends WriteSelectorArgument[A,B]
-{
-  def normalizedFun = {c => 
-     val (a, next) = f(c) 
-     Some((a,Future successful next))
-  }
-
-}
-
-sealed trait SkipSelectorArgument[A]
-{
-  def normalizedFun: Skip[A] => Option[Future[Continuated[A]]]
-}
-
-case class AsyncFullSkipSelectorArgument[A](
-                   f: Skip[A] => Option[Future[Continuated[A]]]
-              )  extends SkipSelectorArgument[A]
-{
-  def normalizedFun = f
-}
-
-case class AsyncNoOptSkipSelectorArgument[A](
-                   f: Skip[A] => Future[Continuated[A]]
-              )  extends SkipSelectorArgument[A]
-{
-  def normalizedFun = { c => Some(f(c)) }
-}
-
-case class SyncSelectorArgument[A](
-                   f: Skip[A] => Continuated[A]
-              )  extends SkipSelectorArgument[A]
-{
-  def normalizedFun = { c => Some(Future successful f(c)) }
-}
-
 class SelectorBuilder[A](api: GopherAPI)
 {
 
@@ -123,66 +41,39 @@ class SelectorBuilder[A](api: GopherAPI)
 class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 {
 
-   thisSelectorBuilder =>
+   def reading[A](ch: Input[A])(f: A=>Unit): ForeverSelectorBuilder =
+        macro ForeverSelectorBuilder.readingImpl[A]
 
-   def reading[A](ch: Input[A]) = new Reading[A](ch)
-
-   class Reading[E](ch: Input[E]) 
+   def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): ForeverSelectorBuilder =
    {
-      def apply(f: E => Unit): ForeverSelectorBuilder =  
-        macro ForeverSelectorBuilder.readingImpl[E]
+     val f1: ((A,ContRead[A,Unit]) => Option[Future[Continuated[Unit]]]) =
+                            { (e, cr) => Some(f(ec,cr.flowTermination,e) map Function.const(cr)) }
+     selector.addReader(ch,f1) 
+     this
+   }
 
-      def withFlowTermination(f: (E, FlowTermination[Unit]) => Unit ): ForeverSelectorBuilder = 
-        macro ForeverSelectorBuilder.readingWithFlowTerminationImpl[E]
+   def writing[A](ch: Output[A], x: A)(body: Unit): ForeverSelectorBuilder = 
+        macro ForeverSelectorBuilder.writingImpl[A]
 
-      def withFlowTerminationAsync(f: (ExecutionContext, E,FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      {
-        val f1: ((E,ContRead[E,Unit]) => Option[Future[Continuated[Unit]]]) =
-                            { (e, cr) => Some(f(ec,e,cr.flowTermination) map Function.const(cr)) }
-        selector.addReader(ch,f1) 
-        thisSelectorBuilder
-      }
-
-   } 
-
-   def writing[A](ch: Output[A], x: =>A) = new Writing[A](ch,x)
-
-   class Writing[E](ch: Output[E], x: =>E) 
+   def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
    {
-
-      /**
-       *@param - body: actions which needed 
-       *  Note, that body is passed with 'byName' semantics, limitations of scala macros not allow to
-       * show this in signature
-       */
-      def apply(body: Unit):ForeverSelectorBuilder =
-           macro ForeverSelectorBuilder.writingImpl[E]
-
-      def withFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      { val f1: ContWrite[E,Unit] => Option[(E,Future[Continuated[Unit]])] =
+     val f1: ContWrite[A,Unit] => Option[(A,Future[Continuated[Unit]])] =
                   { cw => Some(x,f(ec,cw.flowTermination) map Function.const(cw)) }
-        selector.addWriter(ch,f1)
-        thisSelectorBuilder
-      }
-
-
+     selector.addWriter(ch,f1)
+     this
    }
 
-   def idle = new Idle()
 
-   class Idle
-   {
-       def apply(body: Unit): ForeverSelectorBuilder =
+   def idle(body:Unit): ForeverSelectorBuilder =
          macro ForeverSelectorBuilder.idleImpl
-
-      def withFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      { val f1: (Skip[Unit] => Option[Future[Continuated[Unit]]]) =
+    
+   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
+   { val f1: (Skip[Unit] => Option[Future[Continuated[Unit]]]) =
                  { st => Some(f(ec,st.flowTermination) map Function.const(st)) }
-        selector.addIdleSkip(f1)
-        thisSelectorBuilder
-      }
-
+     selector.addIdleSkip(f1)
+     this
    }
+
     
 
 }
@@ -190,50 +81,21 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 object ForeverSelectorBuilder
 {
 
-   def readingImpl[A](c:Context)(f:c.Expr[A=>Unit]):c.Expr[ForeverSelectorBuilder] =
+   def readingImpl[A](c:Context)(ch:c.Expr[Input[A]])(f:c.Expr[A=>Unit]):c.Expr[ForeverSelectorBuilder] =
    {
       import c.universe._
-      val newTree = f.tree match {
+      f.tree match {
          case Function(valdefs, body) => 
-               val elParam = valdefs match {
-                               case el::Nil => el
-                               case _ => c.abort(c.enclosingPosition,"Only one parameter to this function is expected")
-                             }
-               val ftParam = ValDef(Modifiers(Flag.PARAM|Flag.IMPLICIT),TermName("ft"),TypeTree(),EmptyTree)
-               val ecParam = ValDef(Modifiers(Flag.PARAM|Flag.IMPLICIT),TermName("ec"),TypeTree(),EmptyTree)
-               val nvaldefs = ecParam::elParam::ftParam::Nil
-               val nbody = transformDelayedMacroses(c)(body)
-               q"""${c.prefix}.withFlowTerminationAsync(
-                               ${Function(nvaldefs,
-                                          q"{scala.async.Async.async({${nbody};{}})(ec)}")}
-                   )
-                """
+               buildAsyncCall(c)(valdefs,body, 
+                                { (nvaldefs, nbody) =>
+                                 q"""${c.prefix}.readingWithFlowTerminationAsync(${ch},
+                                       ${Function(nvaldefs,nbody)}
+                                      )
+                                  """
+                                })
          case _ => c.abort(c.enclosingPosition,"argument of reading.apply must be function")
       }
-      Console.println("newTree"+newTree)
-      c.Expr[ForeverSelectorBuilder](c.untypecheck(newTree))
    }
-
-
-   def readingWithFlowTerminationImpl[A](c:Context)(f:c.Expr[(A,FlowTermination[Unit])=>Unit]):
-                                                                   c.Expr[ForeverSelectorBuilder] =
-   {
-      import c.universe._
-      val newTree = f.tree match {
-         case Function(valdefs, body) => 
-               Console.println("matched, valdefs="+valdefs)
-               // TODO: freshName instead ec.
-               val nvaldefs = ValDef(Modifiers(Flag.PARAM|Flag.IMPLICIT),TermName("ec"),TypeTree(),EmptyTree)::valdefs
-               q"""${c.prefix}.withFlowTerminationAsync(
-                               ${Function(nvaldefs,q"scala.async.Async.async({${body}})(ec)")}
-                            )
-                        """
-         case _ => c.abort(c.enclosingPosition,"argument of withFlowTermination must be function")
-      }
-      Console.println("newTree"+newTree)
-      c.Expr[ForeverSelectorBuilder](c.untypecheck(newTree))
-   }
-
 
    def transformDelayedMacroses(c:Context)(block:c.Tree):c.Tree =
    {
@@ -242,6 +104,15 @@ object ForeverSelectorBuilder
      val transformer = new Transformer {
         override def transform(tree:Tree): Tree =
           tree match {
+             case Apply(TypeApply(Select(obj,TermName("implicitly")),objType), args) =>
+                    if (obj.tpe =:= typeOf[Predef.type] ) {
+                       // unresolve implicit references.
+                       System.err.println("objType="+objType)
+                       System.err.println("objType.head.tpe="+objType.head.tpe)
+                       TypeApply(Select(obj,TermName("implicitly")),objType)
+                    } else {
+                       super.transform(tree)
+                    }
              case Apply(TypeApply(Select(obj,member),objType), args) =>
                     if (obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
                        member match {
@@ -269,23 +140,48 @@ object ForeverSelectorBuilder
      transformer.transform(block)
    }
 
-   def writingImpl[A](c:Context)(body:c.Expr[Unit]):c.Expr[ForeverSelectorBuilder] =
+   def buildAsyncCall(c:Context)(valdefs: List[c.universe.ValDef], body: c.Tree,
+                                 lastFun: (List[c.universe.ValDef], c.Tree) => c.Tree): c.Expr[ForeverSelectorBuilder] =
    {
      import c.universe._
-     val ftParam = ValDef(Modifiers(Flag.PARAM|Flag.IMPLICIT),TermName("ft"),TypeTree(),EmptyTree)
-     val ecParam = ValDef(Modifiers(Flag.PARAM|Flag.IMPLICIT),TermName("ec"),TypeTree(),EmptyTree)
-     val nvaldefs = ecParam::ftParam::Nil
-     val nbody = transformDelayedMacroses(c)(body.tree)
-     val newTree = q"""${c.prefix}.withFlowTerminationAsync(
-                             ${Function(nvaldefs,q"scala.async.Async.async({${nbody}})(ec)")}
-                       )
-                   """
+     val ftParam = ValDef(Modifiers(Flag.PARAM),TermName("ft"),TypeTree(),EmptyTree)
+     val ecParam = ValDef(Modifiers(Flag.PARAM),TermName("ec"),TypeTree(),EmptyTree)
+     val nvaldefs = ecParam::ftParam::valdefs
+     val nbody = q"""{
+                      implicit val ft1: gopher.FlowTermination[Unit] = ft;
+                      implicit val ec1 = ec;
+                      scala.async.Async.async(${transformDelayedMacroses(c)(body)})(ec)
+                     }
+                  """
+     val newTree = lastFun(nvaldefs,nbody)
      c.Expr[ForeverSelectorBuilder](c.untypecheck(newTree))
+   }
+
+   def writingImpl[A](c:Context)(ch:c.Expr[Output[A]],x:c.Expr[A])(body:c.Expr[Unit]):c.Expr[ForeverSelectorBuilder] =
+   {
+     import c.universe._
+     buildAsyncCall(c)(Nil,body.tree,
+                   { (nvaldefs, nbody) =>
+                     q"""${c.prefix}.writingWithFlowTerminationAsync(${ch},${x},
+                             ${Function(nvaldefs,nbody)}
+                       )
+                     """
+                   })
    }
 
 
    def idleImpl(c:Context)(body:c.Expr[Unit]):c.Expr[ForeverSelectorBuilder] =
-     writingImpl[Nothing](c)(body)
+   {
+     import c.universe._
+     buildAsyncCall(c)(Nil,body.tree,
+                   { (nvaldefs, nbody) =>
+                      q"""${c.prefix}.idleWithFlowTerminationAsync(
+                                    ${Function(nvaldefs,nbody)}
+                          )
+                       """
+                   })
+   }
+
 
 }
 

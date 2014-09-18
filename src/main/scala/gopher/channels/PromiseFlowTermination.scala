@@ -1,6 +1,7 @@
 package gopher.channels
 
 import scala.concurrent._
+import gopher._
 
 trait PromiseFlowTermination[A] extends FlowTermination[A]
 {

@@ -80,7 +80,7 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
-    test("async base: select read, default action", Now)  {
+    test("async base: select read, default action")  {
 
        val channel = gopherApi.makeChannel[Int](10)
 

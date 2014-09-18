@@ -5,6 +5,7 @@ import scala.async.Async._
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
+import gopher._
 
 /**
  * Entity, which can 'eat' objects of type A,

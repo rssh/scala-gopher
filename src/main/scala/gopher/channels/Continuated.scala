@@ -2,6 +2,7 @@ package gopher.channels;
 
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
+import gopher._
 
 /**
  * represent continuated computation from A to B.

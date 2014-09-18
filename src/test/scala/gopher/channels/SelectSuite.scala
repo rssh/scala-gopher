@@ -12,21 +12,26 @@ class SelectSuite extends FunSuite
 {
 
  
-   test("basic select with reading syntax sugar")  {
+   test("basic select with reading syntax sugar", Now)  {
      
      val channel = gopherApi.makeChannel[Int](100)
      
      val producer = channel.awriteAll(1 to 1000)
        
      @volatile var sum = 0;
-     val consumer = gopherApi.select.forever.reading(channel).withFlowTermination { (i, ft) =>
+     val consumer = gopherApi.select.forever.reading(channel){ i =>
+                                       System.err.println("reading:"+i) 
                                        sum = sum+i
-                                       if (i==1000) ft.doExit(())
+                                       if (i==1000) {
+                                          System.err.println("doExit:"+implicitly[FlowTermination[Unit]])
+                                          implicitly[FlowTermination[Unit]].doExit(())
+                                       } else {
+                                       }
                                      }.go
 
 
      
-     Await.ready(consumer, 1000.second)
+     Await.ready(consumer, 10.second)
 
     // System.err.println("sum="+sum);
      
@@ -126,7 +131,7 @@ class SelectSuite extends FunSuite
 
    }
    
-   test("basic compound select with apply", Now)  {
+   test("basic compound select with apply")  {
 
      import scala.concurrent.ExecutionContext.Implicits.global
 
