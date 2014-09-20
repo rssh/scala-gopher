@@ -174,6 +174,31 @@ class SelectSuite extends FunSuite
 
    }
 
+   test("basic select.once with reading syntax sugar")  {
+
+     val channel1 = gopherApi.makeChannel[String](1)
+     val channel2 = gopherApi.makeChannel[String](1)
+     val selector = (gopherApi.select.once.reading(channel1)(x=>x)
+                                                  .reading(channel2)(x=>x)
+                    ).go
+     channel2.awrite("A")
+     assert(Await.result(selector, 10.second)=="A")
+     
+   }
+
+   test("basic select.once with writing syntax sugar")  {
+     val channel1 = gopherApi.makeChannel[Int](100)
+     val channel2 = gopherApi.makeChannel[Int](100)
+     @volatile var s:Int = 0
+     val selector = (gopherApi.select.once.writing(channel1,s){("A")}
+                                          .writing(channel2,s){("B")}
+                    ).go
+     // hi, Captain Obvious
+     assert(Set("A","B") contains Await.result(selector, 10.second) )
+     channel1.close()
+     channel2.close()
+   }
+
 /*
   
    test("select with queue type") {
