@@ -29,6 +29,29 @@ class SelectorBuilder[A](api: GopherAPI)
      this
    }
 
+   @inline
+   def withReader[B](ch:Input[B], f: (B,ContRead[B,A]) => Option[Future[Continuated[A]]]): this.type =
+   {
+     selector.addReader(ch,f)
+     this
+   }
+
+   @inline
+   def withWriter[B](ch:Output[B], f: ContWrite[B,A] => Option[(B,Future[Continuated[A]])] ): this.type =
+   {
+     selector.addWriter(ch,f)
+     this
+   } 
+
+   @inline
+   def withIdle(f: Skip[A] => Option[Future[Continuated[A]]]):this.type =
+   {
+     selector.addIdleSkip(f)
+     this
+   }
+     
+
+
 
    def go: Future[A] = selector.run
 
@@ -152,35 +175,24 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
                     // internal error in compiler when using this.type as S
       
 
+   @inline
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
-   {
-     val f1: ((A,ContRead[A,Unit]) => Option[Future[Continuated[Unit]]]) =
-                            { (e, cr) => Some(f(ec,cr.flowTermination,e) map Function.const(cr)) }
-     selector.addReader(ch,f1) 
-     this
-   }
+      withReader[A]( ch, (e, cr) => Some(f(ec,cr.flowTermination,e) map Function.const(cr)) )
 
    def writing[A](ch: Output[A], x: A)(body: Unit): ForeverSelectorBuilder = 
         macro SelectorBuilder.writingImpl[A,Unit,ForeverSelectorBuilder]
 
+   @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-   {
-     val f1: ContWrite[A,Unit] => Option[(A,Future[Continuated[Unit]])] =
-                  { cw => Some(x,f(ec,cw.flowTermination) map Function.const(cw)) }
-     selector.addWriter(ch,f1)
-     this
-   }
+       withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination) map Function.const(cw)) } )
 
 
    def idle(body:Unit): ForeverSelectorBuilder =
          macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
     
+   @inline
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-   { val f1: (Skip[Unit] => Option[Future[Continuated[Unit]]]) =
-                 { st => Some(f(ec,st.flowTermination) map Function.const(st)) }
-     selector.addIdleSkip(f1)
-     this
-   }
+      withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
     
 
@@ -193,13 +205,9 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
    def reading[A](ch: Input[A])(f: A=>T): OnceSelectorBuilder[T] =
         macro SelectorBuilder.readingImpl[A,T,OnceSelectorBuilder[T]] 
 
+   @inline
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): OnceSelectorBuilder[T] =
-   {
-     val f1: ((A,ContRead[A,T]) => Option[Future[Continuated[T]]]) =
-                            { (e, cr) => Some(f(ec,cr.flowTermination,e) map ( Done(_,cr.flowTermination))) }
-     selector.addReader(ch,f1) 
-     this
-   }
+       withReader[A](ch,  { (e, cr) => Some(f(ec,cr.flowTermination,e) map ( Done(_,cr.flowTermination))) } )
 
    /**
     * write x to channel if possible
@@ -207,25 +215,16 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
    def writing[A](ch: Output[A], x: A)(body: T): OnceSelectorBuilder[T] = 
         macro SelectorBuilder.writingImpl[A,T,OnceSelectorBuilder[T]]
  
+   @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
-   {
-     val f1: ContWrite[A,T] => Option[(A,Future[Continuated[T]])] =
-                  { cw => Some(x,f(ec,cw.flowTermination) map(x => Done(x,cw.flowTermination)) ) }
-     selector.addWriter(ch,f1)
-     this
-   }
+        withWriter[A](ch, { cw => Some(x,f(ec,cw.flowTermination) map(x => Done(x,cw.flowTermination)) ) } )
 
    def idle(body: T): OnceSelectorBuilder[T] = 
         macro SelectorBuilder.idleImpl[T,OnceSelectorBuilder[T]]
 
+   @inline
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
-   {
-     val f1: Skip[T] => Option[Future[Continuated[T]]] =
-                  { sk => Some(f(ec,sk.flowTermination) map(x => Done(x,sk.flowTermination)) ) }
-     selector.addIdleSkip(f1)
-     this
-   }
-
+       withIdle{ sk => Some(f(ec,sk.flowTermination) map(x => Done(x,sk.flowTermination)) ) }
 
 }
 
