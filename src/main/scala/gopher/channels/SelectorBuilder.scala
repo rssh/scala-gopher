@@ -129,6 +129,18 @@ object SelectorBuilder
      c.Expr[S](c.untypecheck(newTree))
    }
 
+   def idleImpl[T,S](c:Context)(body:c.Expr[T]):c.Expr[S] =
+   {
+     import c.universe._
+     SelectorBuilder.buildAsyncCall(c)(Nil,body.tree,
+                   { (nvaldefs, nbody) =>
+                      q"""${c.prefix}.idleWithFlowTerminationAsync(
+                                    ${Function(nvaldefs,nbody)}
+                          )
+                       """
+                   })
+   }
+
 }
 
 class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
@@ -161,7 +173,7 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 
 
    def idle(body:Unit): ForeverSelectorBuilder =
-         macro ForeverSelectorBuilder.idleImpl
+         macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
     
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
    { val f1: (Skip[Unit] => Option[Future[Continuated[Unit]]]) =
@@ -174,26 +186,6 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 
 }
 
-object ForeverSelectorBuilder
-{
-
-
-
-
-   def idleImpl(c:Context)(body:c.Expr[Unit]):c.Expr[ForeverSelectorBuilder] =
-   {
-     import c.universe._
-     SelectorBuilder.buildAsyncCall(c)(Nil,body.tree,
-                   { (nvaldefs, nbody) =>
-                      q"""${c.prefix}.idleWithFlowTerminationAsync(
-                                    ${Function(nvaldefs,nbody)}
-                          )
-                       """
-                   })
-   }
-
-
-}
 
 class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@uncheckedVariance](api)
 {
@@ -209,6 +201,9 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
      this
    }
 
+   /**
+    * write x to channel if possible
+    */
    def writing[A](ch: Output[A], x: A)(body: T): OnceSelectorBuilder[T] = 
         macro SelectorBuilder.writingImpl[A,T,OnceSelectorBuilder[T]]
  
@@ -219,6 +214,18 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
      selector.addWriter(ch,f1)
      this
    }
+
+   def idle(body: T): OnceSelectorBuilder[T] = 
+        macro SelectorBuilder.idleImpl[T,OnceSelectorBuilder[T]]
+
+   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
+   {
+     val f1: Skip[T] => Option[Future[Continuated[T]]] =
+                  { sk => Some(f(ec,sk.flowTermination) map(x => Done(x,sk.flowTermination)) ) }
+     selector.addIdleSkip(f1)
+     this
+   }
+
 
 }
 

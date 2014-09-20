@@ -20,10 +20,8 @@ class SelectSuite extends FunSuite
        
      @volatile var sum = 0;
      val consumer = gopherApi.select.forever.reading(channel){ i =>
-                                       System.err.println("reading:"+i) 
                                        sum = sum+i
                                        if (i==1000) {
-                                          System.err.println("doExit:"+implicitly[FlowTermination[Unit]])
                                           implicitly[FlowTermination[Unit]].doExit(())
                                        } else {
                                        }
@@ -33,10 +31,7 @@ class SelectSuite extends FunSuite
      
      Await.ready(consumer, 10.second)
 
-    // System.err.println("sum="+sum);
-     
      val xsum = (1 to 1000).sum
-    // System.err.println("xsum="+xsum);
      assert(xsum == sum)
    }
 
@@ -199,38 +194,14 @@ class SelectSuite extends FunSuite
      channel2.close()
    }
 
-/*
-  
-   test("select with queue type") {
-
-     val channel = make[Int](100)
-
-     val producer = Future {
-       for( i <- 1 to 1000) {
-         channel <~ i 
-       }       
-     }
-          
-     var sum = 0;
-     val consumer = Future {
-       val sc = new SelectorContext()
-       sc.addInputAction(channel, 
-            (i: channel.OutputElement) => { sum = sum + i; 
-                          if (i == 1000) {
-                            sc.shutdown()
-                          }
-                          Promise successful true future 
-                        }
-       )
-       Await.ready(sc.go, 1000.second)
-     }
-   
-    
-     Await.ready(consumer, 1000.second)
-     
+   test("basic select.once with idle syntax sugar")  {
+     val ch = gopherApi.makeChannel[String](1)
+     val selector = (gopherApi.select.once[String].reading(ch)(x=>x)
+                                                  .idle("IDLE")
+                    ).go
+     assert(Await.result(selector, 10.second)=="IDLE")
+     ch.close()
    }
-    
-  */ 
   
   def gopherApi = CommonTestObjects.gopherApi
    
