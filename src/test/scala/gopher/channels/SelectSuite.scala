@@ -79,6 +79,8 @@ class SelectSuite extends FunSuite
 
    }
 
+
+
    test("basic select write with apply")  {
 
      val channel = gopherApi.makeChannel[Int](1)
@@ -168,6 +170,47 @@ class SelectSuite extends FunSuite
      assert(q==true)
 
    }
+
+
+   test("basic compound select with for syntax")  {
+    
+     import scala.concurrent.ExecutionContext.Implicits.global
+     import scala.async.Async._
+
+     val channel1 = gopherApi.makeChannel[Int](1)
+     val channel2 = gopherApi.makeChannel[Int](1)
+     val channel3 = gopherApi.makeChannel[Int](1)
+     val channel4 = gopherApi.makeChannel[Int](1)
+
+     val producer = channel1.awriteAll(1 to 1000)
+
+     @volatile var q = false
+     pending
+
+/*
+     async {
+       @volatile var x=0
+       @volatile var nw=0
+       @volatile var ch1s=0
+ 
+       for(s <- selector.forever) {
+         case channel1 ~> i =>
+                                   channel4.awrite(i)
+                                   ch1s=i           
+         case channel3 <~ x =>
+                                   nw = nw+1
+         case _    => q=true
+       }
+     }
+
+     for(c <- channel4) channel2.write(c)
+
+     Await.ready(selector, 10.second)
+     assert(selector.isCompleted)
+     assert(q==true)
+*/
+   }
+
 
    test("basic select.once with reading syntax sugar")  {
 
