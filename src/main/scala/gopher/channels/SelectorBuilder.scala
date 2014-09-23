@@ -245,17 +245,28 @@ object ForeverSelectorBuilder
            case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+showRaw(cs.pat))
         }
      }
-     Block( 
-       (q"val ${bn} = ${c.prefix}" :: calls) : _*
-     )
+     q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
    }
 
    def foreachTransformReadWriteCaseDef(c:Context)(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
    {
     import c.universe._
-    Console.println("rw: caseDef.pat"+caseDef.pat)
-    Console.println("rw: caseDef.guard"+caseDef.guard)
-    Console.println("rw: caseDef.body"+caseDef.body)
+
+    // Loook's like bug in 'untypecheck' : when we split cassDef on few functions, than sometines, symbols
+    // entries in identifier tree are not cleared.  
+    def clearIdent(name:c.Name, tree:Tree):Tree =
+    {
+      val termName = name.toTermName
+      val transformer = new Transformer {
+            override def transform(tree:Tree): Tree =
+                tree match  {
+                   case Ident(`termName`) => Ident(termName)
+                   case _                 => super.transform(tree)
+                }
+      }
+      transformer.transform(tree)
+    }
+
     caseDef.pat match {
       case Bind(name,Typed(_,tp:c.universe.TypeTree)) =>
                     val tpo = if (tp.original.isEmpty) tp else tp.original
@@ -264,17 +275,8 @@ object ForeverSelectorBuilder
                                    if (!caseDef.guard.isEmpty) {
                                      c.abort(caseDef.guard.pos,"guard is not supported in select case")
                                    }
-                                   val termName = /* name.toTermName */ TermName("ir")
-                                   val bodyTransformer = new Transformer {
-                                                             override def transform(tree:Tree): Tree =
-                                                                tree match {
-                                                                   case Ident(`termName`) =>
-                                                                                       Ident(termName)
-                                                                   case _ =>
-                                                                            super.transform(tree)
-                                                                }
-                                                         }
-                                   val body = bodyTransformer.transform(caseDef.body)
+                                   val termName = name.toTermName 
+                                   val body = clearIdent(name,caseDef.body)
                                    val readParam = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
                                    val reading = q"${builderName}.reading(${ch}){ ${readParam} => ${body} }"
                    
@@ -291,7 +293,8 @@ object ForeverSelectorBuilder
                                                       Ident(termName)
                                                     }
                                    val param = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
-                                   val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${caseDef.body} )"
+                                   val body = clearIdent(name,caseDef.body)
+                                   val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
                                    System.err.println("r:"+writing)
                                    writing
                        case _ =>
