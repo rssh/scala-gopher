@@ -52,8 +52,9 @@ import gopher.channels._
 //
 // implicit def toFuture[A](sb:SelectorBuilder[A]):Future[A] = sb.go
 
- @scala.annotation.compileTimeOnly("AAA")
+ @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
  implicit def ft[A]: FlowTermination[A] = ???
+
 
 }
 

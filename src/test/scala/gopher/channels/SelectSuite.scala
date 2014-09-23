@@ -87,7 +87,7 @@ class SelectSuite extends FunSuite
 
      @volatile var x = 1
      @volatile var y = 1
-     val producer = gopherApi.select.forever.writing(channel,x) { 
+     val producer = gopherApi.select.forever.writing(channel,x) { _ =>
                       var z = x + y
                       x=y
                       y=z    
@@ -152,8 +152,8 @@ class SelectSuite extends FunSuite
                                   {}; // workarround for https://issues.scala-lang.org/browse/SI-8846
                                   x=i
                                   //Console.println(s"reading from ch2, i=${i}")
-                                }.writing(channel3,x) {
-                                  {};
+                                }.writing(channel3,x) { x =>
+                                  {}; // workarround for https://issues.scala-lang.org/browse/SI-8846
                                   nw=nw+1        
                                   //Console.println(s"writing ${x} to ch3, nw=${nw}")
                                 }.idle {
@@ -185,22 +185,25 @@ class SelectSuite extends FunSuite
      val producer = channel1.awriteAll(1 to 1000)
 
      @volatile var q = false
-     pending
 
-/*
-     async {
+     val selector = async {
        @volatile var x=0
        @volatile var nw=0
        @volatile var ch1s=0
  
-       for(s <- selector.forever) {
-         case channel1 ~> i =>
-                                   channel4.awrite(i)
-                                   ch1s=i           
-         case channel3 <~ x =>
-                                   nw = nw+1
-         case _    => q=true
+       //pending
+       // for syntax will be next:
+       for(s <- gopherApi.select.forever)  
+        s match {
+         case ir: channel1.read  =>
+                                   channel4.awrite(ir)
+                                   ch1s=ir           
+         case iw: channel3.write if (iw==(x+1)) =>
+                                   {}; nw = nw+1
+         case _    => {}; q=true
+                      implicitly[FlowTermination[Unit]].doExit(())
        }
+
      }
 
      for(c <- channel4) channel2.write(c)
@@ -208,7 +211,7 @@ class SelectSuite extends FunSuite
      Await.ready(selector, 10.second)
      assert(selector.isCompleted)
      assert(q==true)
-*/
+
    }
 
 
@@ -228,8 +231,8 @@ class SelectSuite extends FunSuite
      val channel1 = gopherApi.makeChannel[Int](100)
      val channel2 = gopherApi.makeChannel[Int](100)
      @volatile var s:Int = 0
-     val selector = (gopherApi.select.once.writing(channel1,s){("A")}
-                                          .writing(channel2,s){("B")}
+     val selector = (gopherApi.select.once.writing(channel1,s){q:Int =>"A"}
+                                          .writing(channel2,s){s=>"B"}
                     ).go
      // hi, Captain Obvious
      assert(Set("A","B") contains Await.result(selector, 10.second) )

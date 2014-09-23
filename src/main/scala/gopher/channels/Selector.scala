@@ -20,7 +20,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
     waiters add makeLocked(ContRead(f, ch, this)) 
   }
  
-  def addWriter[E](ch:Output[E],f: ContWrite[E,A] => Option[(E,Future[Continuated[A]])]): Unit =
+  def addWriter[E](ch:Output[E], f: ContWrite[E,A] => Option[(E,Future[Continuated[A]])]): Unit =
   {
    waiters add makeLocked(ContWrite(f,ch,this))
   }

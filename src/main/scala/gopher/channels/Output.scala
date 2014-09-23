@@ -14,6 +14,11 @@ import gopher._
 trait Output[A]
 {
 
+  type ~> = A
+  type writeExp[X] = A
+  type write = A
+
+
   /**
    * apply f and send result to channels processor.
    */
@@ -36,8 +41,9 @@ trait Output[A]
    * 'go' or 'async' blocks, since blocking is
    * emulated by 'Async.await'
    **/
-  def write(a:A):Unit = macro OutputMacro.write[A]
+  def write(a:A):Unit = macro Output.writeImpl[A]
 
+  def <~ (a:A):Output[A] = macro Output.writeWithBuilderImpl[A] 
 
   def awriteAll[C <: Iterable[A]](c:C):Future[Unit] =
   {
@@ -62,13 +68,28 @@ trait Output[A]
 
 }
 
-object OutputMacro
+object Output
 {
 
-  def write[A](c:Context)(a:c.Expr[A]):c.Expr[Unit] =
+  def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[Unit] =
   {
    import c.universe._
    c.Expr[Unit](q"scala.async.Async.await(${c.prefix}.awrite(${a}))")
+  }
+
+  def writeWithBuilderImpl[A](c:Context)(a:c.Expr[A]):c.Expr[Output[A]] =
+  {
+   import c.universe._
+   val retval = c.Expr[Output[A]](
+     q"""{
+          val prefix = ${c.prefix}
+          scala.async.Async.await{prefix.awrite(${a});{}}
+          prefix 
+         }
+      """
+   )
+   Console.println("q:"+retval)
+   retval
   }
 
 }
