@@ -4,6 +4,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
+import gopher.util._
 import scala.concurrent._
 import scala.annotation.unchecked._
 
@@ -213,16 +214,12 @@ object ForeverSelectorBuilder
        case Function(forvals,Block(commonExpr,Match(choice,cases))) =>  
                                 foreachTransformMatch(c)(forvals,choice,cases, commonExpr)
        case Function(a,b) =>
-                     c.abort(f.tree.pos, "match expected in gopher select loop");
+                     c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(b)} ");
        case _ => {
-            // TODO: write hlepr functio which wirite first 255 chars of x raw representation
-            System.err.println("raw f:"+c.universe.showRaw(f.tree));
-            c.abort(f.tree.pos, "match expected in gopher select loop");
+            c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(f.tree)}");
        }
     }
-    val r = c.Expr[Unit](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
-    System.err.println("foreach: r="+r)
-    r
+    c.Expr[Unit](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
    }
 
    def foreachTransformMatch(c:Context)(forvals:List[c.universe.ValDef],
@@ -231,10 +228,6 @@ object ForeverSelectorBuilder
                                         commonExpr:List[c.Tree]):c.Tree =
    {
      import c.universe._
-     Console.println("forvals="+forvals)
-     Console.println("choice="+choice)
-     Console.println("cases="+cases)
-     Console.println("commonExpr="+commonExpr)
      // TODO: check that choice and forvals are the same.
      val bn = TermName(c.freshName)
      val calls = cases map { cs =>
@@ -279,13 +272,8 @@ object ForeverSelectorBuilder
                                    val body = clearIdent(name,caseDef.body)
                                    val readParam = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
                                    val reading = q"${builderName}.reading(${ch}){ ${readParam} => ${body} }"
-                   
-                                   System.err.println("raw caseDef:"+showRaw(caseDef.body))
-                                   System.err.println(s"read from ${ch}")
-                                   System.err.println(s"r:"+reading)
                                    reading
                        case Select(ch,TypeName("write")) =>
-                                   System.err.println(s"write to ${ch}")
                                    val termName = name.toTermName
                                    val expression = if (!caseDef.guard.isEmpty) {
                                                       parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
@@ -295,18 +283,18 @@ object ForeverSelectorBuilder
                                    val param = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
                                    val body = clearIdent(name,caseDef.body)
                                    val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-                                   System.err.println("r:"+writing)
                                    writing
                        case _ =>
                          c.abort(tp.pos, "match must be in form x:channel.write or x:channel.read");
                     }
       case Bind(name,x) =>
-                    x match {
+                    val rawToShow = x match {
                       case Typed(_,tp) =>
-                            System.err.println("TP:"+showRaw(tp))
+                                     MacroUtil.shortString(c)(tp)
                       case _ =>
+                                     MacroUtil.shortString(c)(x)
                     }
-                    c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read");
+                    c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
       case _ =>
             c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read");
     }
@@ -316,7 +304,6 @@ object ForeverSelectorBuilder
    def parseGuardInSelectorCaseDef(c: Context)(name: c.TermName, guard:c.Tree): c.Tree =
    {
      import c.universe._
-     Console.println(showRaw(guard))
      guard match {
         case Apply(Select(Ident(`name`),TermName("$eq$eq")),List(expression)) =>
                expression
