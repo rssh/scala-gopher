@@ -16,20 +16,3 @@ trait FlowTermination[-A]
 
 }
 
-
-class CompileTimeOnlyFlowTermination[A] extends FlowTermination[A]
-{
-
-  @compileTimeOnly("Usage of implicit FlowTermination outside gopher flow")
-  def doThrow(e: Throwable): Unit = ???
-
-  @compileTimeOnly("Usage of implicit FlowTermination outside gopher flow")
-  def doExit(a:A): Unit = ???
-
-  @compileTimeOnly("Usage of implicit FlowTermination outside gopher flow")
-  def defer(body: =>Unit)(implicit ec: ExecutionContext):Unit = ???
-
-  @compileTimeOnly("Usage of implicit FlowTermination outside gopher flow")
-  def isCompleted: Boolean = ???
-
-}
