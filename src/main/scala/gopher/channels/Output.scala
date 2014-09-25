@@ -66,6 +66,8 @@ trait Output[A]
     }
   }
 
+  def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
+
 }
 
 object Output
@@ -76,6 +78,13 @@ object Output
    import c.universe._
    c.Expr[Unit](q"scala.async.Async.await(${c.prefix}.awrite(${a}))")
   }
+
+  def writeAllImpl[A,C](c:Context)(it:c.Expr[C]):c.Expr[Unit] =
+  {
+   import c.universe._
+   c.Expr[Unit](q"scala.async.Async.await(${c.prefix}.writeAll(${it}))")
+  }
+
 
   def writeWithBuilderImpl[A](c:Context)(a:c.Expr[A]):c.Expr[Output[A]] =
   {
@@ -91,5 +100,6 @@ object Output
    Console.println("q:"+retval)
    retval
   }
+
 
 }

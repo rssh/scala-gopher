@@ -7,6 +7,21 @@ import gopher._
 
 case object ChannelClose
 
+/**
+ * this is message wich send to ChannelActor, when we 
+ * know, that channel is closed. In such case, we don't
+ * konw: is actor stopped or not, So, we say this message
+ * (instead read) and wait for reply. If reply is not received
+ * within given timeout: think that channel is-dead.
+ */
+case class ClosedChannelRead(cont: ContRead[_,_])
+
+/**
+ * result of CloseChannelRead, return number of elements
+ * left to read
+ */
+case class ChannelCloseProcessed(nElements: Integer)
+
 
 class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
@@ -22,19 +37,30 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
                  processReaders
                }
             }
-    case cr@ContRead(f,_,_) =>
+    case cr@ContRead(_,_,ft) =>
             val cra = cr.asInstanceOf[ContRead[A,_]]
             if (nElements==0) {
-               readers = readers :+ cra
+               if (closed) {
+                  ft.doThrow(new ChannelClosedException())
+               } else {
+                 readers = readers :+ cra
+               }
             } else {
                val prevNElements = nElements
-               if (processReader(cra) && prevNElements==capacity) {
-                 checkWriters
+               if (processReader(cra)) {
+                 if (closed) {
+                    stopIfEmpty
+                 } else if (prevNElements==capacity) {
+                    checkWriters
+                 }
                }
             }
+     case ccr@ClosedChannelRead(_) =>
+            self ! ccr.cont
+            sender ! ChannelCloseProcessed(nElements)
      case ChannelClose =>
-            // TODO: remove name from system.
             closed=true
+            stopIfEmpty
   }
 
   def processReaders: Boolean =
@@ -66,7 +92,11 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
     while(!writers.isEmpty && nElements < capacity) {
       val current = writers.head
       writers = writers.tail
-      retval ||= processWriter(current)
+      val processed = processWriter(current)
+      retval ||= processed
+      if (!processed) {
+        // TODO: add current to next-writers
+      }
     }
     retval
   }
@@ -83,6 +113,21 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
        case None => 
                 false
    }
+
+
+  private[this] def stopIfEmpty:Unit =
+  {
+   require(closed==true)
+   if (nElements == 0) {
+      while(!readers.isEmpty) {
+        val reader = readers.head
+        val c = reader.asInstanceOf[ContRead[A,reader.R]]
+        readers = readers.tail
+        //val a: A = _
+        c.function(null.asInstanceOf[A],c) 
+      }
+   }
+  }
 
   private[this] implicit def ec: ExecutionContext = api.executionContext
 
