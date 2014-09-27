@@ -8,17 +8,29 @@ import gopher.channels._
 //
 
  implicit def toAsyncFullReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]]
+                   f: ContRead[A,B] => Option[(() => A) => Future[Continuated[B]]]
               ): ReadSelectorArgument[A,B] = AsyncFullReadSelectorArgument(f)  
 
  implicit def toAsyncNoOptionReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Future[Continuated[B]]
+                   f: ContRead[A,B] => ((()=>A)=> Future[Continuated[B]])
                ): ReadSelectorArgument[A,B] = AsyncNoOptionReadSelectorArgument(f)
 
+ implicit def toAsyncNoGenReadSelectorArgument[A,B](
+                   f: ContRead[A,B] => (A => Future[Continuated[B]])
+               ): ReadSelectorArgument[A,B] = AsyncNoGenReadSelectorArgument(f)
+
+ implicit def toAsyncPairReadSelectorArgument[A,B](
+                   f: (A, ContRead[A,B]) => Future[Continuated[B]]
+               ): ReadSelectorArgument[A,B] = AsyncPairReadSelectorArgument(f)
 
  implicit def toSyncReadSelectorArgument[A,B](
-                   f: (A, ContRead[A,B]) => Continuated[B]
+                   f: ContRead[A,B] => ((()=>A) => Continuated[B])
                ):ReadSelectorArgument[A,B] = SyncReadSelectorArgument(f)
+
+ implicit def toSyncPairReadSelectorArgument[A,B](
+                   f: (A, ContRead[A,B]) => Continuated[B]
+               ):ReadSelectorArgument[A,B] = SyncPairReadSelectorArgument(f)
+
 
 
  implicit def toAsyncFullWriteSelectorArgument[A,B](

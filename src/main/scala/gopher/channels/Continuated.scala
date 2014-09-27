@@ -22,7 +22,7 @@ case class Done[A](result:A, override val flowTermination: FlowTermination[A]) e
 /**
  * read A and compute B as result.
  */
-case class ContRead[A,B](function: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], channel: Input[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
+case class ContRead[A,B](function: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], channel: Input[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
 }

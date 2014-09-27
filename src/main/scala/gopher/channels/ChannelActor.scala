@@ -41,7 +41,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
             val cra = cr.asInstanceOf[ContRead[A,_]]
             if (nElements==0) {
                if (closed) {
-                  ft.doThrow(new ChannelClosedException())
+                 ft.throwIfNotCompleted(new ChannelClosedException())
                } else {
                  readers = readers :+ cra
                }
@@ -75,8 +75,9 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   }
 
   private[this] def processReader[B](reader:ContRead[A,B]): Boolean =
-   reader.function(elementAt(readIndex),reader) match {
-       case Some(cont) => 
+   reader.function(reader) match {
+       case Some(f1) => 
+              val cont = f1(() => elementAt(readIndex))
               nElements-=1
               readIndex+=1
               readIndex%=capacity
@@ -124,7 +125,9 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
         val c = reader.asInstanceOf[ContRead[A,reader.R]]
         readers = readers.tail
         //val a: A = _
-        c.function(null.asInstanceOf[A],c) 
+        c.function(c) foreach {
+          f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+        }
       }
    }
   }

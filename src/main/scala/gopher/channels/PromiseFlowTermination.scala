@@ -1,13 +1,30 @@
 package gopher.channels
 
 import scala.concurrent._
+import scala.util._
 import gopher._
 
 trait PromiseFlowTermination[A] extends FlowTermination[A]
 {
 
   def doThrow(e: Throwable): Unit =
-    p failure e
+  {
+    if (isCompleted) {
+      //
+      import ExecutionContext.Implicits.global
+      System.err.println("flow already completed, suppressed:"+e.getMessage())
+      e.printStackTrace()
+      p.future.onComplete{ 
+         case Success(x) =>
+           // success was before throw, ignoring.
+         case Failure(prevEx) =>
+          System.err.println("previous exception:"+prevEx)
+          prevEx.printStackTrace();
+      }
+    } else {
+      p failure e
+   }
+  }
 
   def doExit(a: A): Unit =
     p success a

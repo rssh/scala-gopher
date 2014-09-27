@@ -20,11 +20,11 @@ trait Input[A]
   /**
    * apply f, when input will be ready and send result to API processor
    */
-  def  cbread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit
+  def  cbread[B](f: (ContRead[A,B] => (Option[(()=>A) => Future[Continuated[B]]])), flwt: FlowTermination[B] ): Unit
 
   def  aread:Future[A] = {
     val ft = PromiseFlowTermination[A]() 
-    cbread[A]( (a, self) => { Some(Future.successful(Done(a,ft))) }, ft )
+    cbread[A]( self => Some((gen:()=>A) => Future.successful(Done(gen(),ft))) , ft )
     ft.future
   }
 
@@ -38,16 +38,16 @@ trait Input[A]
        val ft = PromiseFlowTermination[IndexedSeq[A]]
        var i = 1;
        var r: IndexedSeq[A] = IndexedSeq()
-       cbread({
-        (a:A, c:ContRead[A,IndexedSeq[A]]) => 
-          i=i+1
-          r = r :+ a
-          if (i<n) {
-             Some(Future successful c)
-          } else {
-             Some(Future successful Done(r,ft))
-          }
-        },ft)
+       cbread({(c:ContRead[A,IndexedSeq[A]]) => 
+          Some{gen:(()=>A) =>
+               i=i+1
+               r = r :+ gen()
+               if (i<n) {
+                  Future successful c
+               } else {
+                  Future successful Done(r,ft)
+               }
+             }},ft)
         ft.future
     }
   }
