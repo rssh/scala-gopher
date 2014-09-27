@@ -2,7 +2,9 @@ package gopher.channels
 
 
 import akka.actor._
+import akka.pattern._
 import scala.concurrent._
+import scala.concurrent.duration._
 import gopher._
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
@@ -12,15 +14,31 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
 {
 
 
-  def  cbread[B](f: (A, ContRead[A,B]) => Option[Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
-     futureChannelRef.foreach( _ ! ContRead(f,this, flwt) )
+  def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
+  {
+   if (closed) {
+     if (closedEmpty) {
+       if (!flwt.isCompleted) {
+         flwt.doThrow(new ChannelClosedException())
+       }
+     } else {
+         futureChannelRef.foreach(_.ask(ClosedChannelRead(ContRead(f,this, flwt)))(10 seconds)
+                                          .onFailure{
+                                             case e: AskTimeoutException => flwt.doThrow(new ChannelClosedException())  
+                                             case other => //TODO: log
+                                          }
+                                 )
+     }
+   }
+   futureChannelRef.foreach( _ ! ContRead(f,this, flwt) )
+  }
 
   private def  contRead[B](x:ContRead[A,B]): Unit =
      futureChannelRef.foreach( _ ! x )
 
   def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = 
     if (closed) {
-     throw new IllegalStateException("channel is closed");
+      flwt.doThrow(new ChannelClosedException())
     } else {
      futureChannelRef.foreach( _ ! ContWrite(f,this, flwt) )
     }
@@ -44,10 +62,11 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
   {
     val ft = PromiseFlowTermination[Unit]
     cbread({
-            (a:A, cont: ContRead[A,Unit]) => 
-                f(a)
-                if (isClosed) ft.doExit(())
-                Some(Future successful cont)
+            (cont: ContRead[A,Unit]) => 
+                Some{(gen:()=>A) => 
+                     if (isClosed) ft.doExit(())
+                     f(gen())
+                     Future successful cont}
            },ft)
     ft.future
   }
@@ -56,8 +75,8 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
   {
     val ft = PromiseFlowTermination[Unit]
     cbread({
-            (a:A, cont: ContRead[A,Unit]) => 
-                Some (f(a) transform (
+            (cont: ContRead[A,Unit]) => 
+                Some ((gen: ()=>A) => f(gen()) transform (
                    u => { if (isClosed) ft.doExit(())
                           cont },
                    e => {ft.doThrow(e)
@@ -68,6 +87,7 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
   }
 
   private var closed = false
+  private var closedEmpty = false
 }
 
 object IOChannel

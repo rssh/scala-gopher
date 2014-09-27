@@ -31,7 +31,7 @@ class SelectorBuilder[A](api: GopherAPI)
    }
 
    @inline
-   def withReader[B](ch:Input[B], f: (B,ContRead[B,A]) => Option[Future[Continuated[A]]]): this.type =
+   def withReader[B](ch:Input[B], f: ContRead[B,A] => Option[(()=>B)=>Future[Continuated[A]]]): this.type =
    {
      selector.addReader(ch,f)
      this
@@ -179,7 +179,7 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 
    @inline
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
-      withReader[A]( ch, (e, cr) => Some(f(ec,cr.flowTermination,e) map Function.const(cr)) )
+      withReader[A]( ch, cr => Some(gen=>f(ec,cr.flowTermination,gen()) map Function.const(cr)) )
 
    def writing[A](ch: Output[A], x: A)(f: A => Unit): ForeverSelectorBuilder = 
         macro SelectorBuilder.writingImpl[A,Unit,ForeverSelectorBuilder]
@@ -332,7 +332,7 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
 
    @inline
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): OnceSelectorBuilder[T] =
-       withReader[A](ch,  { (e, cr) => Some(f(ec,cr.flowTermination,e) map ( Done(_,cr.flowTermination))) } )
+       withReader[A](ch,  { cr => Some(gen => f(ec,cr.flowTermination,gen()) map ( Done(_,cr.flowTermination))) } )
 
    /**
     * write x to channel if possible

@@ -12,7 +12,7 @@ class SelectSuite extends FunSuite
 {
 
  
-   test("basic select with reading syntax sugar", Now)  {
+   test("basic select with reading syntax sugar")  {
      
      val channel = gopherApi.makeChannel[Int](100)
      
