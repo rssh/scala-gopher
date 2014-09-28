@@ -109,7 +109,7 @@ class AsyncSelectSuite extends FunSuite {
 
     }
 
-    test("async base: catch exception in read", Now)  {
+    test("async base: catch exception in read")  {
       val ERROR_N = 10
       var lastReaded = 0
       val channel = gopherApi.makeChannel[Int](10)

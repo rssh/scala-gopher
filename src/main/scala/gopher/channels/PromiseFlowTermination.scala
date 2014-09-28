@@ -10,16 +10,13 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
   def doThrow(e: Throwable): Unit =
   {
     if (isCompleted) {
-      //
       import ExecutionContext.Implicits.global
-      System.err.println("flow already completed, suppressed:"+e.getMessage())
-      e.printStackTrace()
       p.future.onComplete{ 
          case Success(x) =>
            // success was before throw, ignoring.
          case Failure(prevEx) =>
-          System.err.println("previous exception:"+prevEx)
-          prevEx.printStackTrace();
+          //System.err.println("previous exception:"+prevEx)
+          //prevEx.printStackTrace();
       }
     } else {
       p failure e
@@ -36,6 +33,9 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
     p future
 
   def isCompleted = p.isCompleted
+
+  def throwIfNotCompleted(ex: Throwable):Unit =
+      p.tryFailure(ex.fillInStackTrace())
 
   val p = Promise[A]()
 

@@ -14,10 +14,7 @@ trait FlowTermination[-A]
 
   def isCompleted: Boolean
 
-  def throwIfNotCompleted(ex: Throwable): Unit =
-   if (!isCompleted) {
-     doThrow(ex)
-   }
+  def throwIfNotCompleted(ex: Throwable): Unit 
 
 }
 

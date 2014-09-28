@@ -18,9 +18,7 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
   {
    if (closed) {
      if (closedEmpty) {
-       if (!flwt.isCompleted) {
-         flwt.doThrow(new ChannelClosedException())
-       }
+         flwt.throwIfNotCompleted(new ChannelClosedException())
      } else {
          futureChannelRef.foreach(_.ask(ClosedChannelRead(ContRead(f,this, flwt)))(10 seconds)
                                           .onFailure{
@@ -29,8 +27,9 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
                                           }
                                  )
      }
+   } else {
+     futureChannelRef.foreach( _ ! ContRead(f,this, flwt) )
    }
-   futureChannelRef.foreach( _ ! ContRead(f,this, flwt) )
   }
 
   private def  contRead[B](x:ContRead[A,B]): Unit =

@@ -50,7 +50,7 @@ class CloseSuite extends FunSuite
 
    }
 
-   test("after close we can read but not more, than was send")  {
+   test("after close we can read but not more, than was send", Now)  {
      val channel = gopherApi.makeChannel[Int](100)
      @volatile var q = 0
      val p = async {

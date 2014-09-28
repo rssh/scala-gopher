@@ -95,9 +95,6 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
       writers = writers.tail
       val processed = processWriter(current)
       retval ||= processed
-      if (!processed) {
-        // TODO: add current to next-writers
-      }
     }
     retval
   }
