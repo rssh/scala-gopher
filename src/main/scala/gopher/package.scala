@@ -73,5 +73,8 @@ import gopher.channels._
 
  def go[T](body: T)(implicit ec:ExecutionContext) : Future[T] = macro gopher.goasync.GoAsync.goImpl[T]
 
+ @scala.annotation.compileTimeOnly("defer must be used inside flow scopes (go, reading/writing/idle args)")
+ def defer(x: =>Unit)(ec: ExecutionContext): Unit = ???
+
 }
 

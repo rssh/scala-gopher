@@ -10,8 +10,6 @@ trait FlowTermination[-A]
 
   def doExit(a:A): Unit
 
-  def defer(body: =>Unit)(implicit ec: ExecutionContext):Unit
-
   def isCompleted: Boolean
 
   def throwIfNotCompleted(ex: Throwable): Unit 

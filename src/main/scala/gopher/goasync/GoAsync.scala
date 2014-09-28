@@ -10,19 +10,52 @@ import scala.annotation.unchecked._
 
 
 /**
- * async arround go. Just wrapper arround SIP-22 async
+ * async arround go. 
  *
+ * Basicly go is wrapped inside SIP-22 async with defer
  */
 object GoAsync
 {
 
  //TODO: add handling of try/catch and operations inside collections.
 
-   def goImpl[T](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[Future[T]] =
+   def goImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[Future[T]] =
    {
      import c.universe._
-     c.Expr[Future[T]](q"scala.async.Async.async(${body})(${ec})")
+     if (containsDefer(c)(body)) {
+       val nbody = transformDefer(c)(body)
+       c.Expr[Future[T]](q"""{implicit val ft = gopher.channels.PromiseFlowTermination[${weakTypeOf[T]}]()
+                              val retval = scala.async.Async.async(${nbody})(${ec})
+                              ft.completeWith(retval)
+                              retval
+                             }
+                          """)
+     } else {
+       c.Expr[Future[T]](q"scala.async.Async.async(${body})(${ec})")
+     }
    }
+
+   def goScope[T:c.WeakTypeTag](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[T] =
+   {
+     import c.universe._
+     if (containsDefer(c)(body)) {
+       val nbody = transformDefer(c)(body)
+       c.Expr[T](q"""{implicit val ft = gopher.channels.PromiseFlowTermination[${weakTypeOf[T]}]()
+                      try {
+                         ft.exit(${body})
+                      } catch {
+                         case ex: Throwable => ft.doThrow(ex)
+                      }
+                     }""")
+     } else {
+       body
+     }
+   }
+
+   def containsDefer[T](c:Context)(body:c.Expr[T]):Boolean = false
+
+   def transformDefer[T](c:Context)(body:c.Expr[T]):c.Expr[T] = ???
+
 
 }
 

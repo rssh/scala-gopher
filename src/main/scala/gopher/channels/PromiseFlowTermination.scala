@@ -26,9 +26,6 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
   def doExit(a: A): Unit =
     p success a
 
-  def defer(body: =>Unit)(implicit ec: ExecutionContext): Unit =
-    p.future.onComplete{ x => body }
-
   def future =
     p future
 
@@ -36,6 +33,10 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
 
   def throwIfNotCompleted(ex: Throwable):Unit =
       p.tryFailure(ex.fillInStackTrace())
+
+  def completeWith(other: Future[A]): Unit =
+     p.completeWith(other)
+      
 
   val p = Promise[A]()
 
