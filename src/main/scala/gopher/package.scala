@@ -1,4 +1,8 @@
+
+import scala.language.experimental.macros
+
 package object gopher {
+
 
 import scala.concurrent._
 import gopher.channels._
@@ -67,6 +71,7 @@ import gopher.channels._
  @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
  implicit def ft[A]: FlowTermination[A] = ???
 
+ def go[T](body: T)(implicit ec:ExecutionContext) : Future[T] = macro gopher.goasync.GoAsync.goImpl[T]
 
 }
 

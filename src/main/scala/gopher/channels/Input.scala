@@ -28,7 +28,15 @@ trait Input[A]
     ft.future
   }
 
+  /**
+   * read object from channel. Must be situated inside async/go/action block
+   */
   def  read:A = macro InputMacro.read[A]
+
+  /**
+   * synonim for read.
+   */
+  def  ? : A = macro InputMacro.read[A]
 
   def atake(n:Int):Future[IndexedSeq[A]] =
   {

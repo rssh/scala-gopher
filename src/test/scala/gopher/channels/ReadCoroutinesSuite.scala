@@ -2,6 +2,8 @@ package gopher.channels
 
 import gopher._
 import gopher.channels._
+import scala.concurrent._
+import scala.concurrent.duration._
 
 import org.scalatest._
 
@@ -34,13 +36,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
   
    * 
    */
-/*
 object ReadCoroutines {
   
-  def integers:IOChannel[Int] =
+  lazy val integers:IOChannel[Int] =
   {
-    val y = makeChannel[Int]()
-    var count = 0
+    val y = gopherApi.makeChannel[Int]()
+    @volatile var count = 0
     go {
       while(true) {
         y <~ count
@@ -50,30 +51,26 @@ object ReadCoroutines {
     y
   }
   
-  val resume = integers
-  
-  def generateInteger: Int =
-    resume ?
-  
+  def gopherApi = CommonTestObjects.gopherApi
   
 }
 
-*/
 
 class ReadCoroutinesSuite extends FunSuite {
 
-  //import ReadCoroutines._
+  import ReadCoroutines._
+  import language.postfixOps
   
   test("get few numbers from generarator") {
-    pending
-   /*
-    val x0 = generateInteger
-    assert(x0 == 0)
-    val x1 = generateInteger
-    assert(x1 == 1)
-    val x2 = generateInteger
-    assert(x2 == 2)
-    */
+   val p = go {
+      val x0 = (integers ?)
+      assert(x0 == 0)
+      val x1 = (integers ?)
+      assert(x1 == 1)
+      val x2 = (integers ?)
+      assert(x2 == 2)
+   }
+   Await.ready(p, 10 seconds)
   }
   
   

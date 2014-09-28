@@ -34,7 +34,6 @@ class ChannelCleanupSuite extends FunSuite
    //  so, it can 
    test("unused closed channel-actor must be cleanuped during gc")  {
      
-     
      val cleanedObjectRq = new ReferenceQueue[CleanedObject]();
      var weakRef: WeakReference[CleanedObject] = null;
 

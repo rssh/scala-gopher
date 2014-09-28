@@ -107,7 +107,7 @@ object IOChannel
        if (!found) {
          tree match {
             case Apply(TypeApply(Select(obj,TermName("await")),objType), args) =>
-                   if (obj.tpe =:= typeOf[async.Async.type]) {
+                   if (obj.tpe =:= typeOf[scala.async.Async.type]) {
                        found=true
                    } else super.traverse(tree)
             case _ => super.traverse(tree)
