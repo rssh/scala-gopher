@@ -17,6 +17,20 @@ case object ChannelClose
 case class ClosedChannelRead(cont: ContRead[_,_])
 
 /**
+ * this message is send, when all references to 
+ * some instance of this channel are unreachable, 
+ * so if we have no other instances (i.e. remote 
+ * channel incarnation), than we must destroy channel.
+ **/
+case object ChannelRefDecrement
+
+/**
+ * this message is send, when we create new remote 
+ * reference to channel, backed by this actor.
+ **/
+case object ChannelRefIncrement
+
+/**
  * result of CloseChannelRead, return number of elements
  * left to read
  */
@@ -27,15 +41,19 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
 
   def receive = {
-    case cw@ContWrite(f,_,_) =>
+    case cw@ContWrite(_,_,ft) =>
             val cwa = cw.asInstanceOf[ContWrite[A,_]]
-            if (nElements==capacity) {
-               writers = writers :+ cwa
+            if (closed) {
+               ft.throwIfNotCompleted(new ChannelClosedException())
             } else {
+              if (nElements==capacity) {
+               writers = writers :+ cwa
+              } else {
                val prevNElements = nElements
                if (processWriter(cwa) && prevNElements==0) {
                  processReaders
                }
+              }
             }
     case cr@ContRead(_,_,ft) =>
             val cra = cr.asInstanceOf[ContRead[A,_]]
@@ -61,6 +79,14 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
      case ChannelClose =>
             closed=true
             stopIfEmpty
+     case ChannelRefDecrement =>
+            nRefs -= 1
+            if (nRefs == 0) {
+               stopAll
+            }
+     case ChannelRefIncrement =>
+            nRefs += 1
+            
   }
 
   def processReaders: Boolean =
@@ -113,7 +139,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
    }
 
 
-  private[this] def stopIfEmpty:Unit =
+  private[this] def stopIfEmpty: Boolean =
   {
    require(closed==true)
    if (nElements == 0) {
@@ -121,12 +147,35 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
         val reader = readers.head
         val c = reader.asInstanceOf[ContRead[A,reader.R]]
         readers = readers.tail
-        //val a: A = _
         c.function(c) foreach {
-          f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+           f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
         }
       }
+   } 
+   while(!writers.isEmpty) {
+      val writer = writers.head
+      val c = writer.asInstanceOf[ContWrite[A,writer.R]]
+      writers = writers.tail
+      c.function(c) foreach {
+         f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+      }
    }
+   if (nElements == 0) {
+      context.stop(self)
+      true
+   } else 
+      false
+  }
+
+  def stopAll: Unit =
+  {
+    if (!closed) {
+       closed=true
+    } 
+    if (!stopIfEmpty) {
+       // stop anyway
+       context.stop(self)
+    }
   }
 
   private[this] implicit def ec: ExecutionContext = api.executionContext
@@ -148,5 +197,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   var closed=false
   var readers = Queue[ContRead[A,_]] ()
   var writers = Queue[ContWrite[A,_]] ()
+
+  var nRefs = 1
 
 }

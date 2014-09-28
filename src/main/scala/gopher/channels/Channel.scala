@@ -13,7 +13,6 @@ import scala.reflect.api._
 class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends Input[A] with Output[A]
 {
 
-
   def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
   {
    if (closed) {
@@ -83,6 +82,12 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
                 ))
            },ft)
     ft.future
+  }
+
+  override protected def finalize(): Unit =
+  {
+   // allow channel actor be grabage collected
+   futureChannelRef.foreach( _ ! ChannelRefDecrement )
   }
 
   private var closed = false
