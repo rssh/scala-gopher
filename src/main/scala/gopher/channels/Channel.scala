@@ -54,36 +54,6 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
     closed=true
   }
 
-  def foreach(f: A=>Unit): Future[Unit] = macro IOChannel.foreachImpl[A]
-
-  def foreachSync(f: A=>Unit): Future[Unit] =
-  {
-    val ft = PromiseFlowTermination[Unit]
-    cbread({
-            (cont: ContRead[A,Unit]) => 
-                Some{(gen:()=>A) => 
-                     if (isClosed) ft.doExit(())
-                     f(gen())
-                     Future successful cont}
-           },ft)
-    ft.future
-  }
-
-  def foreachAsync(f: A=>Future[Unit]): Future[Unit] =
-  {
-    val ft = PromiseFlowTermination[Unit]
-    cbread({
-            (cont: ContRead[A,Unit]) => 
-                Some ((gen: ()=>A) => f(gen()) transform (
-                   u => { if (isClosed) ft.doExit(())
-                          cont },
-                   e => {ft.doThrow(e)
-                         e }
-                ))
-           },ft)
-    ft.future
-  }
-
   override protected def finalize(): Unit =
   {
    // allow channel actor be grabage collected
@@ -94,38 +64,3 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends I
   private var closedEmpty = false
 }
 
-object IOChannel
-{
-
-  def foreachImpl[A](c:Context)(f:c.Expr[A=>Unit]):c.Expr[Future[Unit]] =
-  {
-   import c.universe._
-   val findAwait = new Traverser {
-      var found = false
-      override def traverse(tree:Tree):Unit =
-      {
-       if (!found) {
-         tree match {
-            case Apply(TypeApply(Select(obj,TermName("await")),objType), args) =>
-                   if (obj.tpe =:= typeOf[scala.async.Async.type]) {
-                       found=true
-                   } else super.traverse(tree)
-            case _ => super.traverse(tree)
-         }
-       }
-      }
-   }
-   f.tree match {
-     case Function(valdefs,body) =>
-            findAwait.traverse(body)
-            if (findAwait.found) {
-               val nbody = q"scala.async.Async.async(${body})"
-               c.Expr[Future[Unit]](q"${c.prefix}.foreachAsync(${Function(valdefs,nbody)})")
-            } else {
-               c.Expr[Future[Unit]](q"${c.prefix}.foreachSync(${Function(valdefs,body)})")
-            }
-     case _ => c.abort(c.enclosingPosition,"function expected")
-   }
-  }
-
-}

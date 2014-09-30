@@ -24,9 +24,8 @@ object GoAsync
      import c.universe._
      if (containsDefer(c)(body)) {
        val nbody = transformDefer(c)(body)
-       c.Expr[Future[T]](q"""{implicit val ft = gopher.channels.PromiseFlowTermination[${weakTypeOf[T]}]()
-                              val retval = scala.async.Async.async(${nbody})(${ec})
-                              ft.completeWith(retval)
+       c.Expr[Future[T]](q"""{implicit val defered = new Defered()
+                              val retval = scala.async.Async.async(${nbody})(${ec}).andThen(defered.run(_))
                               retval
                              }
                           """)
@@ -40,12 +39,8 @@ object GoAsync
      import c.universe._
      if (containsDefer(c)(body)) {
        val nbody = transformDefer(c)(body)
-       c.Expr[T](q"""{implicit val ft = gopher.channels.PromiseFlowTermination[${weakTypeOf[T]}]()
-                      try {
-                         ft.exit(${body})
-                      } catch {
-                         case ex: Throwable => ft.doThrow(ex)
-                      }
+       c.Expr[T](q"""{implicit val defered = new Defered()
+                      defered.run(Try(${body}))
                      }""")
      } else {
        body

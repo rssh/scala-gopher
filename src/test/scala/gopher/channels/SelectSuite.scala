@@ -98,7 +98,7 @@ class SelectSuite extends FunSuite
                     }.go
 
      @volatile var last = 0
-     channel.foreach{ i=>
+     channel.aforeach{ i=>
         //System.out.printn(i)
         last=i
      }
@@ -163,7 +163,7 @@ class SelectSuite extends FunSuite
                                   gopherApi.currentFlow.exit(())
                                 }.go
 
-     for(c <- channel4) channel2.write(c)
+     for(c <- channel4.async) channel2.write(c)
 
      Await.ready(selector, 10.second)
      assert(selector.isCompleted)
@@ -206,7 +206,7 @@ class SelectSuite extends FunSuite
 
      }
 
-     for(c <- channel4) channel2.write(c)
+     for(c <- channel4.async) channel2.write(c)
 
      Await.ready(selector, 10.second)
      assert(selector.isCompleted)

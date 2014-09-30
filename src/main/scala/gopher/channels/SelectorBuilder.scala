@@ -83,13 +83,14 @@ object SelectorBuilder
      import c.universe._
      f.tree match {
          case Function(valdefs, body) => 
-            buildAsyncCall[T,S](c)(valdefs,body,
+            val retval = buildAsyncCall[T,S](c)(valdefs,body,
                    { (nvaldefs, nbody) =>
                      q"""${c.prefix}.writingWithFlowTerminationAsync(${ch},${x},
                              ${Function(nvaldefs,nbody)}
                        )
                      """
                    })
+            retval
          case _ => c.abort(c.enclosingPosition,"second argument of writing must have shape Function(x,y)")
      }
    }
