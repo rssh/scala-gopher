@@ -112,7 +112,7 @@ object ZippedInput
 {
 
  // can't be case class: compiler error when annotating variables.
- // TODO: submit bug to compiler
+ //  see https://issues.scala-lang.org/browse/SI-8873
  class State[A,B]
  {
    @volatile var oa:Option[A] = None
