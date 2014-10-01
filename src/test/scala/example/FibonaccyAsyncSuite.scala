@@ -5,6 +5,8 @@ import gopher._
 import gopher.channels._
 import akka.actor._
 import gopher.tags._
+import scala.concurrent._
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
 
 
@@ -35,17 +37,21 @@ object FibonaccyAsync {
     /*
     c.zip(1 to n).foreach{ a =>
         val (x,i) = a
-        Console.print("%d, %d".format(i,x))
+        Console.print("%d, %d\n".format(i,x))
         last = x
     } flatMap { x => quit.awrite(1) } 
     */
-    c.zip(1 to n).map{ case (i,x) =>
-        Console.print("%d, %d".format(i,x))
+    val receiver = c.zip(1 to n).map{ case (x,i) =>
+        // don't show, I trust you ;)
+        //Console.print("%d, %d\n".format(i,x))
         last = x
         (i,x)
-    }.atake(n) flatMap { x => quit.awrite(1) }
+    }.atake(n+1) flatMap { x => quit.awrite(1) }
     
     fibonacci(c,quit)
+
+    Await.ready(receiver, 10 seconds)
+
     acceptor(last)
 
   }
@@ -60,8 +66,8 @@ object FibonaccyAsync {
 class FibonaccyAsyncSuite extends FunSuite
 {
   
-  test("async fibonaccy must be processed up to 50", Now) {
-    pending
+  test("async fibonaccy must be processed up to 50") {
+    //§pending
     // zip is not implemented
     var last:Long = 0;
     FibonaccyAsync.run(50, { last = _ } )

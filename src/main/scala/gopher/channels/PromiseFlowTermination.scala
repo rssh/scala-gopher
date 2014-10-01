@@ -15,7 +15,6 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
          case Success(x) =>
            // success was before throw, ignoring.
          case Failure(prevEx) =>
-          //System.err.println("previous exception:"+prevEx)
           //prevEx.printStackTrace();
       }
     } else {
