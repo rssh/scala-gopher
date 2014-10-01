@@ -5,6 +5,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import scala.util._
+import java.util.concurrent.ConcurrentLinkedQueue
 import gopher._
 
 
@@ -26,13 +27,20 @@ trait Input[A]
    */
   def  cbread[B](f: (ContRead[A,B] => (Option[(()=>A) => Future[Continuated[B]]])), flwt: FlowTermination[B] ): Unit
 
-
+  /**
+   * async version of read. Immediatly return future, which will contains result of read or failur with StreamClosedException
+   * in case of stream is closed.
+   */
   def  aread:Future[A] = {
     val ft = PromiseFlowTermination[A]() 
     cbread[A]( self => Some((gen:()=>A) => Future.successful(Done(gen(),ft))) , ft )
     ft.future
   }
 
+  /**
+   * instance of gopher API
+   */
+  def api: GopherAPI
 
   /**
    * read object from channel. Must be situated inside async/go/action block
@@ -81,6 +89,8 @@ trait Input[A]
                                                           } )
                                         }, flwt  )
 
+           def api = thisInput.api
+
        }
 
   def withFilter(p: A=>Boolean): Input[A] = filter(p)
@@ -98,9 +108,13 @@ trait Input[A]
                thisInput.cbread( mf, flwt )
              }
 
+        def api = thisInput.api
+
      }
 
-  def zip[B](x: Iterable[B]): Input[(A,B)] = ???
+  def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
+
+  def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
 
   def async = new {
   
@@ -159,6 +173,23 @@ trait Input[A]
   }
 
 }
+
+object Input
+{
+   def asInput[A](iterable:Iterable[A], api: GopherAPI): Input[A] = new IterableInput(iterable.iterator, api)
+
+   class IterableInput[A](it: Iterator[A], override val api: GopherAPI) extends Input[A]
+   {
+     def  cbread[B](f: (ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]]), flwt: FlowTermination[B] ): Unit =
+      f(ContRead(f,this,flwt)) map (f1 => this.synchronized {
+                                            if (it.hasNext) f1(it.next) else throw new ChannelClosedException()
+                                          }
+                                   )
+   }
+
+
+}
+
 
 
 object InputMacro

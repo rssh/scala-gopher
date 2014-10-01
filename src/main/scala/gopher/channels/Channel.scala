@@ -10,7 +10,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 
-class IOChannel[A](futureChannelRef: Future[ActorRef], api: GopherAPI) extends Input[A] with Output[A]
+class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Input[A] with Output[A]
 {
 
   def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
