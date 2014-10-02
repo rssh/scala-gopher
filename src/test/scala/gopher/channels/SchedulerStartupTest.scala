@@ -15,7 +15,7 @@ class SchedulerStartupTest extends FunSuite {
 
        val scheduler = actorSystem.scheduler
        val p = Promise[Int]()
-       System.err.println("scheduler:"+scheduler)
+       //System.err.println("scheduler:"+scheduler)
        val cancelable = scheduler.schedule(
                                            100 milliseconds, 
                                            500 milliseconds
