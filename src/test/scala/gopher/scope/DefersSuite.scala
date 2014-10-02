@@ -27,7 +27,7 @@ object TestParser
           source.close() 
      }
      val retval:Either[String,Seq[Seq[Double]]] = Right{
-         for( (line, nLine) <- source.lines.toSeq zip Stream.from(1) ) yield withDefer[Seq[Double]] { d =>
+         for( (line, nLine) <- source.lines.toList zip Stream.from(1) ) yield withDefer[Seq[Double]] { d =>
             line.split(",") map { s=> 
                                   d.defer{
                                    d.recover{
@@ -62,6 +62,24 @@ class DefersSuite extends FunSuite
     }
 
   }
+
+  test("Defers.parseCsv: error in second string must be discovered") {
+    val s = new Source {
+                          def name()="internal"
+                          def lines()=Seq(
+                            "1,3,4,5,6.0,8,9",
+                            "3,4,5,6,xxxx7.0,8,9"
+                          ).iterator
+                          def close(): Unit = {}
+                       }
+
+    TestParser.parseCsv(s) match {
+           case Right(x) => assert(false,"source with error parsed")
+           case Left(s) =>  assert(s.contains("2"))
+    }
+
+  }
+
 
 }
 
