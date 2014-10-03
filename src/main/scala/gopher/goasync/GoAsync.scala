@@ -23,10 +23,13 @@ object GoAsync
    {
      import c.universe._
      if (containsDefer(c)(body)) {
+       val defers = c.freshName
        val nbody = transformDefer(c)(body)
-       c.Expr[Future[T]](q"""{implicit val defered = new Defered()
-                              val retval = scala.async.Async.async(${nbody})(${ec}).andThen(defered.run(_))
-                              retval
+       //  TODO: run async only if we have await inside go
+       c.Expr[Future[T]](q"""{implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
+                              scala.async.Async.async(${nbody})(${ec}).collect(
+                                  ${defers}.processResult(_)
+                              )
                              }
                           """)
      } else {
@@ -34,23 +37,56 @@ object GoAsync
      }
    }
 
-   def goScope[T:c.WeakTypeTag](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[T] =
+   def goScopeImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[T]):c.Expr[T] =
    {
      import c.universe._
      if (containsDefer(c)(body)) {
        val nbody = transformDefer(c)(body)
-       c.Expr[T](q"""{implicit val defered = new Defered()
-                      defered.run(Try(${body}))
+       c.Expr[T](q"""{implicit val defered = new Defers[${c.weakTypeOf[T]}]()
+                      defered.processResult(scala.util.Try(${c.untypecheck(nbody)}))
                      }""")
      } else {
        body
      }
    }
 
-   def containsDefer[T](c:Context)(body:c.Expr[T]):Boolean = false
+   def containsDefer[T:c.WeakTypeTag](c:Context)(body:c.Expr[T]):Boolean = 
+   {
+    import c.universe._
+    val findDefer = new Traverser {
+      var found = false
+      override def traverse(tree:Tree):Unit =
+      {
+       if (!found) {
+          tree match {
+            case q"gopher.`package`.defer(..${args})" => found = true
+            case _ => super.traverse(tree)
+          }
+       } 
+      }
+    }
+    findDefer traverse body.tree
+    findDefer.found
+   }
 
-   def transformDefer[T](c:Context)(body:c.Expr[T]):c.Expr[T] = ???
 
+   def transformDefer[T:c.WeakTypeTag](c:Context)(body:c.Expr[T]):c.Tree = 
+   {
+    import c.universe._
+    val transformer = new Transformer {
+      override def transform(tree:Tree):Tree =
+       tree match {
+            case q"gopher.`package`.defer(..${args})" => 
+                       q"implicitly[gopher.Defers[${weakTypeOf[T]}]].defer(..${args map (transform(_))} )"
+            case q"$gopher.`package`.recover[$tps](..${args})" =>
+                       q"implicitly[gopher.Defers[${weakTypeOf[T]}]].recover(..${args map (transform(_))} )"
+            case _ =>
+                      super.transform(tree)
+       }
+    }
+    transformer.transform(body.tree)
+   }
 
+   
 }
 

@@ -1,5 +1,4 @@
-package anypackage.sub
-
+package gopher.scope
 
 
 import org.scalatest.FunSuite
@@ -21,9 +20,11 @@ class ScopeMacroSuite extends FunSuite {
 
   test("typed goScope") {
     var x = 0
-    val s = goScope{ defer{ recover("CCC") } ; panic("AAA"); "4" }
+    val s = goScope{ defer{ recover{case ex: Throwable => "CCC"} } ; throw new RuntimeException("AA"); "4" }
     assert(s=="CCC")
   }
   
 
 }
+
+

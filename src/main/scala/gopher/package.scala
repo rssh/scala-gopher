@@ -6,6 +6,7 @@ package object gopher {
 
 import scala.concurrent._
 import gopher.channels._
+import gopher.goasync._
 
 //
 // magnetic arguments for selector-builder unsugared API
@@ -69,12 +70,17 @@ import gopher.channels._
 // implicit def toFuture[A](sb:SelectorBuilder[A]):Future[A] = sb.go
 
  @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
- implicit def ft[A]: FlowTermination[A] = ???
+ implicit def compileTimeFlowTermination[A]: FlowTermination[A] = ???
 
- def go[T](body: T)(implicit ec:ExecutionContext) : Future[T] = macro gopher.goasync.GoAsync.goImpl[T]
+ def go[T](body: T)(implicit ec:ExecutionContext) : Future[T] = macro GoAsync.goImpl[T]
 
- @scala.annotation.compileTimeOnly("defer must be used inside flow scopes (go, reading/writing/idle args)")
- def defer(x: =>Unit)(ec: ExecutionContext): Unit = ???
+ def goScope[T](body: T): T = macro GoAsync.goScopeImpl[T]
+
+ @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
+ def defer(x: =>Unit): Unit = ??? 
+
+ @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
+ def recover[T](f: PartialFunction[Throwable, T]): Boolean = ??? 
 
 }
 
