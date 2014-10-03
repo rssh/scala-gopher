@@ -167,46 +167,7 @@ object SelectorBuilder
                    })
    }
 
-}
-
-class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
-{
-
-         
-   def reading[A](ch: Input[A])(f: A=>Unit): ForeverSelectorBuilder =
-        macro SelectorBuilder.readingImpl[A,Unit,ForeverSelectorBuilder] 
-                    // internal error in compiler when using this.type as S
-      
-
-   @inline
-   def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
-      withReader[A]( ch, cr => Some(gen=>f(ec,cr.flowTermination,gen()) map Function.const(cr)) )
-
-   def writing[A](ch: Output[A], x: A)(f: A => Unit): ForeverSelectorBuilder = 
-        macro SelectorBuilder.writingImpl[A,Unit,ForeverSelectorBuilder]
-
-   @inline
-   def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): ForeverSelectorBuilder =
-       withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
-
-
-   def idle(body:Unit): ForeverSelectorBuilder =
-         macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
-    
-   @inline
-   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
-
-    
-   def foreach(f:Any=>Unit):Unit = 
-        macro ForeverSelectorBuilder.foreachImpl
-
-}
-
-object ForeverSelectorBuilder
-{
-
-   def foreachImpl(c:Context)(f:c.Expr[Any=>Unit]):c.Expr[Unit] =
+   def foreachImpl[T](c:Context)(f:c.Expr[Any=>T]):c.Expr[T] =
    {
      import c.universe._
      val builder = f.tree match {
@@ -220,7 +181,7 @@ object ForeverSelectorBuilder
             c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(f.tree)}");
        }
     }
-    c.Expr[Unit](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
+    c.Expr[T](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
    }
 
    def foreachTransformMatch(c:Context)(forvals:List[c.universe.ValDef],
@@ -324,6 +285,41 @@ object ForeverSelectorBuilder
 
 }
 
+class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
+{
+
+         
+   def reading[A](ch: Input[A])(f: A=>Unit): ForeverSelectorBuilder =
+        macro SelectorBuilder.readingImpl[A,Unit,ForeverSelectorBuilder] 
+                    // internal error in compiler when using this.type as S
+      
+
+   @inline
+   def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
+      withReader[A]( ch, cr => Some(gen=>f(ec,cr.flowTermination,gen()) map Function.const(cr)) )
+
+   def writing[A](ch: Output[A], x: A)(f: A => Unit): ForeverSelectorBuilder = 
+        macro SelectorBuilder.writingImpl[A,Unit,ForeverSelectorBuilder]
+
+   @inline
+   def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): ForeverSelectorBuilder =
+       withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
+
+
+   def idle(body:Unit): ForeverSelectorBuilder =
+         macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
+    
+   @inline
+   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
+      withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
+
+    
+   def foreach(f:Any=>Unit):Unit = 
+        macro SelectorBuilder.foreachImpl[Unit]
+
+}
+
+
 
 class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@uncheckedVariance](api)
 {
@@ -351,6 +347,9 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
    @inline
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
        withIdle{ sk => Some(f(ec,sk.flowTermination) map(x => Done(x,sk.flowTermination)) ) }
+
+   def foreach(f:Any=>T):T = 
+        macro SelectorBuilder.foreachImpl[T]
 
 }
 
