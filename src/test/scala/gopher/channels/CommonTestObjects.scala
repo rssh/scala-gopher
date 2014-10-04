@@ -10,6 +10,6 @@ import scala.concurrent.duration._
 object CommonTestObjects {
 
     lazy val actorSystem = ActorSystem.create("system")
-    lazy val gopherApi = GopherAPIExtension(actorSystem)
+    lazy val gopherApi = Gopher(actorSystem)
   
 }

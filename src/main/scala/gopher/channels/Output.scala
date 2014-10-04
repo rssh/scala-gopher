@@ -36,14 +36,22 @@ trait Output[A]
   }
   
   /**
-   * 'blocked' write of 'a' to channel.
+   * 'blocking' write of 'a' to channel.
    * Note, that this method can be called only inside
    * 'go' or 'async' blocks, since blocking is
    * emulated by 'Async.await'
    **/
   def write(a:A):Unit = macro Output.writeImpl[A]
 
+  /**
+   * shortcut for blocking write.
+   */
   def <~ (a:A):Output[A] = macro Output.writeWithBuilderImpl[A] 
+
+  /**
+   * shortcut for blocking read.
+   */
+  def !(a:A):Unit = macro Output.writeImpl[A]
 
   def awriteAll[C <: Iterable[A]](c:C):Future[Unit] =
   {

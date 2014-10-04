@@ -6,7 +6,8 @@ import scala.concurrent._
 import gopher.channels._
 import java.util.concurrent.Executors
 
-class GopherAPIExtensionImpl(system: ExtendedActorSystem) 
+
+class GopherImpl(system: ExtendedActorSystem) 
             extends GopherAPI(system, 
                     GopherAPIExtensionHelper.retrieveConfiguredExecutor(system))
                 with Extension
@@ -14,15 +15,19 @@ class GopherAPIExtensionImpl(system: ExtendedActorSystem)
 
 }
 
-object GopherAPIExtension extends ExtensionId[GopherAPIExtensionImpl]
+/**
+ * Akka extension which provide gopherApi interface
+ *@see GopherAPI
+ **/
+object Gopher extends ExtensionId[GopherImpl]
                              with ExtensionIdProvider
 {
-   override def lookup = GopherAPIExtension
+   override def lookup = Gopher
 
    override def createExtension(system: ExtendedActorSystem) 
-                             = new GopherAPIExtensionImpl(system)
+                             = new GopherImpl(system)
 
-   override def get(system: ActorSystem): GopherAPIExtensionImpl = super.get(system)
+   override def get(system: ActorSystem): GopherImpl = super.get(system)
 
 }
 
