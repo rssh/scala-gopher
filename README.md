@@ -1,47 +1,59 @@
   
  Fully asyncronics implementation of go-like channels/selectors in scala
- -----------------------------------------------------------------------
+ -------------------------------------------------------
  -----------------------------------------------------------------------
 
- Requirements:    
+ Dependences:    
  ------------
  
  * scala 2.11.2 +
- * akka
- * scala-async plugin which you must install by hands from 
-    https://github.com/scala/async.git  (on the time of writing this document
-    livrary was not yet published).
+ * akka 2.3.6 +
+ * scala-async 0.9.2
 
  Download: 
  ---------
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.9.1"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.0"
 
+  
 
  Overview
  -------------
  -------------
 
-   Scala-gopher is a library, built on top of scala, akka and SIP-22 async, which provide implementation of
-'Go-like' channels  for scala.  
-  // http://swtch.com/~rsc/thread/
+   Scala-gopher is a scala library, build on top of akka and SIP-22 async, which provide implementation of 
+ CSP [Communicate Sequential Processes] primitives, known as 'Go-like channels'. Also analogs of go/defer/recover control flow constructions are provided. 
 
-Note, that 
+Note, that this is not an emulation of go language constructions in scala, but rather reimplementation of key ideas in 'scala-like' maner.
+  
+  Some related links:
+
+* [Communicating Sequential Processes book by Tony Hoare](http://www.usingcsp.com])
+* [brief history of CSP in Bell-labs](http://swtch.com/~rsc/thread/)
+* [introduction article about go defer/recover ](http://blog.golang.org/defer-panic-and-recover)   
+    
 
 
-
- What-s inside:
- --------------
- --------------
+ Initialization
+ ---------------
  
+ You need instance of gopherApi for creating channels and selectors.  The most easy way is to use one as Akka extension:
  
+     import akka.actors._
+     import gopher._
+ 
+     ......
+     
+     val actorSystem = ActorSystem.create("system")
+     val gopherApi = Gopher(actorSystem)    
+ 
+ In akka.conf we can place config values in 'gopher' entry. 
+ 
+ goScope
+ ---
 
-
- Scope
- -----
-
- Library define 'goScope'  expression, which allows to use inside
- goScope go-like 'defer', 'panic' and 'recover' expression.
+ `goScope[T](body: =>T)` is expression, which allows to use inside `body` go-like 'defer' and 'recover' expression.
+ 
  Typical usage:
 
     import gopher._
@@ -68,148 +80,182 @@ Note, that
   
     }
 
-  Here statements inside defer block are executed at the end of goScope block
-  in reverse order.
+  Here statements inside defer block are executed at the end of goScope block in reverse order.
 
-  Take a look at introduction article about go-like control flow constructs:
-                              http://blog.golang.org/defer-panic-and-recover
+  Basically, inside goScope we can use two pseudofunctions:
 
-  Basically, goScope wrap it's argument into try/finalize block and rewrite
-  *defer* calls to construction of list of code blocks, which are
-  executed in finalize.  *panic* calls are just throwing exception and 
-  *recover* (which can be executed only inside *defer*) is returning a value
-  of recover argument instead rethrowing exception:
+* `defer(body: =>Unit):Unit` - defer execution of `body` until the end of `go` or `goScope` block and previous defered blocks.
+* `recover[T](f:PartialFunction[Throwable,T]):Boolean` -- can be used only within `defer` block with next semantics:
+* * if exeception was raised inside `go` or `goScope` than `recover` try to apply  `f` to this exception and
+* * * if   `f` is applicable - set `f(e)` as return value of the block and return true
+* * * otherwise - do nothing and return false 
+* * during normal exit - return fase.
 
-    val s = goScope{ 
-                defer{ recover("CCC") } 
-                panic("panic message")
+You can look on `defer` as on stackable finally clauses, and on `defer` with `recover` inside as on `catch` clause. Small example:
+
+      val s = goScope{ 
+                defer{ recover{
+                         case ex: Throwable => "CCC"
+                      } } 
+                throw new Exception("")
                "QQQ" 
             }
 
-  will set *s* to "CCC".
+
+  will set `s` to "CCC".
 
     
-  Go statement
-  ------------
+    
+  go 
+  --
 
-  Go statement starts the execution of expression in independent thread.
-  We map one to Future call which use current implicit execution statement, 
-  so next 'go-like' code
-
-    go {
-      expr:A
-    }
+  `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
-  have type *Future[A]* and mapped into plain scala as combination of *Future*
-  and *goScope* . 
+  Basucally, go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
 
   Channels
-  --------
+  ---------
+  ---------
 
- Channels is a way for organizing go-like message passing. Basically you
-can look on it as on classic blocked queue. Different 'goroutines', executed
-in different flows can exchange messages via channels.
+You can look on channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
 
 
-     val channel = makeChannel[Int];
+     val channel = gopherApi.makeChannel[Int];
 
      go {
-       for(i <- 1 to 10) channel <~ i
+       channel.write(a)
      }
-
+     ......
      go {
-       val i1 = channel? 
-       val i2 = channel?
+       val i = channel.read 
      }
 
   
-  *channel <~ i* - send i to channel (it is possible to use '!' as synonym, to
-  provide interface, simular to actors), *i = channel ?* - blocked read 
-  of channell. Note, that unlike akka, default read and write operations are
-  blocked.  Unlike go, we also provide 'immediate' and 'timeouted' versions
-  of read/write operations.
+  
+* `channel.write(x)` - send x to channel and wait until one will be send (it is possible us as synonims `channel<~x` and `channel!x` if you prefere short syntax)
+* `channel.read` or `(channel ?)` - blocking read
+
+Blocking operations can be used only inside `go` or `Async.await` blocks. 
+
+Outside we can use asynchronics version:
+
+* `channel.awrite(x)` will write `x` and return to us `Future[Unit]` which will be executed after x will send
+* `channel.aread` will reaturn feature to value, which will be readed.
+
+Also channels can be closed, after this attempt to write will cause throwing of 'ClosedChannelException', reading is possible up to 'last written value', after this attempt to read will cause same exception.  
+
+Note, that closing channels is not mandatory, unreachable channels are garbage-collected regardless of they are closed or not. 
+
+Also you can use only 'Input' or 'Output' interfaces, where appropriative read/write operations is defined. 
+For input we have defined usual collection functions, like `map`, `zip`, `takeN` . Scala Iterable can be represented as `channels.Input` via method `asInput`
+
+Also note, that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
+
 
   Select loop
   ----------
 
-  May-be one of most unusual language constructions in go is 
-  'select statement' which work in somewhat simular to unix 'select' syscall:
-  from set of blocking operations select one which is ready for input/output
-  and run it.
+  'select statement' is somewhat simular to unix 'select' syscall:
+  from set of blocking operations select one which is ready for input/output and run it.
 
-  The common pattern of channel processing in go language is wrap select 
-  operarion into endless loop.
+  The common pattern of channel processing in go language is wrap select operation into endless loop.
  
   Gopher provides simular functionality with 'select loops':
 
-     import gopher._
-
-
-     for( s <- select ) 
+    go{
+     for( s <- gopherApi.select.forever) 
       s match {
-        case `channelA` ~> (i:Int) => ..do-something-with-i
-        case `channelB' ~> (ch: Char) => .. do-something-with-b
+        case i:channelA.read => ..do-something-with-i
+        case ch:channelB.read .. do-something-with-b
       }
+    }
    
   Here we read in loop from channelA or channelB. 
 
-  Body of select loop must consists only from one *match* statement where 
-  patterns in *case* clauses must have form *channel ~> (v:Type)*  
-  (for reading from channel) or *channel <~ v* (for writing).
- 
-  Yet one example: 
+  Body of select loop must consists only from one `match` statement where 
+  patterns in `case` clauses must have form
+   
+  * `v:channel.read` (for reading from channel) 
+  * `v:channel.write if (v==expr])` (for writing `expr` into channel).
+  * `_` - for 'idle' action.
 
-     val channel = makeChannel[Int](100)
-     
-     
-     go {
-       for( i <- 1 to 1000) 
-         channel <~ i 
-     }
-     
-     var sum = 0;
-     val consumer = go {
-       for(s <- select) {
-          s match {
-             case `channel` ~> (i:Int) =>
-                     sum = sum + i
-                     if (i==1000)  s.shutdown()
-          }
-       }
-       sum
-     }
+  For endless loop inside go we can use shortcut with syntax of partial function:
+    
+    gopherApi.select.forever{ 
+        case i:channelA.read => ..do-something-with-i
+        case ch:channelB.read .. do-something-with-b
+    }
+    
+ 
+  Inside case actions we can use blocing read/writes and await operations.  For ending loop we must call doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[T]`)
   
+  Example: 
+
+     val channel = gopherApi.makeChannel[Int](100)
+     
+     val producer = channel.awrite(1 to 1000)
+     
+     @volatile var sum = 0;
+     val consumer = gopherApi.select.forever{
+          case i: channerl.read  =>
+                  sum = sum + i
+                  if (i==1000)  {
+                    implictily[FlowTermination[Unit]].doExit(())
+                  }
+     }
+     
      Await.ready(consumer, 5.second)
 
-   Note the use of *s.shutdown* method for ending select loop. 
 
    For using select operation not enclosed in loop, scala-gopher provide
    *select.once* syntax:
    
-
-    for(s <- select.once) s match {
-       case `channelA` ~> (i:Type) => ...do read ..
-       case `channelB` <~ 1 => .. when writed .. 
+     gopherApi.select.once{
+       case i: channelA.read => s"Readed(${i})"
+       case x:channelB.write if (x==1) => s"Written(${x})" 
     }
 
-   Which is corresponding to one plain select in go language.
+   Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`
+    
+    go {
+      .....
+     val s = for(s <-gopherApi.select.once) 
+       s match {
+         case i: channelA.read => s"Readed(${i})"
+         case x: channelB.write if (x==1) => s"Written(${x})" 
+     }
+      
+    }  
 
-
-
-  Interaction with Actors
-  -----------------------
-
-   We can bind channel output to actor (i.e. all, what we will write to channel
-  will be readed to actor) with call 
-
-    bindChannelRead[A](read: InputChannel[A], actor: ActorRef)
-
-   and bind channel to actorsystem, by creating actor which will push all input
-   into channel:
-
-    bindChannelWrite[A: ClassTag](write: channels.OutputChannel[A], 
-                                  name: String)
-                                 (implicit as: ActorSystem): ActorRef 
+   Unsugared interfaces
+   --------------------
+   
+   It's not worse to know that exists gopher API without macro-based syntax sugar.  
+   
+    (
+     new ForeverSelectorBuilder(gopherApi)
+            .reading(ch1){ x => something-x }
+            .writing(ch2,y){ y => something-y }
+            .idle(something idle).go
+    )
+    
+   can be used instead appropriative macro-based call.  
+   
+   And for really tricky things exists even low-level interface, which can combine computations by adding to functional interfaces, simular to continuations:
+   
+    {
+     val selector = new Selector[Unit](gopherApi)
+     selector.addReader(ch1, cont=>Some{gen=> something-x
+                                        Future successful cont
+                                   }
+                       )
+     selector.addWriter(ch2, cont=>Some{(y,{something y;
+                                            Future successful cont
+                                           })})                  
+      selector.addIdle
+    } 
+   
+   Please, consult with source code for details.
 
 
    Additional Informatiom

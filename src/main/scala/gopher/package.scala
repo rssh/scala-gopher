@@ -8,9 +8,9 @@ import scala.concurrent._
 import gopher.channels._
 import gopher.goasync._
 
-//
-// magnetic arguments for selector-builder unsugared API
-//
+ //
+ // magnetic arguments for selector-builder unsugared API
+ //
 
  implicit def toAsyncFullReadSelectorArgument[A,B](
                    f: ContRead[A,B] => Option[(() => A) => Future[Continuated[B]]]
@@ -72,8 +72,15 @@ import gopher.goasync._
  @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
  implicit def compileTimeFlowTermination[A]: FlowTermination[A] = ???
 
+ /**
+  * starts asyncronics execution of `body` in provided execution context. 
+  * Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
+  */
  def go[T](body: T)(implicit ec:ExecutionContext) : Future[T] = macro GoAsync.goImpl[T]
 
+ /**
+  * provide access to using defer/recover inside body in the current thread of execution.
+  */
  def goScope[T](body: T): T = macro GoAsync.goScopeImpl[T]
 
  @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
