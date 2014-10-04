@@ -165,10 +165,12 @@ Also note, that you can provide own Input and Output implementations by implemen
 
   For endless loop inside go we can use shortcut with syntax of partial function:
     
+```
      gopherApi.select.forever{ 
          case i:channelA.read => ..do-something-with-i
          case ch:channelB.read .. do-something-with-b
      }
+```
     
  
   Inside case actions we can use blocing read/writes and await operations.  For ending loop we must call doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[T]`)
