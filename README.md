@@ -1,24 +1,18 @@
   
- Fully asyncronics implementation of go-like channels/selectors in scala
- -------------------------------------------------------
- -----------------------------------------------------------------------
+## Fully asyncronics implementation of go-like channels/selectors in scala
 
- Dependences:    
- ------------
+### Dependences:    
  
  * scala 2.11.2 +
  * akka 2.3.6 +
  * scala-async 0.9.2
 
- Download: 
- ---------
+#### Download: 
 
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.0"
 
 
- Overview
- -------------
- -------------
+## Overview
 
    Scala-gopher is a scala library, build on top of akka and SIP-22 async, which provide implementation of 
  CSP [Communicate Sequential Processes] primitives, known as 'Go-like channels'. Also analogs of go/defer/recover control flow constructions are provided. 
@@ -27,8 +21,7 @@ Note, that this is not an emulation of go language constructions in scala, but r
   
 
 
- Initialization
- ---------------
+### Initialization
  
  You need instance of gopherApi for creating channels and selectors.  The most easy way is to use one as Akka extension:
  
@@ -42,8 +35,9 @@ Note, that this is not an emulation of go language constructions in scala, but r
  
  In akka.conf we can place config values in 'gopher' entry. 
  
- goScope
- ---------
+## Control flow constructions:
+
+### goScope
 
  `goScope[T](body: =>T)` is expression, which allows to use inside `body` go-like 'defer' and 'recover' expression.
  
@@ -99,17 +93,13 @@ You can look on `defer` as on stackable finally clauses, and on `defer` with `re
 
     
 
- go 
- --
-  
+### go 
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
   Basucally, go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
 
- Channels
- ---------
- ---------
+## Channels
 
 You can look on channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
 
@@ -146,8 +136,7 @@ For input we have defined usual collection functions, like `map`, `zip`, `takeN`
 Also note, that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
 
 
- Select loop
- ------------
+## Select loops
 
   'select statement' is somewhat simular to unix 'select' syscall:
   from set of blocking operations select one which is ready for input/output and run it.
@@ -221,8 +210,7 @@ Also note, that you can provide own Input and Output implementations by implemen
       
       }  
 
- Unsugared interfaces
-  --------------------
+## Unsugared interfaces
    
    It's not worse to know that exists gopher API without macro-based syntax sugar.  
    
@@ -252,8 +240,9 @@ Also note, that you can provide own Input and Output implementations by implemen
    Please, consult with source code for details.
 
 
-   Additional Informatiom
+## Additional Informatiom
    ----------------------
+
 * API reference: http://rssh.github.io/scala-gopher/api/index.html#package
 * source code: https://github.com/rssh/scala-gopher
 
