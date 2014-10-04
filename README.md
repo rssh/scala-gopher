@@ -173,7 +173,7 @@ Also note, that you can provide own Input and Output implementations by implemen
 ```
     
  
-  Inside case actions we can use blocing read/writes and await operations.  For ending loop we must call doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[T]`)
+  Inside case actions we can use blocking read/writes and await operations.  Call of doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[T]`) can be used for exiting from loop.
   
   Example: 
 
