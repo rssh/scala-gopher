@@ -1,5 +1,5 @@
   
-## asynchronous implementation of go-like channels/selectors in scala
+## Gopher: asynchronous implementation of go-like channels/selectors in scala
 
 ### Dependences:    
  
