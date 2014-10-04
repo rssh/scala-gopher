@@ -45,7 +45,7 @@ pomExtra := (
   <licenses>
     <license>
       <name>Apache 2</name>
-      <url>pt</url>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
