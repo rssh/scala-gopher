@@ -105,7 +105,6 @@ object Output
          }
       """
    )
-   Console.println("q:"+retval)
    retval
   }
 
