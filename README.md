@@ -98,8 +98,9 @@ You can look on `defer` as on stackable finally clauses, and on `defer` with `re
   will set `s` to "CCC".
 
     
+
  go 
- -------
+ --
   
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
