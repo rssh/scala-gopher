@@ -295,6 +295,9 @@ object SelectorBuilder
 
 }
 
+/**
+ * Builder for 'forever' selector. Can be obtained as `gopherApi.select.forever`.
+ **/
 class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
 {
 
@@ -323,17 +326,45 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
       withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
-    
+   /**
+    * provide syntax for running select loop inside go (or async) block
+    * example of usage:
+    *
+    *{{{
+    *  go {
+    *    .....
+    *    for(s <- gopherApi.select.forever) 
+    *      s match {
+    *        case x: ch1.read => do something with x
+    *        case q: chq.read => implicitly[FlowTermination[Unit]].doExit(())
+    *        case y: ch2.write if (y=expr) => do something with y
+    *        case _ => do somethig when idle.
+    *      }
+    *}}}
+    *
+    * Note, that you can use implicit instance of [FlowTermination[Unit]] to stop loop.
+    **/
    def foreach(f:Any=>Unit):Unit = 
         macro SelectorBuilder.foreachImpl[Unit]
 
+   /**
+    * provide syntax for running select loop as async operation.
+    *
+    *{{{
+    *  val receiver = gopherApi.select.forever{
+    *                   case x: channel.read => Console.println(s"received:\$x")
+    *                 }
+    *}}}
+    */
    def apply(f: PartialFunction[Any,Unit]): Future[Unit] =
         macro SelectorBuilder.applyImpl[Unit]
 
 }
 
 
-
+/**
+ * Builder for 'once' selector. Can be obtained as `gopherApi.select.once`.
+ */
 class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@uncheckedVariance](api)
 {
 
@@ -370,15 +401,27 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
 }
 
 
+/**
+ * Factory for select instantiation.
+ * Can be obtained via gopherAPI
+ *
+ * {{{
+ *   val selector = gopherApi.select.forever
+ *   for(s <- selector) ...
+ * }}}
+ */
 class SelectFactory(api: GopherAPI)
 {
  
   /**
    * forever builder. 
-   *@Seee ForeverSelectorBuilder
+   *@see ForeverSelectorBuilder
    */
   def forever: ForeverSelectorBuilder = new ForeverSelectorBuilder(api)
 
+  /**
+   * once builder, where case clause return type is `T`
+   */
   def once[T]: OnceSelectorBuilder[T] = new OnceSelectorBuilder[T](api)
 
   /**

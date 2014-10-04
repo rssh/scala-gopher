@@ -35,7 +35,7 @@ import java.util.concurrent.atomic._
  *                                 d.defer{
  *                                  d.recover{
  *                                     case ex: NumberFormatException =>
- *                                       throw new RuntimeException(s"parse error in line ${nLine} file ${fname} ")
+ *                                       throw new RuntimeException(s"parse error in line \${nLine} file \${fname} ")
  *                                  }
  *                                 }
  *                                 s.toDouble 

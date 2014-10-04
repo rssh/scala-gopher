@@ -8,12 +8,34 @@ import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicLong
 import com.typesafe.config._
 
+/**
+ * Api for providing access to channel and selector interfaces.
+ */
 class GopherAPI(as: ActorSystem, es: ExecutionContext)
 {
 
+  /**
+   * obtain select factory
+   *
+   * {{{
+   *  goopherApi.select.once[String] {
+   *    case x: a.read => s"\${x} from A"
+   *    case x: b.read => s"\${x} from B"
+   *    case _ => "IDLE"
+   *  }
+   * }}}
+   */
   def select: SelectFactory =
     new SelectFactory(this)
 
+  /**
+   * obtain channel
+   *
+   *{{{
+   *  val channel = gopherApi.makeChannel[Int]()
+   *  channel.awrite(1 to 100)
+   *}}}
+   */
   def makeChannel[A](capacity: Int = 1) =
     {
      val nextId = newChannelId
@@ -24,6 +46,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
                             )
      new IOChannel[A](futureChannelRef, this)
     }
+
 
   def actorSystem: ActorSystem = as
 

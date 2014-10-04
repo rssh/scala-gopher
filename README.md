@@ -50,7 +50,7 @@ Note, that this is not an emulation of go language constructions in scala, but r
  In akka.conf we can place config values in 'gopher' entry. 
  
  goScope
- ---
+ ---------
 
  `goScope[T](body: =>T)` is expression, which allows to use inside `body` go-like 'defer' and 'recover' expression.
  
@@ -107,7 +107,7 @@ You can look on `defer` as on stackable finally clauses, and on `defer` with `re
     
     
   go 
-  --
+  -------
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
@@ -153,7 +153,7 @@ Also note, that you can provide own Input and Output implementations by implemen
 
 
   Select loop
-  ----------
+  ------------
 
   'select statement' is somewhat simular to unix 'select' syscall:
   from set of blocking operations select one which is ready for input/output and run it.
