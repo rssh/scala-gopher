@@ -248,6 +248,31 @@ class SelectSuite extends FunSuite
      assert(Await.result(selector, 10.second)=="IDLE")
      ch.close()
    }
+
+
+   test("basic select.foreach with partial-function syntax sugar")  {
+     val info = gopherApi.makeChannel[Long](1)
+     val quit = gopherApi.makeChannel[Int](2)
+     @volatile var (x,y)=(0L,1L)
+     val writer = gopherApi.select.forever{
+                      case z:info.write if (z==x) =>
+                                              x = y
+                                              y = y + x
+                      case q:quit.read =>
+                                         implicitly[FlowTermination[Unit]].doExit(())
+                  }
+     @volatile var sum=0L
+     val reader = gopherApi.select.forever{
+                      case z:info.read => sum += z
+                                          if (sum > 100000) {
+                                            quit.write(1)
+                                            implicitly[FlowTermination[Unit]].doExit(())
+                                         }
+                  }
+     Await.ready(writer, 10.second)
+     Await.ready(reader, 10.second)
+     assert(sum > 100000)
+   }
   
   def gopherApi = CommonTestObjects.gopherApi
    

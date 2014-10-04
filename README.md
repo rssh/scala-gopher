@@ -7,6 +7,7 @@
  ------------
  
  * scala 2.11.2 +
+ * akka
  * scala-async plugin which you must install by hands from 
     https://github.com/scala/async.git  (on the time of writing this document
     livrary was not yet published).
@@ -17,10 +18,25 @@
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.9.1"
 
 
+ Overview
+ -------------
+ -------------
+
+   Scala-gopher is a library, built on top of scala, akka and SIP-22 async, which provide implementation of
+'Go-like' channels  for scala.  
+  // http://swtch.com/~rsc/thread/
+
+Note, that 
+
+
+
  What-s inside:
  --------------
  --------------
  
+ 
+
+
  Scope
  -----
 
@@ -71,30 +87,6 @@
             }
 
   will set *s* to "CCC".
-
-  One question -- what to do if exception is occured inside one of defer blocks (?). By default we assume that statements inside *defer* have cleanup 
- semantics, so exception inside ones are suppressed. You can override this 
- semantics by calling special construction *throwSuppressed* inside first 
- *defer* block (which will evaluated last) i.e.
-
-    goScope{
-      defer{ throwSuppressed }
-      ..........
-    }
-
- will throw suppressed exceptions if one exists.
-
- Also we can get list of suppressed using suppressedExceptions construction:
-
-    goScope{
-      defer{ 
-        if (suppressedExceptions.notEmpty) {
-          System.err.println("suppresses exceptions:")
-          for(e <- suppressedExceptions) e.printStackTrace
-        }
-      }
-      ..........
-    }
 
     
   Go statement

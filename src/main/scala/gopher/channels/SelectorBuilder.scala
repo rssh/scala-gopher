@@ -172,9 +172,11 @@ object SelectorBuilder
      import c.universe._
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) =>
-                                foreachTransformMatch(c)(forvals,choice,cases, Nil)
-       case Function(forvals,Block(commonExpr,Match(choice,cases))) =>  
-                                foreachTransformMatch(c)(forvals,choice,cases, commonExpr)
+                                // TOD: check that forvals and choice are same 
+                                foreachTransformMatch(c)(cases)
+       // TODO: think, are we need syntax with common-expr ?
+       //case Function(forvals,Block(commonExpr,Match(choice,cases))) =>  
+       //                         foreachTransformMatch(c)(forvals,choice,cases, commonExpr)
        case Function(a,b) =>
                      c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(b)} ");
        case _ => {
@@ -184,20 +186,28 @@ object SelectorBuilder
     c.Expr[T](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
    }
 
-   def foreachTransformMatch(c:Context)(forvals:List[c.universe.ValDef],
-                                        choice:c.Tree,
-                                        cases:List[c.universe.CaseDef],
-                                        commonExpr:List[c.Tree]):c.Tree =
+   def applyImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Future[T]] =
    {
      import c.universe._
-     // TODO: check that choice and forvals are the same.
+     val builder = f.tree match {
+        case q"{case ..$cases}" =>
+                  foreachTransformMatch(c)(cases)
+        case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
+     }
+     c.Expr[Future[T]](c.untypecheck(q"${builder}.go"))
+   }
+
+
+   def foreachTransformMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
+   {
+     import c.universe._
      val bn = TermName(c.freshName)
      val calls = cases map { cs =>
         cs.pat match {
            case Bind(ident, t)
                       => foreachTransformReadWriteCaseDef(c)(bn,cs)
            case Ident(TermName("_")) => foreachTransformIdleCaseDef(c)(bn,cs)
-           case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+showRaw(cs.pat))
+           case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+cs.pat)
         }
      }
      q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
@@ -317,6 +327,9 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
    def foreach(f:Any=>Unit):Unit = 
         macro SelectorBuilder.foreachImpl[Unit]
 
+   def apply(f: PartialFunction[Any,Unit]): Future[Unit] =
+        macro SelectorBuilder.applyImpl[Unit]
+
 }
 
 
@@ -350,6 +363,9 @@ class OnceSelectorBuilder[T](api: GopherAPI) extends SelectorBuilder[T@unchecked
 
    def foreach(f:Any=>T):T = 
         macro SelectorBuilder.foreachImpl[T]
+
+   def apply(f: PartialFunction[Any,Unit]): Future[T] =
+        macro SelectorBuilder.applyImpl[T]
 
 }
 
