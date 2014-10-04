@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>channels - gopher.channels</title>
@@ -9,6 +8,11 @@
           
       <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../index.html';
@@ -26,7 +30,11 @@
       <div id="definition">
         <img src="../../lib/package_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>channels</h1>
+        <h1>channels</h1> <span class="permalink">
+      <a href="../../index.html#gopher.channels.package" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -39,7 +47,10 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
+Instance of <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> represent one step of computations and leave in queue inside <a href="ChannelProcessor.html" class="extype" name="gopher.channels.ChannelProcessor">ChannelProcessor</a> or <a href="ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>
+<a href="Selector.html" class="extype" name="gopher.channels.Selector">Selector</a> transform <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> to executed exclusive with each other within one selector. Also we have <a href="IdleDetector.html" class="extype" name="gopher.channels.IdleDetector">IdleDetector</a> which
+determinate idle selectors and activer appropriative actions.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -81,149 +92,687 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="gopher.channels.Activable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ActivableextendsAnyRef"></a>
-      <a id="Activable:Activable"></a>
+              <ol><li name="gopher.channels.AsyncFullReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncFullReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncFullReadSelectorArgument[A,B]:AsyncFullReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncFullReadSelectorArgument.html"><span class="name">AsyncFullReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.B">B</span>]]]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncFullReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncFullReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncFullSkipSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncFullSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable"></a>
+      <a id="AsyncFullSkipSelectorArgument[A]:AsyncFullSkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncFullSkipSelectorArgument.html"><span class="name">AsyncFullSkipSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.channels.AsyncFullSkipSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncFullSkipSelectorArgument.A">A</span>]]]</span>)</span><span class="result"> extends <a href="SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncFullSkipSelectorArgument.A">A</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncFullSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncFullWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncFullWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncFullWriteSelectorArgument[A,B]:AsyncFullWriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncFullWriteSelectorArgument.html"><span class="name">AsyncFullWriteSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.B">B</span>]])]</span>)</span><span class="result"> extends <a href="WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncFullWriteSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncFullWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncNoGenReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncNoGenReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncNoGenReadSelectorArgument[A,B]:AsyncNoGenReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncNoGenReadSelectorArgument.html"><span class="name">AsyncNoGenReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.B">B</span>]]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoGenReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncNoGenReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncNoOptSkipSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncNoOptSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable"></a>
+      <a id="AsyncNoOptSkipSelectorArgument[A]:AsyncNoOptSkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncNoOptSkipSelectorArgument.html"><span class="name">AsyncNoOptSkipSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.channels.AsyncNoOptSkipSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncNoOptSkipSelectorArgument.A">A</span>]]</span>)</span><span class="result"> extends <a href="SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncNoOptSkipSelectorArgument.A">A</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncNoOptSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncNoOptWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncNoOptWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncNoOptWriteSelectorArgument[A,B]:AsyncNoOptWriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncNoOptWriteSelectorArgument.html"><span class="name">AsyncNoOptWriteSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.B">B</span>]])</span>)</span><span class="result"> extends <a href="WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoOptWriteSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncNoOptWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncNoOptionReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncNoOptionReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncNoOptionReadSelectorArgument[A,B]:AsyncNoOptionReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncNoOptionReadSelectorArgument.html"><span class="name">AsyncNoOptionReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.B">B</span>]]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncNoOptionReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncNoOptionReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncPairReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AsyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="AsyncPairReadSelectorArgument[A,B]:AsyncPairReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncPairReadSelectorArgument.html"><span class="name">AsyncPairReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.A">A</span>, <a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.B">B</span>]]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.AsyncPairReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@AsyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ChannelActor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelActor[A]extendsActor"></a>
+      <a id="ChannelActor[A]:ChannelActor[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelActor.html"><span class="name">ChannelActor</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelActor[A]extendsActor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ChannelCloseProcessed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelCloseProcessedextendsProductwithSerializable"></a>
+      <a id="ChannelCloseProcessed:ChannelCloseProcessed"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelCloseProcessed.html"><span class="name">ChannelCloseProcessed</span></a><span class="params">(<span name="nElements">nElements: <span class="extype" name="java.lang.Integer">Integer</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelCloseProcessedextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">result of CloseChannelRead, return number of elements
+left to read
+</p>
+    </li><li name="gopher.channels.ChannelProcessor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelProcessorextendsActor"></a>
+      <a id="ChannelProcessor:ChannelProcessor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelProcessor.html"><span class="name">ChannelProcessor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelProcessorextendsActor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ChannelSupervisor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelSupervisorextendsActor"></a>
+      <a id="ChannelSupervisor:ChannelSupervisor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ChannelSupervisor.html"><span class="name">ChannelSupervisor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelSupervisorextendsActor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.CloseChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CloseChannelextendsProductwithSerializable"></a>
+      <a id="CloseChannel:CloseChannel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CloseChannel.html"><span class="name">CloseChannel</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@CloseChannelextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ClosedChannelRead" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ClosedChannelReadextendsProductwithSerializable"></a>
+      <a id="ClosedChannelRead:ClosedChannelRead"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ClosedChannelRead.html"><span class="name">ClosedChannelRead</span></a><span class="params">(<span name="cont">cont: <a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[_, _]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ClosedChannelReadextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">this is message wich send to ChannelActor, when we
+know, that channel is closed.</p><div class="fullcomment"><div class="comment cmt"><p>this is message wich send to ChannelActor, when we
+know, that channel is closed. In such case, we don't
+konw: is actor stopped or not, So, we say this message
+(instead read) and wait for reply. If reply is not received
+within given timeout: think that channel is-dead.
+</p></div></div>
+    </li><li name="gopher.channels.ContRead" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ContRead[A,B]extendsFlowContinuated[B]withProductwithSerializable"></a>
+      <a id="ContRead[A,B]:ContRead[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ContRead.html"><span class="name">ContRead</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="function">function: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.ContRead.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>, <span name="channel">channel: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ContRead[A,B]extendsFlowContinuated[B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">read A and compute B as result.</p>
+    </li><li name="gopher.channels.ContWrite" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ContWrite[A,B]extendsFlowContinuated[B]withProductwithSerializable"></a>
+      <a id="ContWrite[A,B]:ContWrite[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ContWrite.html"><span class="name">ContWrite</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="function">function: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.ContWrite.A">A</span>, <span class="extype" name="gopher.channels.ContWrite.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.channels.ContWrite.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContWrite.B">B</span>]])]</span>, <span name="channel">channel: <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.ContWrite.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContWrite.B">B</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.ContWrite.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ContWrite[A,B]extendsFlowContinuated[B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">write A and compute B as result
+</p>
+    </li><li name="gopher.channels.Continuated" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Continuated[+A]extendsAnyRef"></a>
+      <a id="Continuated[+A]:Continuated[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Continuated.html"><span class="name">Continuated</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Continuated[+A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">represent continuated computation from A to B.</p>
+    </li><li name="gopher.channels.Done" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Done[A]extendsFlowContinuated[A]withProductwithSerializable"></a>
+      <a id="Done[A]:Done[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Done.html"><span class="name">Done</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="result">result: <span class="extype" name="gopher.channels.Done.A">A</span></span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.Done.A">A</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.Done.A">A</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Done[A]extendsFlowContinuated[A]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.FlowContinuated" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="FlowContinuated[A]extendsContinuated[A]"></a>
+      <a id="FlowContinuated[A]:FlowContinuated[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="FlowContinuated.html"><span class="name">FlowContinuated</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.FlowContinuated.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@FlowContinuated[A]extendsContinuated[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ForeverSelectorBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ForeverSelectorBuilderextendsSelectorBuilder[Unit]"></a>
+      <a id="ForeverSelectorBuilder:ForeverSelectorBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ForeverSelectorBuilder.html"><span class="name">ForeverSelectorBuilder</span></a><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ForeverSelectorBuilderextendsSelectorBuilder[Unit]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builder for 'forever' selector.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for 'forever' selector. Can be obtained as <code>gopherApi.select.forever</code>.
+</p></div></div>
+    </li><li name="gopher.channels.IOChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IOChannel[A]extendsInput[A]withOutput[A]"></a>
+      <a id="IOChannel[A]:IOChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="IOChannel.html"><span class="name">IOChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>] with <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@IOChannel[A]extendsInput[A]withOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.IdleDetector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IdleDetectorextendsAnyRef"></a>
+      <a id="IdleDetector:IdleDetector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="IdleDetector.html"><span class="name">IdleDetector</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@IdleDetectorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Input" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Input[A]extendsAnyRef"></a>
+      <a id="Input[A]:Input[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Activable.html"><span class="name">Activable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Input.html"><span class="name">Input</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Input[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Entity, which can read (or generate, as you prefer) objects of type A,
+can be part of channel
+</p>
+    </li><li name="gopher.channels.NewChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NewChannelextendsProductwithSerializable"></a>
+      <a id="NewChannel:NewChannel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NewChannel.html"><span class="name">NewChannel</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Long">Long</span></span>, <span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@NewChannelextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.FromActorToChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FromActorToChannel[A]extendsActor"></a>
-      <a id="FromActorToChannel[A]:FromActorToChannel[A]"></a>
+    </li><li name="gopher.channels.OnceSelectorBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="OnceSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]"></a>
+      <a id="OnceSelectorBuilder[T]:OnceSelectorBuilder[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FromActorToChannel.html"><span class="name">FromActorToChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+        <a href="OnceSelectorBuilder.html"><span class="name">OnceSelectorBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>
       </span>
-      </h4>
-      
-    </li><li name="gopher.channels.FromActorToChannelAsync" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FromActorToChannelAsync[A]extendsActor"></a>
-      <a id="FromActorToChannelAsync[A]:FromActorToChannelAsync[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="FromActorToChannelAsync.html"><span class="name">FromActorToChannelAsync</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
-      </span>
-      </h4>
-      
-    </li><li name="gopher.channels.GBlockedQueue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="GBlockedQueue[A]extendsInputOutputChannel[A]withJLockHelper"></a>
-      <a id="GBlockedQueue[A]:GBlockedQueue[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="GBlockedQueue.html"><span class="name">GBlockedQueue</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputOutputChannel.html" class="extype" name="gopher.channels.InputOutputChannel">InputOutputChannel</a>[<span class="extype" name="gopher.channels.GBlockedQueue.A">A</span>] with <a href="JLockHelper.html" class="extype" name="gopher.channels.JLockHelper">JLockHelper</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">classical blocked queue, which supports listeners.</p>
-    </li><li name="gopher.channels.InputChannel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="InputChannel[+A]extendsActivable"></a>
-      <a id="InputChannel[+A]:InputChannel[A]"></a>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@OnceSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builder for 'once' selector.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for 'once' selector. Can be obtained as <code>gopherApi.select.once</code>.
+</p></div></div>
+    </li><li name="gopher.channels.Output" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Output[A]extendsAnyRef"></a>
+      <a id="Output[A]:Output[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="InputChannel.html"><span class="name">InputChannel</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></span>
+        <a href="Output.html"><span class="name">Output</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
-      
-    </li><li name="gopher.channels.InputOutputChannel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="InputOutputChannel[A]extendsInputChannel[A]withOutputChannel[A]"></a>
-      <a id="InputOutputChannel[A]:InputOutputChannel[A]"></a>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Output[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Entity, which can 'eat' objects of type A,
+can be part of channel
+</p>
+    </li><li name="gopher.channels.PromiseFlowTermination" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PromiseFlowTermination[A]extendsFlowTermination[A]"></a>
+      <a id="PromiseFlowTermination[A]:PromiseFlowTermination[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="InputOutputChannel.html"><span class="name">InputOutputChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.channels.InputOutputChannel.A">A</span>] with <a href="OutputChannel.html" class="extype" name="gopher.channels.OutputChannel">OutputChannel</a>[<span class="extype" name="gopher.channels.InputOutputChannel.A">A</span>]</span>
+        <a href="PromiseFlowTermination.html"><span class="name">PromiseFlowTermination</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.PromiseFlowTermination.A">A</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@PromiseFlowTermination[A]extendsFlowTermination[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.JLockHelper" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="JLockHelperextendsAnyRef"></a>
-      <a id="JLockHelper:JLockHelper"></a>
+    </li><li name="gopher.channels.ReadSelectorArgument" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ReadSelectorArgument[A,B]extendsAnyRef"></a>
+      <a id="ReadSelectorArgument[A,B]:ReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="JLockHelper.html"><span class="name">JLockHelper</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ReadSelectorArgument.html"><span class="name">ReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ReadSelectorArgument[A,B]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.JoinInputChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="JoinInputChannel[A]extendsInputChannel[A]"></a>
-      <a id="JoinInputChannel[A]:JoinInputChannel[A]"></a>
+    </li><li name="gopher.channels.SelectFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SelectFactoryextendsAnyRef"></a>
+      <a id="SelectFactory:SelectFactory"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="JoinInputChannel.html"><span class="name">JoinInputChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.channels.JoinInputChannel.A">A</span>]</span>
+        <a href="SelectFactory.html"><span class="name">SelectFactory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
-      
-    </li><li name="gopher.channels.JoinInputChannelBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="JoinInputChannelBuilder[+A]extendsAnyRef"></a>
-      <a id="JoinInputChannelBuilder[+A]:JoinInputChannelBuilder[A]"></a>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SelectFactoryextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory for select instantiation.</p><div class="fullcomment"><div class="comment cmt"><p>Factory for select instantiation.
+Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gopherApi.select.forever
+<span class="kw">for</span>(s <span class="kw">&lt;-</span> selector) ...</pre></div></div>
+    </li><li name="gopher.channels.Selector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Selector[A]extendsPromiseFlowTermination[A]"></a>
+      <a id="Selector[A]:Selector[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="JoinInputChannelBuilder.html"><span class="name">JoinInputChannelBuilder</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="Selector.html"><span class="name">Selector</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a>[<span class="extype" name="gopher.channels.Selector.A">A</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Selector[A]extendsPromiseFlowTermination[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.OutputChannel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="OutputChannel[-A]extendsActivable"></a>
-      <a id="OutputChannel[-A]:OutputChannel[A]"></a>
+    </li><li name="gopher.channels.SelectorBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SelectorBuilder[A]extendsAnyRef"></a>
+      <a id="SelectorBuilder[A]:SelectorBuilder[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SelectorBuilder.html"><span class="name">SelectorBuilder</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SelectorBuilder[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Skip" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Skip[A]extendsFlowContinuated[A]withProductwithSerializable"></a>
+      <a id="Skip[A]:Skip[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Skip.html"><span class="name">Skip</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="function">function: (<a href="Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.channels.Skip.A">A</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.Skip.A">A</span>]]]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.Skip.A">A</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.Skip.A">A</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Skip[A]extendsFlowContinuated[A]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">skip (i.e.</p><div class="fullcomment"><div class="comment cmt"><p>skip (i.e. do some operation not related to reading or writing.)
+</p></div></div>
+    </li><li name="gopher.channels.SkipSelectorArgument" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SkipSelectorArgument[A]extendsAnyRef"></a>
+      <a id="SkipSelectorArgument[A]:SkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="OutputChannel.html"><span class="name">OutputChannel</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></span>
+        <a href="SkipSelectorArgument.html"><span class="name">SkipSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SkipSelectorArgument[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.SelectorContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SelectorContextextendsActivable"></a>
-      <a id="SelectorContext:SelectorContext"></a>
+    </li><li name="gopher.channels.SyncPairReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="SyncPairReadSelectorArgument[A,B]:SyncPairReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SyncPairReadSelectorArgument.html"><span class="name">SyncPairReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.A">A</span>, <a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.B">B</span>]) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.B">B</span>]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncPairReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SyncReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SyncReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="SyncReadSelectorArgument[A,B]:SyncReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SyncReadSelectorArgument.html"><span class="name">SyncReadSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SyncReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SyncSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SyncSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable"></a>
+      <a id="SyncSelectorArgument[A]:SyncSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SyncSelectorArgument.html"><span class="name">SyncSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.channels.SyncSelectorArgument.A">A</span>]) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncSelectorArgument.A">A</span>]</span>)</span><span class="result"> extends <a href="SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncSelectorArgument.A">A</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SyncSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SyncWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SyncWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable"></a>
+      <a id="SyncWriteSelectorArgument[A,B]:SyncWriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SyncWriteSelectorArgument.html"><span class="name">SyncWriteSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.SyncWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncWriteSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.channels.SyncWriteSelectorArgument.A">A</span>, <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncWriteSelectorArgument.B">B</span>])</span>)</span><span class="result"> extends <a href="WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncWriteSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SyncWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.WriteSelectorArgument" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="WriteSelectorArgument[A,B]extendsAnyRef"></a>
+      <a id="WriteSelectorArgument[A,B]:WriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="WriteSelectorArgument.html"><span class="name">WriteSelectorArgument</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@WriteSelectorArgument[A,B]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ZippedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZippedInput[A,B]extendsInput[(A,B)]"></a>
+      <a id="ZippedInput[A,B]:ZippedInput[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SelectorContext.html"><span class="name">SelectorContext</span></a><span class="result"> extends <a href="Activable.html" class="extype" name="gopher.channels.Activable">Activable</a></span>
+        <a href="ZippedInput.html"><span class="name">ZippedInput</span></a><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[(<span class="extype" name="gopher.channels.ZippedInput.A">A</span>, <span class="extype" name="gopher.channels.ZippedInput.B">B</span>)]</span>
       </span>
-      </h4>
-      <p class="comment cmt">context, which await of doing one of blocked operations.</p>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ZippedInput[A,B]extendsInput[(A,B)]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -231,83 +780,200 @@
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="gopher.channels.FromActorToChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FromActorToChannel"></a>
-      <a id="FromActorToChannel:FromActorToChannel"></a>
+              <ol><li name="gopher.channels.ChannelClose" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelClose"></a>
+      <a id="ChannelClose:ChannelClose"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="FromActorToChannel$.html"><span class="name">FromActorToChannel</span></a>
+        <a href="ChannelClose$.html"><span class="name">ChannelClose</span></a><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelClose" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.SelectorMacroCaller" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SelectorMacroCaller"></a>
-      <a id="SelectorMacroCaller:SelectorMacroCaller"></a>
+    </li><li name="gopher.channels.ChannelRefDecrement" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ChannelRefDecrement"></a>
+      <a id="ChannelRefDecrement:ChannelRefDecrement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="SelectorMacroCaller$.html"><span class="name">SelectorMacroCaller</span></a>
+        <a href="ChannelRefDecrement$.html"><span class="name">ChannelRefDecrement</span></a><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
-      </h4>
-      
-    </li><li name="gopher.channels.TypeHelper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TypeHelper"></a>
-      <a id="TypeHelper:TypeHelper"></a>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelRefDecrement" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">this message is send, when all references to
+some instance of this channel are unreachable,
+so if we have no other instances (i.e.</p><div class="fullcomment"><div class="comment cmt"><p>this message is send, when all references to
+some instance of this channel are unreachable,
+so if we have no other instances (i.e. remote
+channel incarnation), than we must destroy channel.
+</p></div></div>
+    </li><li name="gopher.channels.ChannelRefIncrement" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelRefIncrement"></a>
+      <a id="ChannelRefIncrement:ChannelRefIncrement"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TypeHelper$.html"><span class="name">TypeHelper</span></a>
+        <a href="ChannelRefIncrement$.html"><span class="name">ChannelRefIncrement</span></a><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
-      </h4>
-      
-    </li><li name="gopher.channels.package#bindRead" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bindRead[A](read:gopher.channels.InputChannel[A],actor:akka.actor.ActorRef):Unit"></a>
-      <a id="bindRead[A](InputChannel[A],ActorRef):Unit"></a>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ChannelRefIncrement" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">this message is send, when we create new remote
+reference to channel, backed by this actor.</p>
+    </li><li name="gopher.channels.CurrentFlowTermination" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CurrentFlowTermination"></a>
+      <a id="CurrentFlowTermination:CurrentFlowTermination"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">bindRead</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="read">read: <a href="InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.channels.bindRead.A">A</span>]</span>, <span name="actor">actor: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <a href="CurrentFlowTermination$.html"><span class="name">CurrentFlowTermination</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@CurrentFlowTermination" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.package#bindWrite" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bindWrite[A](write:gopher.channels.OutputChannel[A],name:String)(implicitevidence$2:scala.reflect.ClassTag[A],implicitas:akka.actor.ActorSystem):akka.actor.ActorRef"></a>
-      <a id="bindWrite[A](OutputChannel[A],String)(ClassTag[A],ActorSystem):ActorRef"></a>
+    </li><li name="gopher.channels.Input" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Input"></a>
+      <a id="Input:Input"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">bindWrite</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="write">write: <a href="OutputChannel.html" class="extype" name="gopher.channels.OutputChannel">OutputChannel</a>[<span class="extype" name="gopher.channels.bindWrite.A">A</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.channels.bindWrite.A">A</span>]</span>, <span name="as">as: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>)</span><span class="result">: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>
+        <a href="Input$.html"><span class="name">Input</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Input" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.channels.package#make" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="make[A](capacity:Int)(implicitevidence$1:scala.reflect.ClassTag[A],implicitec:scala.concurrent.ExecutionContext):gopher.channels.InputOutputChannel[A]"></a>
-      <a id="make[A](Int)(ClassTag[A],ExecutionContext):InputOutputChannel[A]"></a>
+    </li><li name="gopher.channels.InputMacro" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InputMacro"></a>
+      <a id="InputMacro:InputMacro"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">make</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.channels.make.A">A</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <a href="InputOutputChannel.html" class="extype" name="gopher.channels.InputOutputChannel">InputOutputChannel</a>[<span class="extype" name="gopher.channels.make.A">A</span>]</span>
+        <a href="InputMacro$.html"><span class="name">InputMacro</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@InputMacro" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Never" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Never"></a>
+      <a id="Never:Never"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Never$.html"><span class="name">Never</span></a><span class="result"> extends <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="scala.Nothing">Nothing</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Never" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">never means the end of conversation
+</p>
+    </li><li name="gopher.channels.Output" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Output"></a>
+      <a id="Output:Output"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Output$.html"><span class="name">Output</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Output" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.PromiseFlowTermination" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PromiseFlowTermination"></a>
+      <a id="PromiseFlowTermination:PromiseFlowTermination"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PromiseFlowTermination$.html"><span class="name">PromiseFlowTermination</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@PromiseFlowTermination" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SelectorBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SelectorBuilder"></a>
+      <a id="SelectorBuilder:SelectorBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SelectorBuilder$.html"><span class="name">SelectorBuilder</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SelectorBuilder" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ZippedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZippedInput"></a>
+      <a id="ZippedInput:ZippedInput"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ZippedInput$.html"><span class="name">ZippedInput</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ZippedInput" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -338,6 +1004,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../lib/template.js"></script>
+
+
     </body>
       </html>

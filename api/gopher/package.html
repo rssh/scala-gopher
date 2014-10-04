@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>gopher - gopher</title>
@@ -9,6 +8,11 @@
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
@@ -26,7 +30,11 @@
       <div id="definition">
         <img src="../lib/package_big.png" />
         
-        <h1>gopher</h1>
+        <h1>gopher</h1> <span class="permalink">
+      <a href="../index.html#gopher.package" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -39,7 +47,34 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>package wich introduce go-like language constructions into scala:</p><p>goroutines</p><ul><li><a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a></li></ul><p> go scope support:</p><ul><li> <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a></li><li> <a href="#defer(x:=&gt;Unit):Unit" class="extmbr" name="gopher#defer">defer</a></li><li> <a href="#panic(x:String):Unit" class="extmbr" name="gopher#panic">panic</a></li><li> <a href="#recover[A](x:A):Unit" class="extmbr" name="gopher#recover">recover</a></li></ul><p> channels and select statement support:</p><ul><li> <a href="#makeChannel[A](capacity:Int)(implicitevidence$1:scala.reflect.ClassTag[A],implicitec:scala.concurrent.ExecutionContext):gopher.channels.InputOutputChannel[A]" class="extmbr" name="gopher#makeChannel">makeChannel</a></li><li> <a href="#select:gopher.channels.SelectorMacroCaller.type" class="extmbr" name="gopher#select">select</a></li></ul></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides scala API for 'go-like' CSP channels.</p><h4> Overview </h4><p> see <a href="https://github.com/rssh/scala-gopher/"> readme </a> for quick introduction.</p><h4> Usage </h4><p>At first you must receive gopherApi as Akka extension:</p><pre><span class="kw">import</span> gopher._
+
+.....
+<span class="kw">val</span> gopherApi = Gopher(actorSystem)</pre><p>Then you can use CPS channels with blocling operations inside go clauses:</p><pre><span class="kw">val</span> channel = gopherApi.makeChannel[<span class="std">Long</span>]
+<span class="kw">val</span> n = <span class="num">10000</span>
+<span class="kw">val</span> producer = go {
+ <span class="ano">@volatile</span> <span class="kw">var</span>(x,y) = (<span class="num">0</span>L,<span class="num">1</span>L)
+ <span class="kw">for</span>( s <span class="kw">&lt;-</span> gopherApi.select.forever) {
+   <span class="kw">case</span> z: channel.write <span class="kw">if</span> (z==x) <span class="kw">=&gt;</span>
+              x = y
+              y = x+z
+              <span class="kw">if</span> (x &gt; n) {
+                 channel.close
+                 implicitly[FlowTermination[<span class="std">Unit</span>]].doExit()
+              }
+ }
+}
+<span class="kw">val</span> consumer = <span class="kw">for</span>((c,i) <span class="kw">&lt;-</span> channel.zip(<span class="num">1</span> to n)) {
+   <span class="std">Console</span>.println(s<span class="lit">"fib(${i})=${c}"</span>)
+}
+Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/recover in go/goScope</p><pre>goScope{
+<span class="kw">val</span> f = openFile(myFileName)
+defer{
+  <span class="kw">if</span> (! recover{<span class="kw">case</span> ex:FileNotFoundException <span class="kw">=&gt;</span> <span class="std">Console</span>.println(<span class="lit">"invalid fname"</span>)}) {
+     f.close()
+  }
+}
+}</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">channels.IOChannel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -81,31 +116,126 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="gopher.InputChannelPair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="InputChannelPair[A]=(gopher.channels.InputChannel[A],A)"></a>
-      <a id="InputChannelPair[A]:(InputChannel[A],A)"></a>
+              <ol><li name="gopher.ChannelClosedException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ChannelClosedExceptionextendsIllegalStateException"></a>
+      <a id="ChannelClosedException:ChannelClosedException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">InputChannelPair</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> = (<a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.InputChannelPair.A">A</span>], <span class="extype" name="gopher.InputChannelPair.A">A</span>)</span>
+        <a href="ChannelClosedException.html"><span class="name">ChannelClosedException</span></a><span class="result"> extends <span class="extype" name="java.lang.IllegalStateException">IllegalStateException</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@ChannelClosedExceptionextendsIllegalStateException" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">throwed when channel is closed:
+a) during attempt to write to closed channel.</p><div class="fullcomment"><div class="comment cmt"><p>throwed when channel is closed:
+a) during attempt to write to closed channel.
+b) during attempt to read from closed channel 'behind' last message.
+</p></div></div>
+    </li><li name="gopher.Defers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Defers[T]extendsAnyRef"></a>
+      <a id="Defers[T]:Defers[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Defers.html"><span class="name">Defers</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@Defers[T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Construction Defers: defer/recover is alternative mechanism to exception handling,
+simular to one in Go language.</p><div class="fullcomment"><div class="comment cmt"><p>Construction Defers: defer/recover is alternative mechanism to exception handling,
+simular to one in Go language.</p><p>We use one hidden in go and goScope construct are transformed to withDefers usage with
+help of macroses.</p><p>It is also possible to use one unsugared (as in next example), but this is a bit verbose.</p><p><pre>
+def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
+ withDefer[Either[String,Seq[Seq[Double]]]]{ d =>
+   val in = Source.fromFile(fname)
+   d.defer{
+      var r = d.recover{
+                case FileNotFoundException => Left("fileNotFound")
+              }
+      if (!r) in.close()
+      d.recover {
+        case ex: Throwable => Left(ex.getMessage)
+      }
+   }
+   val retval:Either[String,Seq[Seq[Double]]] = Right{
+       for( (line, nLine) <- in.getLines.toSeq zip Stream.from(1) ) yield withDefer[Seq[Double]] { d =>
+          line.split(",") map { s=>
+                                d.defer{
+                                 d.recover{
+                                    case ex: NumberFormatException =>
+                                      throw new RuntimeException(s"parse error in line ${nLine} file ${fname} ")
+                                 }
+                                }
+                                s.toDouble
+                              }
+       }.toSeq
+     }
+   retval
+}
+</pre>
+</p></div></div>
+    </li><li name="gopher.FlowTermination" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="FlowTermination[-A]extendsAnyRef"></a>
+      <a id="FlowTermination[-A]:FlowTermination[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="FlowTermination.html"><span class="name">FlowTermination</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@FlowTermination[-A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.OutputChannelPair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OutputChannelPair[A]=(gopher.channels.InputChannel[A],A)"></a>
-      <a id="OutputChannelPair[A]:(InputChannel[A],A)"></a>
+    </li><li name="gopher.GopherAPI" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GopherAPIextendsAnyRef"></a>
+      <a id="GopherAPI:GopherAPI"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">OutputChannelPair</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> = (<a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.OutputChannelPair.A">A</span>], <span class="extype" name="gopher.OutputChannelPair.A">A</span>)</span>
+        <a href="GopherAPI.html"><span class="name">GopherAPI</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@GopherAPIextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Api for providing access to channel and selector interfaces.</p>
+    </li><li name="gopher.GopherImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GopherImplextendsGopherAPIwithExtension"></a>
+      <a id="GopherImpl:GopherImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="GopherImpl.html"><span class="name">GopherImpl</span></a><span class="result"> extends <a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a> with <span class="extype" name="akka.actor.Extension">Extension</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@GopherImplextendsGopherAPIwithExtension" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -114,87 +244,59 @@
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="gopher.!" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="!"></a>
-      <a id="!:!"></a>
+              <ol><li name="gopher.Defers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Defers"></a>
+      <a id="Defers:Defers"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$$bang$.html"><span title="gt4s: $bang" class="name">!</span></a>
+        <a href="Defers$.html"><span class="name">Defers</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">unapply pattern for write case statement in select loop
-<code> `channel` <~ `x` </code> transformed to write from channel
-into variable x (and evaluating block if write was successful).</code></p>
-    </li><li name="gopher.&lt;~" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;~"></a>
-      <a id="&lt;~:&lt;~"></a>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@Defers" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Gopher" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Gopher"></a>
+      <a id="Gopher:Gopher"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$$less$tilde$.html"><span title="gt4s: $less$tilde" class="name">&lt;~</span></a>
+        <a href="Gopher$.html"><span class="name">Gopher</span></a><span class="result"> extends <span class="extype" name="akka.actor.ExtensionId">ExtensionId</span>[<a href="GopherImpl.html" class="extype" name="gopher.GopherImpl">GopherImpl</a>] with <span class="extype" name="akka.actor.ExtensionIdProvider">ExtensionIdProvider</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">unapply pattern for write case statement in select loop
-<code> `channel` <~ `x` </code> transformed to write from channel
-into variable x (and evaluating block if write was successful).</code></p>
-    </li><li name="gopher.?" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="?"></a>
-      <a id="?:?"></a>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@Gopher" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI
+</p></span></dd></dl></div>
+    </li><li name="gopher.GopherAPIExtensionHelper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GopherAPIExtensionHelper"></a>
+      <a id="GopherAPIExtensionHelper:GopherAPIExtensionHelper"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$$qmark$.html"><span title="gt4s: $qmark" class="name">?</span></a>
+        <a href="GopherAPIExtensionHelper$.html"><span class="name">GopherAPIExtensionHelper</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">unapply pattern for read case statement in select loop
-<code> channel ? x </code> transformed to reading from channel
-into variable x (end evaluating block in case statement if read was successful)
-</code></p>
-    </li><li name="gopher.package#bindChannelRead" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bindChannelRead[A](read:gopher.channels.InputChannel[A],actor:akka.actor.ActorRef):Unit"></a>
-      <a id="bindChannelRead[A](InputChannel[A],ActorRef):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bindChannelRead</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="read">read: <a href="channels/InputChannel.html" class="extype" name="gopher.channels.InputChannel">InputChannel</a>[<span class="extype" name="gopher.bindChannelRead.A">A</span>]</span>, <span name="actor">actor: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Bind 'read' of channel to actor, i.</p><div class="fullcomment"><div class="comment cmt"><p>Bind 'read' of channel to actor, i.e. when message sent to channel, it's passed to actor.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@inline</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.package#bindChannelWrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bindChannelWrite[A](write:gopher.channels.OutputChannel[A],name:String)(implicitevidence$2:scala.reflect.ClassTag[A],implicitas:akka.actor.ActorSystem):akka.actor.ActorRef"></a>
-      <a id="bindChannelWrite[A](OutputChannel[A],String)(ClassTag[A],ActorSystem):ActorRef"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bindChannelWrite</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="write">write: <a href="channels/OutputChannel.html" class="extype" name="gopher.channels.OutputChannel">OutputChannel</a>[<span class="extype" name="gopher.bindChannelWrite.A">A</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.bindChannelWrite.A">A</span>]</span>, <span name="as">as: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>)</span><span class="result">: <span class="extype" name="akka.actor.ActorRef">ActorRef</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">bind write of channel to actor, i.</p><div class="fullcomment"><div class="comment cmt"><p>bind write of channel to actor, i.e. create actor, which will put all received messages into channel.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@inline</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.channels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@GopherAPIExtensionHelper" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channels"></a>
       <a id="channels:channels"></a>
       <h4 class="signature">
@@ -205,9 +307,39 @@ into variable x (end evaluating block in case statement if read was successful)
       <span class="symbol">
         <a href="channels/package.html"><span class="name">channels</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@channels" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.</p><div class="fullcomment"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
+Instance of <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> represent one step of computations and leave in queue inside <a href="channels/ChannelProcessor.html" class="extype" name="gopher.channels.ChannelProcessor">ChannelProcessor</a> or <a href="channels/ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>
+<a href="channels/Selector.html" class="extype" name="gopher.channels.Selector">Selector</a> transform <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> to executed exclusive with each other within one selector. Also we have <a href="channels/IdleDetector.html" class="extype" name="gopher.channels.IdleDetector">IdleDetector</a> which
+determinate idle selectors and activer appropriative actions.</p></div></div>
+    </li><li name="gopher#compileTimeFlowTermination" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compileTimeFlowTermination[A]:gopher.FlowTermination[A]"></a>
+      <a id="compileTimeFlowTermination[A]:FlowTermination[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compileTimeFlowTermination</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <a href="FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.compileTimeFlowTermination.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@compileTimeFlowTermination[A]:gopher.FlowTermination[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
-    </li><li name="gopher.package#defer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <span class="defval" name="&quot;FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="gopher#defer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="defer(x:=&gt;Unit):Unit"></a>
       <a id="defer(⇒Unit):Unit"></a>
       <h4 class="signature">
@@ -218,230 +350,335 @@ into variable x (end evaluating block in case statement if read was successful)
       <span class="symbol">
         <span class="name">defer</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">defer statement: push x to be executed at the end of <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a> or <a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a> block.</p><div class="fullcomment"><div class="comment cmt"><p>defer statement: push x to be executed at the end of <a href="#goScope[A](x:=&gt;A):A" class="extmbr" name="gopher#goScope">goScope</a> or <a href="#go[A](x:=&gt;A):scala.concurrent.Future[A]" class="extmbr" name="gopher#go">go</a> block.
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@defer(x:=&gt;Unit):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">pseudostatement which can be used inside go/goScope block.</p><div class="fullcomment"><div class="comment cmt"><p>pseudostatement which can be used inside go/goScope block.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
-      <span class="defval" name="&quot;defer outside of go or goScope block&quot;">...</span>
+      <span class="defval" name="&quot;defer/recover method usage outside go / goScope &quot;">...</span>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.package#go" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="go[A](x:=&gt;A):scala.concurrent.Future[A]"></a>
-      <a id="go[A](⇒A):Future[A]"></a>
+    </li><li name="gopher#go" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="go[T](body:T)(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[T]"></a>
+      <a id="go[T](T)(ExecutionContext):Future[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">macro </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">go</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="gopher.go.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.go.A">A</span>]</span>
+        <span class="name">go</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="body">body: <span class="extype" name="gopher.go.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.go.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">spawn execution of x (wrapped into goScope) in separate execution flow.</p><div class="fullcomment"><div class="comment cmt"><p>spawn execution of x (wrapped into goScope) in separate execution flow.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@macroImpl</span><span class="args">(<span>
-      
-      <span class="defval" name="`macro`(&quot;versionFormat&quot; = 1, &quot;className&quot; = &quot;gopher.package$&quot;, &quot;methodName&quot; = &quot;goImpl&quot;, &quot;signature&quot; = List(-1, -1))[A]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.package#goImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="goImpl[A](c:scala.reflect.macros.Context)(x:c.Expr[A]):c.Expr[scala.concurrent.Future[A]]"></a>
-      <a id="goImpl[A](Context)(scala.reflect.macros.Context.Expr[A]):scala.reflect.macros.Context.Expr[Future[A]]"></a>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@go[T](body:T)(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[T]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">starts asyncronics execution of <code>body</code> in provided execution context.</p><div class="fullcomment"><div class="comment cmt"><p>starts asyncronics execution of <code>body</code> in provided execution context.
+Inside go we can use <code>defer</code>/<code>recover</code> clauses and blocked read/write channel operations.</p></div></div>
+    </li><li name="gopher#goScope" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="goScope[T](body:T):T"></a>
+      <a id="goScope[T](T):T"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">macro </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">goImpl</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.Context">Context</span></span>)</span><span class="params">(<span name="x">x: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.Context.Expr</span>[<span class="extype" name="gopher.goImpl.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.Context.Expr</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goImpl.A">A</span>]]</span>
+        <span class="name">goScope</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="body">body: <span class="extype" name="gopher.goScope.T">T</span></span>)</span><span class="result">: <span class="extype" name="gopher.goScope.T">T</span></span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">implementation of go.</p><div class="fullcomment"><div class="comment cmt"><p>implementation of go. public as imlementation details.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>go
-</p></span></dd></dl></div>
-    </li><li name="gopher.package#goScope" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="goScope[A](x:=&gt;A):A"></a>
-      <a id="goScope[A](⇒A):A"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">goScope</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: ⇒ <span class="extype" name="gopher.goScope.A">A</span></span>)</span><span class="result">: <span class="extype" name="gopher.goScope.A">A</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">block of code inside goScope is processed for support of 'defer', 'panic' and 'recover' constructions.</p><div class="fullcomment"><div class="comment cmt"><p>block of code inside goScope is processed for support of 'defer', 'panic' and 'recover' constructions.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@macroImpl</span><span class="args">(<span>
-      
-      <span class="defval" name="`macro`(&quot;versionFormat&quot; = 1, &quot;className&quot; = &quot;gopher.scope.ScopeMacroses&quot;, &quot;methodName&quot; = &quot;goScopeImpl&quot;, &quot;signature&quot; = List(-1, -1))[A]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.package#makeChannel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="makeChannel[A](capacity:Int)(implicitevidence$1:scala.reflect.ClassTag[A],implicitec:scala.concurrent.ExecutionContext):gopher.channels.InputOutputChannel[A]"></a>
-      <a id="makeChannel[A](Int)(ClassTag[A],ExecutionContext):InputOutputChannel[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="gopher.makeChannel.A">A</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <a href="channels/InputOutputChannel.html" class="extype" name="gopher.channels.InputOutputChannel">InputOutputChannel</a>[<span class="extype" name="gopher.makeChannel.A">A</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Make channel: create go-like channel with given capacity.</p><div class="fullcomment"><div class="comment cmt"><p>Make channel: create go-like channel with given capacity.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@inline</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.package#panic" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="panic(x:String):Unit"></a>
-      <a id="panic(String):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">panic</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">throw PanicException
-</p><div class="fullcomment"><div class="comment cmt"><p>throw PanicException
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@compileTimeOnly</span><span class="args">(<span>
-      
-      <span class="defval" name="&quot;panic outside of go or goScope block&quot;">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.package#recover" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="recover[A](x:A):Unit"></a>
-      <a id="recover[A](A):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">recover</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="x">x: <span class="extype" name="gopher.recover.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">recover statement: if x (situated inside defer block) will be executed in process of exception handling,
- inside go scope block, than block will return value of x instead throwing exception.</p><div class="fullcomment"><div class="comment cmt"><p>recover statement: if x (situated inside defer block) will be executed in process of exception handling,
- inside go scope block, than block will return value of x instead throwing exception.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@compileTimeOnly</span><span class="args">(<span>
-      
-      <span class="defval" name="&quot;recover outside of go or goScope block&quot;">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.scope" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scope"></a>
-      <a id="scope:scope"></a>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@goScope[T](body:T):T" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">provide access to using defer/recover inside body in the current thread of execution.</p>
+    </li><li name="gopher.goasync" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="goasync"></a>
+      <a id="goasync:goasync"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="scope/package.html"><span class="name">scope</span></a>
+        <a href="goasync/package.html"><span class="name">goasync</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@goasync" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
       
-    </li><li name="gopher.package#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="select:gopher.channels.SelectorMacroCaller.type"></a>
-      <a id="select:SelectorMacroCaller.type"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">select</span><span class="result">: <a href="channels/SelectorMacroCaller$.html" class="extype" name="gopher.channels.SelectorMacroCaller">SelectorMacroCaller</a>.type</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.</p><div class="fullcomment"><div class="comment cmt"><p>select pseudoobject -- used for emulation of go 'select' statements via for-comprehancions.
-i.e. next go code:</p><pre><span class="kw">for</span>(;;) {
-select
-  <span class="kw">case</span> channelA -&gt; x : <span class="kw">do</span>-something-<span class="kw">with</span>-x
-  <span class="kw">case</span> channelB -&gt; y : <span class="kw">do</span>-something-<span class="kw">with</span>-y
-}</pre><p> will looks in scala as
-<pre>
-for(s <- select)
- s match {
-   case `channelA` ~> (x: XType) => do-something-with-x
-   case `channelB` ~> (y: YType) => do-something-with-y
- }
-</pre>
-and plain select (without enclosing loop) as
-for(s &lt;- select.once)
- s match {
-   case <code>channelA</code> ~&gt; (x: XType) =&gt; do-something-with-x
-   case <code>channelB</code> ~&gt; (y: YType) =&gt; do-something-with-y
- }
-</pre></p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="package$$$tilde$greater$.html" class="extype" name="gopher.~&gt;">gopher.~&gt;</a>
-</p></span><span class="cmt"><p><a href="channels/SelectorContext.html" class="extype" name="gopher.channels.SelectorContext">gopher.channels.SelectorContext</a></p></span></dd></dl></div>
-    </li><li name="gopher.package#suppressedExceptions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="suppressedExceptions:List[Exception]"></a>
-      <a id="suppressedExceptions:List[Exception]"></a>
+    </li><li name="gopher#recover" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recover[T](f:PartialFunction[Throwable,T]):Boolean"></a>
+      <a id="recover[T](PartialFunction[Throwable,T]):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">suppressedExceptions</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Exception">Exception</span>]</span>
+        <span class="name">recover</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="gopher.recover.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">Access to list of exceptions from defer blocks, which was suppressed during handling of some other 'first' exception.</p><div class="fullcomment"><div class="comment cmt"><p>Access to list of exceptions from defer blocks, which was suppressed during handling of some other 'first' exception.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@recover[T](f:PartialFunction[Throwable,T]):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">can be called only from defer block.</p><div class="fullcomment"><div class="comment cmt"><p>can be called only from defer block. If we in handling exception, try to apply <code> f </code>
+to exception and if it's applied - stop panic and return true, otherwise return false.
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>- partial function for recovering exception.</p></dd><dt>returns</dt><dd class="cmt"><p>true if exception was recovered, false otherwise
+</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
-      <span class="defval" name="&quot;suppressedExceptions outside of go or goScope block&quot;">...</span>
+      <span class="defval" name="&quot;defer/recover method usage outside go / goScope &quot;">...</span>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.package#throwSuppressed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="throwSuppressed:Unit"></a>
-      <a id="throwSuppressed:Unit"></a>
+    </li><li name="gopher#toAsyncFullReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncFullReadSelectorArgument[A,B]((ContRead[A,B])⇒Option[(()⇒A)⇒Future[Continuated[B]]]):ReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">implicit </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">throwSuppressed</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">toAsyncFullReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]</span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">throw suppresses exception instead first.</p><div class="fullcomment"><div class="comment cmt"><p>throw suppresses exception instead first.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@compileTimeOnly</span><span class="args">(<span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
       
-      <span class="defval" name="&quot;throwSuppressed outside of go or goScope block&quot;">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="gopher.~&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="~&gt;"></a>
-      <a id="~&gt;:~&gt;"></a>
+    </li><li name="gopher#toAsyncFullSkipSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncFullSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;Option[scala.concurrent.Future[gopher.channels.Continuated[A]]]):gopher.channels.SkipSelectorArgument[A]"></a>
+      <a id="toAsyncFullSkipSelectorArgument[A]((Skip[A])⇒Option[Future[Continuated[A]]]):SkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncFullSkipSelectorArgument</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="channels/Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.toAsyncFullSkipSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncFullSkipSelectorArgument.A">A</span>]]]</span>)</span><span class="result">: <a href="channels/SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.toAsyncFullSkipSelectorArgument.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncFullSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;Option[scala.concurrent.Future[gopher.channels.Continuated[A]]]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncFullWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncFullWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])]):gopher.channels.WriteSelectorArgument[A,B]"></a>
+      <a id="toAsyncFullWriteSelectorArgument[A,B]((ContWrite[A,B])⇒Option[(A,Future[Continuated[B]])]):WriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncFullWriteSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.B">B</span>]])]</span>)</span><span class="result">: <a href="channels/WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullWriteSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncFullWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])]):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncNoGenReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncNoGenReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(A=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncNoGenReadSelectorArgument[A,B]((ContRead[A,B])⇒(A)⇒Future[Continuated[B]]):ReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncNoGenReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.B">B</span>]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoGenReadSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncNoGenReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(A=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncNoOptSkipSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncNoOptSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]):gopher.channels.SkipSelectorArgument[A]"></a>
+      <a id="toAsyncNoOptSkipSelectorArgument[A]((Skip[A])⇒Future[Continuated[A]]):SkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncNoOptSkipSelectorArgument</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="channels/Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.toAsyncNoOptSkipSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoOptSkipSelectorArgument.A">A</span>]]</span>)</span><span class="result">: <a href="channels/SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoOptSkipSelectorArgument.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncNoOptSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncNoOptWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncNoOptWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.WriteSelectorArgument[A,B]"></a>
+      <a id="toAsyncNoOptWriteSelectorArgument[A,B]((ContWrite[A,B])⇒(A,Future[Continuated[B]])):WriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncNoOptWriteSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.B">B</span>]])</span>)</span><span class="result">: <a href="channels/WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptWriteSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncNoOptWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncNoOptionReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncNoOptionReadSelectorArgument[A,B]((ContRead[A,B])⇒(()⇒A)⇒Future[Continuated[B]]):ReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncNoOptionReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toAsyncPairReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toAsyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncPairReadSelectorArgument[A,B]((A,ContRead[A,B])⇒Future[Continuated[B]]):ReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toAsyncPairReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.toAsyncPairReadSelectorArgument.A">A</span>, <a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncPairReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncPairReadSelectorArgument.B">B</span>]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncPairReadSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toAsyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toSyncPairReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toSyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;gopher.channels.Continuated[B]):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toSyncPairReadSelectorArgument[A,B]((A,ContRead[A,B])⇒Continuated[B]):ReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toSyncPairReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.toSyncPairReadSelectorArgument.A">A</span>, <a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toSyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncPairReadSelectorArgument.B">B</span>]) ⇒ <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncPairReadSelectorArgument.B">B</span>]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toSyncPairReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncPairReadSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toSyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;gopher.channels.Continuated[B]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toSyncReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toSyncReadSelectorArgument[A,B]((ContRead[A,B])⇒(()⇒A)⇒Continuated[B]):ReadSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toSyncReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>) ⇒ <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toSyncSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toSyncSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;gopher.channels.Continuated[A]):gopher.channels.SkipSelectorArgument[A]"></a>
+      <a id="toSyncSelectorArgument[A]((Skip[A])⇒Continuated[A]):SkipSelectorArgument[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toSyncSelectorArgument</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<a href="channels/Skip.html" class="extype" name="gopher.channels.Skip">Skip</a>[<span class="extype" name="gopher.toSyncSelectorArgument.A">A</span>]) ⇒ <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncSelectorArgument.A">A</span>]</span>)</span><span class="result">: <a href="channels/SkipSelectorArgument.html" class="extype" name="gopher.channels.SkipSelectorArgument">SkipSelectorArgument</a>[<span class="extype" name="gopher.toSyncSelectorArgument.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toSyncSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;gopher.channels.Continuated[A]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#toSyncWriteSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toSyncWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,gopher.channels.Continuated[B])):gopher.channels.WriteSelectorArgument[A,B]"></a>
+      <a id="toSyncWriteSelectorArgument[A,B]((ContWrite[A,B])⇒(A,Continuated[B])):WriteSelectorArgument[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toSyncWriteSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.toSyncWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncWriteSelectorArgument.B">B</span>]) ⇒ (<span class="extype" name="gopher.toSyncWriteSelectorArgument.A">A</span>, <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncWriteSelectorArgument.B">B</span>])</span>)</span><span class="result">: <a href="channels/WriteSelectorArgument.html" class="extype" name="gopher.channels.WriteSelectorArgument">WriteSelectorArgument</a>[<span class="extype" name="gopher.toSyncWriteSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncWriteSelectorArgument.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@toSyncWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,gopher.channels.Continuated[B])):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.util" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="util"></a>
+      <a id="util:util"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="util/package.html"><span class="name">util</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@util" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.withDefer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withDefer"></a>
+      <a id="withDefer:withDefer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$$tilde$greater$.html"><span title="gt4s: $tilde$greater" class="name">~&gt;</span></a>
+        <a href="withDefer$.html"><span class="name">withDefer</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">unapply pattern for read case statement in select loop
-<code> channel ~> x </code> transformed to reading from channel
-into variable x.</code></p>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@withDefer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">syntax sugar, for calling Defers.</p>
     </li></ol>
             </div>
 
@@ -471,6 +708,7 @@ into variable x.</code></p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../lib/template.js"></script>
+
+
     </body>
       </html>
