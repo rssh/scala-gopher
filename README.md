@@ -193,22 +193,26 @@ Also note, that you can provide own Input and Output implementations by implemen
    For using select operation not enclosed in loop, scala-gopher provide
    *select.once* syntax:
    
-      gopherApi.select.once{
-        case i: channelA.read => s"Readed(${i})"
-        case x:channelB.write if (x==1) => s"Written(${x})" 
-     }
+
+       gopherApi.select.once{
+         case i: channelA.read => s"Readed(${i})"
+         case x:channelB.write if (x==1) => s"Written(${x})" 
+      }
+
 
    Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`
     
-     go {
-       .....
-       val s = for(s <-gopherApi.select.once) 
-           s match {
-             case i: channelA.read => s"Readed(${i})"
-             case x: channelB.write if (x==1) => s"Written(${x})" 
-           }
+
+       go {
+         .....
+         val s = for(s <-gopherApi.select.once) 
+             s match {
+               case i: channelA.read => s"Readed(${i})"
+               case x: channelB.write if (x==1) => s"Written(${x})" 
+             }
       
-      }  
+        }  
+
 
 ## Unsugared interfaces
    
