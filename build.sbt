@@ -13,7 +13,7 @@ scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.3-SNAPSHOT"
+libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
@@ -22,7 +22,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
-version:="0.9.4-SNAPSHOT"
+version:="0.99.0"
 
 
 publishMavenStyle := true
