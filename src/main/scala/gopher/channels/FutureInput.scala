@@ -9,7 +9,11 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import gopher._
  
 /**
- * Future[A], represented as input which can produce a value when will be completed.
+ * Future[A], represented as input which produce a value when completed, after this
+ *  closes. If evaluation of feature is unsuccessful (i.e. failure), than appropriative
+ *  exception is thrown during reading.
+ *
+ *
  * Can be obtained from gopherApi.
  *
  *{{{
@@ -17,9 +21,17 @@ import gopher._
  *
  *  val myInput = futureInput(future)
  *  select.forever{
- *     case x: myInput => Console.println(s"we receive value from future: \${x}")
+ *     case x: myInput.read => Console.println(s"we receive value from future: \${x}")
  *                           implicitly[FlowTermination[Unit]].doExit(())
- *     case x: myChannel => Console.println(s"value from channel: \${x}")
+ *     case x: myChannel.read => Console.println(s"value from channel: \${x}")
+ *  }
+ *}}}
+ *
+ *  Also it is possiblt to direclty read from future in case guard:
+ *{{{
+ *  select.forever{
+ *     case x: T if (x==future.read) => Console.println(s"we receive value from future: \${x}")
+ *     case x: T if (x==channel.read) => Console.println(s"value from channel: \${x}")
  *  }
  *}}}
  *
