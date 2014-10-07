@@ -8,8 +8,8 @@ import scala.reflect.api._
 import gopher._
 
 /**
- * Entity, which can 'eat' objects of type A,
- * can be part of channel
+ * Entity, where we can write objects of type A.
+ *
  */
 trait Output[A]
 {
@@ -38,8 +38,7 @@ trait Output[A]
   /**
    * 'blocking' write of 'a' to channel.
    * Note, that this method can be called only inside
-   * 'go' or 'async' blocks, since blocking is
-   * emulated by 'Async.await'
+   * 'go' or 'async' blocks.
    **/
   def write(a:A):Unit = macro Output.writeImpl[A]
 
@@ -49,7 +48,7 @@ trait Output[A]
   def <~ (a:A):Output[A] = macro Output.writeWithBuilderImpl[A] 
 
   /**
-   * shortcut for blocking read.
+   * shortcut for blocking write.
    */
   def !(a:A):Unit = macro Output.writeImpl[A]
 

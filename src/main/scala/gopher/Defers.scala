@@ -91,7 +91,7 @@ class Defers[T]
    */
   def recover(f: PartialFunction[Throwable,T]): Boolean = {
         var retval = false
-        for(e <- last.failed if (f.isDefinedAt(e))) {
+        for(e <- last.failed if (f.isDefinedAt(e) && !e.isInstanceOf[ControlThrowable])) {
             last = Success(f(e))
             retval=true
         }
@@ -119,7 +119,6 @@ class Defers[T]
 
 object Defers
 {
-  class RecoverException[T](val v:T) extends RuntimeException with NoStackTrace
 
   class NoResultException extends RuntimeException
 
@@ -127,6 +126,21 @@ object Defers
   {
    def apply() = new NoResultException()
   }
+
+  /**
+   * same as scala.util.Try with one difference:
+   *ControlThrowable is catched and mapped to Failure.
+   */
+  def controlTry[T](body: =>T):Try[T] =
+  {
+    try {
+      Success(body)
+    } catch {
+      case ex: ControlThrowable => Failure(ex)
+      case NonFatal(ex) => Failure(ex)
+    }
+  }
+
 }
 
 /**
@@ -137,12 +151,12 @@ object withDefer
 
    def apply[A](f: Defers[A] => A):A =
    { val d = new Defers[A]()
-     d.processResult(Try(f(d)))
+     d.processResult(Defers.controlTry(f(d)))
    }
 
    def asTry[A](f: Defers[A] => A) =
    { val d = new Defers[A]()
-     d.tryProcess(Try(f(d)))
+     d.tryProcess(Defers.controlTry(f(d)))
    }
 
 }

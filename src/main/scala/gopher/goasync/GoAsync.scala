@@ -42,8 +42,8 @@ object GoAsync
      import c.universe._
      if (containsDefer(c)(body)) {
        val nbody = transformDefer(c)(body)
-       c.Expr[T](q"""{implicit val defered = new Defers[${c.weakTypeOf[T]}]()
-                      defered.processResult(scala.util.Try(${c.untypecheck(nbody)}))
+       c.Expr[T](q"""{implicit val defered = new gopher.Defers[${c.weakTypeOf[T]}]()
+                      defered.processResult(gopher.Defers.controlTry(${c.untypecheck(nbody)}))
                      }""")
      } else {
        body

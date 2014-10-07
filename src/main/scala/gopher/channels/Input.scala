@@ -10,8 +10,9 @@ import gopher._
 
 
 /**
- * Entity, which can read (or generate, as you prefer) objects of type A,
- * can be part of channel
+ * Entity, from which we can read objects of type A.
+ *
+ *
  */
 trait Input[A]
 {
@@ -43,7 +44,7 @@ trait Input[A]
   def api: GopherAPI
 
   /**
-   * read object from channel. Must be situated inside async/go/action block
+   * read object from channel. Must be situated inside async/go/action block.
    */
   def  read:A = macro InputMacro.read[A]
 
@@ -52,7 +53,9 @@ trait Input[A]
    */
   def  ? : A = macro InputMacro.read[A]
 
-
+  /**
+   * return feature which contains sequence from first `n` elements.
+   */
   def atake(n:Int):Future[IndexedSeq[A]] =
   {
     if (n==0) {
@@ -75,6 +78,11 @@ trait Input[A]
     }
   }
 
+  /**
+   * run <code> f </code> each time when new object is arrived. Ended when input closes.
+   *
+   * must be inside go/async/action block.
+   */
   def foreach(f: A=>Unit): Unit = macro InputMacro.foreachImpl[A]
 
   def aforeach(f: A=>Unit): Future[Unit] = macro InputMacro.aforeachImpl[A]
