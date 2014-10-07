@@ -132,7 +132,7 @@ Also channels can be closed, after this attempt to write will cause throwing of 
 Note, that closing channels is not mandatory, unreachable channels are garbage-collected regardless of they are closed or not. 
 
 Also you can use only 'Input' or 'Output' interfaces, where appropriative read/write operations is defined. 
-For input we have defined usual collection functions, like `map`, `zip`, `takeN` . Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also we can use scala futures as channels, which produce one value and then closed. For obtaining such inpt use  `gopherApi.futureInput`.
+For input we have defined usual collection functions, like `map`, `zip`, `takeN` . Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also we can use scala futures as channels, which produce one value and then closes. For obtaining such inpt use  `gopherApi.futureInput`.
 
 
 Also note, that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
