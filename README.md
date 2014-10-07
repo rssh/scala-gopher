@@ -157,11 +157,14 @@ Also note, that you can provide own Input and Output implementations by implemen
   Here we read in loop from channelA or channelB. 
 
   Body of select loop must consists only from one `match` statement where 
-  patterns in `case` clauses must have form
+  left parts in `case` clauses must have form
    
   * `v:channel.read` (for reading from channel) 
-  * `v:channel.write if (v==expr])` (for writing `expr` into channel).
+  * `v:Type if (v==read(ch))` (for reading from channel or future) 
+  * `v:channel.write if (v==expr)` (for writing `expr` into channel).
+  * `v:Type if (v==write(ch,expr))` (for writing `expr` into channel).
   * `_` - for 'idle' action.
+
 
   For endless loop inside go we can use shortcut with syntax of partial function:
     

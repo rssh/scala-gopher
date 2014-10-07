@@ -9,7 +9,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
+scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */   )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
 
@@ -22,7 +22,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
-version:="0.99.0"
+version:="0.99.1-SNAPSHOT"
 
 
 publishMavenStyle := true

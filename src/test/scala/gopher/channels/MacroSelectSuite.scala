@@ -78,6 +78,48 @@ class MacroSelectSuite extends FunSuite
 
    }
 
+   test("select from futureInput")  {
+     import gopherApi._
+     val channel = makeChannel[Int](100)
+     val future = Future successful 10
+     val fu = futureInput(future)
+     var res = 0
+     val r = select.forever{
+                case x: channel.read => 
+                                     Console.println(s"readed from channel: ${x}")
+                case x: fu.read => 
+                                     //Console.println(s"readed from future: ${x}")
+                                     res=x
+                                     implicitly[FlowTermination[Unit]].doExit(())
+                //  syntax for using channels/futures in cases without
+                //  setting one in stable identifers.
+                case x: Int if (x==future.read) =>
+                                     {};
+                                     res=x
+     }
+     Await.ready(r, 10 seconds)
+     assert(res==10)
+   }
+
+   test("select syntax with read/writes in guard")  {
+     import gopherApi._
+     val channel1 = makeChannel[Int](100)
+     val channel2 = makeChannel[Int](100)
+     var res = 0
+     val r = select.forever{
+                case x: Int if (x==channel1.write(3)) => 
+                                     Console.println(s"write to output")
+                case x: Int if (x==channel2.read) => 
+                                     Console.println(s"readed from channel2: ${x}")
+                case x: Int if (x==(Future successful 10).read) => 
+                                     res=x
+                                     implicitly[FlowTermination[Unit]].doExit(())
+     }
+     Await.ready(r, 10 seconds)
+     assert(res==10)
+   }
+
+
    lazy val gopherApi = CommonTestObjects.gopherApi
    
 }

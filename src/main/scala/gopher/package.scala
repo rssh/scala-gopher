@@ -159,5 +159,15 @@ import gopher.goasync._
  @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
  def recover[T](f: PartialFunction[Throwable, T]): Boolean = ??? 
 
+ /**
+  * sugar for reading value from future.
+  */
+ implicit class FutureWithRead[T](f:Future[T])
+ {
+   def read: T = macro InputMacro.read[T]
+
+   def aread: Future[T] = f
+ }
+
 }
 

@@ -47,6 +47,9 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
      new IOChannel[A](futureChannelRef, this)
     }
 
+  def futureInput[A](future:Future[A]): FutureInput[A] = new FutureInput(future, this)
+
+  def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
   def actorSystem: ActorSystem = as
 

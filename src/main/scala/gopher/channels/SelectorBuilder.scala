@@ -51,11 +51,16 @@ class SelectorBuilder[A](api: GopherAPI)
      this
    }
      
+
    def go: Future[A] = selector.run
 
    implicit def ec: ExecutionContext = api.executionContext
 
    val selector=new Selector[A](api)
+
+   // used in
+   @inline
+   def futureInput[A](f:Future[A]):FutureInput[A]=api.futureInput(f)
 
 }
 
@@ -235,29 +240,51 @@ object SelectorBuilder
     caseDef.pat match {
       case Bind(name,Typed(_,tp:c.universe.TypeTree)) =>
                     val tpo = if (tp.original.isEmpty) tp else tp.original
+                    val termName = name.toTermName 
+                    val param = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
+                    val body = clearIdent(name,caseDef.body)
                     tpo match {
                        case Select(ch,TypeName("read")) =>
                                    if (!caseDef.guard.isEmpty) {
                                      c.abort(caseDef.guard.pos,"guard is not supported in select case")
                                    }
-                                   val termName = name.toTermName 
-                                   val body = clearIdent(name,caseDef.body)
-                                   val readParam = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
-                                   val reading = q"${builderName}.reading(${ch}){ ${readParam} => ${body} }"
+                                   val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
                                    reading
                        case Select(ch,TypeName("write")) =>
-                                   val termName = name.toTermName
                                    val expression = if (!caseDef.guard.isEmpty) {
                                                       parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
                                                     } else {
                                                       Ident(termName)
                                                     }
-                                   val param = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
-                                   val body = clearIdent(name,caseDef.body)
                                    val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
                                    writing
                        case _ =>
-                         c.abort(tp.pos, "match must be in form x:channel.write or x:channel.read");
+                         if (caseDef.guard.isEmpty) {
+                            c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
+                         } else {
+                            parseGuardInSelectorCaseDef(c)(termName, caseDef.guard) match {
+                               case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                                        // here is 'reverse' of out read macros
+                                        val channel = readed match {
+                                           case q"gopher.`package`.FutureWithRead[${t2}](${future})" =>
+                                                q"${builderName}.futureInput(${future})"
+                                           case _ =>
+                                                if (readed.tpe <:< typeOf[gopher.channels.Input[_]]) {
+                                                   readed
+                                                } else if (readed.tpe <:< typeOf[gopher.`package`.FutureWithRead[_]]) {
+                                                  q"${builderName}.futureInput(${readed}.aread)"
+                                                } else {
+                                                   c.abort(readed.pos,"reading in select pattern guide must be channel or future, we have:"+readed.tpe)
+                                                }
+                                        }
+                                        q"${builderName}.reading(${channel})(${param} => ${body} )"
+                               case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                                        q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                               case x@_ =>
+                                  c.abort(tp.pos, "can't parse match guard: "+x);
+                            }
+                          
+                         }
                     }
       case Bind(name,x) =>
                     val rawToShow = x match {
@@ -280,7 +307,7 @@ object SelectorBuilder
         case Apply(Select(Ident(`name`),TermName("$eq$eq")),List(expression)) =>
                expression
         case _ =>
-               c.abort(guard.pos, s"expected ${name}==<expression> in select write guard")
+               c.abort(guard.pos, s"expected ${name}==<expression> in select guard")
      }
    }
 
