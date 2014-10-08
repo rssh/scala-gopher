@@ -33,7 +33,7 @@ class ZippedInput[A,B](override val api: GopherAPI, inputA: Input[A], inputB: In
                         } else {
                           // unfortunelly, somebody eat our pair between !empry and poll()
                           // if we receive f1, than let submit next reader, which will apply f1.
-                          //  unfortunelly, this can cause ver rare block 'select' until we
+                          //  this can cause ver rare block 'select' until we
                           //  end the f1
                           // TODO: send skip instead.
                           cbread[C]( cont => Some(gen => f1(gen)) , flwt )
