@@ -39,7 +39,7 @@ import gopher._
 class FutureInput[A](future: Future[A], override val api: GopherAPI) extends Input[A]
 {
 
-  def  cbread[B](f: (ContRead[A,B] => (Option[(()=>A) => Future[Continuated[B]]])), flwt: FlowTermination[B] ): Unit =
+  def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit =
   {
    future.onComplete{  r => 
                        for (f1 <- f(ContRead(f,this,flwt))) {

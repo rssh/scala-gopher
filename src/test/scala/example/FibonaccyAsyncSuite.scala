@@ -20,7 +20,8 @@ object FibonaccyAsync {
                   x = y
                   y = z + y
        }.reading(quit){ 
-                  x => implicitly[FlowTermination[Unit]].doExit(())
+                  x => 
+                        implicitly[FlowTermination[Unit]].doExit(())
        }.go
   }
   
@@ -46,7 +47,10 @@ object FibonaccyAsync {
         //Console.print("%d, %d\n".format(i,x))
         last = x
         (i,x)
-    }.atake(n+1) flatMap { x => quit.awrite(1) }
+    }.atake(n) flatMap { 
+      x => 
+           quit.awrite(1) 
+    }
     
     fibonacci(c,quit)
 
@@ -64,7 +68,7 @@ object FibonaccyAsync {
 class FibonaccyAsyncSuite extends FunSuite
 {
   
-  test("async fibonaccy must be processed up to 50") {
+  test("async fibonaccy must be processed up to 50", Now) {
     var last:Long = 0;
     FibonaccyAsync.run(50, { last = _ } )
     assert(last != 0)

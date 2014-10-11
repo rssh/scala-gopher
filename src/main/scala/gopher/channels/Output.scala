@@ -63,7 +63,7 @@ trait Output[A]
       {
           val n = it.next()
           if (it.hasNext) {
-            Some((n,Future successful cont))
+            Some((n,Future successful ContWrite(f,this,ft)))
           } else {
             Some((n, Future successful Done((), ft) ))
           }

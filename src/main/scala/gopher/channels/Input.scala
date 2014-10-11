@@ -26,7 +26,8 @@ trait Input[A]
   /**
    * apply f, when input will be ready and send result to API processor
    */
-  def  cbread[B](f: (ContRead[A,B] => (Option[(()=>A) => Future[Continuated[B]]])), flwt: FlowTermination[B] ): Unit
+  def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit
+
 
   /**
    * async version of read. Immediatly return future, which will contains result of read or failur with StreamClosedException
@@ -34,7 +35,7 @@ trait Input[A]
    */
   def  aread:Future[A] = {
     val ft = PromiseFlowTermination[A]() 
-    cbread[A]( self => Some((gen:()=>A) => Future.successful(Done(gen(),ft))) , ft )
+    cbread[A](cont => Some((gen:()=>A) => Future.successful(Done(gen(),ft))) ,  ft )
     ft.future
   }
 
@@ -62,19 +63,20 @@ trait Input[A]
       Future successful IndexedSeq()
     } else {
        val ft = PromiseFlowTermination[IndexedSeq[A]]
-       var i = 1;
-       var r: IndexedSeq[A] = IndexedSeq()
-       cbread({(c:ContRead[A,IndexedSeq[A]]) => 
-          Some{gen:(()=>A) =>
-               i=i+1
-               r = r :+ gen()
-               if (i<n) {
-                  Future successful c
-               } else {
-                  Future successful Done(r,ft)
-               }
-             }},ft)
-        ft.future
+       @volatile var i = 0;
+       @volatile var r: IndexedSeq[A] = IndexedSeq()
+       def takeFun(_cont:ContRead[A,IndexedSeq[A]]):Option[(()=>A)=>Future[Continuated[IndexedSeq[A]]]] =
+       Some{ (gen:()=>A) =>
+             i += 1
+             r = r :+ gen()
+             if (i<n) {
+                Future successful ContRead(takeFun,this,ft)
+             } else {
+                Future successful Done(r,ft)
+             }
+       }
+       api.continuatedProcessorRef ! ContRead(takeFun, this, ft)
+       ft.future
     }
   }
 
@@ -90,12 +92,14 @@ trait Input[A]
   def filter(p: A=>Boolean): Input[A] =
        new Input[A] {
 
-          def  cbread[B](f: (ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]]), flwt: FlowTermination[B] ): Unit =
-           thisInput.cbread[B]( cont => f(cont) map {
+          def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+           thisInput.cbread[B]( 
+                               (cont) => f(cont) map {
                                             f1 => (gen => { val a = gen()
-                                                            if (p(a)) f1(()=>a) else Future successful cont 
+                                                            if (p(a)) f1(()=>a) 
+                                                              else Future successful ContRead(f,this,ft)
                                                           } )
-                                        }, flwt  )
+                                        }, ft)  
 
            def api = thisInput.api
 
@@ -106,15 +110,12 @@ trait Input[A]
   def map[B](g: A=>B): Input[B] =
      new Input[B] {
 
-        def  cbread[C](f: (ContRead[B,C] => Option[(()=>B) => Future[Continuated[C]]]), flwt: FlowTermination[C] ): Unit =
-             {
-               val mf: ContRead[A,C] => Option[(()=>A) => Future[Continuated[C]]] = {
-                     cont => f(ContRead(f,this,cont.flowTermination)) map ( 
-                                f1 => (gen => f1(()=>g(gen())) )
-                             )
-               }
-               thisInput.cbread( mf, flwt )
-             }
+        def  cbread[C](f: ContRead[B,C] => Option[(()=>B)=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+        {
+         def mf(cont:ContRead[A,C]):Option[(()=>A)=>Future[Continuated[C]]] =
+            f(ContRead(f,this,ft)) map (f1 => (gen:(()=>A))=>f1(()=>g(gen())))
+         thisInput.cbread(mf,ft)
+        }
 
         def api = thisInput.api
 
@@ -123,6 +124,8 @@ trait Input[A]
   def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
 
   def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
+
+  def |(other:Input[A]):Input[A] = new OrInput(this,other)
 
   def async = new {
   
@@ -140,43 +143,42 @@ trait Input[A]
   def foreachSync(f: A=>Unit): Future[Unit] =
   {
     val ft = PromiseFlowTermination[Unit]
-    cbread({
-            (cont: ContRead[A,Unit]) => 
-                Some{(gen:()=>A) => 
-                     {var ar = false
-                      try {
-                       val a=gen()
-                       ar = true 
-                       f(a)
-                      }catch{
-                       case ex: ChannelClosedException if (!ar) => ft.doExit(())
-                      }
-                      Future successful cont
-                    }}
-           },ft)
+    lazy val cont = ContRead(applyF,this,ft)
+    def applyF(_cont:ContRead[A,Unit]):Option[(()=>A)=>Future[Continuated[Unit]]] =
+          Some{
+            (gen:()=>A) => var ar = false
+                          try {
+                            val a = gen()
+                            ar = true
+                            f(a)
+                          } catch {
+                            case ex: ChannelClosedException if (!ar) => ft.doExit(())
+                          }
+                          Future successful cont
+          }
+    cbread(applyF,ft)
     ft.future
   }
 
   def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] =
   {
     val ft = PromiseFlowTermination[Unit]
-    cbread({
-            (cont: ContRead[A,Unit]) => 
-                Some ((gen: ()=>A) => 
-                          { val next = Try(gen()) match {
+    def applyF(_cont:ContRead[A,Unit]):Option[(()=>A)=>Future[Continuated[Unit]]] =
+          Some{ (gen:()=>A) => {
+                    val next = Try(gen()) match {
                               case Success(a) => f(a) 
-                                                 cont
+                                                 ContRead(applyF,this,ft)
                               case Failure(ex) => if (ex.isInstanceOf[ChannelClosedException]) {
-                                                     Done((),ft)
+                                                    Done((),ft)
                                                   } else {
-                                                     ft.doThrow(ex)
-                                                     Never
-                                                  } 
-                            }
-                            Future successful next
-                           }
-                     )
-           },ft)
+                                                    ft.doThrow(ex)
+                                                    Never
+                                                  }
+                    } 
+                    Future successful next
+                }
+          }
+    cbread(applyF,ft)
     ft.future
   }
 
@@ -188,11 +190,17 @@ object Input
 
    class IterableInput[A](it: Iterator[A], override val api: GopherAPI) extends Input[A]
    {
-     def  cbread[B](f: (ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]]), flwt: FlowTermination[B] ): Unit =
-      f(ContRead(f,this,flwt)) map (f1 => this.synchronized {
-                                            if (it.hasNext) f1(it.next) else throw new ChannelClosedException()
-                                          }
-                                   )
+
+     def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+      f(ContRead(f,this,ft)) map (f1 => { val next = this.synchronized {
+                                                       if (it.hasNext) {
+                                                         val x = it.next
+                                                         f1(()=>x) 
+                                                       } else throw new ChannelClosedException()
+                                                    }
+                                          api.continue(next,ft)
+                                        }
+                              )
    }
 
 

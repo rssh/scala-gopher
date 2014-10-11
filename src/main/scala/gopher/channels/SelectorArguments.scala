@@ -19,14 +19,14 @@ case class AsyncNoOptionReadSelectorArgument[A,B](
                    f: ContRead[A,B] => ((()=>A)=>Future[Continuated[B]])
                ) extends ReadSelectorArgument[A,B]
 {
-   def normalizedFun = ( c => Some(f(c)) )
+   def normalizedFun = ( cont => Some(f(cont)) )
 }
 
 case class AsyncNoGenReadSelectorArgument[A,B](
                    f: ContRead[A,B] => (A=>Future[Continuated[B]])
                ) extends ReadSelectorArgument[A,B]
 {
-   def normalizedFun = ( c => Some(gen => f(c)(gen())) )
+   def normalizedFun = ( cont => Some(gen => f(cont)(gen())) )
 }
 
 case class AsyncPairReadSelectorArgument[A,B](
@@ -36,12 +36,11 @@ case class AsyncPairReadSelectorArgument[A,B](
    def normalizedFun = ( c => Some(gen => f(gen(),c)) ) 
 }
 
-
 case class SyncReadSelectorArgument[A,B](
                    f: ContRead[A,B] => ((()=>A) => Continuated[B])
                ) extends ReadSelectorArgument[A,B]
 {
-  def normalizedFun = ( c => Some( gen => Future successful f(c)(gen) ) )
+  def normalizedFun = ( cont => Some( gen => Future successful f(cont)(gen) ) )
 }
 
 case class SyncPairReadSelectorArgument[A,B](

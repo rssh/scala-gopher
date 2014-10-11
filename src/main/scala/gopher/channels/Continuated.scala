@@ -27,6 +27,17 @@ case class ContRead[A,B](function: ContRead[A,B] => Option[(()=>A) => Future[Con
   type El = A
 }
 
+object ContRead
+{
+
+  sealed trait In[+A]
+  case class NextValue[A](a:A) extends In[A]
+  case object SkipValue extends In[Nothing]
+  case object ChannelClosed extends In[Nothing]
+  case class Failure(ex:Exception) extends In[Nothing]
+  
+}
+
 
 /**
  * write A and compute B as result

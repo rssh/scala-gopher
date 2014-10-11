@@ -334,9 +334,13 @@ class ForeverSelectorBuilder(api: GopherAPI) extends SelectorBuilder[Unit](api)
                     // internal error in compiler when using this.type as S
       
 
-   @inline
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
-      withReader[A]( ch, cr => Some(gen=>f(ec,cr.flowTermination,gen()) map Function.const(cr)) )
+   {
+     lazy val cont = ContRead(normalized, ch, selector)
+     def normalized(_cont:ContRead[A,Unit]):Option[(()=>A)=>Future[Continuated[Unit]]] = 
+                                         Some(gen=>f(ec,selector,gen()) map Function.const(cont)) 
+     withReader[A](ch, normalized) 
+   }
 
    def writing[A](ch: Output[A], x: A)(f: A => Unit): ForeverSelectorBuilder = 
         macro SelectorBuilder.writingImpl[A,Unit,ForeverSelectorBuilder]

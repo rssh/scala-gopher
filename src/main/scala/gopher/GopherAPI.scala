@@ -5,6 +5,7 @@ import akka.pattern._
 import gopher.channels._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.util._
 import java.util.concurrent.atomic.AtomicLong
 import com.typesafe.config._
 
@@ -74,6 +75,14 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   private[gopher] def newChannelId: Long =
                         channelIdCounter.getAndIncrement
 
+  private[gopher] def continue[A](next:Future[Continuated[A]], ft:FlowTermination[A]): Unit =
+                       next.onComplete{
+                          case Success(cont) => continuatedProcessorRef ! cont
+                          case Failure(ex) => ft.throwIfNotCompleted(ex)
+                       }(executionContext)
+ 
+
   private[this] val channelIdCounter = new AtomicLong(0L)
+
   
 }

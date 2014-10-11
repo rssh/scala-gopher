@@ -25,7 +25,7 @@ class ScopeMacroSuite extends FunSuite {
     assert(s=="CCC")
   }
 
-  test("3. defered code must be called when non-local return", Now) {
+  test("3. defered code must be called when non-local return") {
 
      var deferCalled = false
 
@@ -47,7 +47,7 @@ class ScopeMacroSuite extends FunSuite {
 
   }
   
-  test("4. non-local return must not be catched in recover", Now) {
+  test("4. non-local return must not be catched in recover") {
 
      var thCatched = false
 
