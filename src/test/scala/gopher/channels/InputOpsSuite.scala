@@ -72,7 +72,6 @@ class InputOpsSuite extends FunSuite {
       val zipped = ch1 zip ch2
       val at = zipped.atake(5)
       var ar = Await.result(at, 10 seconds)
-      System.err.println("ar:"+ar)
       assert(ar(0)==(1,1))
       assert(ar(4)==(5,5))
   }
