@@ -26,7 +26,7 @@ trait Input[A]
   /**
    * apply f, when input will be ready and send result to API processor
    */
-  def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit
+  def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit
 
 
   /**
@@ -35,7 +35,9 @@ trait Input[A]
    */
   def  aread:Future[A] = {
     val ft = PromiseFlowTermination[A]() 
-    cbread[A](cont => Some((gen:()=>A) => Future.successful(Done(gen(),ft))) ,  ft )
+    cbread[A](cont => Some(in => ContRead.applyIn(in,cont) { a =>
+                                    a => Future.successful(Done(a,ft))
+                                 }), ft)
     ft.future
   }
 
@@ -65,14 +67,16 @@ trait Input[A]
        val ft = PromiseFlowTermination[IndexedSeq[A]]
        @volatile var i = 0;
        @volatile var r: IndexedSeq[A] = IndexedSeq()
-       def takeFun(_cont:ContRead[A,IndexedSeq[A]]):Option[(()=>A)=>Future[Continuated[IndexedSeq[A]]]] =
-       Some{ (gen:()=>A) =>
-             i += 1
-             r = r :+ gen()
-             if (i<n) {
-                Future successful ContRead(takeFun,this,ft)
-             } else {
-                Future successful Done(r,ft)
+       def takeFun(cont:ContRead[A,IndexedSeq[A]]):Option[ContRead.In[A]=>Future[Continuated[IndexedSeq[A]]]] =
+       Some{ in =>
+             ContRead.applyIn(in, cont) {
+               i += 1
+               r = r :+ gen()
+               if (i<n) {
+                  Future successful ContRead(takeFun,this,ft)
+               } else {
+                  Future successful Done(r,ft)
+               }
              }
        }
        api.continuatedProcessorRef ! ContRead(takeFun, this, ft)
@@ -92,10 +96,10 @@ trait Input[A]
   def filter(p: A=>Boolean): Input[A] =
        new Input[A] {
 
-          def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+          def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
            thisInput.cbread[B]( 
                                (cont) => f(cont) map {
-                                            f1 => (gen => { val a = gen()
+                                            f1 => (in => { val a = gen()
                                                             if (p(a)) f1(()=>a) 
                                                               else Future successful ContRead(f,this,ft)
                                                           } )

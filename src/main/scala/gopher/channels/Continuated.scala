@@ -22,7 +22,7 @@ case class Done[A](result:A, override val flowTermination: FlowTermination[A]) e
 /**
  * read A and compute B as result.
  */
-case class ContRead[A,B](function: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], channel: Input[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
+case class ContRead[A,B](function: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], channel: Input[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
 }
@@ -31,11 +31,29 @@ object ContRead
 {
 
   sealed trait In[+A]
-  case class NextValue[A](a:A) extends In[A]
-  case object SkipValue extends In[Nothing]
+  case class Value[A](a:A) extends In[A]
+  case object Skip extends In[Nothing]
   case object ChannelClosed extends In[Nothing]
-  case class Failure(ex:Exception) extends In[Nothing]
+  case class Failure(ex:Throwable) extends In[Nothing]
   
+  object In
+  {
+    def value[A](a:A) = ContRead.Value(a)
+    def failure(ex:Throwable) = ContRead.Failure(ex)
+    def channelClosed = ContRead.ChannelClosed
+    def skip = ContRead.Skip
+  }
+
+   def liftIn[A,B](prev: ContRead[A,B])( f: A => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] =
+      {
+        case Value(a) => f(a)
+        case Skip => Future successful prev
+        case ChannelClosed => prev.flowTermination.thwrowIfNotComplete(new ChannelClosedException())
+                              Future successful Never
+        case Failure(ex) => prev.flowTermination.doThrow(ex)
+                              Future successful Never
+      }
+
 }
 
 
