@@ -38,7 +38,7 @@ object FibonaccyAsync {
     /*
     c.zip(1 to n).foreach{ a =>
         val (x,i) = a
-        Console.print("%d, %d\n".format(i,x))
+        //Console.print("%d, %d\n".format(i,x))
         last = x
     } flatMap { x => quit.awrite(1) } 
     */

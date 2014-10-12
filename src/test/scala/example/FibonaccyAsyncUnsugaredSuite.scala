@@ -25,7 +25,6 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
 
     selector.addWriter(c,
         ((cont:ContWrite[Long,Unit]) => Some{
-                   System.err.println(s"write: ${x} to channel ${c}")
                    (x, async{
                         val z=x
                         x=y
@@ -37,7 +36,6 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
     )
     selector.addReader(quit,
        ((cont:ContRead[Int,Unit]) => Some{ (gen: ()=>Int) =>
-                                             System.err.println("read-control:"+x)
                                              Future successful Done((),cont.flowTermination) 
                                          }
        )
@@ -54,7 +52,7 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
     selector.addReader(c zip (1 to max),
               (cont:ContRead[(Long,Int),Long]) => Some{ (gen: ()=>(Long,Int)) =>
                         val (n,i) = gen()
-                        Console.println(s"received:${i}:${n} from channel ${cont.channel}")
+                        //Console.println(s"received:${i}:${n} from channel ${cont.channel}")
                         Future successful {
                           if (i >= max) 
                              Done(n,cont.flowTermination)
