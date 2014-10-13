@@ -18,47 +18,41 @@ class ZippedInput[A,B](override val api: GopherAPI, inputA: Input[A], inputB: In
  val readers = new ConcurrentLinkedQueue[ContRead[(A,B),_]]
 
 
- def  cbread[C](f: (ContRead[(A,B),C] => Option[(()=>(A,B)) => Future[Continuated[C]]]), flwt: FlowTermination[C] ): Unit =
+ def  cbread[C](f: (ContRead[(A,B),C] => Option[ContRead.In[(A,B)] => Future[Continuated[C]]]), flwt: FlowTermination[C] ): Unit =
  {
    if (!pairs.isEmpty) {
          implicit val ec = api.executionContext
          f(ContRead(f,this,flwt)) match {
            case Some(f1) => 
                         val ready = pairs.poll();
-                        if (! (ready eq null) ) {
-                          f1(()=>ready) onComplete {
-                            case Success(x) => api.continuatedProcessorRef ! x
-                            case Failure(ex) => flwt.doThrow(ex)
-                          }
-                        } else {
-                          // unfortunelly, somebody eat our pair between !empry and poll()
-                          // if we receive f1, than let submit next reader, which will apply f1.
-                          //  this can cause ver rare block 'select' until we
-                          //  end the f1
-                          // TODO: send skip instead.
-                          cbread[C]( cont => Some(gen => f1(gen)) , flwt )
-                        }
+                        val in = if (! (ready eq null) ) {
+                                        ContRead.Value(ready)
+                                 } else {
+                                       // unfortunelly, somebody has been eat our pair between !empty and poll()
+                                       ContRead.Skip
+                                 }
+                        api.continue(f1(in), flwt)
            case None => /* do nothing */
          }
     } else {
          readers.add(ContRead(f,this,flwt))
          val s = new State[A,B]
-         inputA.cbread[C](cont => Some(gen => {
+         inputA.cbread[C](cont => Some(ContRead.liftIn(cont)(a => {
                                                val toFire = s.synchronized{
-                                                              s.oa=Some(gen())
+                                                              s.oa=Some(a)
                                                               s.ob.isDefined
                                                             }
                                                fireAttempt(toFire, s)
-                                              }  )
+                                              }  ))
                          , flwt)
          inputB.cbread[C](cont =>  
-                                    Some(gen => {
+                                    Some(ContRead.liftIn(cont)(b => {
                                                  val toFire = s.synchronized{
-                                                                s.ob = Some(gen())
+                                                                s.ob = Some(b)
                                                                 s.oa.isDefined
                                                               }
                                                 fireAttempt(toFire,s)
-                                               }  )
+                                               }  ))
                          , flwt)
     }
 
@@ -76,17 +70,10 @@ class ZippedInput[A,B](override val api: GopherAPI, inputA: Input[A], inputB: In
                         } else {
                            implicit val ec = api.executionContext
                            cont.function(cont) match {
-                             case Some(f1) => {
-                                      f1(()=>pair).onComplete{ 
-                                        case Success(x) =>
-                                                api.continuatedProcessorRef ! x 
-                                        case Failure(ex) =>
-                                                cont.flowTermination.doThrow(ex)
-                                      }
-                                  }
-                             case None => {
+                             case Some(f1) => 
+                                      api.continue(f1(ContRead.Value(pair)),cont.flowTermination)
+                             case None => 
                                       pairs.add(pair)
-                                  }
                            }
                         }
            case _ =>  throw new IllegalStateException("Impossible: fully-filled state is a precondition");

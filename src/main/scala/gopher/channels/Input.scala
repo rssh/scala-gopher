@@ -35,7 +35,7 @@ trait Input[A]
    */
   def  aread:Future[A] = {
     val ft = PromiseFlowTermination[A]() 
-    cbread[A](cont => Some(in => ContRead.applyIn(in,cont) { a =>
+    cbread[A](cont => Some(ContRead.liftIn(cont) {
                                     a => Future.successful(Done(a,ft))
                                  }), ft)
     ft.future
@@ -68,10 +68,10 @@ trait Input[A]
        @volatile var i = 0;
        @volatile var r: IndexedSeq[A] = IndexedSeq()
        def takeFun(cont:ContRead[A,IndexedSeq[A]]):Option[ContRead.In[A]=>Future[Continuated[IndexedSeq[A]]]] =
-       Some{ in =>
-             ContRead.applyIn(in, cont) {
+       Some{ 
+             ContRead.liftIn(cont) { a =>
                i += 1
-               r = r :+ gen()
+               r = r :+ a
                if (i<n) {
                   Future successful ContRead(takeFun,this,ft)
                } else {
@@ -99,11 +99,11 @@ trait Input[A]
           def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
            thisInput.cbread[B]( 
                                (cont) => f(cont) map {
-                                            f1 => (in => { val a = gen()
-                                                            if (p(a)) f1(()=>a) 
-                                                              else Future successful ContRead(f,this,ft)
-                                                          } )
-                                        }, ft)  
+                                            f1 => ContRead.liftIn(cont){ a =>
+                                                            if (p(a)) f1(ContRead.Value(a)) 
+                                                              else Future successful cont /* ContRead(f,this,ft)*/
+                                                          } 
+                                                      }, ft)  
 
            def api = thisInput.api
 
@@ -114,10 +114,12 @@ trait Input[A]
   def map[B](g: A=>B): Input[B] =
      new Input[B] {
 
-        def  cbread[C](f: ContRead[B,C] => Option[(()=>B)=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+        def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
         {
-         def mf(cont:ContRead[A,C]):Option[(()=>A)=>Future[Continuated[C]]] =
-            f(ContRead(f,this,ft)) map (f1 => (gen:(()=>A))=>f1(()=>g(gen())))
+         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+         {  val contA = ContRead(f,this,cont.flowTermination)
+            f(contA) map (f1 => ContRead.liftIn(cont)(a => f1(ContRead.Value(g(a)))) )
+         }
          thisInput.cbread(mf,ft)
         }
 
@@ -147,41 +149,21 @@ trait Input[A]
   def foreachSync(f: A=>Unit): Future[Unit] =
   {
     val ft = PromiseFlowTermination[Unit]
-    lazy val cont = ContRead(applyF,this,ft)
-    def applyF(_cont:ContRead[A,Unit]):Option[(()=>A)=>Future[Continuated[Unit]]] =
-          Some{
-            (gen:()=>A) => var ar = false
-                          try {
-                            val a = gen()
-                            ar = true
-                            f(a)
-                          } catch {
-                            case ex: ChannelClosedException if (!ar) => ft.doExit(())
-                          }
-                          Future successful cont
-          }
-    cbread(applyF,ft)
+    lazy val contForeach = ContRead(applyF,this,ft)
+    def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
+          Some{ContRead.liftIn(cont){ x =>
+                                      f(x)
+                                      Future successful contForeach
+                                    }}
+    cbread(applyF, ft) 
     ft.future
   }
 
   def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] =
   {
     val ft = PromiseFlowTermination[Unit]
-    def applyF(_cont:ContRead[A,Unit]):Option[(()=>A)=>Future[Continuated[Unit]]] =
-          Some{ (gen:()=>A) => {
-                    val next = Try(gen()) match {
-                              case Success(a) => f(a) 
-                                                 ContRead(applyF,this,ft)
-                              case Failure(ex) => if (ex.isInstanceOf[ChannelClosedException]) {
-                                                    Done((),ft)
-                                                  } else {
-                                                    ft.doThrow(ex)
-                                                    Never
-                                                  }
-                    } 
-                    Future successful next
-                }
-          }
+    def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
+          Some{ContRead.liftIn(cont)( f(_) map ( _ => ContRead(applyF,this,ft) ) )}
     cbread(applyF,ft)
     ft.future
   }
@@ -195,14 +177,14 @@ object Input
    class IterableInput[A](it: Iterator[A], override val api: GopherAPI) extends Input[A]
    {
 
-     def  cbread[B](f:ContRead[A,B]=>Option[(()=>A)=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
       f(ContRead(f,this,ft)) map (f1 => { val next = this.synchronized {
-                                                       if (it.hasNext) {
-                                                         val x = it.next
-                                                         f1(()=>x) 
-                                                       } else throw new ChannelClosedException()
-                                                    }
-                                          api.continue(next,ft)
+                                                       if (it.hasNext) 
+                                                         ContRead.Value(it.next)
+                                                       else 
+                                                         ContRead.ChannelClosed
+                                                     }
+                                          api.continue(f1(next),ft)
                                         }
                               )
    }

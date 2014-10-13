@@ -15,7 +15,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   thisSelector =>
 
-  def addReader[E](ch:Input[E],f: ContRead[E,A] => Option[(()=>E)=>Future[Continuated[A]]]): Unit =
+  def addReader[E](ch:Input[E],f: ContRead[E,A] => Option[ContRead.In[E]=>Future[Continuated[A]]]): Unit =
   {
     waiters add makeLocked(ContRead(f, ch, this)) 
   }
@@ -50,11 +50,11 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   {
       block match {
            case cr@ContRead(f,ch, ft) => 
-               def f1(cont:ContRead[cr.El,cr.R]): Option[(()=>cr.El)=>Future[Continuated[cr.R]]]  = { 
+               def f1(cont:ContRead[cr.El,cr.R]): Option[ContRead.In[cr.El]=>Future[Continuated[cr.R]]]  = { 
                                tryLocked(f(ContRead(f,ch,ft)),cont,"read") map { q =>
-                                   (gen => unlockAfter(
+                                   (in => unlockAfter(
                                                  try { 
-                                                   q(gen) 
+                                                   q(in) 
                                                  }catch{
                                                    case e: Throwable => ft.doThrow(e)
                                                                         Future successful Never
