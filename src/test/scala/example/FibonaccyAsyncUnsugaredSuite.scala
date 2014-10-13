@@ -35,7 +35,7 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
         )
     )
     selector.addReader(quit,
-       ((cont:ContRead[Int,Unit]) => Some{ (gen: ()=>Int) =>
+       ((cont:ContRead[Int,Unit]) => Some{ (in:ContRead.In[Int]) =>
                                              Future successful Done((),cont.flowTermination) 
                                          }
        )
@@ -50,8 +50,8 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
     
     val selector = new Selector[Long](gopherApi)
     selector.addReader(c zip (1 to max),
-              (cont:ContRead[(Long,Int),Long]) => Some{ (gen: ()=>(Long,Int)) =>
-                        val (n,i) = gen()
+              (cont:ContRead[(Long,Int),Long]) => Some(ContRead.liftIn(cont){ in =>
+                        val (n,i) = in
                         //Console.println(s"received:${i}:${n} from channel ${cont.channel}")
                         Future successful {
                           if (i >= max) 
@@ -59,7 +59,7 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
                           else 
                            cont
                         }
-                      }
+                      })
     )
     val consumer = selector.run
 

@@ -5,18 +5,18 @@ import scala.concurrent._
 
 sealed trait ReadSelectorArgument[A,B]
 {
-  def normalizedFun: ContRead[A,B] => Option[(()=>A)=>Future[Continuated[B]]]
+  def normalizedFun: ContRead[A,B] => Option[ContRead.In[A]=>Future[Continuated[B]]]
 }
 
 case class AsyncFullReadSelectorArgument[A,B](
-                   f: ContRead[A,B] => Option[(()=>A)=>Future[Continuated[B]]]
+                   f: ContRead[A,B] => Option[ContRead.In[A]=>Future[Continuated[B]]]
               )  extends ReadSelectorArgument[A,B]
 {
   def normalizedFun = f
 }
 
 case class AsyncNoOptionReadSelectorArgument[A,B](
-                   f: ContRead[A,B] => ((()=>A)=>Future[Continuated[B]])
+                   f: ContRead[A,B] => (ContRead.In[A]=>Future[Continuated[B]])
                ) extends ReadSelectorArgument[A,B]
 {
    def normalizedFun = ( cont => Some(f(cont)) )
@@ -26,18 +26,18 @@ case class AsyncNoGenReadSelectorArgument[A,B](
                    f: ContRead[A,B] => (A=>Future[Continuated[B]])
                ) extends ReadSelectorArgument[A,B]
 {
-   def normalizedFun = ( cont => Some(gen => f(cont)(gen())) )
+   def normalizedFun = ( cont => Some(ContRead.liftIn(cont)(f(cont))) )
 }
 
 case class AsyncPairReadSelectorArgument[A,B](
                    f: (A, ContRead[A,B]) => Future[Continuated[B]]
                ) extends ReadSelectorArgument[A,B]
 {
-   def normalizedFun = ( c => Some(gen => f(gen(),c)) ) 
+   def normalizedFun = ( c => Some(ContRead.liftIn(c)(f(_,c))) ) 
 }
 
 case class SyncReadSelectorArgument[A,B](
-                   f: ContRead[A,B] => ((()=>A) => Continuated[B])
+                   f: ContRead[A,B] => (ContRead.In[A] => Continuated[B])
                ) extends ReadSelectorArgument[A,B]
 {
   def normalizedFun = ( cont => Some( gen => Future successful f(cont)(gen) ) )
@@ -47,7 +47,7 @@ case class SyncPairReadSelectorArgument[A,B](
                    f: (A, ContRead[A,B]) => Continuated[B]
                ) extends ReadSelectorArgument[A,B]
 {
-   def normalizedFun = ( c => Some(gen => Future successful f(gen(),c)) )
+   def normalizedFun = ( c => Some(ContRead.liftIn(c)(a => Future successful f(a,c))) )
 }
 
 sealed trait WriteSelectorArgument[A,B]

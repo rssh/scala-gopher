@@ -39,17 +39,17 @@ import gopher._
 class FutureInput[A](future: Future[A], override val api: GopherAPI) extends Input[A]
 {
 
-  def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit =
+  def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit =
   {
    future.onComplete{  r => 
                        for (f1 <- f(ContRead(f,this,flwt))) {
                           if (closed) 
-                            f1(() => throw new ChannelClosedException())
+                            f1(ContRead.In.channelClosed)
                           else {
                             closed = true
                             r match {
-                             case Success(x) => f1(()=>x)
-                             case Failure(ex) => f1(()=>throw ex)
+                             case Success(x) => f1(ContRead.In value x)
+                             case Failure(ex) => f1(ContRead.In failure ex)
                             }
                           }
                        }

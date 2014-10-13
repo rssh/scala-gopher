@@ -20,13 +20,13 @@ class OrInput[A](x:Input[A],y:Input[A]) extends Input[A]
 {
 
 
-  def  cbread[B](f: ContRead[A,B] => Option[(()=>A) => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit =
+  def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit =
   {
     val cBegin = new AtomicBoolean(false)
     val cEnd = new AtomicBoolean(false)
 
     @tailrec
-    def cf(cont:ContRead[A,B]): Option[(()=>A)=>Future[Continuated[B]]] =
+    def cf(cont:ContRead[A,B]): Option[ContRead.In[A]=>Future[Continuated[B]]] =
     {
                      if (cBegin.compareAndSet(false,true)) {
                         f(cont) match {

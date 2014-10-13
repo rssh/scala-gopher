@@ -103,7 +103,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   private[this] def processReader[B](reader:ContRead[A,B]): Boolean =
    reader.function(reader) match {
        case Some(f1) => 
-              val cont = f1(() => elementAt(readIndex))
+              val cont = f1(ContRead.In value elementAt(readIndex) )
               nElements-=1
               readIndex+=1
               readIndex%=capacity
