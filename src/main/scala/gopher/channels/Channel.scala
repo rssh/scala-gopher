@@ -10,24 +10,33 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 
+// TODO: change channelRef to channelSelector
 class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Input[A] with Output[A]
 {
 
   def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
   {
+   val cont = ContRead(f,this, flwt)
+   def applyClosed() =
+   {
+      f(cont) foreach { f1 => (api.continuatedProcessorRef ! f1(ContRead.ChannelClosed)) }
+   }
    if (closed) {
      if (closedEmpty) {
-         flwt.throwIfNotCompleted(new ChannelClosedException())
+       applyClosed();
      } else {
-         futureChannelRef.foreach(_.ask(ClosedChannelRead(ContRead(f,this, flwt)))(10 seconds)
-                                          .onFailure{
-                                             case e: AskTimeoutException => flwt.doThrow(new ChannelClosedException())  
-                                             case other => //TODO: log
-                                          }
-                                 )
+         futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(10 seconds)
+                                     f.onFailure{
+                                          case e: AskTimeoutException => applyClosed()
+                                     }
+                                     f.onSuccess{
+                                          case ChannelCloseProcessed(0) =>
+                                                                  closedEmpty = true
+                                     }
+                                 }
      }
    } else {
-     futureChannelRef.foreach( _ ! ContRead(f,this, flwt) )
+     futureChannelRef.foreach( _ ! cont )
    }
   }
 

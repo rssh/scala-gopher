@@ -151,10 +151,14 @@ trait Input[A]
     val ft = PromiseFlowTermination[Unit]
     lazy val contForeach = ContRead(applyF,this,ft)
     def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
-          Some{ContRead.liftIn(cont){ x =>
-                                      f(x)
-                                      Future successful contForeach
-                                    }}
+          Some( (in:ContRead.In[A]) =>
+                 in match {
+                   case ContRead.ChannelClosed => Future successful Done((),ft)
+                   case x => ContRead.liftIn(cont){ x => f(x)
+                                              Future successful contForeach
+                                            }(x)
+                 }
+              )
     cbread(applyF, ft) 
     ft.future
   }
@@ -163,10 +167,15 @@ trait Input[A]
   {
     val ft = PromiseFlowTermination[Unit]
     def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
-          Some{ContRead.liftIn(cont)( f(_) map ( _ => ContRead(applyF,this,ft) ) )}
+          Some{
+                case ContRead.ChannelClosed => Future successful Done((),ft)
+                case in =>
+                     ContRead.liftIn(cont){ x => f(x) map ( _ => ContRead(applyF, this, ft) ) }(in)
+              } 
     cbread(applyF,ft)
     ft.future
   }
+
 
 }
 

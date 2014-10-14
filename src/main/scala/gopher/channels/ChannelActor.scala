@@ -34,7 +34,7 @@ case object ChannelRefIncrement
  * result of CloseChannelRead, return number of elements
  * left to read
  */
-case class ChannelCloseProcessed(nElements: Integer)
+case class ChannelCloseProcessed(nElements: Int)
 
 
 class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
@@ -51,7 +51,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
               } else {
                val prevNElements = nElements
                if (processWriter(cwa) && prevNElements==0) {
-                 processReaders
+                 processReaders()
                }
               }
             }
@@ -59,7 +59,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
             val cra = cr.asInstanceOf[ContRead[A,_]]
             if (nElements==0) {
                if (closed) {
-                 ft.throwIfNotCompleted(new ChannelClosedException())
+                 processReaderClosed(cra)
                } else {
                  readers = readers :+ cra
                }
@@ -89,7 +89,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
             
   }
 
-  def processReaders: Boolean =
+  def processReaders() : Boolean =
   {
     var retval = false
     while(!readers.isEmpty && nElements > 0) {
@@ -107,10 +107,17 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
               nElements-=1
               readIndex+=1
               readIndex%=capacity
-              cont foreach ( api.continuatedProcessorRef ! _ )
+              api.continue(cont, reader.flowTermination)
               true
        case None =>
               false
+   }
+
+  private[this] def processReaderClosed[B](reader:ContRead[A,B]): Boolean =
+   reader.function(reader) match {
+       case Some(f1) => api.continue(f1(ContRead.ChannelClosed), reader.flowTermination)
+                        true
+       case None => false
    }
 
   def checkWriters: Boolean =
@@ -132,7 +139,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
                 setElementAt(writeIndex,a)
                 writeIndex+=1
                 writeIndex%=capacity
-                cont foreach ( api.continuatedProcessorRef ! _ )
+                api.continue(cont, writer.flowTermination)
                 true
        case None => 
                 false
@@ -147,8 +154,8 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
         val reader = readers.head
         val c = reader.asInstanceOf[ContRead[A,reader.R]]
         readers = readers.tail
-        c.function(c) foreach {
-           f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+        c.function(c) foreach { f1 =>
+            api.continue(f1(ContRead.ChannelClosed), c.flowTermination)
         }
       }
    } 

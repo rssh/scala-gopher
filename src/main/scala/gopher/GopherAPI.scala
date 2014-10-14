@@ -81,7 +81,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
                           case Failure(ex) => ft.throwIfNotCompleted(ex)
                        }(executionContext)
  
-
   private[this] val channelIdCounter = new AtomicLong(0L)
 
   

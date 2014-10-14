@@ -68,6 +68,7 @@ object ContRead
                               Future successful Never
     }
 
+
    def chainIn[A,B](prev: ContRead[A,B])(fn: (In[A], In[A] => Future[Continuated[B]]) => Future[Continuated[B]] ): 
                                             Option[In[A] => Future[Continuated[B]]] =
          prev.function(prev) map (f1 => liftInValue(prev) { v => fn(v,f1) } )
