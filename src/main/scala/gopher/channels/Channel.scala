@@ -19,13 +19,19 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherA
    val cont = ContRead(f,this, flwt)
    def applyClosed() =
    {
-      f(cont) foreach { f1 => (api.continuatedProcessorRef ! f1(ContRead.ChannelClosed)) }
+      f(cont) foreach {  f1 => try {
+                                 api.continue( f1(ContRead.ChannelClosed), flwt) 
+                               } catch {
+                                 case ex: Throwable => flwt.doThrow(ex)
+                               }
+                      }
    }
    if (closed) {
      if (closedEmpty) {
        applyClosed();
      } else {
-         futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(10 seconds)
+         // TODO: ask timeput on closed channel set in config.
+         futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(5 seconds)
                                      f.onFailure{
                                           case e: AskTimeoutException => applyClosed()
                                      }

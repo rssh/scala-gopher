@@ -185,10 +185,12 @@ class InputOpsSuite extends FunSuite {
       val r = Await.result(at, 10 seconds)
   }
 
-  test("Input foreach on closed stream must do nothing ") {
+  test("Input foreach on closed stream must do nothing ", Now) {
       val ch = gopherApi.makeChannel[Int]()
       @volatile var flg = false
-      val f = go { for(s <- ch) { flg = true  } }
+      val f = go { for(s <- ch) { 
+                     flg = true  
+                 } }
       ch.close()
       val r = Await.result(f, 10 seconds)
       assert(!flg)

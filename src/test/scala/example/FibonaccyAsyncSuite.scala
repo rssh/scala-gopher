@@ -68,7 +68,7 @@ object FibonaccyAsync {
 class FibonaccyAsyncSuite extends FunSuite
 {
   
-  test("async fibonaccy must be processed up to 50", Now) {
+  test("async fibonaccy must be processed up to 50") {
     var last:Long = 0;
     FibonaccyAsync.run(50, { last = _ } )
     assert(last != 0)
