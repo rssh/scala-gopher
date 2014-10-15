@@ -5,7 +5,9 @@ import scala.concurrent._
 import scala.collection.immutable._
 import gopher._
 
-case object ChannelClose
+sealed trait ChannelActorMessage
+
+case object ChannelClose extends ChannelActorMessage
 
 /**
  * this is message wich send to ChannelActor, when we 
@@ -14,7 +16,7 @@ case object ChannelClose
  * (instead read) and wait for reply. If reply is not received
  * within given timeout: think that channel is-dead.
  */
-case class ClosedChannelRead(cont: ContRead[_,_])
+case class ClosedChannelRead(cont: ContRead[_,_]) extends ChannelActorMessage
 
 /**
  * this message is send, when all references to 
@@ -22,21 +24,32 @@ case class ClosedChannelRead(cont: ContRead[_,_])
  * so if we have no other instances (i.e. remote 
  * channel incarnation), than we must destroy channel.
  **/
-case object ChannelRefDecrement
+case object ChannelRefDecrement extends ChannelActorMessage
 
 /**
  * this message is send, when we create new remote 
  * reference to channel, backed by this actor.
  **/
-case object ChannelRefIncrement
+case object ChannelRefIncrement extends ChannelActorMessage
 
 /**
  * result of CloseChannelRead, return number of elements
  * left to read
  */
-case class ChannelCloseProcessed(nElements: Int)
+case class ChannelCloseProcessed(nElements: Int) extends ChannelActorMessage
+
+/**
+ * When we decide to stop channel, do it via special message,
+ * to process one after messages, which exists now in queue.
+ *
+ * Note, that channel-stop messages can be send only from ChannelActor
+ */
+case object GracefullChannelStop extends ChannelActorMessage
 
 
+/**
+ * ChannelActor - actor, which leave
+ */
 class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
 
@@ -86,7 +99,8 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
             }
      case ChannelRefIncrement =>
             nRefs += 1
-            
+     case GracefullChannelStop =>
+            context.stop(self)
   }
 
   def processReaders() : Boolean =
@@ -168,7 +182,11 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
       }
    }
    if (nElements == 0) {
-      context.stop(self)
+      if (nRefs == 0) {
+        // here we leave 'closed' channels in actor-system untile they will be
+        // garbage-collected.  TODO: think about actual stop ?
+        self ! GracefullChannelStop
+      }
       true
    } else 
       false
@@ -181,7 +199,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
     } 
     if (!stopIfEmpty) {
        // stop anyway
-       context.stop(self)
+       self ! GracefullChannelStop
     }
   }
 

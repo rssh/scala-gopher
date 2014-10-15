@@ -99,11 +99,10 @@ trait Input[A]
           def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
            thisInput.cbread[B]( 
                                (cont) => f(cont) map {
-                                            f1 => ContRead.liftIn(cont){ a =>
-                                                            if (p(a)) f1(ContRead.Value(a)) 
-                                                              else Future successful cont /* ContRead(f,this,ft)*/
-                                                          } 
-                                                      }, ft)  
+                                            f1 => { case v@ContRead.Value(a) =>
+                                                              if (p(a)) f1(v) else Future successful cont
+                                                    case v@_ => f1(v)
+                                                  } }, ft)  
 
            def api = thisInput.api
 
@@ -118,7 +117,11 @@ trait Input[A]
         {
          def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
          {  val contA = ContRead(f,this,cont.flowTermination)
-            f(contA) map (f1 => ContRead.liftIn(cont)(a => f1(ContRead.Value(g(a)))) )
+            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
+                                  case ContRead.Skip => Future successful cont
+                                  case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
+                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
+                                } )
          }
          thisInput.cbread(mf,ft)
         }

@@ -68,6 +68,8 @@ class CloseSuite extends FunSuite
      assert(q != 2)
    }
 
+
+
   def gopherApi = CommonTestObjects.gopherApi
    
 }

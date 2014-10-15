@@ -5,37 +5,45 @@ import gopher.channels._
 import gopher.tags._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.util._
 
 import org.scalatest._
+import org.scalatest.concurrent._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class InputOpsSuite extends FunSuite {
+class InputOpsSuite extends FunSuite with AsyncAssertions {
 
   
   test("map operation for input") {
+      val w = new Waiter
       val ch = gopherApi.makeChannel[String]()
       ch.awriteAll(List("AAA","123","1234","12345"))
       val mappedCh = ch map (_.reverse)
-      val r = ch.atake(4) map { l =>
-                assert(l(0) == "54321")
-                assert(l(1) == "4321")
-                assert(l(2) == "321")
-                assert(l(3) == "AAA")
+      val r = mappedCh.atake(4) map { l =>
+                w{ assert(l(0) == "AAA") }
+                w{ assert(l(1) == "321") }
+                w{ assert(l(2) == "4321") }
+                w{ assert(l(3) == "54321") }
+                w.dismiss()
               }
-      Await.ready(r, 10 seconds) 
+      w.await(timeout(10 seconds))
   }
   
-  test("filter operation for input") {
+  test("filter operation for input", Now) {
+      val w = new Waiter
       val ch = gopherApi.makeChannel[String]()
       ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
       val filteredCh = ch filter (_.contains("A"))
-      val readed = Await.result( filteredCh.aread, 10 seconds )
-      assert(readed == "AAA")
+      filteredCh.aread map { x => w{ assert(x == "AAA") } } onComplete{ case Success(x) => w.dismiss()
+                                                                        case Failure(ex) => w(throw ex) 
+                                                                      }
+      w.await(timeout(10 seconds))
   }
 
 
   test("zip operation for two simple inputs") {
+      val w = new Waiter
       val ch1 = gopherApi.makeChannel[String]()
       ch1.awriteAll(List("qqq", "AAA","123","1234","12345"))
       val ch2 = gopherApi.makeChannel[Int]()
@@ -115,6 +123,8 @@ class InputOpsSuite extends FunSuite {
 
   test("simultanuos reading from Q1|Q2") {
 
+      val w = new Waiter()
+
       val ch1 = gopherApi.makeChannel[Int]()
       val ch2 = gopherApi.makeChannel[Int]()
 
@@ -185,7 +195,7 @@ class InputOpsSuite extends FunSuite {
       val r = Await.result(at, 10 seconds)
   }
 
-  test("Input foreach on closed stream must do nothing ", Now) {
+  test("Input foreach on closed stream must do nothing ") {
       val ch = gopherApi.makeChannel[Int]()
       @volatile var flg = false
       val f = go { for(s <- ch) { 
@@ -195,6 +205,43 @@ class InputOpsSuite extends FunSuite {
       val r = Await.result(f, 10 seconds)
       assert(!flg)
   }
+
+  test("Input foreach on stream with 'N' elements inside must run N times ", Now) {
+      val w = new Waiter
+      val ch = gopherApi.makeChannel[Int]()
+      @volatile var count = 0
+      val f = go { for(s <- ch) { 
+                     count += 1
+                 } }
+      val ar = ch.awriteAll(1 to 10)
+      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
+      f.onComplete{ case _ => w{ assert(count == 10) }; w.dismiss() }
+      // Too many awaits.
+      w.await(timeout(10 seconds), dismissals(2))
+  }
+
+  test("forech with mapped closed stream") {
+    def one(i:Int) = {
+      val w = new Waiter
+      val ch = gopherApi.makeChannel[Int]() 
+      val mapped = ch map (_ * 2)
+      @volatile var count = 0
+      val f = go { for(s <- mapped) { 
+                     //  error in compiler
+                     //assert((s % 2) == 0)
+                     if ((s%2)!=0) {
+                       throw new IllegalStateException("numbers in mapped channel must be odd")
+                     }
+                     count += 1
+                 }              }
+      val ar = ch.awriteAll(1 to 10)
+      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
+      f.onComplete{ case _ => { w{assert(count == 10)}; w.dismiss() } }
+      w.await(timeout(10 seconds), dismissals(2))
+    }
+    for(i <- 1 to 10) one(i)
+  }
+
 
   def gopherApi = CommonTestObjects.gopherApi
 
