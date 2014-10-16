@@ -242,6 +242,19 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
     for(i <- 1 to 10) one(i)
   }
 
+  test("forech with filtered closed stream") {
+      val w = new Waiter
+      val ch = gopherApi.makeChannel[Int]() 
+      val filtered = ch filter (_ %2 == 0)
+      @volatile var count = 0
+      val f = go { for(s <- filtered) { 
+                      count += 1
+                 }                    }
+      val ar = ch.awriteAll(1 to 10)
+      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
+      f.onComplete{ case _ => { w{assert(count == 5)}; w.dismiss() } }
+      w.await(timeout(10 seconds), dismissals(2))
+  }
 
   def gopherApi = CommonTestObjects.gopherApi
 
