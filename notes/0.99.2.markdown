@@ -1,0 +1,4 @@
+
+-  changed signature ContRead to have case set instead receive function.
+-  fixed race condition when ContRead messages can be discarded after channel closing.
+-  introduced `Processor` abstraction.
