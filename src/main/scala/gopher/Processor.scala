@@ -11,6 +11,7 @@ trait Processor
 
  class InPort[A](input:Input[A]) extends Input[A]
  {
+
    override def cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = 
           v.cbread(f,ft)
 
