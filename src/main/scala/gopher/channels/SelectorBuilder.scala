@@ -191,17 +191,32 @@ object SelectorBuilder
     c.Expr[T](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
    }
 
-   def applyImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Future[T]] =
+   def builderImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Tree =
    {
      import c.universe._
-     val builder = f.tree match {
+     f.tree match {
         case q"{case ..$cases}" =>
                   foreachTransformMatch(c)(cases)
         case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
      }
+   }
+
+   def applyImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Future[T]] =
+   {
+     import c.universe._
+     val builder = builderImpl[T](c)(f)
      c.Expr[Future[T]](c.untypecheck(q"${builder}.go"))
    }
 
+   /**
+    * processor: loop => just add waiters to this selector.
+    */
+   def loopImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Unit] =
+   {
+     import c.universe._
+     val builder = builderImpl[T](c)(f)
+     c.Expr[Unit](c.untypecheck(q"${builder}"))
+   }
 
    def foreachTransformMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
    {
