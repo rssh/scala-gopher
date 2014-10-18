@@ -64,13 +64,12 @@ trait Processor
 
  def +(p: Processor) = new ParProcessor(api, Seq(this,p))
  
- def api: GopherAPI
-
  def go: Future[Unit]
 
+ def api: GopherAPI
 }
 
-class SelectProcessor(override val api: GopherAPI) extends ForeverSelectorBuilder(api) with Processor with FlowTermination[Unit] 
+trait SelectProcessor extends ForeverSelectorBuilder with Processor with FlowTermination[Unit] 
 {
 
  def loop(f: PartialFunction[Any,Unit]): Unit = macro SelectorBuilder.loopImpl[Unit]

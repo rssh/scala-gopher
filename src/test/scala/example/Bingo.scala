@@ -8,7 +8,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 
-class Bingo(api: GopherAPI) extends SelectProcessor(api)
+class Bingo(override val api: GopherAPI) extends SelectProcessor
 {
 
   val inX = InPort[Int]()
@@ -25,7 +25,7 @@ class Bingo(api: GopherAPI) extends SelectProcessor(api)
 
 }
 
-class Acceptor(api: GopherAPI) extends SelectProcessor(api)
+class Acceptor(override val api: GopherAPI) extends SelectProcessor
 {
 
   val inA = InPort[Boolean]()
