@@ -182,18 +182,18 @@
     </span>
       
     </li><li name="gopher.channels.Selector#addReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addReader[E](ch:gopher.channels.Input[E],f:gopher.channels.ContRead[E,A]=&gt;Option[(()=&gt;E)=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):Unit"></a>
-      <a id="addReader[E](Input[E],(ContRead[E,A])⇒Option[(()⇒E)⇒Future[Continuated[A]]]):Unit"></a>
+      <a id="addReader[E](ch:gopher.channels.Input[E],f:gopher.channels.ContRead[E,A]=&gt;Option[gopher.channels.ContRead.In[E]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):Unit"></a>
+      <a id="addReader[E](Input[E],(ContRead[E,A])⇒Option[(In[E])⇒Future[Continuated[A]]]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addReader</span><span class="tparams">[<span name="E">E</span>]</span><span class="params">(<span name="ch">ch: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Selector.addReader.E">E</span>]</span>, <span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.Selector.addReader.E">E</span>, <span class="extype" name="gopher.channels.Selector.A">A</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.Selector.addReader.E">E</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.Selector.A">A</span>]]]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">addReader</span><span class="tparams">[<span name="E">E</span>]</span><span class="params">(<span name="ch">ch: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Selector.addReader.E">E</span>]</span>, <span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.Selector.addReader.E">E</span>, <span class="extype" name="gopher.channels.Selector.A">A</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.Selector.addReader.E">E</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.Selector.A">A</span>]]]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.Selector@addReader[E](ch:gopher.channels.Input[E],f:gopher.channels.ContRead[E,A]=&gt;Option[(()=&gt;E)=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Selector@addReader[E](ch:gopher.channels.Input[E],f:gopher.channels.ContRead[E,A]=&gt;Option[gopher.channels.ContRead.In[E]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -288,7 +288,9 @@
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
+      <p class="shortcomment cmt">terminate current flow and leave <code>a</code> as result of flow.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow and leave <code>a</code> as result of flow.
+have no effect if flow is already completed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
     </li><li name="gopher.channels.PromiseFlowTermination#doThrow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="doThrow(e:Throwable):Unit"></a>
       <a id="doThrow(Throwable):Unit"></a>
@@ -305,7 +307,9 @@
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
+      <p class="shortcomment cmt">terminate current flow with exception.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow with exception.
+Mostly used internally.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -430,7 +434,8 @@
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
+      <p class="shortcomment cmt">check - if flow is completed.</p><div class="fullcomment"><div class="comment cmt"><p>check - if flow is completed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a> → <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>

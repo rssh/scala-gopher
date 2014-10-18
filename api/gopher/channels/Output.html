@@ -47,14 +47,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Entity, which can 'eat' objects of type A,
-can be part of channel
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Entity, where we can write objects of type A.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a></div>
+            <div class="subClasses hiddenContent"><a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>, <a href="../Processor$OutPort.html" class="extype" name="gopher.Processor.OutPort">OutPort</a></div>
           </div></div>
         
 
@@ -188,7 +186,7 @@ can be part of channel
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <p class="shortcomment cmt">shortcut for blocking read.</p>
+      <p class="shortcomment cmt">shortcut for blocking write.</p>
     </li><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -611,8 +609,7 @@ can be part of channel
     </span>
       <p class="shortcomment cmt">'blocking' write of 'a' to channel.</p><div class="fullcomment"><div class="comment cmt"><p>'blocking' write of 'a' to channel.
 Note, that this method can be called only inside
-'go' or 'async' blocks, since blocking is
-emulated by 'Async.await'
+'go' or 'async' blocks.
 </p></div></div>
     </li><li name="gopher.channels.Output#writeAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="writeAll[C&lt;:Iterable[A]](it:C):Unit"></a>

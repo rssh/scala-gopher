@@ -51,7 +51,10 @@
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="scala.Unit">Unit</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="../SelectProcessor.html" class="extype" name="gopher.SelectProcessor">SelectProcessor</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -326,6 +329,26 @@ example of usage:</p><pre>go {
     <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">do</span> somethig when idle.
   }</pre><p>Note, that you can use implicit instance of [FlowTermination[Unit]] to stop loop.
 </p></div></div>
+    </li><li name="gopher.channels.SelectorBuilder#futureInput" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="futureInput[A](f:scala.concurrent.Future[A]):gopher.channels.FutureInput[A]"></a>
+      <a id="futureInput[A](Future[A]):FutureInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">futureInput</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.SelectorBuilder.futureInput.A">A</span>]</span>)</span><span class="result">: <a href="FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>[<span class="extype" name="gopher.channels.SelectorBuilder.futureInput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@futureInput[A](f:scala.concurrent.Future[A]):gopher.channels.FutureInput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -550,7 +573,7 @@ example of usage:</p><pre>go {
       </a>
     </span>
       
-    </li><li name="gopher.channels.ForeverSelectorBuilder#readingWithFlowTerminationAsync" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.ForeverSelectorBuilder#readingWithFlowTerminationAsync" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readingWithFlowTerminationAsync[A](ch:gopher.channels.Input[A],f:(scala.concurrent.ExecutionContext,gopher.FlowTermination[Unit],A)=&gt;scala.concurrent.Future[Unit]):ForeverSelectorBuilder.this.type"></a>
       <a id="readingWithFlowTerminationAsync[A](Input[A],(ExecutionContext,FlowTermination[Unit],A)⇒Future[Unit]):ForeverSelectorBuilder.this.type"></a>
       <h4 class="signature">
@@ -566,10 +589,7 @@ example of usage:</p><pre>go {
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@inline</span><span class="args">()</span>
-              
-        </dd></dl></div>
+      
     </li><li name="gopher.channels.SelectorBuilder#selector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="selector:gopher.channels.Selector[A]"></a>
       <a id="selector:Selector[Unit]"></a>
@@ -711,18 +731,18 @@ example of usage:</p><pre>go {
               
         </dd></dl></div>
     </li><li name="gopher.channels.SelectorBuilder#withReader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withReader[B](ch:gopher.channels.Input[B],f:gopher.channels.ContRead[B,A]=&gt;Option[(()=&gt;B)=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):SelectorBuilder.this.type"></a>
-      <a id="withReader[B](Input[B],(ContRead[B,Unit])⇒Option[(()⇒B)⇒Future[Continuated[Unit]]]):ForeverSelectorBuilder.this.type"></a>
+      <a id="withReader[B](ch:gopher.channels.Input[B],f:gopher.channels.ContRead[B,A]=&gt;Option[gopher.channels.ContRead.In[B]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):SelectorBuilder.this.type"></a>
+      <a id="withReader[B](Input[B],(ContRead[B,Unit])⇒Option[(In[B])⇒Future[Continuated[Unit]]]):ForeverSelectorBuilder.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withReader</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="ch">ch: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>]</span>, <span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>, <span class="extype" name="scala.Unit">Unit</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="scala.Unit">Unit</span>]]]</span>)</span><span class="result">: <a href="" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a>.this.type</span>
+        <span class="name">withReader</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="ch">ch: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>]</span>, <span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>, <span class="extype" name="scala.Unit">Unit</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.SelectorBuilder.withReader.B">B</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="scala.Unit">Unit</span>]]]</span>)</span><span class="result">: <a href="" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a>.this.type</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@withReader[B](ch:gopher.channels.Input[B],f:gopher.channels.ContRead[B,A]=&gt;Option[(()=&gt;B)=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):SelectorBuilder.this.type" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@withReader[B](ch:gopher.channels.Input[B],f:gopher.channels.ContRead[B,A]=&gt;Option[gopher.channels.ContRead.In[B]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]]):SelectorBuilder.this.type" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

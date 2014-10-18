@@ -47,12 +47,18 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>FlowTermination[-A] - termination of flow.</p><p>Inside each block in select loop or
+select apply (once or forever) we have implicit
+FlowTermination entity, which we can use for
+exiting the loop.</p><pre>select.forever{
+<span class="kw">case</span> x: info.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received from info $x"</span>)
+<span class="kw">case</span> x: control.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
+}</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="channels/PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a>, <a href="channels/Selector.html" class="extype" name="gopher.channels.Selector">Selector</a></div>
+            <div class="subClasses hiddenContent"><a href="channels/PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a>, <a href="SelectProcessor.html" class="extype" name="gopher.SelectProcessor">SelectProcessor</a>, <a href="channels/Selector.html" class="extype" name="gopher.channels.Selector">Selector</a></div>
           </div></div>
         
 
@@ -94,7 +100,7 @@
 
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="gopher.FlowTermination#doExit" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="gopher.FlowTermination#doExit" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="doExit(a:A):Unit"></a>
       <a id="doExit(A):Unit"></a>
       <h4 class="signature">
@@ -110,8 +116,10 @@
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
-    </li><li name="gopher.FlowTermination#doThrow" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">terminate current flow and leave <code>a</code> as result of flow.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow and leave <code>a</code> as result of flow.
+have no effect if flow is already completed.
+</p></div></div>
+    </li><li name="gopher.FlowTermination#doThrow" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="doThrow(e:Throwable):Unit"></a>
       <a id="doThrow(Throwable):Unit"></a>
       <h4 class="signature">
@@ -127,7 +135,9 @@
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">terminate current flow with exception.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow with exception.
+Mostly used internally.
+</p></div></div>
     </li><li name="gopher.FlowTermination#isCompleted" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="isCompleted:Boolean"></a>
       <a id="isCompleted:Boolean"></a>
@@ -144,7 +154,7 @@
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">check - if flow is completed.</p>
     </li><li name="gopher.FlowTermination#throwIfNotCompleted" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="throwIfNotCompleted(ex:Throwable):Unit"></a>
       <a id="throwIfNotCompleted(Throwable):Unit"></a>

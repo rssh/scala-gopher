@@ -217,7 +217,7 @@
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <p class="shortcomment cmt">shortcut for blocking read.</p><div class="fullcomment"><div class="comment cmt"><p>shortcut for blocking read.
+      <p class="shortcomment cmt">shortcut for blocking write.</p><div class="fullcomment"><div class="comment cmt"><p>shortcut for blocking write.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
@@ -411,7 +411,8 @@ in case of stream is closed.
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
+      <p class="shortcomment cmt">return feature which contains sequence from first <code>n</code> elements.</p><div class="fullcomment"><div class="comment cmt"><p>return feature which contains sequence from first <code>n</code> elements.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
     </li><li name="gopher.channels.Output#awrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="awrite(a:A):scala.concurrent.Future[Unit]"></a>
       <a id="awrite(A):Future[Unit]"></a>
@@ -447,18 +448,18 @@ in case of stream is closed.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="gopher.channels.IOChannel#cbread" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit"></a>
-      <a id="cbread[B]((ContRead[A,B])⇒Option[(()⇒A)⇒Future[Continuated[B]]],FlowTermination[B]):Unit"></a>
+      <a id="cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit"></a>
+      <a id="cbread[B]((ContRead[A,B])⇒Option[(In[A])⇒Future[Continuated[B]]],FlowTermination[B]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cbread</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>, <span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.IOChannel.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]]]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">cbread</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>, <span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]]]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.IOChannel.cbread.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.IOChannel@cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.IOChannel@cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -607,7 +608,8 @@ in case of stream is closed.
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
+      <p class="shortcomment cmt">run <code> f </code> each time when new object is arrived.</code></p><div class="fullcomment"><div class="comment cmt"><p>run <code> f </code> each time when new object is arrived. Ended when input closes.</p><p>must be inside go/async/action block.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
     </li><li name="gopher.channels.Input#foreachAsync" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foreachAsync(f:A=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]"></a>
       <a id="foreachAsync((A)⇒Future[Unit])(ExecutionContext):Future[Unit]"></a>
@@ -794,7 +796,7 @@ in case of stream is closed.
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      <p class="shortcomment cmt">read object from channel.</p><div class="fullcomment"><div class="comment cmt"><p>read object from channel. Must be situated inside async/go/action block
+      <p class="shortcomment cmt">read object from channel.</p><div class="fullcomment"><div class="comment cmt"><p>read object from channel. Must be situated inside async/go/action block.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -934,8 +936,7 @@ in case of stream is closed.
     </span>
       <p class="shortcomment cmt">'blocking' write of 'a' to channel.</p><div class="fullcomment"><div class="comment cmt"><p>'blocking' write of 'a' to channel.
 Note, that this method can be called only inside
-'go' or 'async' blocks, since blocking is
-emulated by 'Async.await'
+'go' or 'async' blocks.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="gopher.channels.Output#writeAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writeAll[C&lt;:Iterable[A]](it:C):Unit"></a>
@@ -984,6 +985,23 @@ emulated by 'Async.await'
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.IOChannel@zip[B](x:Iterable[B]):gopher.channels.Input[(A,B)]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
+    </li><li name="gopher.channels.Input#|" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="|(other:gopher.channels.Input[A]):gopher.channels.Input[A]"></a>
+      <a id="|(Input[A]):Input[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bar" class="name">|</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.IOChannel@|(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

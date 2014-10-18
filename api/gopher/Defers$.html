@@ -106,23 +106,6 @@
       </a>
     </span>
       
-    </li><li name="gopher.Defers.RecoverException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RecoverException[T]extendsRuntimeExceptionwithNoStackTrace"></a>
-      <a id="RecoverException[T]:RecoverException[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Defers$$RecoverException.html"><span class="name">RecoverException</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.Defers$@RecoverException[T]extendsRuntimeExceptionwithNoStackTrace" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li></ol>
             </div>
 
@@ -238,6 +221,24 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.Defers#controlTry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="controlTry[T](body:=&gt;T):scala.util.Try[T]"></a>
+      <a id="controlTry[T](⇒T):Try[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">controlTry</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="body">body: ⇒ <span class="extype" name="gopher.Defers.controlTry.T">T</span></span>)</span><span class="result">: <span class="extype" name="scala.util.Try">Try</span>[<span class="extype" name="gopher.Defers.controlTry.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Defers$@controlTry[T](body:=&gt;T):scala.util.Try[T]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">same as scala.util.Try with one difference:
+ControlThrowable is catched and mapped to Failure.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

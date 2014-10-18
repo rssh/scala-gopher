@@ -28,9 +28,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
+        <a href="ContRead$.html" title="Go to companion"><img src="../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
-        <h1>ContRead</h1> <span class="permalink">
+        <h1><a href="ContRead$.html" title="Go to companion">ContRead</a></h1> <span class="permalink">
       <a href="../../index.html#gopher.channels.ContRead" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
@@ -43,7 +43,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ContRead</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="function">function: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.ContRead.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>, <span name="channel">channel: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ContRead</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="function">function: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>, <span name="channel">channel: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]</span>)</span><span class="result"> extends <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -89,7 +89,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="gopher.channels.ContRead#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(function:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],channel:gopher.channels.Input[A],flowTermination:gopher.FlowTermination[B]):gopher.channels.ContRead[A,B]"></a>
+      <a id="&lt;init&gt;(function:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],channel:gopher.channels.Input[A],flowTermination:gopher.FlowTermination[B]):gopher.channels.ContRead[A,B]"></a>
       <a id="&lt;init&gt;:ContRead[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -97,10 +97,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ContRead</span><span class="params">(<span name="function">function: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.ContRead.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>, <span name="channel">channel: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]</span>)</span>
+        <span class="name">ContRead</span><span class="params">(<span name="function">function: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>, <span name="channel">channel: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]</span>, <span name="flowTermination">flowTermination: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ContRead@&lt;init&gt;(function:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],channel:gopher.channels.Input[A],flowTermination:gopher.FlowTermination[B]):gopher.channels.ContRead[A,B]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ContRead@&lt;init&gt;(function:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],channel:gopher.channels.Input[A],flowTermination:gopher.FlowTermination[B]):gopher.channels.ContRead[A,B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -317,18 +317,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.ContRead">ContRead</a> → <a href="FlowContinuated.html" class="extype" name="gopher.channels.FlowContinuated">FlowContinuated</a></dd></dl></div>
     </li><li name="gopher.channels.ContRead#function" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="function:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]"></a>
-      <a id="function:(ContRead[A,B])⇒Option[(()⇒A)⇒Future[Continuated[B]]]"></a>
+      <a id="function:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]"></a>
+      <a id="function:(ContRead[A,B])⇒Option[(In[A])⇒Future[Continuated[B]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">function</span><span class="result">: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.channels.ContRead.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>
+        <span class="name">function</span><span class="result">: (<a href="" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>, <span class="extype" name="gopher.channels.ContRead.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.ContRead.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.ContRead.B">B</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ContRead@function:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ContRead@function:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

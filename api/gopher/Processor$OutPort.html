@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>GopherAPI - gopher.GopherAPI</title>
-          <meta name="description" content="GopherAPI - gopher.GopherAPI" />
-          <meta name="keywords" content="GopherAPI gopher.GopherAPI" />
+          <title>OutPort - gopher.Processor.OutPort</title>
+          <meta name="description" content="OutPort - gopher.Processor.OutPort" />
+          <meta name="keywords" content="OutPort gopher.Processor.OutPort" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
-            var hash = 'gopher.GopherAPI';
+            var hash = 'gopher.Processor$OutPort';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -28,10 +28,10 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/class_big.png" />
-        <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>GopherAPI</h1> <span class="permalink">
-      <a href="../index.html#gopher.GopherAPI" title="Permalink" target="_top">
+        <a href="Processor$OutPort$.html" title="Go to companion"><img src="../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a>.<a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></p>
+        <h1><a href="Processor$OutPort$.html" title="Go to companion">OutPort</a></h1> <span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -43,18 +43,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">GopherAPI</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">OutPort</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Api for providing access to channel and selector interfaces.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="GopherImpl.html" class="extype" name="gopher.GopherImpl">GopherImpl</a></div>
-          </div></div>
+          <div class="superTypes hiddenContent"><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -71,7 +67,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.GopherAPI"><span>GopherAPI</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.Processor.OutPort"><span>OutPort</span></li><li class="in" name="gopher.channels.Output"><span>Output</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -91,19 +87,19 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="gopher.GopherAPI#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(as:akka.actor.ActorSystem,es:scala.concurrent.ExecutionContext):gopher.GopherAPI"></a>
-      <a id="&lt;init&gt;:GopherAPI"></a>
+              <ol><li name="gopher.Processor.OutPort#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(output:gopher.channels.Output[A]):Processor.this.OutPort[A]"></a>
+      <a id="&lt;init&gt;:OutPort[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">GopherAPI</span><span class="params">(<span name="as">as: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>, <span name="es">es: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span>
+        <span class="name">OutPort</span><span class="params">(<span name="output">output: <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@&lt;init&gt;(as:akka.actor.ActorSystem,es:scala.concurrent.ExecutionContext):gopher.GopherAPI" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@&lt;init&gt;(output:gopher.channels.Output[A]):Processor.this.OutPort[A]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -111,13 +107,85 @@
     </li></ol>
             </div>
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="gopher.channels.Output.write" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="write=A"></a>
+      <a id="write:write"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">write</span><span class="result"> = <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@write=A" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="gopher.channels.Output.writeExp" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeExp[X]=A"></a>
+      <a id="writeExp[X]:writeExp[X]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeExp</span><span class="tparams">[<span name="X">X</span>]</span><span class="result"> = <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@writeExp[X]=A" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="gopher.channels.Output.~&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="~&gt;=A"></a>
+      <a id="~&gt;:~&gt;"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $tilde$greater" class="name">~&gt;</span><span class="result"> = <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@~&gt;=A" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="gopher.channels.Output#!" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!(a:A):Unit"></a>
+      <a id="!(A):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang" class="name">!</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@!(a:A):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">shortcut for blocking write.</p><div class="fullcomment"><div class="comment cmt"><p>shortcut for blocking write.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -129,7 +197,7 @@
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -146,11 +214,29 @@
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@##():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@##():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.channels.Output#&lt;~" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;~(a:A):gopher.channels.Output[A]"></a>
+      <a id="&lt;~(A):Output[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $less$tilde" class="name">&lt;~</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>)</span><span class="result">: <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@&lt;~(a:A):gopher.channels.Output[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">shortcut for blocking write.</p><div class="fullcomment"><div class="comment cmt"><p>shortcut for blocking write.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
@@ -163,24 +249,24 @@
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.GopherAPI#actorSystem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="actorSystem:akka.actor.ActorSystem"></a>
-      <a id="actorSystem:ActorSystem"></a>
+    </li><li name="gopher.Processor.OutPort#&gt;~~&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&gt;~~&gt;(x:gopher.Processor#InPort[A]):Unit"></a>
+      <a id="&gt;~~&gt;(InPort[A]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">actorSystem</span><span class="result">: <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></span>
+        <span title="gt4s: $greater$tilde$tilde$greater" class="name">&gt;~~&gt;</span><span class="params">(<span name="x">x: <a href="Processor$InPort.html" class="extype" name="gopher.Processor.InPort">InPort</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@actorSystem:akka.actor.ActorSystem" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@&gt;~~&gt;(x:gopher.Processor#InPort[A]):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -197,11 +283,63 @@
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="gopher.channels.Output#awrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="awrite(a:A):scala.concurrent.Future[Unit]"></a>
+      <a id="awrite(A):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">awrite</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@awrite(a:A):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="gopher.channels.Output#awriteAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="awriteAll[C&lt;:Iterable[A]](c:C):scala.concurrent.Future[Unit]"></a>
+      <a id="awriteAll[C&lt;:Iterable[A]](C):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">awriteAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="gopher.channels.Output.awriteAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@awriteAll[C&lt;:Iterable[A]](c:C):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="gopher.Processor.OutPort#cbwrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],ft:gopher.FlowTermination[B]):Unit"></a>
+      <a id="cbwrite[B]((ContWrite[A,B])⇒Option[(A,Future[Continuated[B]])],FlowTermination[B]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cbwrite</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>, <span class="extype" name="gopher.Processor.OutPort.cbwrite.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.Processor.OutPort.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.Processor.OutPort.cbwrite.B">B</span>]])]</span>, <span name="ft">ft: <a href="FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.Processor.OutPort.cbwrite.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],ft:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">apply f and send result to channels processor.</p><div class="fullcomment"><div class="comment cmt"><p>apply f and send result to channels processor.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.Processor.OutPort">OutPort</a> → <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -214,7 +352,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@clone():Object" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@clone():Object" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -225,36 +363,36 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.GopherAPI#config" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="config:com.typesafe.config.Config"></a>
-      <a id="config:Config"></a>
+    </li><li name="gopher.Processor.OutPort#connect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="connect(inPort:gopher.Processor#InPort[A],bufferSize:Int):Unit"></a>
+      <a id="connect(InPort[A],Int):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">config</span><span class="result">: <span class="extype" name="com.typesafe.config.Config">Config</span></span>
+        <span class="name">connect</span><span class="params">(<span name="inPort">inPort: <a href="Processor$InPort.html" class="extype" name="gopher.Processor.InPort">InPort</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>, <span name="bufferSize">bufferSize: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@config:com.typesafe.config.Config" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@connect(inPort:gopher.Processor#InPort[A],bufferSize:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       
-    </li><li name="gopher.GopherAPI#currentFlow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="currentFlow:gopher.channels.CurrentFlowTermination.type"></a>
-      <a id="currentFlow:CurrentFlowTermination.type"></a>
+    </li><li name="gopher.Processor.OutPort#connect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="connect(x:gopher.channels.Output[A]):Unit"></a>
+      <a id="connect(Output[A]):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">currentFlow</span><span class="result">: <a href="channels/CurrentFlowTermination$.html" class="extype" name="gopher.channels.CurrentFlowTermination">CurrentFlowTermination</a>.type</span>
+        <span class="name">connect</span><span class="params">(<span name="x">x: <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@currentFlow:gopher.channels.CurrentFlowTermination.type" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@connect(x:gopher.channels.Output[A]):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -271,7 +409,7 @@
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -288,28 +426,11 @@
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.GopherAPI#executionContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="executionContext:scala.concurrent.ExecutionContext"></a>
-      <a id="executionContext:ExecutionContext"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">executionContext</span><span class="result">: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@executionContext:scala.concurrent.ExecutionContext" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -322,7 +443,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@finalize():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@finalize():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -333,23 +454,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.GopherAPI#futureInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="futureInput[A](future:scala.concurrent.Future[A]):gopher.channels.FutureInput[A]"></a>
-      <a id="futureInput[A](Future[A]):FutureInput[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">futureInput</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="future">future: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.GopherAPI.futureInput.A">A</span>]</span>)</span><span class="result">: <a href="channels/FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>[<span class="extype" name="gopher.GopherAPI.futureInput.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@futureInput[A](future:scala.concurrent.Future[A]):gopher.channels.FutureInput[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -362,7 +466,7 @@
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -379,7 +483,7 @@
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@hashCode():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@hashCode():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -396,46 +500,11 @@
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="gopher.GopherAPI#iterableInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="iterableInput[A](iterable:Iterable[A]):gopher.channels.Input[A]"></a>
-      <a id="iterableInput[A](Iterable[A]):Input[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">iterableInput</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="iterable">iterable: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.GopherAPI.iterableInput.A">A</span>]</span>)</span><span class="result">: <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.GopherAPI.iterableInput.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@iterableInput[A](iterable:Iterable[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="gopher.GopherAPI#makeChannel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="makeChannel[A](capacity:Int):gopher.channels.IOChannel[A]"></a>
-      <a id="makeChannel[A](Int):IOChannel[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>[<span class="extype" name="gopher.GopherAPI.makeChannel.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@makeChannel[A](capacity:Int):gopher.channels.IOChannel[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">obtain channel</p><div class="fullcomment"><div class="comment cmt"><p>obtain channel</p><pre><span class="kw">val</span> channel = gopherApi.makeChannel[<span class="std">Int</span>]()
-channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -448,7 +517,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -465,7 +534,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@notify():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@notify():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -482,32 +551,11 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="gopher.GopherAPI#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="select:gopher.channels.SelectFactory"></a>
-      <a id="select:SelectFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">select</span><span class="result">: <a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">SelectFactory</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@select:gopher.channels.SelectFactory" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">obtain select factory</p><div class="fullcomment"><div class="comment cmt"><p>obtain select factory</p><pre>goopherApi.select.once[<span class="std">String</span>] {
-<span class="kw">case</span> x: a.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from A"</span>
-<span class="kw">case</span> x: b.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from B"</span>
-<span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="lit">"IDLE"</span>
-}</pre></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -520,7 +568,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -537,11 +585,28 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@toString():String" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@toString():String" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.Processor.OutPort#v" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="v:gopher.channels.Output[A]"></a>
+      <a id="v:Output[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">v</span><span class="result">: <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@v:gopher.channels.Output[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -554,7 +619,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@wait():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@wait():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -577,7 +642,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -600,7 +665,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.GopherAPI@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Processor$OutPort@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -611,6 +676,43 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.channels.Output#write" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="write(a:A):Unit"></a>
+      <a id="write(A):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">write</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.Processor.OutPort.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@write(a:A):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">'blocking' write of 'a' to channel.</p><div class="fullcomment"><div class="comment cmt"><p>'blocking' write of 'a' to channel.
+Note, that this method can be called only inside
+'go' or 'async' blocks.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+    </li><li name="gopher.channels.Output#writeAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeAll[C&lt;:Iterable[A]](it:C):Unit"></a>
+      <a id="writeAll[C&lt;:Iterable[A]](C):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>]</span><span class="params">(<span name="it">it: <span class="extype" name="gopher.channels.Output.writeAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Processor$OutPort@writeAll[C&lt;:Iterable[A]](it:C):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -620,7 +722,9 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="gopher.channels.Output">
+              <h3>Inherited from <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

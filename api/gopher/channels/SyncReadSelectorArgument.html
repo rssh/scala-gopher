@@ -43,7 +43,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SyncReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">SyncReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>]) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result"> extends <a href="ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -88,7 +88,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="gopher.channels.SyncReadSelectorArgument#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.SyncReadSelectorArgument[A,B]"></a>
+      <a id="&lt;init&gt;(f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])):gopher.channels.SyncReadSelectorArgument[A,B]"></a>
       <a id="&lt;init&gt;:SyncReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -96,10 +96,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SyncReadSelectorArgument</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>)</span>
+        <span class="name">SyncReadSelectorArgument</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>]) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@&lt;init&gt;(f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.SyncReadSelectorArgument[A,B]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@&lt;init&gt;(f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])):gopher.channels.SyncReadSelectorArgument[A,B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -222,18 +222,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="gopher.channels.SyncReadSelectorArgument#f" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])"></a>
-      <a id="f:(ContRead[A,B])⇒(()⇒A)⇒Continuated[B]"></a>
+      <a id="f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])"></a>
+      <a id="f:(ContRead[A,B])⇒(In[A])⇒Continuated[B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">f</span><span class="result">: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>
+        <span class="name">f</span><span class="result">: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ (<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>]) ⇒ <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -313,18 +313,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="gopher.channels.SyncReadSelectorArgument#normalizedFun" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="normalizedFun:gopher.channels.ContRead[A,B]=&gt;Some[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]"></a>
-      <a id="normalizedFun:(ContRead[A,B])⇒Some[(()⇒A)⇒Future[Continuated[B]]]"></a>
+      <a id="normalizedFun:gopher.channels.ContRead[A,B]=&gt;Some[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]"></a>
+      <a id="normalizedFun:(ContRead[A,B])⇒Some[(In[A])⇒Future[Continuated[B]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">normalizedFun</span><span class="result">: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Some">Some</span>[(() ⇒ <span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]]]</span>
+        <span class="name">normalizedFun</span><span class="result">: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Some">Some</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.SyncReadSelectorArgument.B">B</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@normalizedFun:gopher.channels.ContRead[A,B]=&gt;Some[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.SyncReadSelectorArgument@normalizedFun:gopher.channels.ContRead[A,B]=&gt;Some[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

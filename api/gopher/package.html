@@ -132,11 +132,7 @@ defer{
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      <p class="shortcomment cmt">throwed when channel is closed:
-a) during attempt to write to closed channel.</p><div class="fullcomment"><div class="comment cmt"><p>throwed when channel is closed:
-a) during attempt to write to closed channel.
-b) during attempt to read from closed channel 'behind' last message.
-</p></div></div>
+      <p class="shortcomment cmt">throwed when channel is closed:</p><div class="fullcomment"><div class="comment cmt"><p>throwed when channel is closed:</p><ul><li> during attempt to write to closed channel.</li><li> during attempt to read from closed channel 'behind' last message.</li></ul></div></div>
     </li><li name="gopher.Defers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Defers[T]extendsAnyRef"></a>
       <a id="Defers[T]:Defers[T]"></a>
@@ -186,7 +182,7 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
 }
 </pre>
 </p></div></div>
-    </li><li name="gopher.FlowTermination" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.FlowTermination" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="FlowTermination[-A]extendsAnyRef"></a>
       <a id="FlowTermination[-A]:FlowTermination[A]"></a>
       <h4 class="signature">
@@ -202,7 +198,30 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">FlowTermination[-A] - termination of flow.</p><div class="fullcomment"><div class="comment cmt"><p>FlowTermination[-A] - termination of flow.</p><p>Inside each block in select loop or
+select apply (once or forever) we have implicit
+FlowTermination entity, which we can use for
+exiting the loop.</p><pre>select.forever{
+<span class="kw">case</span> x: info.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received from info $x"</span>)
+<span class="kw">case</span> x: control.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
+}</pre></div></div>
+    </li><li name="gopher.FutureWithRead" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FutureWithRead[T]extendsAnyRef"></a>
+      <a id="FutureWithRead[T]:FutureWithRead[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$FutureWithRead.html"><span class="name">FutureWithRead</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@FutureWithRead[T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">sugar for reading value from future.</p>
     </li><li name="gopher.GopherAPI" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GopherAPIextendsAnyRef"></a>
       <a id="GopherAPI:GopherAPI"></a>
@@ -220,7 +239,7 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
       </a>
     </span>
       <p class="shortcomment cmt">Api for providing access to channel and selector interfaces.</p>
-    </li><li name="gopher.GopherImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.GopherImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GopherImplextendsGopherAPIwithExtension"></a>
       <a id="GopherImpl:GopherImpl"></a>
       <h4 class="signature">
@@ -233,6 +252,58 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherImplextendsGopherAPIwithExtension" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI
+</p></span></dd></dl></div>
+    </li><li name="gopher.ParProcessor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParProcessorextendsProcessor"></a>
+      <a id="ParProcessor:ParProcessor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ParProcessor.html"><span class="name">ParProcessor</span></a><span class="result"> extends <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@ParProcessorextendsProcessor" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Processor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ProcessorextendsAnyRef"></a>
+      <a id="Processor:Processor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Processor.html"><span class="name">Processor</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@ProcessorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.SelectProcessor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SelectProcessorextendsForeverSelectorBuilderwithProcessorwithFlowTermination[Unit]"></a>
+      <a id="SelectProcessor:SelectProcessor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SelectProcessor.html"><span class="name">SelectProcessor</span></a><span class="result"> extends <a href="channels/ForeverSelectorBuilder.html" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a> with <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a> with <a href="FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@SelectProcessorextendsForeverSelectorBuilderwithProcessorwithFlowTermination[Unit]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -277,8 +348,8 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI
-</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Factory object for Akka extension</p><div class="fullcomment"><div class="comment cmt"><p>Factory object for Akka extension</p><pre><span class="kw">val</span> actorSystem = ActorSystem(<span class="lit">"myapp"</span>)
+<span class="kw">val</span> gopherApi = Gopher(actorSystem)</pre></div></div>
     </li><li name="gopher.GopherAPIExtensionHelper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GopherAPIExtensionHelper"></a>
       <a id="GopherAPIExtensionHelper:GopherAPIExtensionHelper"></a>
@@ -442,18 +513,18 @@ to exception and if it's applied - stop panic and return true, otherwise return 
               
         </dd></dl></div>
     </li><li name="gopher#toAsyncFullReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]"></a>
-      <a id="toAsyncFullReadSelectorArgument[A,B]((ContRead[A,B])⇒Option[(()⇒A)⇒Future[Continuated[B]]]):ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncFullReadSelectorArgument[A,B]((ContRead[A,B])⇒Option[(In[A])⇒Future[Continuated[B]]]):ReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">implicit </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toAsyncFullReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(() ⇒ <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]</span>
+        <span class="name">toAsyncFullReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="channels/ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncFullReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncFullReadSelectorArgument.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[(()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -544,18 +615,18 @@ to exception and if it's applied - stop panic and return true, otherwise return 
     </span>
       
     </li><li name="gopher#toAsyncNoOptionReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]"></a>
-      <a id="toAsyncNoOptionReadSelectorArgument[A,B]((ContRead[A,B])⇒(()⇒A)⇒Future[Continuated[B]]):ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toAsyncNoOptionReadSelectorArgument[A,B]((ContRead[A,B])⇒(In[A])⇒Future[Continuated[B]]):ReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">implicit </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toAsyncNoOptionReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]</span>
+        <span class="name">toAsyncNoOptionReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]) ⇒ (<a href="channels/ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toAsyncNoOptionReadSelectorArgument.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -595,18 +666,18 @@ to exception and if it's applied - stop panic and return true, otherwise return 
     </span>
       
     </li><li name="gopher#toSyncReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]"></a>
-      <a id="toSyncReadSelectorArgument[A,B]((ContRead[A,B])⇒(()⇒A)⇒Continuated[B]):ReadSelectorArgument[A,B]"></a>
+      <a id="toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]"></a>
+      <a id="toSyncReadSelectorArgument[A,B]((ContRead[A,B])⇒(In[A])⇒Continuated[B]):ReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">implicit </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toSyncReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]) ⇒ (() ⇒ <span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>) ⇒ <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>
+        <span class="name">toSyncReadSelectorArgument</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="channels/ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]) ⇒ (<a href="channels/ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>]) ⇒ <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>)</span><span class="result">: <a href="channels/ReadSelectorArgument.html" class="extype" name="gopher.channels.ReadSelectorArgument">ReadSelectorArgument</a>[<span class="extype" name="gopher.toSyncReadSelectorArgument.A">A</span>, <span class="extype" name="gopher.toSyncReadSelectorArgument.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;((()=&gt;A)=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
