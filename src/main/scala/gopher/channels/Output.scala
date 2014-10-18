@@ -22,7 +22,10 @@ trait Output[A]
   /**
    * apply f and send result to channels processor.
    */
-  def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], ft: FlowTermination[B]): Unit
+  def  cbwrite[B](f: ContWrite[A,B] => Option[
+                   (A,Future[Continuated[B]])
+                  ], 
+                  ft: FlowTermination[B]): Unit
 
   def  awrite(a:A):Future[Unit] =
   {

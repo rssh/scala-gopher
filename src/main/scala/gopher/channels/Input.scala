@@ -26,7 +26,11 @@ trait Input[A]
   /**
    * apply f, when input will be ready and send result to API processor
    */
-  def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit
+  def  cbread[B](f:
+            ContRead[A,B]=>Option[
+                    ContRead.In[A]=>Future[Continuated[B]]
+            ], 
+            ft: FlowTermination[B]): Unit
 
 
   /**
@@ -178,7 +182,6 @@ trait Input[A]
     cbread(applyF,ft)
     ft.future
   }
-
 
 }
 

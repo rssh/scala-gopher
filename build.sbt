@@ -19,10 +19,12 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
+//TODO: enable after 1.0
+//libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
-version:="0.99.2-SNAPSHOT"
+version:="0.99.2"
 
 
 publishMavenStyle := true
