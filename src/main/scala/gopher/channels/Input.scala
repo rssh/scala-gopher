@@ -1,6 +1,7 @@
 package gopher.channels
 
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
@@ -159,7 +160,7 @@ trait Input[A]
    *}
    *```
    **/
-  def withTimeout(timeout: FiniteDuration): Input[Either[FiniteDuration,A]] = new InputWithTimeout(this)
+  def withTimeout(timeout: FiniteDuration): Input[Either[FiniteDuration,A]] = new InputWithTimeout(this, timeout)
 
   def async = new {
   

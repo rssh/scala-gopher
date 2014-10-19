@@ -27,11 +27,11 @@ trait Output[A]
                   ], 
                   ft: FlowTermination[B]): Unit
 
-  def  awrite(a:A):Future[Unit] =
+  def  awrite(a:A):Future[A] =
   {
-   val ft = PromiseFlowTermination[Unit]()
-   cbwrite[Unit]( cont => {
-            Some((a,Future.successful(Done((),ft))))
+   val ft = PromiseFlowTermination[A]()
+   cbwrite[A]( cont => {
+            Some((a,Future.successful(Done(a,ft))))
           }, 
           ft
          )
@@ -43,7 +43,7 @@ trait Output[A]
    * Note, that this method can be called only inside
    * 'go' or 'async' blocks.
    **/
-  def write(a:A):Unit = macro Output.writeImpl[A]
+  def write(a:A):A = macro Output.writeImpl[A]
 
   /**
    * shortcut for blocking write.
@@ -83,10 +83,10 @@ trait Output[A]
 object Output
 {
 
-  def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[Unit] =
+  def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[A] =
   {
    import c.universe._
-   c.Expr[Unit](q"scala.async.Async.await(${c.prefix}.awrite(${a}))")
+   c.Expr[A](q"scala.async.Async.await(${c.prefix}.awrite(${a}))")
   }
 
   def writeAllImpl[A,C](c:Context)(it:c.Expr[C]):c.Expr[Unit] =
