@@ -138,7 +138,28 @@ trait Input[A]
 
   def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
 
+  /**
+   * return input merged with 'other'.
+   * (i.e. non-determenistics choice)
+   **/
   def |(other:Input[A]):Input[A] = new OrInput(this,other)
+
+  /**
+   * return channel, where read contains or `Right(value)` if it is possible to
+   * read value from this channel during `timeout` or `Left(timeout)` if no value in
+   * given channel was available.
+   *
+   *```
+   *select.forever{
+   *  case x: Either[FiniteDuration, String] if (x==read(ch withTimeout(10 seconds))) =>
+   *           x match {
+   *              case Left(timeout) => Console.println("timeout occured")
+   *              case Right(value) => Console.println("received value: ${value}")
+   *           }
+   *}
+   *```
+   **/
+  def withTimeout(timeout: FiniteDuration): Input[Either[FiniteDuration,A]] = new InputWithTimeout(this)
 
   def async = new {
   

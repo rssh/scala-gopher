@@ -5,6 +5,8 @@ import akka.pattern._
 import gopher.channels._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
 import scala.util._
 import java.util.concurrent.atomic.AtomicLong
 import com.typesafe.config._
@@ -52,6 +54,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
+  def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
+
   def actorSystem: ActorSystem = as
 
   def executionContext: ExecutionContext = es
@@ -84,4 +88,21 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   private[this] val channelIdCounter = new AtomicLong(0L)
 
   
+}
+
+object GopherAPI
+{
+
+  def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
+    import c.universe._
+    c.Expr[T](q"""{ def factory():${c.weakTypeOf[T]} = new ${c.weakTypeOf[T]} { 
+                                                def api = ${c.prefix} 
+                                                def recoverFactory = factory
+                                     }
+                    val retval = factory()
+                    retval
+                  }
+               """)
+  }
+
 }

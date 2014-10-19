@@ -8,7 +8,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 
-class Bingo(override val api: GopherAPI) extends SelectProcessor
+trait Bingo extends SelectTransputer
 {
 
   val inX = InPort[Int]()
@@ -25,7 +25,7 @@ class Bingo(override val api: GopherAPI) extends SelectProcessor
 
 }
 
-class Acceptor(override val api: GopherAPI) extends SelectProcessor
+trait Acceptor extends SelectTransputer
 {
 
   val inA = InPort[Boolean]()
@@ -50,8 +50,8 @@ class BingoSuite extends FunSuite
   test("bingo process wit identical input must return same", Now) {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
-     val bingo = new Bingo(gopherApi)
-     val acceptor = new Acceptor(gopherApi)
+     val bingo = gopherApi.makeTransputer[Bingo]
+     val acceptor = gopherApi.makeTransputer[Acceptor]
      bingo.inX connect inX
      bingo.inY connect inY
      bingo.out >~~> acceptor.inA
