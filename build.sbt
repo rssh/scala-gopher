@@ -9,7 +9,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */   )
+scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
 

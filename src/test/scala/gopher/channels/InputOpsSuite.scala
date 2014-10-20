@@ -30,7 +30,7 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
       w.await(timeout(10 seconds))
   }
   
-  test("filter operation for input", Now) {
+  test("filter operation for input") {
       val w = new Waiter
       val ch = gopherApi.makeChannel[String]()
       ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
@@ -206,7 +206,7 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
       assert(!flg)
   }
 
-  test("Input foreach on stream with 'N' elements inside must run N times ", Now) {
+  test("Input foreach on stream with 'N' elements inside must run N times ") {
       val w = new Waiter
       val ch = gopherApi.makeChannel[Int]()
       @volatile var count = 0

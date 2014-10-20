@@ -155,12 +155,28 @@ trait Input[A]
    *  case x: Either[FiniteDuration, String] if (x==read(ch withTimeout(10 seconds))) =>
    *           x match {
    *              case Left(timeout) => Console.println("timeout occured")
-   *              case Right(value) => Console.println("received value: ${value}")
+   *              case Right(value) => Console.println(s"received value: \${value}")
    *           }
    *}
    *```
    **/
   def withTimeout(timeout: FiniteDuration): Input[Either[FiniteDuration,A]] = new InputWithTimeout(this, timeout)
+
+  /**
+   * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`
+   * and if during reading you wait more than specified `timeout`, than timeout message is appear in `timeouts`
+   *
+   *```
+   * val (inReady, inTimeouts) = in trackInputTimeouts (10 seconds)
+   * select.forever {
+   *   case x: inReady.read => Console.println(s"received value ${value}")
+   *   case x: inTimeouts.read => Console.println(s"timeout occured")
+   * }
+   *```
+   **/
+  def trackInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
+                                               new TrackedInputTimeouts(this,timeout).pair
+
 
   def async = new {
   

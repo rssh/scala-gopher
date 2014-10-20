@@ -47,7 +47,7 @@ trait Acceptor extends SelectTransputer
 class BingoSuite extends FunSuite
 {
 
-  test("bingo process wit identical input must return same", Now) {
+  test("bingo process wit identical input must return same") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[Bingo]
