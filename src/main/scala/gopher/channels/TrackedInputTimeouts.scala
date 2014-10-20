@@ -32,7 +32,10 @@ class TrackedInputTimeouts[A](origin: Input[A], timeout: FiniteDuration)
             c.cancel()
             in => in match {
                      case ContRead.Skip => Future successful ContRead(f,this,ft)
-                     case x@_ => f1(x)
+                     case ContRead.ChannelClosed => 
+                                                    timeouts.close()
+                                                    f1(ContRead.ChannelClosed)
+                     case x@_ => f1(x) 
                   }                       
         }
       }

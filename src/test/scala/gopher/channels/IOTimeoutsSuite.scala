@@ -26,7 +26,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
                 case x: chReady.read => 1
                 case x: chTimeout.read => 2
       } 
-      Await.ready(f map ( x => { w( x == 2); w.dismiss() } ), 1 second )
+      Await.ready(f map ( x => { w( assert(x == 2) ); w.dismiss() } ), 1 second )
       w.await()
   }
 
@@ -39,8 +39,34 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
                 case x: chReady.read => 1
                 case x: chTimeout.read => 2
       } 
-      Await.ready(f map ( x => { w( x == 1); w.dismiss() } ), 1 second )
+      Await.ready(f map ( x => { w( assert(x == 1) ); w.dismiss() } ), 1 second )
       w.await()
+  }
+
+
+  test("on channel close timeout channel also must close", Now) {
+      val w = new Waiter()
+      val ch = gopherApi.makeChannel[String]()
+      ch.awrite("qqq")
+      val (chReady, chTimeout) = ch.trackInputTimeouts(300 milliseconds)
+      ch.close()
+      // now must read one element
+      val f1 = gopherApi.select.once {
+                case x: chReady.read => 1
+                case x: chTimeout.read => 2
+              }
+      Await.ready(f1 map ( x => { w( x == 1); w.dismiss(); } ), 1 second )
+      // now receive stream-closed exception
+      val f2 = chReady.aread
+      f2 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
+                           w.dismiss()
+      } 
+      val f3 = chTimeout.aread
+      f3 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
+                           w.dismiss()
+      } 
+      w.await(dismissals=Dismissals(3))
+               
   }
 
   
