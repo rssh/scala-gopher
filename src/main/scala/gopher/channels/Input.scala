@@ -146,23 +146,6 @@ trait Input[A]
   def |(other:Input[A]):Input[A] = new OrInput(this,other)
 
   /**
-   * return channel, where read contains or `Right(value)` if it is possible to
-   * read value from this channel during `timeout` or `Left(timeout)` if no value in
-   * given channel was available.
-   *
-   *```
-   *select.forever{
-   *  case x: Either[FiniteDuration, String] if (x==read(ch withTimeout(10 seconds))) =>
-   *           x match {
-   *              case Left(timeout) => Console.println("timeout occured")
-   *              case Right(value) => Console.println(s"received value: \${value}")
-   *           }
-   *}
-   *```
-   **/
-  def withTimeout(timeout: FiniteDuration): Input[Either[FiniteDuration,A]] = new InputWithTimeout(this, timeout)
-
-  /**
    * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`
    * and if during reading you wait more than specified `timeout`, than timeout message is appear in `timeouts`
    *

@@ -15,7 +15,7 @@ trait Transputer
    override def cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = 
           v.cbread(f,ft)
 
-   def api: gopher.GopherAPI = v.api
+   def api: gopher.GopherAPI = Transputer.this.api
 
    def connect(x: Input[A]): Unit = 
       { v=x }
@@ -41,6 +41,8 @@ trait Transputer
  {
   override def cbwrite[B](f: ContWrite[A,B] => Option[(A, Future[Continuated[B]])], ft: FlowTermination[B]): Unit =
         v.cbwrite(f, ft)
+
+  def api: gopher.GopherAPI = Transputer.this.api
 
   def connect(x: Output[A]): Unit = 
       { v=x }

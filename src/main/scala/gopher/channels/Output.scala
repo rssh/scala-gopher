@@ -1,6 +1,7 @@
 package gopher.channels
 
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.async.Async._
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
@@ -26,6 +27,8 @@ trait Output[A]
                    (A,Future[Continuated[B]])
                   ], 
                   ft: FlowTermination[B]): Unit
+
+  def api: GopherAPI
 
   def  awrite(a:A):Future[A] =
   {
@@ -55,6 +58,7 @@ trait Output[A]
    */
   def !(a:A):Unit = macro Output.writeImpl[A]
 
+
   def awriteAll[C <: Iterable[A]](c:C):Future[Unit] =
   {
     if (c.isEmpty) {
@@ -77,6 +81,10 @@ trait Output[A]
   }
 
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
+
+  
+  def trackOutputTimeouts(timeout: FiniteDuration): (Output[A],Input[FiniteDuration]) =
+        new TrackedOutputTimeouts(this, timeout).pair
 
 }
 
