@@ -150,15 +150,15 @@ trait Input[A]
    * and if during reading you wait more than specified `timeout`, than timeout message is appear in `timeouts`
    *
    *```
-   * val (inReady, inTimeouts) = in trackInputTimeouts (10 seconds)
+   * val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
    * select.forever {
    *   case x: inReady.read => Console.println(s"received value ${value}")
    *   case x: inTimeouts.read => Console.println(s"timeout occured")
    * }
    *```
    **/
-  def trackInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
-                                               new TrackedInputTimeouts(this,timeout).pair
+  def withInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
+                                               new InputWithTimeouts(this,timeout).pair
 
 
   def async = new {

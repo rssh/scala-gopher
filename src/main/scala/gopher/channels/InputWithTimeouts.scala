@@ -10,9 +10,9 @@ import gopher._
  * Wrap `origin` input into input, which produce 'timeout' value into `timeouts` channel 
  * when reading from wrapped channel take more time than `timeout` .
  *
- *@see InputChannel.trackInputTimeouts
+ *@see InputChannel.withInputTimeouts
  */
-class TrackedInputTimeouts[A](origin: Input[A], timeout: FiniteDuration)
+class InputWithTimeouts[A](origin: Input[A], timeout: FiniteDuration)
 {
 
   def pair: (Input[A],Input[FiniteDuration]) = (wrapped, timeouts)

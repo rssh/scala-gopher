@@ -12,7 +12,7 @@ import gopher._
  * 
  *
  */
-class TrackedOutputTimeouts[A](origin: Output[A], timeout: FiniteDuration)
+class OutputWithTimeouts[A](origin: Output[A], timeout: FiniteDuration)
 {
 
 
