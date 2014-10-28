@@ -160,6 +160,11 @@ trait Input[A]
   def withInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
                                                new InputWithTimeouts(this,timeout).pair
 
+  /**
+   * duplicate input 
+   */
+  def dup(): (Input[A],Input[A]) = 
+        (new DuppedInput(this)).pair
 
   def async = new {
   

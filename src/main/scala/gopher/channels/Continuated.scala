@@ -56,9 +56,9 @@ object ContRead
         case v@Value(a) => f(v)
         case Skip => Future successful prev
         case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Future successful Never
+                              Never.future
         case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Future successful Never
+                              Never.future
       }
 
    @inline
@@ -69,9 +69,9 @@ object ContRead
       case Value(a) => f(a)
       case Skip => Future successful prev
       case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Future successful Never
+                              Never.future
       case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Future successful Never
+                              Never.future
     }
 
 
@@ -99,6 +99,9 @@ case class Skip[A](function: Skip[A] => Option[Future[Continuated[A]]], override
  * never means the end of conversation
  */
 case object Never extends Continuated[Nothing]
+{
+  val future = Future successful Never
+}
 
 
 

@@ -1,0 +1,4 @@
+
+-  added dup
+-  Output.write(a) now return a
+-  added withTimeot (Input-s and Output-s)
