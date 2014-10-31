@@ -6,6 +6,7 @@ import gopher.tags._
 import org.scalatest._
 import scala.concurrent._
 import scala.concurrent.duration._
+import akka.actor._
 
 
 trait Bingo extends SelectTransputer
@@ -15,12 +16,15 @@ trait Bingo extends SelectTransputer
   val inY = InPort[Int]()
   val out = OutPort[Boolean]()
 
-
   loop {
        case x: inX.read =>
                val y = inY.read
                //Console.println(s"Bingo checker, received ${x}, ${y}")
                out.write(x==y)
+  }
+
+  recover {
+    case ex: ChannelClosedException => SupervisorStrategy.Stop
   }
 
 }
@@ -55,7 +59,7 @@ class BingoSuite extends FunSuite
      bingo.inX connect inX
      bingo.inY connect inY
      bingo.out >~~> acceptor.inA
-     val w = (bingo + acceptor).go
+     val w = (bingo + acceptor).start()
      Await.ready(w,10 seconds) 
      assert(acceptor.nBingos == acceptor.nPairs)
   }

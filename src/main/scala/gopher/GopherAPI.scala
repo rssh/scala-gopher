@@ -76,6 +76,11 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
     actorSystem.actorOf(props,name="channels")
   }
 
+  private[gopher] val transputerSupervisorRef: ActorRef = {
+    val props = Props(classOf[TransputerSupervisor], this)
+    actorSystem.actorOf(props,name="transputerSupervisor")
+  }
+
   private[gopher] def newChannelId: Long =
                         channelIdCounter.getAndIncrement
 

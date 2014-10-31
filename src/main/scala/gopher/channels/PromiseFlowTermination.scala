@@ -31,7 +31,7 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
   def isCompleted = p.isCompleted
 
   def throwIfNotCompleted(ex: Throwable):Unit =
-      p.tryFailure(ex.fillInStackTrace())
+      p.tryFailure(ex)
 
   def completeWith(other: Future[A]): Unit =
      p.completeWith(other)

@@ -55,6 +55,9 @@ trait SelectorBuilder[A]
 
    def go: Future[A] = selector.run
 
+   // for call from SelectorTransforment wich have another 'go'
+   def selectorRun: Future[A] = selector.run
+
    implicit def ec: ExecutionContext = api.executionContext
 
    val selector=new Selector[A](api)
