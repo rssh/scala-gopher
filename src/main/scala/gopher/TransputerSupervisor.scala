@@ -34,14 +34,12 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
 
   def handleFailure(t: Transputer, ex: Throwable)  =
   {
-    System.err.println(s"handle failure ${t} ${ex}")
     import SupervisorStrategy.{Resume,Restart,Stop,Escalate}
     if (t.recoveryStatistics.failure(ex,t.recoveryPolicy,System.nanoTime)) {
         log.error("too many failures per period, escalate", ex)
         escalate(t, new Transputer.TooManyFailures(t))
     }
     if (t.recoveryFunction.isDefinedAt(ex)) {
-        System.err.println("recoveryFunction is defined")
         t.recoveryFunction(ex) match {
            case Resume =>  log.info(s"${t} failed with ${ex.getMessage()}, resume execution")
                            log.debug("caused by",ex)
@@ -56,7 +54,6 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
                             escalate(t,ex)
         }
     } else {
-        System.err.println("recoveryFunction is *not* defined")
         escalate(t,ex)
     }
   }

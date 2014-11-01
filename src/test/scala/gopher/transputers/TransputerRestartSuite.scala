@@ -8,6 +8,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor._
 
+class MyException extends RuntimeException("AAA")
 
 trait BingoWithRestart extends SelectTransputer
 {
@@ -19,10 +20,8 @@ trait BingoWithRestart extends SelectTransputer
 
   recover {
        case ex: ChannelClosedException => 
-                                     System.err.println("handle ChannelClosed, stop")
                                      SupervisorStrategy.Stop
-       case ex: Exception => 
-                                     System.err.println(s"handle ${ex}, restart ")
+       case ex: MyException => 
                                      SupervisorStrategy.Restart
   }
 
@@ -32,7 +31,7 @@ trait BingoWithRestart extends SelectTransputer
                //Console.println(s"Bingo checker, received ${x}, ${y}")
                out.write(x==y)
                if (x==2) {
-                 throw new RuntimeException("AAA")
+                 throw new MyException()
                }
                if (x==100) {
                  fin.write(true)
@@ -63,8 +62,7 @@ trait Acceptor1 extends SelectTransputer
 class TransputerRestartSuite extends FunSuite
 {
 
-  test("bingo must be restored with the same connectons") {
-     pending
+  test("bingo must be restored with the same connectons", Now) {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRestart]

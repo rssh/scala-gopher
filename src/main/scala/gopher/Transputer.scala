@@ -46,7 +46,9 @@ trait Transputer
  class OutPort[A](output:Output[A]) extends Output[A]
  {
   override def cbwrite[B](f: ContWrite[A,B] => Option[(A, Future[Continuated[B]])], ft: FlowTermination[B]): Unit =
+  {
         v.cbwrite(f, ft)
+  }
 
   def api: gopher.GopherAPI = Transputer.this.api
 
@@ -107,11 +109,12 @@ trait Transputer
    def retrieveVals[T:ru.TypeTag](o:Transputer): List[T] =
    {
      val im = mirror.reflect(o);
-     (im.symbol.typeSignature.members.filter(x => x.isTerm).
+     val retval = (im.symbol.typeSignature.members.filter(x => x.isTerm).
                                    map (x => x.asTerm).
-                                   filter ( x => x.typeSignature =:= ru.typeOf[T] && x.isVal).
+                                   filter ( x => x.typeSignature <:< ru.typeOf[T] && x.isVal).
                                    map ((x:ru.TermSymbol) => im.reflectField(x).get.asInstanceOf[T]) 
      ).toList 
+     retval
    }
    
    def copyVar[T:ClassTag:ru.TypeTag,V:ClassTag](x:T, y: T, varName: String): Unit =
@@ -120,14 +123,18 @@ trait Transputer
      val imy = mirror.reflect(y);
      val field = ru.typeOf[T].decl(ru.TermName(varName)).asTerm.accessed.asTerm
      
-     imx.reflectField(field).set(imy.reflectField(field).get)
+     val v = imy.reflectField(field).get
+     imx.reflectField(field).set(v)
    }
 
-   val List(newIns, prevIns) = List(this, prev) map (retrieveVals[InPort[_]](_))
-   for((x,y) <- newIns zip prevIns) copyVar(x,y,"v")
+   def copyPorts[T:ru.TypeTag:ClassTag]:Unit =
+   {
+     val List(newIns, prevIns) = List(this, prev) map (retrieveVals[T](_))
+     for((x,y) <- newIns zip prevIns) copyVar(x,y,"v")
+   }
 
-   val List(newOuts, prevOuts) = List(this, prev) map (retrieveVals[OutPort[_]](_))
-   for((x,y) <- newIns zip prevIns) copyVar(x,y,"v")
+   copyPorts[InPort[_]];
+   copyPorts[OutPort[_]];
  }
 
 
@@ -187,6 +194,8 @@ trait Transputer
 object Transputer
 {
 
+
+
  case class RecoveryStatistics(
     var nFailures: Int = 0,
     var windowStart: Long = 0,
@@ -231,6 +240,8 @@ object Transputer
  {
    addSuppressed(t.recoveryStatistics.lastFailure.get) 
  }
+
+
 
 }
 
