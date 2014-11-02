@@ -1,7 +1,5 @@
 package gopher
 
-import akka.actor._
-import akka.pattern._
 import gopher.channels._
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -9,12 +7,13 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.util._
 import java.util.concurrent.atomic.AtomicLong
-import com.typesafe.config._
+
+import scala.concurrent.ExecutionContext.Implicits.global 
 
 /**
  * Api for providing access to channel and selector interfaces.
  */
-class GopherAPI(as: ActorSystem, es: ExecutionContext)
+class GopherAPI()
 {
 
   /**
@@ -34,23 +33,9 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
-  def actorSystem: ActorSystem = as
-
-  def executionContext: ExecutionContext = es
-
-  def config: Config = as.settings.config.atKey("gopher")
+  def executionContext: ExecutionContext = implicitly[ExecutionContext]
 
   def currentFlow = CurrentFlowTermination
-
-  private[gopher] val transputerSupervisorRef: ActorRef = {
-    val props = Props(classOf[TransputerSupervisor], this)
-    actorSystem.actorOf(props,name="transputerSupervisor")
-  }
-
-  private[gopher] def newChannelId: Long =
-                        channelIdCounter.getAndIncrement
-
-  private[this] val channelIdCounter = new AtomicLong(0L)
 
   
 }

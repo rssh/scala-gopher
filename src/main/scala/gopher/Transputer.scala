@@ -4,7 +4,6 @@ import scala.language.experimental.macros
 import channels._
 import scala.concurrent._
 import scala.concurrent.duration._
-import akka.actor._
 
 
 trait Transputer
@@ -35,15 +34,9 @@ trait Transputer
  
  def start():Future[Unit] =
  {
-   api.transputerSupervisorRef ! TransputerSupervisor.Start(this)
    flowTermination.future
  }
 
- /**
-  * set recover function 
-  **/
- def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): Unit =
-  { recoveryFunction = f }
 
  def api: GopherAPI
 
@@ -127,7 +120,6 @@ trait Transputer
    if (!(prev eq null)) {
       recoveryStatistics = prev.recoveryStatistics
       recoveryPolicy = prev.recoveryPolicy
-      recoveryFunction = prev.recoveryFunction
       parent = prev.parent
    }
    //§§onRestart()
@@ -135,10 +127,6 @@ trait Transputer
 
  private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
  private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
- private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty /* {
-                                            case ex: ChannelClosedException => SupervisorStrategy.Stop                       
-                                        }
-                                        */
  private[gopher] var parent: Option[Transputer] = None
  private[gopher] var flowTermination: PromiseFlowTermination[Unit] = createFlowTermination()
 
@@ -160,12 +148,6 @@ trait Transputer
  }
  
 
-/*
- import akka.event.LogSource
- implicit def logSource: LogSource[Transputer] = new LogSource[Transputer] {
-    def genString(t: Transputer) = t.getClass.getName
- }
-*/
 
 }
 

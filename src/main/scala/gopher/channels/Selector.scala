@@ -1,8 +1,6 @@
 package gopher.channels
 
 import gopher._
-import akka.actor._
-import akka.pattern._
 import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicBoolean
