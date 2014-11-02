@@ -13,10 +13,10 @@ class MyException extends RuntimeException("AAA")
 trait BingoWithRecover extends SelectTransputer 
 {
 
-  val inX = InPort[Int]()
-  val inY = InPort[Int]()
-  val out = OutPort[Boolean]()
-  val fin = OutPort[Boolean]()
+  val inX = InPort[Int](1)
+  val inY = InPort[Int](1)
+  val out = OutPort[Boolean](false)
+  val fin = OutPort[Boolean](false)
 
   var exReaction: SupervisorStrategy.Directive = SupervisorStrategy.Restart
   var throwAlways: Boolean = false
@@ -40,16 +40,6 @@ trait BingoWithRecover extends SelectTransputer
 }
 
 
-trait Acceptor1 extends SelectTransputer
-{
-
-  val inA = InPort[Boolean]()
-
-  @volatile var nBingos = 0
-  @volatile var nPairs = 0
-
-
-}
 
 class TransputerRestartSuite extends FunSuite
 {

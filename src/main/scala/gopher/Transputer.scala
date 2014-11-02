@@ -7,40 +7,28 @@ import scala.concurrent.duration._
 import akka.actor._
 
 
-/**
- * Reusable unit of application structure, which consists from  
- * set of input ports, set of output ports and behaviour
- *
- * Transputers can be created as elementary behaviour, descibed by select
- * statement and then can be combined into larger structures
- *
- * Transputers can be recovered from execeptions (i.e. transputer can be restarted or resume execution)
- *  or escalated to parent transputers or root superviser.
- *
- */
 trait Transputer
 {
 
- class InPort[A](input:Input[A]) // extends Input[A]
+ class InPort[A](a:A) // extends Input[A]
  {
 
-   var v: Input[A] = input
+   var v: A = a
  }
  
  object InPort
  {
-  @inline def apply[A]():InPort[A] = new InPort(null) // TODO: create special non-initialized class.
+  @inline def apply[A](a:A):InPort[A] = new InPort(a) 
  }
 
- class OutPort[A](output:Output[A]) // extends Output[A]
+ class OutPort[A](a:A)
  {
-
-  var v: Output[A] = output
+  var v: A = a
  }
 
  object OutPort
  {
-  @inline def apply[A]():OutPort[A] = new OutPort(null) // TODO: create special non-initialized class.
+  @inline def apply[A](a:A):OutPort[A] = new OutPort(a) 
  }
 
  def +(p: Transputer) = new ParTransputer(api, Seq(this,p))
