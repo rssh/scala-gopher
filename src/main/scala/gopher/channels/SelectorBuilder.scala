@@ -4,7 +4,6 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
-import gopher.util._
 import scala.concurrent._
 import scala.annotation.unchecked._
 
