@@ -35,8 +35,6 @@ class GopherAPI()
 
   def executionContext: ExecutionContext = implicitly[ExecutionContext]
 
-  def currentFlow = CurrentFlowTermination
-
   
 }
 
