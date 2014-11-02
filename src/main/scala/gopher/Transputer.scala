@@ -116,10 +116,10 @@ trait Transputer
    def retrieveVals[T:ru.TypeTag](o:Transputer): List[T] =
    {
      val im = mirror.reflect(o);
-     val retval = (im.symbol.typeSignature.members.filter(x => x.isTerm).
-                                   map (x => x.asTerm).
-                                   filter ( x => x.typeSignature <:< ru.typeOf[T] && x.isVal).
-                                   map ((x:ru.TermSymbol) => im.reflectField(x).get.asInstanceOf[T]) 
+     val termMembers = im.symbol.typeSignature.members.filter(_.isTerm).map(_.asTerm)
+     val retval = (termMembers.
+                      filter ( x => x.typeSignature <:< ru.typeOf[T] && x.isVal).
+                      map ((x:ru.TermSymbol) => im.reflectField(x).get.asInstanceOf[T]) 
      ).toList 
      retval
    }
