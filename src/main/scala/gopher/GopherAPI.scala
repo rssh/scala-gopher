@@ -31,28 +31,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def select: SelectFactory =
     new SelectFactory(this)
 
-  /**
-   * obtain channel
-   *
-   *{{{
-   *  val channel = gopherApi.makeChannel[Int]()
-   *  channel.awrite(1 to 100)
-   *}}}
-   */
-  def makeChannel[A](capacity: Int = 1) =
-    {
-     val nextId = newChannelId
-     val futureChannelRef = (channelSupervisorRef.ask(
-                                  NewChannel(nextId, capacity)
-                             )(10 seconds)
-                              .asInstanceOf[Future[ActorRef]]
-                            )
-     new IOChannel[A](futureChannelRef, this)
-    }
-
-  def futureInput[A](future:Future[A]): FutureInput[A] = new FutureInput(future, this)
-
-  def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
@@ -64,18 +42,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def currentFlow = CurrentFlowTermination
 
-  private[gopher] val idleDetector = new IdleDetector(this)
-
-  private[gopher] val continuatedProcessorRef: ActorRef = {
-    val props = Props(classOf[ChannelProcessor], this)
-    actorSystem.actorOf(props,name="channelProcessor")
-  }
-
-  private[gopher] val channelSupervisorRef: ActorRef = {
-    val props = Props(classOf[ChannelSupervisor], this)
-    actorSystem.actorOf(props,name="channels")
-  }
-
   private[gopher] val transputerSupervisorRef: ActorRef = {
     val props = Props(classOf[TransputerSupervisor], this)
     actorSystem.actorOf(props,name="transputerSupervisor")
@@ -84,12 +50,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   private[gopher] def newChannelId: Long =
                         channelIdCounter.getAndIncrement
 
-  private[gopher] def continue[A](next:Future[Continuated[A]], ft:FlowTermination[A]): Unit =
-                       next.onComplete{
-                          case Success(cont) => continuatedProcessorRef ! cont
-                          case Failure(ex) => ft.throwIfNotCompleted(ex)
-                       }(executionContext)
- 
   private[this] val channelIdCounter = new AtomicLong(0L)
 
   

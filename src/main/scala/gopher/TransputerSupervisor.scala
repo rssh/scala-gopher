@@ -15,12 +15,6 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
 
   def receive = {
      case Start(t) => log.debug(s"starting ${t}")
-                        t.goOnce onComplete {
-                             case scala.util.Success(x) => 
-                                    api.transputerSupervisorRef ! Stop(t)
-                             case scala.util.Failure(ex) => 
-                                    api.transputerSupervisorRef ! Failure(t,ex)
-                        }
      case Failure(t,ex) => 
                         handleFailure(t,ex)
      case Stop(t) => log.debug(s"${t} stopped")

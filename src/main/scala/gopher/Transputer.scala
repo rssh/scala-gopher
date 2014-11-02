@@ -39,8 +39,6 @@ trait Transputer
    flowTermination.future
  }
 
- def goOnce: Future[Unit] 
-
  /**
   * set recover function 
   **/
@@ -234,11 +232,6 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
 {
 
  /**
-  * configure loop in selector
-  */
- def loop(f: PartialFunction[Any,Unit]): Unit = macro SelectorBuilder.loopImpl[Unit]
-
- /**
   * When called inside loop - stop execution of selector, from outside - terminate transformer
   */
  def stop():Unit = stopFlowTermination() 
@@ -259,8 +252,6 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
       selector.doExit(())
    }
  }
-
- def goOnce: Future[Unit] = selectorRun
 
  private[gopher] override def beforeResume() : Unit =
  {
