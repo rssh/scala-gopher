@@ -47,16 +47,22 @@ class DuppedChannelsSuite extends FunSuite with AsyncAssertions {
       assert(aw.isCompleted)
   }
   
-  test("on closing of main stream dupped outputs also closed.", Now) {
+  test("on closing of main stream dupped outputs also closed.") {
       val ch = gopherApi.makeChannel[Int]()
       val (in1, in2) = ch.dup
-      ch.awrite(1) onComplete (_ => ch.close())
+      val f1 = go {
+          ch.write(1) 
+          ch.close()
+      }
+      Await.ready(f1, 1 second) 
       val w = new Waiter
-      val r1 = in1.aread map { x =>  w(assert(x==1)); w.dismiss() } onFailure {
-                                       case ex => w( throw ex )
-                                     }
-      val r2 = in1.aread onFailure{  case ex => w(assert(ex.isInstanceOf[ChannelClosedException]));
-                                     w.dismiss() }
+      in1.aread map { x =>  w(assert(x==1)); w.dismiss() } onComplete {
+                           case Failure(ex) => w( throw ex )
+                           case Success(_) =>
+                                     in1.aread onFailure{  case ex => w(assert(ex.isInstanceOf[ChannelClosedException]));
+                                                           w.dismiss() 
+                                 }
+      }
       w.await(timeout(10 seconds),Dismissals(2))
   }
 

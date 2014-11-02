@@ -60,9 +60,9 @@ trait SelectorBuilder[A]
 
    implicit def ec: ExecutionContext = api.executionContext
 
-   val selector=new Selector[A](api)
+   private[gopher] var selector=new Selector[A](api)
 
-   // used in
+   // used for reading from future
    @inline
    def futureInput[A](f:Future[A]):FutureInput[A]=api.futureInput(f)
 
@@ -219,7 +219,7 @@ object SelectorBuilder
    {
      import c.universe._
      val builder = builderImpl[T](c)(f)
-     c.Expr[Unit](c.untypecheck(q"${builder}"))
+     c.Expr[Unit](c.untypecheck(q"{selectorInit = ()=>${builder}; selectorInit()}"))
    }
 
    def foreachTransformMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =

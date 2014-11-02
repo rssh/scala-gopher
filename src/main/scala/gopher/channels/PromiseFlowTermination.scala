@@ -36,8 +36,7 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
   def completeWith(other: Future[A]): Unit =
      p.completeWith(other)
       
-
-  val p = Promise[A]()
+  private[this] val p = Promise[A]()
 
 }
 

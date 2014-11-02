@@ -14,7 +14,7 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
   implicit def ec =  api.executionContext
 
   def receive = {
-     case Start(t) => log.info(s"starting ${t}")
+     case Start(t) => log.debug(s"starting ${t}")
                         t.goOnce onComplete {
                              case scala.util.Success(x) => 
                                     api.transputerSupervisorRef ! Stop(t)
@@ -23,7 +23,7 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
                         }
      case Failure(t,ex) => 
                         handleFailure(t,ex)
-     case Stop(t) => log.info(s"${t} stopped")
+     case Stop(t) => log.debug(s"${t} stopped")
                      if (!t.flowTermination.isCompleted) {
                          t.flowTermination.doExit(())
                      }
@@ -36,21 +36,22 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
   {
     import SupervisorStrategy.{Resume,Restart,Stop,Escalate}
     if (t.recoveryStatistics.failure(ex,t.recoveryPolicy,System.nanoTime)) {
-        log.error("too many failures per period, escalate", ex)
         escalate(t, new Transputer.TooManyFailures(t))
-    }
-    if (t.recoveryFunction.isDefinedAt(ex)) {
+    } else if (t.recoveryFunction.isDefinedAt(ex)) {
         t.recoveryFunction(ex) match {
-           case Resume =>  log.info(s"${t} failed with ${ex.getMessage()}, resume execution")
-                           log.debug("caused by",ex)
+           case Resume =>  log.debug(s"${t} failed with ${ex.getMessage()}, resume execution")
+                           log.debug("caused by {}",ex)
+                           t.beforeResume()
                            self ! Start(t)
-           case Restart => log.info(s"${t} failed with ${ex.getMessage()}, restart")
+           case Restart => log.debug(s"${t} failed with ${ex.getMessage()}, restart")
+                           log.debug("caused by {}",ex)
                            val nt = t.recoverFactory()
                            nt.copyPorts(t)
                            nt.copyState(t)
+                           nt.beforeRestart(t)
                            self ! Start(nt)
            case Stop =>    self ! TransputerSupervisor.Stop(t)
-           case Escalate => log.info(s"escalate exception from ${t}",ex)
+           case Escalate => log.debug(s"escalate from ${t} : ${ex}")
                             escalate(t,ex)
         }
     } else {

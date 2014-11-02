@@ -10,13 +10,24 @@ import akka.actor._
 
 class MyException extends RuntimeException("AAA")
 
-trait BingoWithRestart extends SelectTransputer
+trait BingoWithRecover extends SelectTransputer with TransputerLogging
 {
 
   val inX = InPort[Int]()
   val inY = InPort[Int]()
   val out = OutPort[Boolean]()
   val fin = OutPort[Boolean]()
+
+  var exReaction: SupervisorStrategy.Directive = SupervisorStrategy.Restart
+  var throwAlways: Boolean = false
+
+  override def copyState(prev: Transputer):Unit =
+  {
+    val bingoPrev = prev.asInstanceOf[BingoWithRecover]
+    exReaction = bingoPrev.exReaction
+    throwAlways = bingoPrev.throwAlways
+  }
+
 
   recover {
        case ex: ChannelClosedException => 
@@ -28,9 +39,11 @@ trait BingoWithRestart extends SelectTransputer
   loop {
        case x: inX.read =>
                val y = inY.read
-               //Console.println(s"Bingo checker, received ${x}, ${y}")
+               //log.info(s"Bingo checker, received ${x}, ${y} ")
                out.write(x==y)
                if (x==2) {
+                 throw new MyException()
+               } else if (x > 2 && throwAlways) {
                  throw new MyException()
                }
                if (x==100) {
@@ -39,6 +52,7 @@ trait BingoWithRestart extends SelectTransputer
   }
 
 }
+
 
 trait Acceptor1 extends SelectTransputer
 {
@@ -62,10 +76,11 @@ trait Acceptor1 extends SelectTransputer
 class TransputerRestartSuite extends FunSuite
 {
 
-  test("bingo must be restored with the same connectons", Now) {
+  test("bingo restore with the same connectons") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
-     val bingo = gopherApi.makeTransputer[BingoWithRestart]
+     val bingo = gopherApi.makeTransputer[BingoWithRecover]
+     bingo.exReaction = SupervisorStrategy.Restart
      val acceptor = gopherApi.makeTransputer[Acceptor1]
      val fin = gopherApi.makeChannel[Boolean]()
      bingo.inX connect inX
@@ -77,6 +92,60 @@ class TransputerRestartSuite extends FunSuite
      Await.ready(w,10 seconds) 
      assert(acceptor.nBingos == acceptor.nPairs)
   }
+
+  test("bingo resume") {
+     val inX = gopherApi.iterableInput(1 to 100)
+     val inY = gopherApi.iterableInput(1 to 100)
+     val bingo = gopherApi.makeTransputer[BingoWithRecover]
+     bingo.exReaction = SupervisorStrategy.Resume
+     val acceptor = gopherApi.makeTransputer[Acceptor1]
+     val fin = gopherApi.makeChannel[Boolean]()
+     bingo.inX connect inX
+     bingo.inY connect inY
+     bingo.out >~~> acceptor.inA
+     bingo.fin connect fin
+     (bingo + acceptor).start()
+     val w = fin.aread
+     Await.ready(w,10 seconds) 
+     assert(acceptor.nBingos == acceptor.nPairs)
+  }
+
+  test("bingo - too many failures with restart", Now) {
+     val inX = gopherApi.iterableInput(1 to 100)
+     val inY = gopherApi.iterableInput(1 to 100)
+     val bingo = gopherApi.makeTransputer[BingoWithRecover]
+     bingo.exReaction = SupervisorStrategy.Restart
+     bingo.throwAlways = true
+     val acceptor = gopherApi.makeTransputer[Acceptor1]
+     val fin = gopherApi.makeChannel[Boolean]()
+     bingo.inX connect inX
+     bingo.inY connect inY
+     bingo.out >~~> acceptor.inA
+     bingo.fin connect fin
+     val w = (bingo + acceptor).start()
+     intercept[Transputer.TooManyFailures] {
+        Await.result(w,10 seconds) 
+     }
+  }
+
+  test("bingo - too many failures with resume", Now) {
+     val inX = gopherApi.iterableInput(1 to 100)
+     val inY = gopherApi.iterableInput(1 to 100)
+     val bingo = gopherApi.makeTransputer[BingoWithRecover]
+     bingo.exReaction = SupervisorStrategy.Resume
+     bingo.throwAlways = true
+     val acceptor = gopherApi.makeTransputer[Acceptor1]
+     val fin = gopherApi.makeChannel[Boolean]()
+     bingo.inX connect inX
+     bingo.inY connect inY
+     bingo.out >~~> acceptor.inA
+     bingo.fin connect fin
+     val w = (bingo + acceptor).start()
+     intercept[Transputer.TooManyFailures] {
+        Await.result(w,10 seconds) 
+     }
+  }
+
 
   def gopherApi = CommonTestObjects.gopherApi
 

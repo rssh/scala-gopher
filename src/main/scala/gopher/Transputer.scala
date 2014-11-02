@@ -11,6 +11,12 @@ import akka.actor._
  * Reusable unit of application structure, which consists from  
  * set of input ports, set of output ports and behaviour
  *
+ * Transputers can be created as elementary behaviour, descibed by select
+ * statement and then can be combined into larger structures
+ *
+ * Transputers can be recovered from execeptions (i.e. transputer can be restarted or resume execution)
+ *  or escalated to parent transputers or root superviser.
+ *
  */
 trait Transputer
 {
@@ -92,11 +98,12 @@ trait Transputer
 
  // internal API.
 
- def resume() 
- {
-   onResume();
- }
-
+ /**
+  * copyState from previous instance when transputer is restarted.
+  * can be overriden in subclasses (by default: do nothing)
+  * 
+  * Note, that port connection is restored before call of copyState
+  */
  def copyState(prev: Transputer): Unit = {}
 
  
@@ -158,8 +165,25 @@ trait Transputer
   */
  protected def onStop() { }
 
- private[gopher] val recoveryStatistics = Transputer.RecoveryStatistics( )
- private[gopher] val recoveryPolicy = Transputer.RecoveryPolicy( )
+ private[gopher] def beforeResume() 
+ {
+   flowTermination = createFlowTermination()
+   onResume();
+ }
+
+ private[gopher] def beforeRestart(prev: Transputer) 
+ {
+   if (!(prev eq null)) {
+      recoveryStatistics = prev.recoveryStatistics
+      recoveryPolicy = prev.recoveryPolicy
+      recoveryFunction = prev.recoveryFunction
+      parent = prev.parent
+   }
+   //§§onRestart()
+ }
+
+ private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
+ private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
  private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty /* {
                                             case ex: ChannelClosedException => SupervisorStrategy.Stop                       
                                         }
@@ -186,9 +210,16 @@ trait Transputer
  
  import akka.event.LogSource
  implicit def logSource: LogSource[Transputer] = new LogSource[Transputer] {
-    def genString(t: Transputer) = t.toString
+    def genString(t: Transputer) = t.getClass.getName
  }
 
+}
+
+trait TransputerLogging
+{
+  this: Transputer =>
+
+  val log = akka.event.Logging(api.actorSystem, this)
 }
 
 object Transputer
@@ -232,8 +263,8 @@ object Transputer
    
 
  case class RecoveryPolicy(
-    var maxFailures: Int = 9999,
-    var windowDuration: Duration = 10 seconds
+    var maxFailures: Int = 10,
+    var windowDuration: Duration = 1 second
  )
 
  class TooManyFailures(t: Transputer) extends RuntimeException(s"Too many failures for ${t}", t.recoveryStatistics.firstFailure.get)
@@ -281,6 +312,16 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
 
  def goOnce: Future[Unit] = selectorRun
 
+ private[gopher] override def beforeResume() : Unit =
+ {
+   super.beforeResume()
+   selector = new Selector[Unit](api)
+   selectorInit()
+ }
+
+ protected var selectorInit: ()=>Unit =
+                         { () => throw new IllegalStateException("selectorInit us not initialized yet") }
+
 }
 
 class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends Transputer
@@ -315,6 +356,13 @@ class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends
    
    
    def recoverFactory: () => Transputer = () => new ParTransputer(api,childs)
+
+   private[gopher] override def beforeResume() : Unit =
+   {
+       super.beforeResume()
+       for(ch <- childs) ch.beforeResume()
+   }
+
 }
 
 
