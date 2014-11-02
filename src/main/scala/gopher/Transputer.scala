@@ -21,25 +21,8 @@ import akka.actor._
 trait Transputer
 {
 
- class InPort[A](input:Input[A]) extends Input[A]
+ class InPort[A](input:Input[A]) // extends Input[A]
  {
-
-   override def cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = 
-          v.cbread(f,ft)
-
-   def api: gopher.GopherAPI = Transputer.this.api
-
-   def connect(x: Input[A]): Unit = 
-      { v=x }
-
-   def connect(outPort: Transputer#OutPort[A], bufferSize:Int = 1): Unit = 
-     {
-       val ch = api.makeChannel[A](bufferSize)
-       v = ch
-       outPort.v = ch
-     } 
-
-   def  <~~<(x: Transputer#OutPort[A]) = connect(x)
 
    var v: Input[A] = input
  }
@@ -49,26 +32,8 @@ trait Transputer
   @inline def apply[A]():InPort[A] = new InPort(null) // TODO: create special non-initialized class.
  }
 
- class OutPort[A](output:Output[A]) extends Output[A]
+ class OutPort[A](output:Output[A]) // extends Output[A]
  {
-  override def cbwrite[B](f: ContWrite[A,B] => Option[(A, Future[Continuated[B]])], ft: FlowTermination[B]): Unit =
-  {
-        v.cbwrite(f, ft)
-  }
-
-  def api: gopher.GopherAPI = Transputer.this.api
-
-  def connect(x: Output[A]): Unit = 
-      { v=x }
-
-  def connect(inPort: Transputer#InPort[A], bufferSize:Int = 1): Unit = 
-  {
-   val ch = api.makeChannel[A](bufferSize)
-   v = ch
-   inPort.v = ch
-  }
-
-  def >~~> (x: Transputer#InPort[A]) = connect(x)
 
   var v: Output[A] = output
  }
@@ -208,19 +173,16 @@ trait Transputer
 
  }
  
+
+/*
  import akka.event.LogSource
  implicit def logSource: LogSource[Transputer] = new LogSource[Transputer] {
     def genString(t: Transputer) = t.getClass.getName
  }
+*/
 
 }
 
-trait TransputerLogging
-{
-  this: Transputer =>
-
-  val log = akka.event.Logging(api.actorSystem, this)
-}
 
 object Transputer
 {
