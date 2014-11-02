@@ -3,7 +3,7 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -11,7 +11,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 scalacOptions ++= Seq("-unchecked","-deprecation" /* ,"-Ymacro-debug-lite" */  )
 
-libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.2"
+libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.4"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
@@ -20,7 +20,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
 //TODO: enable after 1.0
-libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
+//libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
