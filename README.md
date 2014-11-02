@@ -136,6 +136,15 @@ For input we have defined usual collection functions, like `map`, `zip`, `takeN`
 
 `|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read vaue from channel x or y when one will be available.
 
+For each input and output you can create facility with tracked timeout, i.e. if `in` is input, than
+```
+ val (inReady, inTimeouts) = in.withInputTimeouts(10 seconds)
+```
+will return two inputs, where reading from `inReady` will return the same as reading from `in`, and if waiting for reading takes longer than 10 seconds then value of timeout will be available in `inTimeouts`. Analogically we can create output with timeouts:
+```
+ val (outReady, outTimeouts) = out.withOutputTimeouts(10 seconds)
+```
+
 
 Also note, that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
 
