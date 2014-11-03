@@ -1,7 +1,6 @@
 package gopher
 
 import scala.language.experimental.macros
-import channels._
 import scala.concurrent._
 import scala.concurrent.duration._
 
@@ -34,7 +33,7 @@ trait Transputer
  
  def start():Future[Unit] =
  {
-   flowTermination.future
+   ???
  }
 
 
@@ -111,7 +110,6 @@ trait Transputer
 
  private[gopher] def beforeResume() 
  {
-   flowTermination = createFlowTermination()
    onResume();
  }
 
@@ -128,24 +126,7 @@ trait Transputer
  private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
  private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
  private[gopher] var parent: Option[Transputer] = None
- private[gopher] var flowTermination: PromiseFlowTermination[Unit] = createFlowTermination()
 
- private[this] def createFlowTermination() = new PromiseFlowTermination[Unit]() {
-
-    override def doThrow(e:Throwable): Unit =
-    {
-      onEscalatedFailure(e)
-      super.doThrow(e)
-    }
-    
-    override def doExit(a:Unit): Unit =
-    {
-      super.doExit(()) 
-      onStop()
-    }
-
-
- }
  
 
 
@@ -213,13 +194,6 @@ object Transputer
 trait SelectTransputer extends Transputer  
 {
 
- /**
-  * When called inside loop - stop execution of selector, from outside - terminate transformer
-  */
- def stop():Unit = stopFlowTermination() 
-
- private[this] def stopFlowTermination(implicit ft:FlowTermination[Unit] = flowTermination): Unit =
-                    ft.doExit(())
 
  protected override def onEscalatedFailure(ex: Throwable): Unit =
  {
@@ -267,10 +241,7 @@ class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends
                                                                           
    override def +(p: Transputer) = new ParTransputer(api, childs :+ p)
 
-   private[this] def stopChilds(): Unit =
-     for(x <- childs if (!x.flowTermination.isCompleted) ) {
-        x.flowTermination.doExit(())
-     }
+   private[this] def stopChilds(): Unit = { }
    
    
    def recoverFactory: () => Transputer = () => new ParTransputer(api,childs)
