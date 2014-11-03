@@ -252,7 +252,7 @@ Also note, that you can provide own Input and Output implementations by implemen
    
      {
       val selector = new Selector[Unit](gopherApi)
-      selector.addReader(ch1, cont=>Some{gen=> something-x
+      selector.addReader(ch1, cont=>Some{ in => something-x
                                          Future successful cont
                                      }
                         )
