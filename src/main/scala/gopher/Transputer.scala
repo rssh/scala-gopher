@@ -4,6 +4,7 @@ import scala.language.experimental.macros
 import scala.concurrent._
 import scala.concurrent.duration._
 
+class GopherAPI
 
 trait Transputer
 {
