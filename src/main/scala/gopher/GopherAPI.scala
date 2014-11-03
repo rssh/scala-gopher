@@ -16,20 +16,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class GopherAPI()
 {
 
-  /**
-   * obtain select factory
-   *
-   * {{{
-   *  goopherApi.select.once[String] {
-   *    case x: a.read => s"\${x} from A"
-   *    case x: b.read => s"\${x} from B"
-   *    case _ => "IDLE"
-   *  }
-   * }}}
-   */
-  def select: SelectFactory =
-    new SelectFactory(this)
-
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 

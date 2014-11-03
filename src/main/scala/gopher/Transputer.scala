@@ -210,7 +210,7 @@ object Transputer
  * Transputer, where dehaviour can be described by selector function
  * 
  **/
-trait SelectTransputer extends ForeverSelectorBuilder with Transputer  
+trait SelectTransputer extends Transputer  
 {
 
  /**
@@ -224,21 +224,16 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
  protected override def onEscalatedFailure(ex: Throwable): Unit =
  {
    super.onEscalatedFailure(ex)
-   selector.throwIfNotCompleted(ex)
  }
 
  protected override def onStop(): Unit =
  {
    super.onStop()
-   if (!selector.isCompleted) {
-      selector.doExit(())
-   }
  }
 
  private[gopher] override def beforeResume() : Unit =
  {
    super.beforeResume()
-   selector = new Selector[Unit](api)
    selectorInit()
  }
 
