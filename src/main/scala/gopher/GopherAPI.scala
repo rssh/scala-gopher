@@ -17,7 +17,7 @@ class GopherAPI()
 
 
 
-  def executionContext: ExecutionContext = implicitly[ExecutionContext]
+ //  def executionContext: ExecutionContext = implicitly[ExecutionContext]
 
   
 }

@@ -222,21 +222,7 @@ class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends
    childs.foreach(_.parent = Some(this))
 
    def goOnce: Future[Unit] = {
-     implicit val ec: ExecutionContext = api.executionContext
-     @volatile var inStop = false
-     def withStopChilds[A](f: Future[A]):Future[A] =
-     {
-      f.onComplete{ _ =>
-        if (!inStop) {
-           inStop = true
-           stopChilds()
-        }
-      }
-      f
-     }
-     withStopChilds(
-         Future.sequence(childs map( x=> withStopChilds(x.start()) ) ) 
-     ) map (_ => ())
+      ???
    }
                                                                           
    override def +(p: Transputer) = new ParTransputer(api, childs :+ p)
