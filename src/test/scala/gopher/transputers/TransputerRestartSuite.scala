@@ -5,20 +5,6 @@ import org.scalatest._
 import scala.concurrent._
 import scala.concurrent.duration._
 
-class MyException extends RuntimeException("AAA")
-
-trait BingoWithRecover extends SelectTransputer 
-{
-
-  val inX = InPort[Int](1)
-  val inY = InPort[Int](1)
-  val out = OutPort[Boolean](false)
-  val fin = OutPort[Boolean](false)
-
-
-
-}
-
 
 
 class TransputerRestartSuite extends FunSuite
