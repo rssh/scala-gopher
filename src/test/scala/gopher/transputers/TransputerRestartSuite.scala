@@ -1,7 +1,6 @@
 package gopher.transputers
 
 import gopher._
-import gopher.channels._
 import org.scalatest._
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -40,7 +39,7 @@ class TransputerRestartSuite extends FunSuite
   }
 
 
-  def gopherApi = CommonTestObjects.gopherApi
+  def gopherApi = new GopherAPI()
 
 }
 
