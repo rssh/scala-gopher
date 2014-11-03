@@ -16,26 +16,9 @@ class GopherAPI()
 {
 
 
-  def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
   def executionContext: ExecutionContext = implicitly[ExecutionContext]
 
   
 }
 
-object GopherAPI
-{
-
-  def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
-    import c.universe._
-    c.Expr[T](q"""{ def factory():${c.weakTypeOf[T]} = new ${c.weakTypeOf[T]} { 
-                                                def api = ${c.prefix} 
-                                                def recoverFactory = factory
-                                     }
-                    val retval = factory()
-                    retval
-                  }
-               """)
-  }
-
-}
