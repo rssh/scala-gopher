@@ -1,8 +1,5 @@
-package gopher
+package gopherCompilerIssue
 
-import scala.language.experimental.macros
-import scala.concurrent._
-import scala.concurrent.duration._
 
 class GopherAPI
 
@@ -78,7 +75,7 @@ trait Transputer
  def recoverFactory: ()=>Transputer
 
 
- private[gopher] var parent: Option[Transputer] = None
+ var parent: Option[Transputer] = None
 
 
 }
