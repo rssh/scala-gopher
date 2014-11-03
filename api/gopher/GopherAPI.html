@@ -28,9 +28,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/class_big.png" />
+        <a href="GopherAPI$.html" title="Go to companion"><img src="../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>GopherAPI</h1> <span class="permalink">
+        <h1><a href="GopherAPI$.html" title="Go to companion">GopherAPI</a></h1> <span class="permalink">
       <a href="../index.html#gopher.GopherAPI" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
@@ -436,6 +436,23 @@
     </span>
       <p class="shortcomment cmt">obtain channel</p><div class="fullcomment"><div class="comment cmt"><p>obtain channel</p><pre><span class="kw">val</span> channel = gopherApi.makeChannel[<span class="std">Int</span>]()
 channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre></div></div>
+    </li><li name="gopher.GopherAPI#makeTransputer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="makeTransputer[T&lt;:gopher.Transputer]:T"></a>
+      <a id="makeTransputer[T&lt;:Transputer]:T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeTransputer</span><span class="tparams">[<span name="T">T &lt;: <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>]</span><span class="result">: <span class="extype" name="gopher.GopherAPI.makeTransputer.T">T</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.GopherAPI@makeTransputer[T&lt;:gopher.Transputer]:T" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -504,9 +521,9 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
       </a>
     </span>
       <p class="shortcomment cmt">obtain select factory</p><div class="fullcomment"><div class="comment cmt"><p>obtain select factory</p><pre>goopherApi.select.once[<span class="std">String</span>] {
-<span class="kw">case</span> x: a.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from A"</span>
-<span class="kw">case</span> x: b.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from B"</span>
-<span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="lit">"IDLE"</span>
+  <span class="kw">case</span> x: a.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from A"</span>
+  <span class="kw">case</span> x: b.read <span class="kw">=&gt;</span> s<span class="lit">"${x} from B"</span>
+  <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="lit">"IDLE"</span>
 }</pre></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>

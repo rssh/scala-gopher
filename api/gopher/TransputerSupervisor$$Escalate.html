@@ -1,22 +1,22 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>SelectFactory - gopher.channels.SelectFactory</title>
-          <meta name="description" content="SelectFactory - gopher.channels.SelectFactory" />
-          <meta name="keywords" content="SelectFactory gopher.channels.SelectFactory" />
+          <title>Escalate - gopher.TransputerSupervisor.Escalate</title>
+          <meta name="description" content="Escalate - gopher.TransputerSupervisor.Escalate" />
+          <meta name="keywords" content="Escalate gopher.TransputerSupervisor.Escalate" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
-      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
-      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../lib/template.js"></script>
-      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
       
       <script type="text/javascript">
          if(top === self) {
-            var url = '../../index.html';
-            var hash = 'gopher.channels.SelectFactory';
+            var url = '../index.html';
+            var hash = 'gopher.TransputerSupervisor$$Escalate';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -28,11 +28,11 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
-        <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
-        <h1>SelectFactory</h1> <span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../lib/class_big.png" />
+        <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a>.<a href="TransputerSupervisor$.html" class="extype" name="gopher.TransputerSupervisor">TransputerSupervisor</a></p>
+        <h1>Escalate</h1> <span class="permalink">
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       </div>
@@ -40,18 +40,16 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SelectFactory</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">Escalate</span><span class="params">(<span name="t">t: <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>, <span name="ex">ex: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <a href="TransputerSupervisor$$Message.html" class="extype" name="gopher.TransputerSupervisor.Message">Message</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Factory for select instantiation.
-Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gopherApi.select.forever
-<span class="kw">for</span>(s <span class="kw">&lt;-</span> selector) ...</pre></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="gopher.channels.SelectFactory">SelectFactory</a></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="TransputerSupervisor$$Message.html" class="extype" name="gopher.TransputerSupervisor.Message">Message</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -69,7 +67,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.channels.SelectFactory"><span>SelectFactory</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.TransputerSupervisor.Escalate"><span>Escalate</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="gopher.TransputerSupervisor.Message"><span>Message</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -89,47 +87,27 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="gopher.channels.SelectFactory#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.SelectFactory"></a>
-      <a id="&lt;init&gt;:SelectFactory"></a>
+              <ol><li name="gopher.TransputerSupervisor.Escalate#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(t:gopher.Transputer,ex:Throwable):gopher.TransputerSupervisor.Escalate"></a>
+      <a id="&lt;init&gt;:Escalate"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SelectFactory</span><span class="params">(<span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
+        <span class="name">Escalate</span><span class="params">(<span name="t">t: <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>, <span name="ex">ex: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.SelectFactory" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@&lt;init&gt;(t:gopher.Transputer,ex:Throwable):gopher.TransputerSupervisor.Escalate" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       
     </li></ol>
             </div>
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="gopher.channels.SelectFactory.SelectFactoryApi" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="SelectFactoryApiextendsAnyRef"></a>
-      <a id="SelectFactoryApi:SelectFactoryApi"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="SelectFactory$SelectFactoryApi.html"><span class="name">SelectFactoryApi</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@SelectFactoryApiextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -147,8 +125,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -164,8 +142,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@##():Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@##():Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -181,8 +159,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -198,8 +176,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -215,11 +193,11 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@clone():Object" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@clone():Object" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
       <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
@@ -238,28 +216,28 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
-      <a id="equals(Any):Boolean"></a>
+    </li><li name="gopher.TransputerSupervisor.Escalate#ex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ex:Throwable"></a>
+      <a id="ex:Throwable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">ex</span><span class="result">: <span class="extype" name="scala.Throwable">Throwable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@ex:Throwable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -272,35 +250,17 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@finalize():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@finalize():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
       <span class="symbol">classOf[java.lang.Throwable]</span>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.channels.SelectFactory#forever" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="forever:gopher.channels.ForeverSelectorBuilder"></a>
-      <a id="forever:ForeverSelectorBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">forever</span><span class="result">: <a href="ForeverSelectorBuilder.html" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@forever:gopher.channels.ForeverSelectorBuilder" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">forever builder.</p><div class="fullcomment"><div class="comment cmt"><p>forever builder.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>ForeverSelectorBuilder
-</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -313,25 +273,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <a id="hashCode():Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@hashCode():Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -347,29 +290,11 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="gopher.channels.SelectFactory#loop" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="loop[A]:gopher.channels.SelectorBuilder[A]"></a>
-      <a id="loop[A]:SelectorBuilder[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">loop</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.SelectFactory.loop.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@loop[A]:gopher.channels.SelectorBuilder[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">generic selector builder
-</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -382,8 +307,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -399,8 +324,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@notify():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@notify():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -416,29 +341,11 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="gopher.channels.SelectFactory#once" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="once[T]:gopher.channels.OnceSelectorBuilder[T]"></a>
-      <a id="once[T]:OnceSelectorBuilder[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">once</span><span class="tparams">[<span name="T">T</span>]</span><span class="result">: <a href="OnceSelectorBuilder.html" class="extype" name="gopher.channels.OnceSelectorBuilder">OnceSelectorBuilder</a>[<span class="extype" name="gopher.channels.SelectFactory.once.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@once[T]:gopher.channels.OnceSelectorBuilder[T]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">once builder, where case clause return type is <code>T</code>
-</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -451,28 +358,28 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <a id="toString():String"></a>
+    </li><li name="gopher.TransputerSupervisor.Escalate#t" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="t:gopher.Transputer"></a>
+      <a id="t:Transputer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">t</span><span class="result">: <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@toString():String" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@t:gopher.Transputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -485,8 +392,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@wait():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@wait():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -508,8 +415,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -531,8 +438,8 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.SelectFactory@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+      <a href="../index.html#gopher.TransputerSupervisor$$Escalate@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -551,7 +458,17 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="gopher.TransputerSupervisor.Message">
+              <h3>Inherited from <a href="TransputerSupervisor$$Message.html" class="extype" name="gopher.TransputerSupervisor.Message">Message</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

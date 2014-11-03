@@ -28,7 +28,7 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
+        <img src="../../lib/trait_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
         <h1>ForeverSelectorBuilder</h1> <span class="permalink">
       <a href="../../index.html#gopher.channels.ForeverSelectorBuilder" title="Permalink" target="_top">
@@ -40,7 +40,7 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <span class="name">ForeverSelectorBuilder</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
@@ -53,7 +53,7 @@
           <div class="superTypes hiddenContent"><a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="scala.Unit">Unit</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="../SelectProcessor.html" class="extype" name="gopher.SelectProcessor">SelectProcessor</a></div>
+            <div class="subClasses hiddenContent"><a href="../SelectTransputer.html" class="extype" name="gopher.SelectTransputer">SelectTransputer</a></div>
           </div></div>
         
 
@@ -89,34 +89,34 @@
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="gopher.channels.ForeverSelectorBuilder#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.ForeverSelectorBuilder"></a>
-      <a id="&lt;init&gt;:ForeverSelectorBuilder"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ForeverSelectorBuilder</span><span class="params">(<span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.ForeverSelectorBuilder" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li></ol>
-            </div>
-
         
 
         
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li name="gopher.channels.SelectorBuilder#api" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="api:gopher.GopherAPI"></a>
+      <a id="api:GopherAPI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span><span class="result">: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@api:gopher.GopherAPI" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -185,8 +185,8 @@
       </a>
     </span>
       <p class="shortcomment cmt">provide syntax for running select loop as async operation.</p><div class="fullcomment"><div class="comment cmt"><p>provide syntax for running select loop as async operation.</p><pre><span class="kw">val</span> receiver = gopherApi.select.forever{
-<span class="kw">case</span> x: channel.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received:$x"</span>)
-}</pre></div></div>
+                 <span class="kw">case</span> x: channel.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received:$x"</span>)
+               }</pre></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -320,14 +320,14 @@
       <p class="shortcomment cmt">provide syntax for running select loop inside go (or async) block
 example of usage:</p><div class="fullcomment"><div class="comment cmt"><p>provide syntax for running select loop inside go (or async) block
 example of usage:</p><pre>go {
-.....
-<span class="kw">for</span>(s <span class="kw">&lt;-</span> gopherApi.select.forever)
-  s <span class="kw">match</span> {
-    <span class="kw">case</span> x: ch1.read <span class="kw">=&gt;</span> <span class="kw">do</span> something <span class="kw">with</span> x
-    <span class="kw">case</span> q: chq.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
-    <span class="kw">case</span> y: ch2.write <span class="kw">if</span> (y=expr) <span class="kw">=&gt;</span> <span class="kw">do</span> something <span class="kw">with</span> y
-    <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">do</span> somethig when idle.
-  }</pre><p>Note, that you can use implicit instance of [FlowTermination[Unit]] to stop loop.
+  .....
+  <span class="kw">for</span>(s <span class="kw">&lt;-</span> gopherApi.select.forever)
+    s <span class="kw">match</span> {
+      <span class="kw">case</span> x: ch1.read <span class="kw">=&gt;</span> <span class="kw">do</span> something <span class="kw">with</span> x
+      <span class="kw">case</span> q: chq.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
+      <span class="kw">case</span> y: ch2.write <span class="kw">if</span> (y=expr) <span class="kw">=&gt;</span> <span class="kw">do</span> something <span class="kw">with</span> y
+      <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">do</span> somethig when idle.
+    }</pre><p>Note, that you can use implicit instance of [FlowTermination[Unit]] to stop loop.
 </p></div></div>
     </li><li name="gopher.channels.SelectorBuilder#futureInput" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="futureInput[A](f:scala.concurrent.Future[A]):gopher.channels.FutureInput[A]"></a>
@@ -590,19 +590,19 @@ example of usage:</p><pre>go {
       </a>
     </span>
       
-    </li><li name="gopher.channels.SelectorBuilder#selector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="selector:gopher.channels.Selector[A]"></a>
-      <a id="selector:Selector[Unit]"></a>
+    </li><li name="gopher.channels.SelectorBuilder#selectorRun" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="selectorRun:scala.concurrent.Future[A]"></a>
+      <a id="selectorRun:Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">selector</span><span class="result">: <a href="Selector.html" class="extype" name="gopher.channels.Selector">Selector</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">selectorRun</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@selector:gopher.channels.Selector[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@selectorRun:scala.concurrent.Future[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

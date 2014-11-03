@@ -124,12 +124,12 @@
    <span class="std">Console</span>.println(s<span class="lit">"fib(${i})=${c}"</span>)
 }
 Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/recover in go/goScope</p><pre>goScope{
-<span class="kw">val</span> f = openFile(myFileName)
-defer{
-  <span class="kw">if</span> (! recover{<span class="kw">case</span> ex:FileNotFoundException <span class="kw">=&gt;</span> <span class="std">Console</span>.println(<span class="lit">"invalid fname"</span>)}) {
-     f.close()
+  <span class="kw">val</span> f = openFile(myFileName)
+  defer{
+    <span class="kw">if</span> (! recover{<span class="kw">case</span> ex:FileNotFoundException <span class="kw">=&gt;</span> <span class="std">Console</span>.println(<span class="lit">"invalid fname"</span>)}) {
+       f.close()
+    }
   }
-}
 }</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="gopher/channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="gopher/channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="gopher/channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">channels.IOChannel</a></p></span><span class="cmt"><p><a href="gopher/GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl></div>
     </li></ol>
             </div>

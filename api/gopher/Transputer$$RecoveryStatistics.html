@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>ParProcessor - gopher.ParProcessor</title>
-          <meta name="description" content="ParProcessor - gopher.ParProcessor" />
-          <meta name="keywords" content="ParProcessor gopher.ParProcessor" />
+          <title>RecoveryStatistics - gopher.Transputer.RecoveryStatistics</title>
+          <meta name="description" content="RecoveryStatistics - gopher.Transputer.RecoveryStatistics" />
+          <meta name="keywords" content="RecoveryStatistics gopher.Transputer.RecoveryStatistics" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
-            var hash = 'gopher.ParProcessor';
+            var hash = 'gopher.Transputer$$RecoveryStatistics';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -29,9 +29,9 @@
         <body class="type">
       <div id="definition">
         <img src="../lib/class_big.png" />
-        <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>ParProcessor</h1> <span class="permalink">
-      <a href="../index.html#gopher.ParProcessor" title="Permalink" target="_top">
+        <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a>.<a href="Transputer$.html" class="extype" name="gopher.Transputer">Transputer</a></p>
+        <h1>RecoveryStatistics</h1> <span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -40,16 +40,16 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ParProcessor</span><span class="result"> extends <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></span>
+        <span class="name">RecoveryStatistics</span><span class="params">(<span name="nFailures">nFailures: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="windowStart">windowStart: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">0</span></span>, <span name="firstFailure">firstFailure: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>] = <span class="symbol">None</span></span>, <span name="lastFailure">lastFailure: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Processor.html" class="extype" name="gopher.Processor">Processor</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -67,7 +67,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.ParProcessor"><span>ParProcessor</span></li><li class="in" name="gopher.Processor"><span>Processor</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.Transputer.RecoveryStatistics"><span>RecoveryStatistics</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -87,19 +87,19 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="gopher.ParProcessor#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(api:gopher.GopherAPI,childs:Seq[gopher.Processor]):gopher.ParProcessor"></a>
-      <a id="&lt;init&gt;:ParProcessor"></a>
+              <ol><li name="gopher.Transputer.RecoveryStatistics#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(nFailures:Int,windowStart:Long,firstFailure:Option[Throwable],lastFailure:Option[Throwable]):gopher.Transputer.RecoveryStatistics"></a>
+      <a id="&lt;init&gt;:RecoveryStatistics"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ParProcessor</span><span class="params">(<span name="api">api: <a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>, <span name="childs">childs: <span class="extype" name="scala.Seq">Seq</span>[<a href="Processor.html" class="extype" name="gopher.Processor">Processor</a>]</span>)</span>
+        <span class="name">RecoveryStatistics</span><span class="params">(<span name="nFailures">nFailures: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="windowStart">windowStart: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">0</span></span>, <span name="firstFailure">firstFailure: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>] = <span class="symbol">None</span></span>, <span name="lastFailure">lastFailure: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>] = <span class="symbol">None</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@&lt;init&gt;(api:gopher.GopherAPI,childs:Seq[gopher.Processor]):gopher.ParProcessor" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@&lt;init&gt;(nFailures:Int,windowStart:Long,firstFailure:Option[Throwable],lastFailure:Option[Throwable]):gopher.Transputer.RecoveryStatistics" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -107,44 +107,7 @@
     </li></ol>
             </div>
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="gopher.Processor.InPort" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="InPort[A]extendsInput[A]"></a>
-      <a id="InPort[A]:InPort[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Processor$InPort.html"><span class="name">InPort</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.Processor.InPort.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.Processor@InPort[A]extendsInput[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
-    </li><li name="gopher.Processor.OutPort" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="OutPort[A]extendsOutput[A]"></a>
-      <a id="OutPort[A]:OutPort[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="Processor$OutPort.html"><span class="name">OutPort</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Processor.OutPort.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.Processor@OutPort[A]extendsOutput[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         
 
@@ -162,7 +125,7 @@
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -179,28 +142,11 @@
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@##():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@##():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.ParProcessor#+" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="+(p:gopher.Processor):gopher.ParProcessor"></a>
-      <a id="+(Processor):ParProcessor"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $plus" class="name">+</span><span class="params">(<span name="p">p: <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></span>)</span><span class="result">: <a href="" class="extype" name="gopher.ParProcessor">ParProcessor</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@+(p:gopher.Processor):gopher.ParProcessor" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.ParProcessor">ParProcessor</a> → <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
@@ -213,62 +159,11 @@
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.Processor.InPort" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="InPort"></a>
-      <a id="InPort:InPort"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Processor$InPort$.html"><span class="name">InPort</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.Processor@InPort" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
-    </li><li name="gopher.Processor.OutPort" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="OutPort"></a>
-      <a id="OutPort:OutPort"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Processor$OutPort$.html"><span class="name">OutPort</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.Processor@OutPort" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
-    </li><li name="gopher.ParProcessor#api" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="api:gopher.GopherAPI"></a>
-      <a id="api:GopherAPI"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">api</span><span class="result">: <a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@api:gopher.GopherAPI" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.ParProcessor">ParProcessor</a> → <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -281,7 +176,7 @@
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -298,7 +193,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@clone():Object" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@clone():Object" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -321,28 +216,28 @@
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
-      <a id="equals(Any):Boolean"></a>
+    </li><li name="gopher.Transputer.RecoveryStatistics#failure" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="failure(ex:Throwable,recoveryPolicy:gopher.Transputer.RecoveryPolicy,nanoNow:Long):Boolean"></a>
+      <a id="failure(Throwable,RecoveryPolicy,Long):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">failure</span><span class="params">(<span name="ex">ex: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="recoveryPolicy">recoveryPolicy: <a href="Transputer$$RecoveryPolicy.html" class="extype" name="gopher.Transputer.RecoveryPolicy">RecoveryPolicy</a></span>, <span name="nanoNow">nanoNow: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@failure(ex:Throwable,recoveryPolicy:gopher.Transputer.RecoveryPolicy,nanoNow:Long):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -355,7 +250,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@finalize():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@finalize():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -366,6 +261,23 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.Transputer.RecoveryStatistics#firstFailure" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="firstFailure:Option[Throwable]"></a>
+      <a id="firstFailure:Option[Throwable]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">firstFailure</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@firstFailure:Option[Throwable]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -378,41 +290,7 @@
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="gopher.ParProcessor#go" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="go:scala.concurrent.Future[Unit]"></a>
-      <a id="go:Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">go</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@go:scala.concurrent.Future[Unit]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.ParProcessor">ParProcessor</a> → <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <a id="hashCode():Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@hashCode():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -429,11 +307,45 @@
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="gopher.Transputer.RecoveryStatistics#lastFailure" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="lastFailure:Option[Throwable]"></a>
+      <a id="lastFailure:Option[Throwable]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lastFailure</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@lastFailure:Option[Throwable]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer.RecoveryStatistics#nFailures" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nFailures:Int"></a>
+      <a id="nFailures:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nFailures</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@nFailures:Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -446,7 +358,7 @@
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -463,7 +375,7 @@
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@notify():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@notify():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -480,11 +392,28 @@
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gopher.Transputer.RecoveryStatistics#sameWindow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sameWindow(recoveryPolicy:gopher.Transputer.RecoveryPolicy,nanoNow:Long):Boolean"></a>
+      <a id="sameWindow(RecoveryPolicy,Long):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sameWindow</span><span class="params">(<span name="recoveryPolicy">recoveryPolicy: <a href="Transputer$$RecoveryPolicy.html" class="extype" name="gopher.Transputer.RecoveryPolicy">RecoveryPolicy</a></span>, <span name="nanoNow">nanoNow: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@sameWindow(recoveryPolicy:gopher.Transputer.RecoveryPolicy,nanoNow:Long):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -497,28 +426,11 @@
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <a id="toString():String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@toString():String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -531,7 +443,7 @@
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@wait():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@wait():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -554,7 +466,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -577,7 +489,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.ParProcessor@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -588,6 +500,23 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.Transputer.RecoveryStatistics#windowStart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="windowStart:Long"></a>
+      <a id="windowStart:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">windowStart</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer$$RecoveryStatistics@windowStart:Long" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -597,8 +526,14 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="gopher.Processor">
-              <h3>Inherited from <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></h3>
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">

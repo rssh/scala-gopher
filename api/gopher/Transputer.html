@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>FlowTermination - gopher.FlowTermination</title>
-          <meta name="description" content="FlowTermination - gopher.FlowTermination" />
-          <meta name="keywords" content="FlowTermination gopher.FlowTermination" />
+          <title>Transputer - gopher.Transputer</title>
+          <meta name="description" content="Transputer - gopher.Transputer" />
+          <meta name="keywords" content="Transputer gopher.Transputer" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
-            var hash = 'gopher.FlowTermination';
+            var hash = 'gopher.Transputer';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -28,10 +28,10 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/trait_big.png" />
+        <a href="Transputer$.html" title="Go to companion"><img src="../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>FlowTermination</h1> <span class="permalink">
-      <a href="../index.html#gopher.FlowTermination" title="Permalink" target="_top">
+        <h1><a href="Transputer$.html" title="Go to companion">Transputer</a></h1> <span class="permalink">
+      <a href="../index.html#gopher.Transputer" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -43,22 +43,19 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">FlowTermination</span><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">Transputer</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>FlowTermination[-A] - termination of flow.</p><p>Inside each block in select loop or
-select apply (once or forever) we have implicit
-FlowTermination entity, which we can use for
-exiting the loop.</p><pre>select.forever{
-    <span class="kw">case</span> x: info.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received from info $x"</span>)
-    <span class="kw">case</span> x: control.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
-}</pre></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Reusable unit of application structure, which consists from
+set of input ports, set of output ports and behaviour</p><p>Transputers can be created as elementary behaviour, descibed by select
+statement and then can be combined into larger structures</p><p>Transputers can be recovered from execeptions (i.e. transputer can be restarted or resume execution)
+ or escalated to parent transputers or root superviser.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="channels/PromiseFlowTermination.html" class="extype" name="gopher.channels.PromiseFlowTermination">PromiseFlowTermination</a>, <a href="channels/Selector.html" class="extype" name="gopher.channels.Selector">Selector</a></div>
+            <div class="subClasses hiddenContent"><a href="ParTransputer.html" class="extype" name="gopher.ParTransputer">ParTransputer</a>, <a href="SelectTransputer.html" class="extype" name="gopher.SelectTransputer">SelectTransputer</a></div>
           </div></div>
         
 
@@ -76,7 +73,7 @@ exiting the loop.</p><pre>select.forever{
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.FlowTermination"><span>FlowTermination</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.Transputer"><span>Transputer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -96,82 +93,99 @@ exiting the loop.</p><pre>select.forever{
         <div id="allMembers">
         
 
-        
-
-        <div id="values" class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="gopher.FlowTermination#doExit" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="doExit(a:A):Unit"></a>
-      <a id="doExit(A):Unit"></a>
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="gopher.Transputer.InPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InPort[A]extendsInput[A]"></a>
+      <a id="InPort[A]:InPort[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
+        <span class="modifier"></span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">doExit</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.FlowTermination.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <a href="Transputer$InPort.html"><span class="name">InPort</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.Transputer.InPort.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@doExit(a:A):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">terminate current flow and leave <code>a</code> as result of flow.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow and leave <code>a</code> as result of flow.
-have no effect if flow is already completed.
-</p></div></div>
-    </li><li name="gopher.FlowTermination#doThrow" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="doThrow(e:Throwable):Unit"></a>
-      <a id="doThrow(Throwable):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">doThrow</span><span class="params">(<span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@doThrow(e:Throwable):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">terminate current flow with exception.</p><div class="fullcomment"><div class="comment cmt"><p>terminate current flow with exception.
-Mostly used internally.
-</p></div></div>
-    </li><li name="gopher.FlowTermination#isCompleted" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="isCompleted:Boolean"></a>
-      <a id="isCompleted:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isCompleted</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@isCompleted:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">check - if flow is completed.</p>
-    </li><li name="gopher.FlowTermination#throwIfNotCompleted" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="throwIfNotCompleted(ex:Throwable):Unit"></a>
-      <a id="throwIfNotCompleted(Throwable):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">throwIfNotCompleted</span><span class="params">(<span name="ex">ex: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@throwIfNotCompleted(ex:Throwable):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@InPort[A]extendsInput[A]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       
+    </li><li name="gopher.Transputer.OutPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OutPort[A]extendsOutput[A]"></a>
+      <a id="OutPort[A]:OutPort[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Transputer$OutPort.html"><span class="name">OutPort</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.Transputer.OutPort.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@OutPort[A]extendsOutput[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="gopher.Transputer#api" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="api:gopher.GopherAPI"></a>
+      <a id="api:GopherAPI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span><span class="result">: <a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@api:gopher.GopherAPI" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer#goOnce" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="goOnce:scala.concurrent.Future[Unit]"></a>
+      <a id="goOnce:Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">goOnce</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@goOnce:scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer#recoverFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="recoverFactory:()=&gt;gopher.Transputer"></a>
+      <a id="recoverFactory:()⇒Transputer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recoverFactory</span><span class="result">: () ⇒ <a href="" class="extype" name="gopher.Transputer">Transputer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@recoverFactory:()=&gt;gopher.Transputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Used for recover failed instances
+</p>
     </li></ol>
             </div>
 
@@ -189,7 +203,7 @@ Mostly used internally.
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -206,11 +220,28 @@ Mostly used internally.
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@##():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@##():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.Transputer#+" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="+(p:gopher.Transputer):gopher.ParTransputer"></a>
+      <a id="+(Transputer):ParTransputer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus" class="name">+</span><span class="params">(<span name="p">p: <a href="" class="extype" name="gopher.Transputer">Transputer</a></span>)</span><span class="result">: <a href="ParTransputer.html" class="extype" name="gopher.ParTransputer">ParTransputer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@+(p:gopher.Transputer):gopher.ParTransputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
@@ -223,11 +254,45 @@ Mostly used internally.
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.Transputer.InPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InPort"></a>
+      <a id="InPort:InPort"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Transputer$InPort$.html"><span class="name">InPort</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@InPort" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer.OutPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OutPort"></a>
+      <a id="OutPort:OutPort"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Transputer$OutPort$.html"><span class="name">OutPort</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@OutPort" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -240,7 +305,7 @@ Mostly used internally.
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -257,7 +322,7 @@ Mostly used internally.
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@clone():Object" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@clone():Object" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -268,6 +333,42 @@ Mostly used internally.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.Transputer#copyPorts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="copyPorts(prev:gopher.Transputer):Unit"></a>
+      <a id="copyPorts(Transputer):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyPorts</span><span class="params">(<span name="prev">prev: <a href="" class="extype" name="gopher.Transputer">Transputer</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@copyPorts(prev:gopher.Transputer):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer#copyState" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copyState(prev:gopher.Transputer):Unit"></a>
+      <a id="copyState(Transputer):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyState</span><span class="params">(<span name="prev">prev: <a href="" class="extype" name="gopher.Transputer">Transputer</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@copyState(prev:gopher.Transputer):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">copyState from previous instance when transputer is restarted.</p><div class="fullcomment"><div class="comment cmt"><p>copyState from previous instance when transputer is restarted.
+can be overriden in subclasses (by default: do nothing)</p><p>Note, that port connection is restored before call of copyState
+</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -280,7 +381,7 @@ Mostly used internally.
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -297,7 +398,7 @@ Mostly used internally.
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -314,7 +415,7 @@ Mostly used internally.
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@finalize():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@finalize():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -337,7 +438,7 @@ Mostly used internally.
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -354,7 +455,7 @@ Mostly used internally.
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@hashCode():Int" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@hashCode():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -371,11 +472,28 @@ Mostly used internally.
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="gopher.Transputer#logSource" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="logSource:akka.event.LogSource[gopher.Transputer]"></a>
+      <a id="logSource:LogSource[Transputer]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logSource</span><span class="result">: <span class="extype" name="akka.event.LogSource">LogSource</span>[<a href="" class="extype" name="gopher.Transputer">Transputer</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@logSource:akka.event.LogSource[gopher.Transputer]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -388,7 +506,7 @@ Mostly used internally.
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -405,7 +523,7 @@ Mostly used internally.
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@notify():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@notify():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -422,11 +540,100 @@ Mostly used internally.
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gopher.Transputer#onEscalatedFailure" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onEscalatedFailure(ex:Throwable):Unit"></a>
+      <a id="onEscalatedFailure(Throwable):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onEscalatedFailure</span><span class="params">(<span name="ex">ex: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@onEscalatedFailure(ex:Throwable):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">called when failure is escalated.</p><div class="fullcomment"><div class="comment cmt"><p>called when failure is escalated.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="gopher.Transputer#onResume" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onResume():Unit"></a>
+      <a id="onResume():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onResume</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@onResume():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">called when transducer is choose resume durign recovery.</p><div class="fullcomment"><div class="comment cmt"><p>called when transducer is choose resume durign recovery.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="gopher.Transputer#onStop" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onStop():Unit"></a>
+      <a id="onStop():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onStop</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@onStop():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">called when transputer is stopped.</p><div class="fullcomment"><div class="comment cmt"><p>called when transputer is stopped.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="gopher.Transputer#recover" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Unit"></a>
+      <a id="recover(PartialFunction[Throwable,Directive]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recover</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="akka.actor.SupervisorStrategy.Directive">Directive</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">set recover function
+</p>
+    </li><li name="gopher.Transputer#start" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="start():scala.concurrent.Future[Unit]"></a>
+      <a id="start():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">start</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@start():scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -439,7 +646,7 @@ Mostly used internally.
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -456,7 +663,7 @@ Mostly used internally.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@toString():String" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@toString():String" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -473,7 +680,7 @@ Mostly used internally.
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@wait():Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@wait():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -496,7 +703,7 @@ Mostly used internally.
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
@@ -519,7 +726,7 @@ Mostly used internally.
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.FlowTermination@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.Transputer@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>

@@ -52,7 +52,7 @@
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>, <a href="../Processor$OutPort.html" class="extype" name="gopher.Processor.OutPort">OutPort</a></div>
+            <div class="subClasses hiddenContent"><a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>, <a href="../Transputer$OutPort.html" class="extype" name="gopher.Transputer.OutPort">OutPort</a></div>
           </div></div>
         
 
@@ -148,7 +148,24 @@
 
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="gopher.channels.Output#cbwrite" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="gopher.channels.Output#api" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="api:gopher.GopherAPI"></a>
+      <a id="api:GopherAPI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span><span class="result">: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Output@api:gopher.GopherAPI" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Output#cbwrite" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],ft:gopher.FlowTermination[B]):Unit"></a>
       <a id="cbwrite[B]((ContWrite[A,B])⇒Option[(A,Future[Continuated[B]])],FlowTermination[B]):Unit"></a>
       <h4 class="signature">
@@ -273,18 +290,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="gopher.channels.Output#awrite" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="awrite(a:A):scala.concurrent.Future[Unit]"></a>
-      <a id="awrite(A):Future[Unit]"></a>
+      <a id="awrite(a:A):scala.concurrent.Future[A]"></a>
+      <a id="awrite(A):Future[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">awrite</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Output.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">awrite</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Output.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Output.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.Output@awrite(a:A):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Output@awrite(a:A):scala.concurrent.Future[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -591,19 +608,49 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.channels.Output#withOutputTimeouts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withOutputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Output[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])"></a>
+      <a id="withOutputTimeouts(FiniteDuration):(Output[A],Input[FiniteDuration])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withOutputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.Output.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Output@withOutputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Output[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">provide pair from Output and Input <code>(ready, timeouts)</code> such that writing to <code>ready</code>
+will case writing to <code>output</code> and if it was not completed during <code><code>timeout</code> than
+appropriative duration will be availabe in </code>timeouts<code> input.</code></p><div class="fullcomment"><div class="comment cmt"><p>provide pair from Output and Input <code>(ready, timeouts)</code> such that writing to <code>ready</code>
+will case writing to <code>output</code> and if it was not completed during <code><code>timeout</code> than
+appropriative duration will be availabe in </code>timeouts<code> input.</code></p><p><code><code><code>
+val (chReady, chTimeouts) = ch withOutputTimeouts (5 seconds)
+select.forever {
+ case x: chReady.write if (x==somethingToWrite) =&gt;
+                   Console.println(s&quot; ${x} send&quot;)
+ case t: chTimeouts.read if (x==somethingToWrite) =&gt;
+                   Console.println(s&quot;timeout during writing&quot;)
+}
+<code><code><code>
+</code></code></code></code></code></code></p></div></div>
     </li><li name="gopher.channels.Output#write" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="write(a:A):Unit"></a>
-      <a id="write(A):Unit"></a>
+      <a id="write(a:A):A"></a>
+      <a id="write(A):A"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">macro </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Output.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">write</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Output.A">A</span></span>)</span><span class="result">: <span class="extype" name="gopher.channels.Output.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.Output@write(a:A):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Output@write(a:A):A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

@@ -28,7 +28,7 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
+        <img src="../../lib/trait_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
         <h1>OnceSelectorBuilder</h1> <span class="permalink">
       <a href="../../index.html#gopher.channels.OnceSelectorBuilder" title="Permalink" target="_top">
@@ -40,7 +40,7 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <span class="name">OnceSelectorBuilder</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>
@@ -86,34 +86,34 @@
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="gopher.channels.OnceSelectorBuilder#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.OnceSelectorBuilder[T]"></a>
-      <a id="&lt;init&gt;:OnceSelectorBuilder[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">OnceSelectorBuilder</span><span class="params">(<span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.OnceSelectorBuilder[T]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li></ol>
-            </div>
-
         
 
         
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li name="gopher.channels.SelectorBuilder#api" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="api:gopher.GopherAPI"></a>
+      <a id="api:GopherAPI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span><span class="result">: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@api:gopher.GopherAPI" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -166,18 +166,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="gopher.channels.OnceSelectorBuilder#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(f:PartialFunction[Any,Unit]):scala.concurrent.Future[T]"></a>
-      <a id="apply(PartialFunction[Any,Unit]):Future[T]"></a>
+      <a id="apply(f:PartialFunction[Any,T]):scala.concurrent.Future[T]"></a>
+      <a id="apply(PartialFunction[Any,T]):Future[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">macro </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@apply(f:PartialFunction[Any,Unit]):scala.concurrent.Future[T]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@apply(f:PartialFunction[Any,T]):scala.concurrent.Future[T]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>
@@ -577,19 +577,19 @@
                 <span class="name">@inline</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="gopher.channels.SelectorBuilder#selector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="selector:gopher.channels.Selector[A]"></a>
-      <a id="selector:Selector[T@scala.annotation.unchecked.uncheckedVariance]"></a>
+    </li><li name="gopher.channels.SelectorBuilder#selectorRun" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="selectorRun:scala.concurrent.Future[A]"></a>
+      <a id="selectorRun:Future[T@scala.annotation.unchecked.uncheckedVariance]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">selector</span><span class="result">: <a href="Selector.html" class="extype" name="gopher.channels.Selector">Selector</a>[T @scala.annotation.unchecked.uncheckedVariance]</span>
+        <span class="name">selectorRun</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[T @scala.annotation.unchecked.uncheckedVariance]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@selector:gopher.channels.Selector[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.OnceSelectorBuilder@selectorRun:scala.concurrent.Future[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

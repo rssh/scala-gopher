@@ -425,6 +425,23 @@ within given timeout: think that channel is-dead.
       </a>
     </span>
       
+    </li><li name="gopher.channels.DuppedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DuppedInput[A]extendsAnyRef"></a>
+      <a id="DuppedInput[A]:DuppedInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DuppedInput.html"><span class="name">DuppedInput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@DuppedInput[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.FlowContinuated" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="FlowContinuated[A]extendsContinuated[A]"></a>
       <a id="FlowContinuated[A]:FlowContinuated[A]"></a>
@@ -442,13 +459,13 @@ within given timeout: think that channel is-dead.
       </a>
     </span>
       
-    </li><li name="gopher.channels.ForeverSelectorBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.ForeverSelectorBuilder" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ForeverSelectorBuilderextendsSelectorBuilder[Unit]"></a>
       <a id="ForeverSelectorBuilder:ForeverSelectorBuilder"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="ForeverSelectorBuilder.html"><span class="name">ForeverSelectorBuilder</span></a><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
@@ -487,8 +504,8 @@ select.forever{
                          implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
    <span class="kw">case</span> x: myChannel.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"value from channel: ${x}"</span>)
 }</pre><p> Also it is possiblt to direclty read from future in case guard:</p><pre>select.forever{
-<span class="kw">case</span> x: T <span class="kw">if</span> (x==future.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"we receive value from future: ${x}"</span>)
-<span class="kw">case</span> x: T <span class="kw">if</span> (x==channel.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"value from channel: ${x}"</span>)
+   <span class="kw">case</span> x: T <span class="kw">if</span> (x==future.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"we receive value from future: ${x}"</span>)
+   <span class="kw">case</span> x: T <span class="kw">if</span> (x==channel.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"value from channel: ${x}"</span>)
 }</pre></div></div>
     </li><li name="gopher.channels.IOChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IOChannel[A]extendsInput[A]withOutput[A]"></a>
@@ -541,6 +558,27 @@ select.forever{
       </a>
     </span>
       <p class="shortcomment cmt">Entity, from which we can read objects of type A.</p>
+    </li><li name="gopher.channels.InputWithTimeouts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InputWithTimeouts[A]extendsAnyRef"></a>
+      <a id="InputWithTimeouts[A]:InputWithTimeouts[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InputWithTimeouts.html"><span class="name">InputWithTimeouts</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@InputWithTimeouts[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Wrap <code>origin</code> input into input, which produce 'timeout' value into <code>timeouts</code> channel
+when reading from wrapped channel take more time than <code>timeout</code> .</p><div class="fullcomment"><div class="comment cmt"><p>Wrap <code>origin</code> input into input, which produce 'timeout' value into <code>timeouts</code> channel
+when reading from wrapped channel take more time than <code>timeout</code> .
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>InputChannel.withInputTimeouts
+</p></span></dd></dl></div>
     </li><li name="gopher.channels.NewChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NewChannelextendsProductwithSerializable"></a>
       <a id="NewChannel:NewChannel"></a>
@@ -558,13 +596,13 @@ select.forever{
       </a>
     </span>
       
-    </li><li name="gopher.channels.OnceSelectorBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.OnceSelectorBuilder" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="OnceSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]"></a>
       <a id="OnceSelectorBuilder[T]:OnceSelectorBuilder[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="OnceSelectorBuilder.html"><span class="name">OnceSelectorBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.OnceSelectorBuilder.T">T</span>]</span>
@@ -610,6 +648,23 @@ select.forever{
       </a>
     </span>
       <p class="shortcomment cmt">Entity, where we can write objects of type A.</p>
+    </li><li name="gopher.channels.OutputWithTimeouts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OutputWithTimeouts[A]extendsAnyRef"></a>
+      <a id="OutputWithTimeouts[A]:OutputWithTimeouts[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="OutputWithTimeouts.html"><span class="name">OutputWithTimeouts</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@OutputWithTimeouts[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p>
     </li><li name="gopher.channels.PromiseFlowTermination" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="PromiseFlowTermination[A]extendsFlowTermination[A]"></a>
       <a id="PromiseFlowTermination[A]:PromiseFlowTermination[A]"></a>
@@ -680,13 +735,13 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </a>
     </span>
       
-    </li><li name="gopher.channels.SelectorBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.channels.SelectorBuilder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SelectorBuilder[A]extendsAnyRef"></a>
       <a id="SelectorBuilder[A]:SelectorBuilder[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="SelectorBuilder.html"><span class="name">SelectorBuilder</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>

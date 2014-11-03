@@ -52,7 +52,7 @@
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>, <a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>, <a href="../Processor$InPort.html" class="extype" name="gopher.Processor.InPort">InPort</a>, <a href="Input$$IterableInput.html" class="extype" name="gopher.channels.Input.IterableInput">IterableInput</a>, <a href="OrInput.html" class="extype" name="gopher.channels.OrInput">OrInput</a>, <a href="ZippedInput.html" class="extype" name="gopher.channels.ZippedInput">ZippedInput</a></div>
+            <div class="subClasses hiddenContent"><a href="FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>, <a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a>, <a href="../Transputer$InPort.html" class="extype" name="gopher.Transputer.InPort">InPort</a>, <a href="Input$$IterableInput.html" class="extype" name="gopher.channels.Input.IterableInput">IterableInput</a>, <a href="OrInput.html" class="extype" name="gopher.channels.OrInput">OrInput</a>, <a href="ZippedInput.html" class="extype" name="gopher.channels.ZippedInput">ZippedInput</a></div>
           </div></div>
         
 
@@ -350,6 +350,24 @@ in case of stream is closed.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.channels.Input#dup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="dup():(gopher.channels.Input[A],gopher.channels.Input[A])"></a>
+      <a id="dup():(Input[A],Input[A])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dup</span><span class="params">()</span><span class="result">: (<a href="" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.A">A</span>], <a href="" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.A">A</span>])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@dup():(gopher.channels.Input[A],gopher.channels.Input[A])" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">duplicate input
+</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -733,6 +751,32 @@ in case of stream is closed.
       </a>
     </span>
       
+    </li><li name="gopher.channels.Input#withInputTimeouts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withInputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Input[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])"></a>
+      <a id="withInputTimeouts(FiniteDuration):(Input[A],Input[FiniteDuration])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withInputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.A">A</span>], <a href="" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@withInputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Input[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">return pair of inputs <code>(ready, timeouts)</code>, such that when you read from <code>ready</code> you receive element from <code>this</code>
+and if during reading you wait more than specified <code>timeout</code>, than timeout message is appear in <code>timeouts</code></p><div class="fullcomment"><div class="comment cmt"><p>return pair of inputs <code>(ready, timeouts)</code>, such that when you read from <code>ready</code> you receive element from <code>this</code>
+and if during reading you wait more than specified <code>timeout</code>, than timeout message is appear in <code>timeouts</code></p><p><code><code><code>
+val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
+select.forever {
+  case x: inReady.read =&gt; Console.println(s&quot;received value ${value}&quot;)
+  case x: inTimeouts.read =&gt; Console.println(s&quot;timeout occured&quot;)
+}
+<code><code><code>
+</code></code></code></code></code></code></p></div></div>
     </li><li name="gopher.channels.Input#zip" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="zip[B](x:gopher.channels.Input[B]):gopher.channels.Input[(A,B)]"></a>
       <a id="zip[B](Input[B]):Input[(A,B)]"></a>
@@ -767,7 +811,7 @@ in case of stream is closed.
       </a>
     </span>
       
-    </li><li name="gopher.channels.Input#|" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.channels.Input#|" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="|(other:gopher.channels.Input[A]):gopher.channels.Input[A]"></a>
       <a id="|(Input[A]):Input[A]"></a>
       <h4 class="signature">
@@ -783,7 +827,9 @@ in case of stream is closed.
         <img src="../../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">return input merged with 'other'.</p><div class="fullcomment"><div class="comment cmt"><p>return input merged with 'other'.
+(i.e. non-determenistics choice)
+</p></div></div>
     </li></ol>
             </div>
 

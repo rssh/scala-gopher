@@ -68,12 +68,12 @@
    <span class="std">Console</span>.println(s<span class="lit">"fib(${i})=${c}"</span>)
 }
 Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/recover in go/goScope</p><pre>goScope{
-<span class="kw">val</span> f = openFile(myFileName)
-defer{
-  <span class="kw">if</span> (! recover{<span class="kw">case</span> ex:FileNotFoundException <span class="kw">=&gt;</span> <span class="std">Console</span>.println(<span class="lit">"invalid fname"</span>)}) {
-     f.close()
+  <span class="kw">val</span> f = openFile(myFileName)
+  defer{
+    <span class="kw">if</span> (! recover{<span class="kw">case</span> ex:FileNotFoundException <span class="kw">=&gt;</span> <span class="std">Console</span>.println(<span class="lit">"invalid fname"</span>)}) {
+       f.close()
+    }
   }
-}
 }</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">channels.IOChannel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -202,8 +202,8 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
 select apply (once or forever) we have implicit
 FlowTermination entity, which we can use for
 exiting the loop.</p><pre>select.forever{
-<span class="kw">case</span> x: info.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received from info $x"</span>)
-<span class="kw">case</span> x: control.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
+    <span class="kw">case</span> x: info.read <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"received from info $x"</span>)
+    <span class="kw">case</span> x: control.read <span class="kw">=&gt;</span> implicitly[FlowTermination[<span class="std">Unit</span>]].doExit(())
 }</pre></div></div>
     </li><li name="gopher.FutureWithRead" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FutureWithRead[T]extendsAnyRef"></a>
@@ -257,57 +257,96 @@ exiting the loop.</p><pre>select.forever{
     </span>
       <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI
 </p></span></dd></dl></div>
-    </li><li name="gopher.ParProcessor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ParProcessorextendsProcessor"></a>
-      <a id="ParProcessor:ParProcessor"></a>
+    </li><li name="gopher.ParTransputer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParTransputerextendsTransputer"></a>
+      <a id="ParTransputer:ParTransputer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ParProcessor.html"><span class="name">ParProcessor</span></a><span class="result"> extends <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a></span>
+        <a href="ParTransputer.html"><span class="name">ParTransputer</span></a><span class="result"> extends <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@ParProcessorextendsProcessor" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@ParTransputerextendsTransputer" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       
-    </li><li name="gopher.Processor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ProcessorextendsAnyRef"></a>
-      <a id="Processor:Processor"></a>
+    </li><li name="gopher.SelectTransputer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SelectTransputerextendsForeverSelectorBuilderwithTransputer"></a>
+      <a id="SelectTransputer:SelectTransputer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Processor.html"><span class="name">Processor</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="SelectTransputer.html"><span class="name">SelectTransputer</span></a><span class="result"> extends <a href="channels/ForeverSelectorBuilder.html" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a> with <a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@ProcessorextendsAnyRef" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@SelectTransputerextendsForeverSelectorBuilderwithTransputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Transputer, where dehaviour can be described by selector function</p>
+    </li><li name="gopher.Transputer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="TransputerextendsAnyRef"></a>
+      <a id="Transputer:Transputer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Transputer.html"><span class="name">Transputer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@TransputerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Reusable unit of application structure, which consists from
+set of input ports, set of output ports and behaviour</p><div class="fullcomment"><div class="comment cmt"><p>Reusable unit of application structure, which consists from
+set of input ports, set of output ports and behaviour</p><p>Transputers can be created as elementary behaviour, descibed by select
+statement and then can be combined into larger structures</p><p>Transputers can be recovered from execeptions (i.e. transputer can be restarted or resume execution)
+ or escalated to parent transputers or root superviser.</p></div></div>
+    </li><li name="gopher.TransputerLogging" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TransputerLoggingextendsAnyRef"></a>
+      <a id="TransputerLogging:TransputerLogging"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="TransputerLogging.html"><span class="name">TransputerLogging</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@TransputerLoggingextendsAnyRef" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       
-    </li><li name="gopher.SelectProcessor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SelectProcessorextendsForeverSelectorBuilderwithProcessorwithFlowTermination[Unit]"></a>
-      <a id="SelectProcessor:SelectProcessor"></a>
+    </li><li name="gopher.TransputerSupervisor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransputerSupervisorextendsActorwithActorLogging"></a>
+      <a id="TransputerSupervisor:TransputerSupervisor"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SelectProcessor.html"><span class="name">SelectProcessor</span></a><span class="result"> extends <a href="channels/ForeverSelectorBuilder.html" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a> with <a href="Processor.html" class="extype" name="gopher.Processor">Processor</a> with <a href="FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <a href="TransputerSupervisor.html"><span class="name">TransputerSupervisor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span> with <span class="extype" name="akka.actor.ActorLogging">ActorLogging</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.package@SelectProcessorextendsForeverSelectorBuilderwithProcessorwithFlowTermination[Unit]" title="Permalink" target="_top">
+      <a href="../index.html#gopher.package@TransputerSupervisorextendsActorwithActorLogging" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">one actor, which perform operations for starting/stopping
+</p>
     </li></ol>
             </div>
 
@@ -350,6 +389,23 @@ exiting the loop.</p><pre>select.forever{
     </span>
       <p class="shortcomment cmt">Factory object for Akka extension</p><div class="fullcomment"><div class="comment cmt"><p>Factory object for Akka extension</p><pre><span class="kw">val</span> actorSystem = ActorSystem(<span class="lit">"myapp"</span>)
 <span class="kw">val</span> gopherApi = Gopher(actorSystem)</pre></div></div>
+    </li><li name="gopher.GopherAPI" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GopherAPI"></a>
+      <a id="GopherAPI:GopherAPI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="GopherAPI$.html"><span class="name">GopherAPI</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@GopherAPI" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li><li name="gopher.GopherAPIExtensionHelper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GopherAPIExtensionHelper"></a>
       <a id="GopherAPIExtensionHelper:GopherAPIExtensionHelper"></a>
@@ -363,6 +419,40 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherAPIExtensionHelper" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.Transputer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Transputer"></a>
+      <a id="Transputer:Transputer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Transputer$.html"><span class="name">Transputer</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@Transputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.TransputerSupervisor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransputerSupervisor"></a>
+      <a id="TransputerSupervisor:TransputerSupervisor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TransputerSupervisor$.html"><span class="name">TransputerSupervisor</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@TransputerSupervisor" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
