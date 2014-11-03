@@ -98,15 +98,27 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 object GopherAPI
 {
 
-  // must be disabled: see https://issues.scala-lang.org/browse/SI-8953
   def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
     import c.universe._
-    c.Expr[T](q"""{ def factory():${c.weakTypeOf[T]} = new ${c.weakTypeOf[T]} { 
-                                                def api = ${c.prefix} 
-                                                def recoverFactory = factory
-                                     }
-                    val retval = factory()
-                    retval
+    //----------------------------------------------
+    // generate incorrect code: see  https://issues.scala-lang.org/browse/SI-8953
+    //c.Expr[T](q"""{ def factory():${c.weakTypeOf[T]} = new ${c.weakTypeOf[T]} { 
+    //                                            def api = ${c.prefix} 
+    //                                            def recoverFactory = factory
+    //                                 }
+    //                val retval = factory()
+    //                retval
+    //              }
+    //           """)
+    //----------------------------------------------
+    // so, let's create subclass
+    val implName = c.freshName(c.symbolOf[T].name)
+    c.Expr[T](q"""{ 
+                    class ${implName} extends ${c.weakTypeOf[T]} { 
+                        def api = ${c.prefix}
+                        def recoverFactory = () => new ${implName}
+                    }
+                    new ${implName}
                   }
                """)
   }
