@@ -4,13 +4,13 @@
 
 ### Dependences:    
  
- * scala 2.11.2 +
+ * scala 2.11.4 +
  * akka 2.3.6 +
  * scala-async 0.9.2
 
 #### Download: 
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.2"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.3"
 
 
 ## Overview
@@ -98,7 +98,7 @@ You can look on `defer` as on stackable finally clauses, and on `defer` with `re
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
-  Basucally, go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
+  Basically, go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
 
 ## Channels
 
