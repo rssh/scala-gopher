@@ -18,12 +18,6 @@ trait BingoWithRecover extends SelectTransputer
   val fin = OutPort[Boolean](false)
 
 
-  override def copyState(prev: Transputer):Unit =
-  {
-    val bingoPrev = prev.asInstanceOf[BingoWithRecover]
-  }
-
-
 
 }
 

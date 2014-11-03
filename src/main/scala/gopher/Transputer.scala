@@ -30,15 +30,10 @@ trait Transputer
   @inline def apply[A](a:A):OutPort[A] = new OutPort(a) 
  }
 
- 
 
  def api: GopherAPI
 
- // internal API.
 
- def copyState(prev: Transputer): Unit = {}
-
- 
  def copyPorts(prev: Transputer): Unit = 
  {
    import scala.reflect._
@@ -82,33 +77,6 @@ trait Transputer
   */
  def recoverFactory: ()=>Transputer
 
- /**
-  * called when transducer is choose resume durign recovery.
-  */
- protected def onResume() { }
-
- /**
-  * called when failure is escalated.
-  **/
- protected def onEscalatedFailure(ex: Throwable) { }
-
- /**
-  * called when transputer is stopped.
-  */
- protected def onStop() { }
-
- private[gopher] def beforeResume() 
- {
-   onResume();
- }
-
- private[gopher] def beforeRestart(prev: Transputer) 
- {
-   if (!(prev eq null)) {
-      parent = prev.parent
-   }
-   //§§onRestart()
- }
 
  private[gopher] var parent: Option[Transputer] = None
 
@@ -116,40 +84,9 @@ trait Transputer
 }
 
 
-object Transputer
-{
-
-
-
-}
-
-/**
- * Transputer, where dehaviour can be described by selector function
- * 
- **/
 trait SelectTransputer extends Transputer  
 {
 
-/*
- protected override def onEscalatedFailure(ex: Throwable): Unit =
- {
-   super.onEscalatedFailure(ex)
- }
-
- protected override def onStop(): Unit =
- {
-   super.onStop()
- }
-
- private[gopher] override def beforeResume() : Unit =
- {
-   super.beforeResume()
-   selectorInit()
- }
-
- protected var selectorInit: ()=>Unit =
-                         { () => throw new IllegalStateException("selectorInit us not initialized yet") }
-*/
 
 }
 
