@@ -67,15 +67,15 @@ import scala.concurrent._
 import gopher.channels._
 
 
- @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
- implicit def compileTimeFlowTermination[A]: FlowTermination[A] = ???
+// @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
+// implicit def compileTimeFlowTermination[A]: FlowTermination[A] = ???
 
 
  /**
   * pseudostatement which can be used inside go/goScope block.
   **/
- @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
- def defer(x: =>Unit): Unit = ??? 
+// @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
+// def defer(x: =>Unit): Unit = ??? 
 
  /**
   * can be called only from defer block. If we in handling exception, try to apply <code> f </code>
@@ -84,8 +84,8 @@ import gopher.channels._
   *@param f - partial function for recovering exception.
   *@return true if exception was recovered, false otherwise
   */
- @scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
- def recover[T](f: PartialFunction[Throwable, T]): Boolean = ??? 
+ //@scala.annotation.compileTimeOnly("defer/recover method usage outside go / goScope ")
+ //def recover[T](f: PartialFunction[Throwable, T]): Boolean = ??? 
 
 
 }
