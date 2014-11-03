@@ -30,24 +30,12 @@ trait Transputer
   @inline def apply[A](a:A):OutPort[A] = new OutPort(a) 
  }
 
- def +(p: Transputer) = new ParTransputer(api, Seq(this,p))
  
- def start():Future[Unit] =
- {
-   ???
- }
-
 
  def api: GopherAPI
 
  // internal API.
 
- /**
-  * copyState from previous instance when transputer is restarted.
-  * can be overriden in subclasses (by default: do nothing)
-  * 
-  * Note, that port connection is restored before call of copyState
-  */
  def copyState(prev: Transputer): Unit = {}
 
  
@@ -117,18 +105,12 @@ trait Transputer
  private[gopher] def beforeRestart(prev: Transputer) 
  {
    if (!(prev eq null)) {
-      recoveryStatistics = prev.recoveryStatistics
-      recoveryPolicy = prev.recoveryPolicy
       parent = prev.parent
    }
    //§§onRestart()
  }
 
- private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
- private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
  private[gopher] var parent: Option[Transputer] = None
-
- 
 
 
 }
@@ -136,53 +118,6 @@ trait Transputer
 
 object Transputer
 {
-
-
-
- case class RecoveryStatistics(
-    var nFailures: Int = 0,
-    var windowStart: Long = 0,
-    var firstFailure: Option[Throwable] = None,
-    var lastFailure: Option[Throwable] = None
- ) {
-
-     def failure(ex: Throwable, recoveryPolicy: RecoveryPolicy, nanoNow: Long): Boolean =
-     {
-       val same = sameWindow(recoveryPolicy, nanoNow)
-       nFailures +=1
-       if (firstFailure.isEmpty) {
-           firstFailure = Some(ex)
-       }
-       lastFailure = Some(ex)
-       return (same && nFailures >= recoveryPolicy.maxFailures) 
-     }
-     
-
-     def sameWindow(recoveryPolicy: RecoveryPolicy, nanoNow: Long): Boolean =
-     {
-       if ((nanoNow - windowStart) > recoveryPolicy.windowDuration.toNanos) {
-            nFailures = 0
-            windowStart = nanoNow
-            firstFailure = None
-            lastFailure = None
-            false
-       } else {
-            true
-       }
-     }
-
- }
-   
-
- case class RecoveryPolicy(
-    var maxFailures: Int = 10,
-    var windowDuration: Duration = 1 second
- )
-
- class TooManyFailures(t: Transputer) extends RuntimeException(s"Too many failures for ${t}", t.recoveryStatistics.firstFailure.get)
- {
-   addSuppressed(t.recoveryStatistics.lastFailure.get) 
- }
 
 
 
@@ -195,7 +130,7 @@ object Transputer
 trait SelectTransputer extends Transputer  
 {
 
-
+/*
  protected override def onEscalatedFailure(ex: Throwable): Unit =
  {
    super.onEscalatedFailure(ex)
@@ -214,30 +149,7 @@ trait SelectTransputer extends Transputer
 
  protected var selectorInit: ()=>Unit =
                          { () => throw new IllegalStateException("selectorInit us not initialized yet") }
-
-}
-
-class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends Transputer
-{
-
-   childs.foreach(_.parent = Some(this))
-
-   def goOnce: Future[Unit] = {
-      ???
-   }
-                                                                          
-   override def +(p: Transputer) = new ParTransputer(api, childs :+ p)
-
-   private[this] def stopChilds(): Unit = { }
-   
-   
-   def recoverFactory: () => Transputer = () => new ParTransputer(api,childs)
-
-   private[gopher] override def beforeResume() : Unit =
-   {
-       super.beforeResume()
-       for(ch <- childs) ch.beforeResume()
-   }
+*/
 
 }
 
