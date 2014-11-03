@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Api for providing access to channel and selector interfaces.
  */
-class GopherAPI()
+class GopherAPI1
 {
 
 
