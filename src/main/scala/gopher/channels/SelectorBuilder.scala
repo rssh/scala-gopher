@@ -256,9 +256,15 @@ object SelectorBuilder
       transformer.transform(tree)
     }
 
+    def skipAnnotation(x: Tree):Tree =
+     x match {
+        case Annotated(_,arg) => arg
+        case _ => x
+     }
+
     caseDef.pat match {
       case Bind(name,Typed(_,tp:c.universe.TypeTree)) =>
-                    val tpo = if (tp.original.isEmpty) tp else tp.original
+                    val tpo = skipAnnotation( if (tp.original.isEmpty) tp else tp.original )
                     val termName = name.toTermName 
                     val param = ValDef(Modifiers(Flag.PARAM),termName,TypeTree(),EmptyTree)
                     val body = clearIdent(name,caseDef.body)
@@ -279,6 +285,7 @@ object SelectorBuilder
                                    writing
                        case _ =>
                          if (caseDef.guard.isEmpty) {
+                            c.abort(tp.pos, "row caseDef:"+showRaw(caseDef) );
                             c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
                          } else {
                             parseGuardInSelectorCaseDef(c)(termName, caseDef.guard) match {

@@ -1,0 +1,2 @@
+
+- allows annotations in select caseDef patterns

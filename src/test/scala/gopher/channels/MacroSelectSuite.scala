@@ -119,6 +119,23 @@ class MacroSelectSuite extends FunSuite
      assert(res==10)
    }
 
+   test("select syntax with @unchecked annotation")  {
+     import gopherApi._
+     val channel1 = makeChannel[List[Int]](100)
+     val channel2 = makeChannel[List[Int]](100)
+     var res = 0
+     val r = select.once{
+                case x: channel1.read @ unchecked => 
+                              {};
+                              res=1
+                case x: List[Int] @ unchecked if (x==channel2.read) => 
+                              {};
+                              res=2
+     }
+     channel1.awrite(List(1,2,3))
+     Await.ready(r, 10 seconds)
+     assert(res==1)
+   }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    
