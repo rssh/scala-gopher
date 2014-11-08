@@ -1,5 +1,6 @@
-package gopher
+package gopher.transputers
 
+import gopher._
 import akka.actor._
 import scala.util._
 

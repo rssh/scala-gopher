@@ -3,6 +3,7 @@ package gopher
 import akka.actor._
 import akka.pattern._
 import gopher.channels._
+import gopher.transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.experimental.macros

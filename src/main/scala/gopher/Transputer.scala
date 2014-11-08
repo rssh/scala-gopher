@@ -2,6 +2,7 @@ package gopher
 
 import scala.language.experimental.macros
 import channels._
+import transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor._
@@ -42,6 +43,7 @@ trait Transputer
    def  <~~<(x: Transputer#OutPort[A]) = connect(x)
 
    var v: Input[A] = input
+
  }
  
  object InPort
@@ -106,7 +108,10 @@ trait Transputer
   */
  def copyState(prev: Transputer): Unit = {}
 
- 
+ /**
+  * copy conection from previous instance when transputer is
+  * restarted. 
+  **/
  def copyPorts(prev: Transputer): Unit = 
  {
    import scala.reflect._
@@ -215,6 +220,9 @@ trait Transputer
 
 }
 
+/**
+ * mix this trait to ypu transputer for access to akka logging.
+ **/
 trait TransputerLogging
 {
   this: Transputer =>
@@ -364,5 +372,4 @@ class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends
    }
 
 }
-
 
