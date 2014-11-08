@@ -137,6 +137,21 @@ class MacroSelectSuite extends FunSuite
      assert(res==1)
    }
 
+   test("tuple in caseDef as one symbol")  {
+     import gopherApi._
+     val ch = makeChannel[(Int,Int)](100)
+     var res = 0
+     val r = select.once{
+                case xpair: ch.read @unchecked  => 
+                              // fixed error in compiler: Can't find proxy
+                              val (a,b)=xpair
+                              res=1
+     }
+     ch.awrite((1,1))
+     Await.ready(r, 10 seconds)
+     assert(res==1)
+   }
+
    lazy val gopherApi = CommonTestObjects.gopherApi
    
 }
