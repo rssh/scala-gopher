@@ -87,7 +87,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   private[gopher] def continue[A](next:Future[Continuated[A]], ft:FlowTermination[A]): Unit =
                        next.onComplete{
-                          case Success(cont) => continuatedProcessorRef ! cont
+                          case Success(cont) => 
+                                              continuatedProcessorRef ! cont
                           case Failure(ex) => ft.throwIfNotCompleted(ex)
                        }(executionContext)
  

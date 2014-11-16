@@ -40,5 +40,6 @@ trait FlowTermination[-A]
 
   def throwIfNotCompleted(ex: Throwable): Unit 
 
+
 }
 

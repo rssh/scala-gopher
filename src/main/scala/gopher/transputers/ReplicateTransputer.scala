@@ -13,23 +13,23 @@ import scala.collection.mutable.ArraySeq
 
 trait PortAdapter[P[_],A]
 {
-   def apply(x:P[A], n:Int, api: GopherAPI): (IndexedSeq[P[A]],Option[ForeverSelectorBuilder])
+   def apply(x:P[A], n:Int, api: GopherAPI): (IndexedSeq[P[A]],Option[ForeverSelectorBuilder=>Unit])
 }
   
 class SharePortAdapter[P[_],A] extends PortAdapter[P,A]
 {
-   def apply(x:P[A], n:Int, api: GopherAPI): (IndexedSeq[P[A]],Option[ForeverSelectorBuilder]) 
+   def apply(x:P[A], n:Int, api: GopherAPI): (IndexedSeq[P[A]],Option[ForeverSelectorBuilder=>Unit]) 
       = ((1 to n) map (_ => x) ,None)
 }
 
 class DuplicatePortAdapter[A](buffLen: Int = 1) extends PortAdapter[Input,A]
 {
-   def apply(x:Input[A], n:Int, api: GopherAPI): (IndexedSeq[Input[A]],Option[ForeverSelectorBuilder]) 
+   def apply(x:Input[A], n:Int, api: GopherAPI): (IndexedSeq[Input[A]],Option[ForeverSelectorBuilder=>Unit]) 
       = {
        val upApi = api
        val newPorts = (1 to n) map (_ => api.makeChannel[A](buffLen))
-       val selector = api.select.forever      
-       selector.readingWithFlowTerminationAsync(x,
+       def f(selector:ForeverSelectorBuilder): Unit =
+         selector.readingWithFlowTerminationAsync(x,
            (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => async{
                var i = 0
                var fl:List[Future[A]]=Nil
@@ -45,22 +45,21 @@ class DuplicatePortAdapter[A](buffLen: Int = 1) extends PortAdapter[Input,A]
                }
          }(ec)
       )
-      (newPorts, Some(selector))
+      (newPorts, Some(f))
    }
 }
 
 
 class DistributePortAdapter[A](f: A=>Int, buffLen: Int = 1) extends PortAdapter[Input,A]
 {
-   def apply(x:Input[A], n:Int, api: GopherAPI): (IndexedSeq[Input[A]],Option[ForeverSelectorBuilder]) =
+   def apply(x:Input[A], n:Int, api: GopherAPI): (IndexedSeq[Input[A]],Option[ForeverSelectorBuilder=>Unit]) =
    {
        val newPorts = (1 to n) map (_ => api.makeChannel[A](buffLen))
-       val selector = api.select.forever      
-       selector.readingWithFlowTerminationAsync(x,
+       val sf: (ForeverSelectorBuilder=>Unit) = _.readingWithFlowTerminationAsync(x,
            (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => 
                                                     newPorts(f(a) % n).awrite(a).map(_ => ())(ec)
        )
-       (newPorts, Some(selector))
+       (newPorts, Some(sf))
    }
 }
 
@@ -68,11 +67,10 @@ class DistributePortAdapter[A](f: A=>Int, buffLen: Int = 1) extends PortAdapter[
 class AggregatePortAdapter[A](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter[Output,A]
 {
 
-   def apply(x:Output[A], n:Int, api: GopherAPI): (IndexedSeq[Output[A]],Option[ForeverSelectorBuilder]) =
+   def apply(x:Output[A], n:Int, api: GopherAPI): (IndexedSeq[Output[A]],Option[ForeverSelectorBuilder=>Unit]) =
    {
        val newPorts = (1 to n) map (_ => api.makeChannel[A](buffLen))
-       val selector = api.select.forever      
-       selector.readingWithFlowTerminationAsync(newPorts(0),
+       val sf: (ForeverSelectorBuilder=>Unit) = _.readingWithFlowTerminationAsync(newPorts(0),
            (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => async{
               val data = new ArraySeq[A](n)
               data(0) = a
@@ -84,12 +82,13 @@ class AggregatePortAdapter[A](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter
               ()
            }(ec)
        )
-       (newPorts,Some(selector))
+       (newPorts,Some(sf))
    }
 
 }
 
-trait ReplicatedTransputer[T<:Transputer, Self] extends Transputer 
+
+abstract class ReplicatedTransputer[T<:Transputer, Self](api: GopherAPI, n: Int) extends ParTransputer(api,List())
 {
 
    thisReplicatedTransputer: Self =>
@@ -105,6 +104,35 @@ trait ReplicatedTransputer[T<:Transputer, Self] extends Transputer
      var adapter: PortAdapter[Output, A] = new SharePortAdapter[Output,A]
      def owner: Self = thisReplicatedTransputer
    }
+
+   
+   class SelectorRunner(configFun: ForeverSelectorBuilder => Unit ) extends SelectTransputer
+   {
+
+     selectorInit = ()=>configFun(this)
+     selectorInit()
+
+     def api = thisReplicatedTransputer.api
+     def recoverFactory = () => new SelectorRunner(configFun)
+   }
+
+   def init(): Unit 
+
+
+   override def onStart():Unit=
+       { init() }
+
+   override def onRestart(prev:Transputer):Unit=
+       { init() }
+
+
+
+   def replicated: Seq[T] 
+                 = replicatedInstances
+
+   protected var replicatedInstances: Seq[T] = Seq()
+
+
 
 }
 

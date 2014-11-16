@@ -2,6 +2,7 @@ package gopher.channels
 
 import gopher._
 import gopher.channels._
+import gopher.tags._
 
 import org.scalatest._
 
@@ -150,6 +151,47 @@ class MacroSelectSuite extends FunSuite
      ch.awrite((1,1))
      Await.ready(r, 10 seconds)
      assert(res==1)
+   }
+
+   test("multiple readers for one write")  {
+     import gopherApi._
+     val ch = makeChannel[Int](10)
+     @volatile var x1 = 0
+     @volatile var x2 = 0
+     @volatile var x3 = 0
+     @volatile var x4 = 0
+     @volatile var x5 = 0
+     val f1 = select.once{
+                case x:ch.read =>
+                            {};
+                            x1=1
+              }
+     val f2 = select.once{
+                case x:ch.read =>
+                            {};
+                            x2=1
+              }
+     val f3 = select.once{
+                case x:ch.read =>
+                            {};
+                            x3=1
+              }
+     val f4 = select.once{
+                case x:ch.read =>
+                            {};
+                            x4=1
+             }
+     val f5 = select.once{
+                case x:ch.read =>
+                            {};
+                            x5=1
+             }
+     Await.ready(ch.awrite(1),1 second)
+     val fr = Future.firstCompletedOf(List(f1,f2,f3,f4,f5)) 
+     Await.ready(fr, 1 second)
+     ch.close()
+     Await.ready(Future.sequence(List(f1,f2,f3,f4,f5)),1 second)
+     assert(x1+x2+x3+x4+x5==1)
    }
 
    lazy val gopherApi = CommonTestObjects.gopherApi

@@ -1,7 +1,8 @@
 package gopher
 
 import scala.language.experimental.macros
-import channels._
+import gopher.channels._
+import gopher.util._
 import transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -84,11 +85,14 @@ trait Transputer
  
  def start():Future[Unit] =
  {
+   onStart()
    api.transputerSupervisorRef ! TransputerSupervisor.Start(this)
    flowTermination.future
  }
 
  def goOnce: Future[Unit] 
+
+ def stop(): Unit
 
  /**
   * set recover function 
@@ -118,17 +122,6 @@ trait Transputer
    import scala.reflect.runtime.{universe=>ru}
    val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
 
-   def retrieveVals[T:ru.TypeTag](o:Transputer): List[T] =
-   {
-     val im = mirror.reflect(o);
-     val termMembers = im.symbol.typeSignature.members.filter(_.isTerm).map(_.asTerm)
-     val retval = (termMembers.
-                      filter ( x => x.typeSignature <:< ru.typeOf[T] && x.isVal).
-                      map ((x:ru.TermSymbol) => im.reflectField(x).get.asInstanceOf[T]) 
-     ).toList 
-     retval
-   }
-   
    def copyVar[T:ClassTag:ru.TypeTag,V:ClassTag](x:T, y: T, varName: String): Unit =
    {
      val imx = mirror.reflect(x);
@@ -141,7 +134,7 @@ trait Transputer
 
    def copyPorts[T:ru.TypeTag:ClassTag]:Unit =
    {
-     val List(newIns, prevIns) = List(this, prev) map (retrieveVals[T](_))
+     val List(newIns, prevIns) = List(this, prev) map (ReflectUtil.retrieveVals[T,Transputer](ru)(mirror,_))
      for((x,y) <- newIns zip prevIns) copyVar(x,y,"v")
    }
 
@@ -154,6 +147,19 @@ trait Transputer
   * Used for recover failed instances
   */
  def recoverFactory: ()=>Transputer
+
+ /**
+  * called when transducer is started.
+  */
+ protected def onStart() { }
+
+ /**
+  * called when transducer is restarted.
+  *
+  *@param prev - previous (i.e. failed) instance of trnasputer.
+  */
+ protected def onRestart(prev:Transputer) { }
+
 
  /**
   * called when transducer is choose resume durign recovery.
@@ -184,17 +190,15 @@ trait Transputer
       recoveryFunction = prev.recoveryFunction
       parent = prev.parent
    }
-   //§§onRestart()
+   onRestart(prev)
  }
 
  private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
  private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
- private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty /* {
-                                            case ex: ChannelClosedException => SupervisorStrategy.Stop                       
-                                        }
-                                        */
+ private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty 
  private[gopher] var parent: Option[Transputer] = None
  private[gopher] var flowTermination: PromiseFlowTermination[Unit] = createFlowTermination()
+ private[gopher] var replicaNumber = 1
 
  private[this] def createFlowTermination() = new PromiseFlowTermination[Unit]() {
 
@@ -212,10 +216,16 @@ trait Transputer
 
 
  }
- 
+
+ /**
+  * return replica number of current instance, if
+  * transponder run replicated.
+  **/
+ protected def replica = replicaNumber
+
  import akka.event.LogSource
  implicit def logSource: LogSource[Transputer] = new LogSource[Transputer] {
-    def genString(t: Transputer) = t.getClass.getName
+    def genString(t: Transputer) = t.getClass.getName+"/"+t.replica
  }
 
 }
@@ -296,11 +306,12 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
   */
  def loop(f: PartialFunction[Any,Unit]): Unit = macro SelectorBuilder.loopImpl[Unit]
 
+
+ def stop():Unit = stopFlowTermination() 
+
  /**
   * When called inside loop - stop execution of selector, from outside - terminate transformer
   */
- def stop():Unit = stopFlowTermination() 
-
  private[this] def stopFlowTermination(implicit ft:FlowTermination[Unit] = flowTermination): Unit =
                     ft.doExit(())
 
@@ -332,7 +343,7 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
 
 }
 
-class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends Transputer
+class ParTransputer(override val api: GopherAPI, var childs:Seq[Transputer]) extends Transputer
 {
 
    childs.foreach(_.parent = Some(this))
@@ -353,6 +364,11 @@ class ParTransputer(override val api: GopherAPI, childs:Seq[Transputer]) extends
      withStopChilds(
          Future.sequence(childs map( x=> withStopChilds(x.start()) ) ) 
      ) map (_ => ())
+   }
+
+   def stop(): Unit = 
+   {
+    stopChilds()
    }
                                                                           
    override def +(p: Transputer) = new ParTransputer(api, childs :+ p)

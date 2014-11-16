@@ -110,7 +110,7 @@ class TransputerRestartSuite extends FunSuite
      assert(acceptor.nBingos == acceptor.nPairs)
   }
 
-  test("bingo - too many failures with restart", Now) {
+  test("bingo - too many failures with restart") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRecover]
@@ -128,7 +128,7 @@ class TransputerRestartSuite extends FunSuite
      }
   }
 
-  test("bingo - too many failures with resume", Now) {
+  test("bingo - too many failures with resume") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRecover]
