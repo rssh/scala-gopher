@@ -85,6 +85,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 
     val out = OutPort[Int]()
 
+    @volatile var nProcessedMessages = 0
 
     loop {
       case x: in.read =>
@@ -92,6 +93,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
                  // TODO: implement gopherApi.time.wait
                  Thread.sleep(1000)
                  out.write(x)
+                 nProcessedMessages += 1
     }
 
 }
@@ -101,50 +103,12 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 class ReplicateSuite extends FunSuite
 {
 
-  test(" define PortAdapter for TestDupper by hands", Now) {
-    // this must be the same as macros-generated,
+  test(" define PortAdapter for TestDupper ", Now) {
+    val r = gopherApi.replicate[TestDupper](10)
     import PortAdapters._
-    class ReplicatedTestDupper(api:GopherAPI, n:Int) extends ReplicatedTransputer[TestDupper, ReplicatedTestDupper](api,n) {
-       val in = new InPortWithAdapter[Int](InPort())
-       val out = new OutPortWithAdapter[Int](OutPort())
-
-       def replicatePorts():IndexedSeq[ForeverSelectorBuilder=>Unit] =
-       {
-         var selectorFuns = IndexedSeq[ForeverSelectorBuilder=>Unit]()
-
-         val (replicatedIns, optInSelectorFun) = in.adapter(in.v,n,api)
-         for((rin,e) <- (replicatedIns zip replicatedInstances)) {
-               e.in.connect(rin)
-         }
-         selectorFuns = selectorFuns ++ optInSelectorFun
- 
-         val (replicatedOuts, optOutSelectorFun) = out.adapter(out.v,n,api)
-         for((rout,e) <-  (replicatedOuts zip replicatedInstances)) {
-              e.out.connect(rout)
-         }
-         selectorFuns = selectorFuns ++ optInSelectorFun
-
-         selectorFuns
-       }
-
-       def init(): Unit =
-       {
-         replicatedInstances = (1 to n) map (i => {
-              val x = gopherApi.makeTransputer[TestDupper]
-              x.replicaNumber = i
-              x
-         })
-        
-         val selectorFuns = replicatePorts
-         childs = (selectorFuns map(new SelectorRunner(_))) ++ replicatedInstances
-         for(x <- childs) x.parent = Some(this)
-       }
-
-    }
-    val r = new ReplicatedTestDupper(gopherApi,10);
-    //( r.in.distribute( (_ % 37 ) ).
-    //    out.share()
-    //)
+    ( r.in.distribute( (_ % 37 ) ).
+        out.share()
+    )
     val inChannel = gopherApi.makeChannel[Int](10); 
     val outChannel = gopherApi.makeChannel[Int](10); 
     r.in.connect(inChannel)
@@ -162,9 +126,12 @@ class ReplicateSuite extends FunSuite
       r2 = outChannel.read
       afterF1 = System.currentTimeMillis
     }
-    Await.ready(f1, 2 seconds)
+    Await.ready(f1, 3 seconds)
     assert(afterF1!=0L)
-    assert((afterF1 - beforeF1) < 2000)
+    assert(r.replicated.map(_.nProcessedMessages).sum == 2)
+    assert(r.replicated.forall(x => x.nProcessedMessages == 0 || x.nProcessedMessages == 1))
+    // depend from other activity, can be longer.
+    //assert((afterF1 - beforeF1) < 2000)
     r.stop()
   }
 

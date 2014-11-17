@@ -2,8 +2,9 @@ package gopher.transputers
 
 import gopher._
 import gopher.channels._
+import gopher.util._
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.whitebox.Context
 import scala.reflect.api._
 import scala.concurrent._
 import scala.annotation._
@@ -124,15 +125,19 @@ abstract class ReplicatedTransputer[T<:Transputer, Self](api: GopherAPI, n: Int)
 
    override def onRestart(prev:Transputer):Unit=
        { init() }
-
-
+ 
 
    def replicated: Seq[T] 
                  = replicatedInstances
 
    protected var replicatedInstances: Seq[T] = Seq()
 
+   protected def replicatePorts():IndexedSeq[ForeverSelectorBuilder=>Unit]
 
+   protected final def formChilds(selectorFuns:IndexedSeq[ForeverSelectorBuilder=>Unit]):Unit = {
+         childs = (selectorFuns map(new SelectorRunner(_))) ++ replicatedInstances
+         for(x <- childs) x.parent = Some(this)
+   }
 
 }
 
@@ -142,11 +147,11 @@ abstract class ReplicatedTransputer[T<:Transputer, Self](api: GopherAPI, n: Int)
 object PortAdapters
 {
  
- implicit class DistributeInput[T<:Transputer, G <: ReplicatedTransputer[T,G],A](in: ReplicatedTransputer[T,G]#InPortWithAdapter[A]) 
+ implicit class DistributeInput[A, G <: ReplicatedTransputer[_,_]](in: G#InPortWithAdapter[A])
  {
    def distribute(f: A=>Int): G = 
         {  in.adapter = new DistributePortAdapter(f)
-           in.owner
+           in.owner.asInstanceOf[G]
         }
  }
 
@@ -176,30 +181,92 @@ object PortAdapters
 
 
 
-/**
-
-Replicate[TestTransputer](  _.in.distribute( _ % 2)
-                             .out.share
-                         )
-
-   }(n)
- =>
-
-Replicate[TestTransputer](  _.inTransform(q"TestTransputer.in".sym, new DistributePortAdapter(f)).toT.
-                              outTransform(q"TestTransputer.out".sym, new SharePortAdapter())   )
-
-*/
-
-
 object Replicate
 {
 
-  def apply[T<:Transputer](cnSpec: (T => T)): Transputer = macro applyImpl[T]
+  /**
+   * macro for GopherAPI.replicate
+   */
+  def replicateImpl[T<:Transputer:c.WeakTypeTag](c:Context)(n:c.Expr[Int]):c.Expr[Transputer] =
+  {
+    import c.universe._
 
-  def applyImpl[T:c.WeakTypeTag](c:Context)(cnSpec:c.Expr[T=>T]):c.Expr[Transputer] =
-  {  
-     Console.println(s"replicate for ${c.weakTypeOf[T]} is called") 
-     Console.println(s"cnSpec: ${cnSpec}") 
-     ???
+    def portDefs[P:TypeTag](portWithAdapterName:String,portConstructorName:String):List[Tree] =
+    {
+      val portWithAdapterType = TypeName(portWithAdapterName)
+      val portConstructor = TermName(portConstructorName)
+      val ports = ReflectUtil.retrieveValSymbols[P](c.universe)(weakTypeOf[T])
+      for(p <- ports) yield {
+        val getter = p.getter.asMethod
+        if (getter.returnType.typeArgs.length!=1) {
+          c.abort(p.pos, "assumed {In|Out}Port[A], have type ${getter.returnType} with typeArgs length other then 1")
+        }
+        val ta = getter.returnType.typeArgs.head
+        val name = TermName(getter.name.toString)
+        q"val ${name} = new ${portWithAdapterType}[${ta}](${portConstructor}())"
+      }
+    }
+
+    def replicatePort(p:TermName):Tree=
+     q"""{ val (replicatedPorts,optSelectorFun) = ${p}.adapter(${p}.v,n,api)
+           for((r,e) <- (replicatedPorts zip replicatedInstances)) {
+              e.${p}.connect(r)
+           }
+           selectorFuns = selectorFuns ++ optSelectorFun
+         }
+      """
+
+    def retrieveValNames[P:TypeTag]:List[TermName] = 
+      ReflectUtil.retrieveValSymbols[P](c.universe)(weakTypeOf[T]) map (x=>TermName(x.getter.name.toString))
+
+    def replicatePorts():List[Tree] =
+    {
+      (retrieveValNames[Transputer#InPort[_]] ++ retrieveValNames[Transputer#OutPort[_]]) map (replicatePort(_))
+    }
+
+
+    val className  = TypeName(c.freshName("Replicated"+weakTypeOf[T].typeSymbol.name))
+    var stats = List[c.Tree]() ++ ( 
+                   portDefs[Transputer#InPort[_]]("InPortWithAdapter","InPort")
+                   ++
+                   portDefs[Transputer#OutPort[_]]("OutPortWithAdapter","OutPort")
+                )
+
+    val retval = c.Expr[Transputer](q"""
+     {
+      class ${className}(api:GopherAPI,n:Int) extends ReplicatedTransputer[${weakTypeOf[T]},${className}](api,n)
+      {
+       type Self = ${className}
+ 
+       def init(): Unit =
+       {
+         replicatedInstances = (1 to n) map (i => {
+              val x = api.makeTransputer[${weakTypeOf[T]}]
+              x.replicaNumber = i
+              x
+         })
+         formChilds(replicatePorts)
+       }
+
+       def replicatePorts():IndexedSeq[ForeverSelectorBuilder=>Unit] =
+       {
+         var selectorFuns = IndexedSeq[ForeverSelectorBuilder=>Unit]()
+
+         ..${replicatePorts()}
+
+         selectorFuns
+       }
+
+
+       ..${stats}
+
+      }
+      new ${className}(${c.prefix},${n.tree})
+     }
+    """
+    )  
+    retval
   }
+
+
 }

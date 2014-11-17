@@ -57,6 +57,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
+  def replicate[T<: Transputer](n:Int): Transputer = macro Replicate.replicateImpl[T]
+
   def actorSystem: ActorSystem = as
 
   def executionContext: ExecutionContext = es
