@@ -5,7 +5,7 @@
 ### Dependences:    
  
  * scala 2.11.4 +
- * akka 2.3.6 +
+ * akka 2.3.7 +
  * scala-async 0.9.2
 
 #### Download: 
