@@ -89,7 +89,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 
     loop {
       case x: in.read =>
-                 System.err.println(s"testDupper, replica: ${replica} received ${x} from ${in.v}")
+                 log.info(s"testDupper, replica: ${replica} received ${x} from ${in.v}")
                  // TODO: implement gopherApi.time.wait
                  Thread.sleep(1000)
                  out.write(x)
@@ -103,7 +103,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 class ReplicateSuite extends FunSuite
 {
 
-  test(" define PortAdapter for TestDupper ", Now) {
+  test(" define replication of TestDupper with port adapters", Now) {
     val r = gopherApi.replicate[TestDupper](10)
     import PortAdapters._
     ( r.in.distribute( (_ % 37 ) ).
@@ -118,20 +118,15 @@ class ReplicateSuite extends FunSuite
     var r1=0
     var r2=0
     val beforeF1 = System.currentTimeMillis
-    var afterF1 = 0L
     val f1 = go{
       inChannel.write(1)  
       inChannel.write(2)  
       r1 = outChannel.read
       r2 = outChannel.read
-      afterF1 = System.currentTimeMillis
     }
     Await.ready(f1, 3 seconds)
-    assert(afterF1!=0L)
     assert(r.replicated.map(_.nProcessedMessages).sum == 2)
     assert(r.replicated.forall(x => x.nProcessedMessages == 0 || x.nProcessedMessages == 1))
-    // depend from other activity, can be longer.
-    //assert((afterF1 - beforeF1) < 2000)
     r.stop()
   }
 

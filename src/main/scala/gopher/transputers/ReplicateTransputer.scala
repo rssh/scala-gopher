@@ -147,7 +147,7 @@ abstract class ReplicatedTransputer[T<:Transputer, Self](api: GopherAPI, n: Int)
 object PortAdapters
 {
  
- implicit class DistributeInput[A, G <: ReplicatedTransputer[_,_]](in: G#InPortWithAdapter[A])
+ implicit class DistributeInput[G <: ReplicatedTransputer[_,_], A](in: G#InPortWithAdapter[A])
  {
    def distribute(f: A=>Int): G = 
         {  in.adapter = new DistributePortAdapter(f)
@@ -156,20 +156,20 @@ object PortAdapters
  }
 
 
- implicit class ShareInput[T <: Transputer, G <: ReplicatedTransputer[T,G],A](in: ReplicatedTransputer[T,G]#InPortWithAdapter[A])
+ implicit class ShareInput[G <: ReplicatedTransputer[_,_],A](in: G#InPortWithAdapter[A])
  {
    def share(): G =
         { in.adapter = new SharePortAdapter[Input,A]()
-          in.owner
+          in.owner.asInstanceOf[G]
         }
  }
 
 
- implicit class ShareOutput[T<:Transputer,G <: ReplicatedTransputer[T,G], A](out: ReplicatedTransputer[T,G]#OutPortWithAdapter[A])
+ implicit class ShareOutput[G <: ReplicatedTransputer[_,_], A](out: G#OutPortWithAdapter[A])
  {
    def share(): G = 
         { out.adapter = new SharePortAdapter[Output,A] 
-          out.owner
+          out.owner.asInstanceOf[G]
         }
  }
 
@@ -203,7 +203,7 @@ object Replicate
         }
         val ta = getter.returnType.typeArgs.head
         val name = TermName(getter.name.toString)
-        q"val ${name} = new ${portWithAdapterType}[${ta}](${portConstructor}())"
+        q"val ${name}: ${portWithAdapterType}[${ta}] = new ${portWithAdapterType}[${ta}](${portConstructor}())"
       }
     }
 
