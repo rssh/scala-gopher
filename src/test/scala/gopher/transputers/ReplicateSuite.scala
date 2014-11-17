@@ -124,7 +124,7 @@ class ReplicateSuite extends FunSuite
       r1 = outChannel.read
       r2 = outChannel.read
     }
-    Await.ready(f1, 3 seconds)
+    Await.ready(f1, 5 seconds)
     assert(r.replicated.map(_.nProcessedMessages).sum == 2)
     assert(r.replicated.forall(x => x.nProcessedMessages == 0 || x.nProcessedMessages == 1))
     r.stop()
