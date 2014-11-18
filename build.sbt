@@ -24,7 +24,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.7"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
-version:="0.99.4"
+version:="0.99.5-SNAPSHOT"
 
 
 publishMavenStyle := true
