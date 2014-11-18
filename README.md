@@ -10,7 +10,7 @@
 
 #### Download: 
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.3"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.4"
 
 
 ## Overview
