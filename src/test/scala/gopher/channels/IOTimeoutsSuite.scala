@@ -66,7 +66,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
       f3 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
                            w.dismiss()
       } 
-      Await.ready(f3, 1 second)
+      Await.ready(f3, 5 seconds)
       w.await(dismissals=Dismissals(3))
                
   }

@@ -43,13 +43,24 @@ trait Transputer
 
    def  <~~<(x: Transputer#OutPort[A]) = connect(x)
 
+   // get other side of port input  if this is possible.
+   def outputSide : Option[Output[A]] =
+      v match {
+        case out: Output[A] => Some(out)
+        case _ => None
+      }
+
+   def *! : Output[A] = outputSide.getOrElse(
+                          throw new IllegalStateException("Can't get output side of port input")
+                        )
+
    var v: Input[A] = input
 
  }
  
  object InPort
  {
-  @inline def apply[A]():InPort[A] = new InPort(null) // TODO: create special non-initialized class.
+  @inline def apply[A]():InPort[A] = new InPort(new LazyChannel[A](api)) 
  }
 
  class OutPort[A](output:Output[A]) extends Output[A]
@@ -73,12 +84,22 @@ trait Transputer
 
   def >~~> (x: Transputer#InPort[A]) = connect(x)
 
+  def inputSide: Option[Input[A]] =
+    v match {
+      case in: Input[A] => Some(in)
+      case _ => None
+    }
+
+  def *! :Input[A] = inputSide.getOrElse(
+                         throw new IllegalStateException("Can't get input side of port output "+v)
+                     )
+
   var v: Output[A] = output
  }
 
  object OutPort
  {
-  @inline def apply[A]():OutPort[A] = new OutPort(null) // TODO: create special non-initialized class.
+  @inline def apply[A]():OutPort[A] = new OutPort(new LazyChannel[A](api)) 
  }
 
  def +(p: Transputer) = new ParTransputer(api, Seq(this,p))

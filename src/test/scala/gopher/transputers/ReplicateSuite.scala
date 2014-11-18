@@ -14,6 +14,7 @@ case class SetMaxWords(n:Int) extends ControlMessage
 case class SetMaxUsers(n:Int) extends ControlMessage
 case class SendTopWords(userId: Long, nWords:Int) extends ControlMessage
 case object Clear extends ControlMessage
+case object Stop extends ControlMessage
 
 sealed trait OverflowMessage
 case object UsersOverflow extends OverflowMessage
@@ -49,6 +50,7 @@ trait WordCountTestTransputer extends SelectTransputer
                case SendTopWords(userId, nWords) =>
                               topOut.write((userId,topNWords(userId, nWords)))
                case Clear => data = Map()
+               case Stop => stop()
              }
                          
   }
@@ -124,17 +126,52 @@ class ReplicateSuite extends FunSuite
       r1 = outChannel.read
       r2 = outChannel.read
     }
-    Await.ready(f1, 5 seconds)
+    Await.ready(f1, 10 seconds)
+    assert(f1.isCompleted)
     assert(r.replicated.map(_.nProcessedMessages).sum == 2)
     assert(r.replicated.forall(x => x.nProcessedMessages == 0 || x.nProcessedMessages == 1))
     r.stop()
   }
 
 
-  test("WordCount must be replicated") {
-    pending
+  test("WordCount must be replicated and accessbke via *! ports side") {
+    //pending
     import PortAdapters._
-    //val t1 = Replicate[WordCountTestTransputer](_.inS.distribute{ case(id,w) => id.toInt })
+    val nReplics = 2
+    val t = gopherApi.replicate[WordCountTestTransputer](nReplics).inS.distribute{ case(id,w) => id.toInt }.control.duplicate()
+    val ft = t.start()
+    val topIn: Input[(Long,Seq[(String,Int)])] = t.topOut.*!
+    @volatile var nReceived = 0
+    val of = gopherApi.select.forever {
+                 case x: topIn.read @ unchecked =>
+                          //Console.println("received:"+x)
+                          nReceived = nReceived + 1
+                          if (nReceived == nReplics) {
+                             implicitly[FlowTermination[Unit]].doExit(())
+                          }
+                 case o: OverflowMessage if (o==(t.overflows*!).read) =>
+                          Console.println("overflow received:"+o)
+              }
+    val outS: Output[(Long,String)] = t.inS.*!
+    //  stack overflow in compiler. [2.11.4]
+    //val fw = go { 
+    //   outS.writeAll( "Some nontrivial sentence with more than one word".split(" ").toList map ((11L,_))  )
+    //}
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val fw = outS.awriteAll(
+               "Some nontrivial sentence with more than one word".split(" ").toList map ((1L,_))  
+             ) flatMap ( _ =>
+                outS.awriteAll( "And in next text word 'word' will be one of top words".split(" ").toList map ((1L,_))  
+                              )  flatMap ( _ =>
+                  outS.awriteAll( "One image is worse than thousand words".split(" ").toList map ((1L,_))  
+               ) ) ) flatMap { _ =>
+                 t.control.*! awrite SendTopWords(1L, 3)
+              }
+    Await.ready(fw, 10 seconds)
+    t.stop()
+    Await.ready(ft, 10 seconds)
+    Await.ready(of, 10 seconds)
+    assert(nReceived == nReplics)
   }
 
 

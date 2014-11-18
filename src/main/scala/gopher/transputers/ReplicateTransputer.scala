@@ -174,6 +174,13 @@ object PortAdapters
  }
 
 
+ implicit class DuplicateInput[G <: ReplicatedTransputer[_,_],A](in: G#InPortWithAdapter[A])
+ {
+   def duplicate(): G = 
+        { in.adapter = new DuplicatePortAdapter[A] 
+          in.owner.asInstanceOf[G]
+        }
+ }
 
 
 
@@ -203,7 +210,7 @@ object Replicate
         }
         val ta = getter.returnType.typeArgs.head
         val name = TermName(getter.name.toString)
-        q"val ${name}: ${portWithAdapterType}[${ta}] = new ${portWithAdapterType}[${ta}](${portConstructor}())"
+        q"val ${name}: ${portWithAdapterType}[${ta}] = new ${portWithAdapterType}[${ta}](${portConstructor}().v)"
       }
     }
 

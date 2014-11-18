@@ -312,7 +312,13 @@ object SelectorBuilder
         case _ => x
      }
 
-    val retval = caseDef.pat match {
+    def unUnapplyPattern(x:Tree):Tree =
+      x match {
+         case Bind(name, UnApply(fun,List(t@Typed(_,_))) ) => Bind(name,t)
+         case _ => x
+      }
+
+    val retval = unUnapplyPattern(caseDef.pat) match {
       case Bind(name,Typed(_,tp:c.universe.TypeTree)) =>
                     val termName = name.toTermName 
                     // when debug problems on later compilation steps, you can create freshName and see visually:
@@ -374,7 +380,9 @@ object SelectorBuilder
                       case _ =>
                                      MacroUtil.shortString(c)(x)
                     }
-                    c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
+                    System.err.println("x:"+x)
+                    System.err.println("raw x:"+showRaw(x))
+                    c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
       case _ =>
             c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read");
     }
