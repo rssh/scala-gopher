@@ -1,0 +1,275 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>transputers - gopher.transputers</title>
+          <meta name="description" content="transputers - gopher.transputers" />
+          <meta name="keywords" content="transputers gopher.transputers" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'gopher.transputers.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a></p>
+        <h1>transputers</h1> <span class="permalink">
+      <a href="../../index.html#gopher.transputers.package" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transputers</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="gopher.transputers.AggregatePortAdapter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AggregatePortAdapter[A]extendsPortAdapter[gopher.channels.Output,A]"></a>
+      <a id="AggregatePortAdapter[A]:AggregatePortAdapter[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AggregatePortAdapter.html"><span class="name">AggregatePortAdapter</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="PortAdapter.html" class="extype" name="gopher.transputers.PortAdapter">PortAdapter</a>[<a href="../channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>, <span class="extype" name="gopher.transputers.AggregatePortAdapter.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@AggregatePortAdapter[A]extendsPortAdapter[gopher.channels.Output,A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.DistributePortAdapter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DistributePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]"></a>
+      <a id="DistributePortAdapter[A]:DistributePortAdapter[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DistributePortAdapter.html"><span class="name">DistributePortAdapter</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="PortAdapter.html" class="extype" name="gopher.transputers.PortAdapter">PortAdapter</a>[<a href="../channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>, <span class="extype" name="gopher.transputers.DistributePortAdapter.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@DistributePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.DuplicatePortAdapter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DuplicatePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]"></a>
+      <a id="DuplicatePortAdapter[A]:DuplicatePortAdapter[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DuplicatePortAdapter.html"><span class="name">DuplicatePortAdapter</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="PortAdapter.html" class="extype" name="gopher.transputers.PortAdapter">PortAdapter</a>[<a href="../channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>, <span class="extype" name="gopher.transputers.DuplicatePortAdapter.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@DuplicatePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.PortAdapter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PortAdapter[P[_],A]extendsAnyRef"></a>
+      <a id="PortAdapter[P[_],A]:PortAdapter[P,A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="PortAdapter.html"><span class="name">PortAdapter</span></a><span class="tparams">[<span name="P">P<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@PortAdapter[P[_],A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.ReplicatedTransputer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ReplicatedTransputer[T&lt;:gopher.Transputer,Self]extendsParTransputer"></a>
+      <a id="ReplicatedTransputer[T&lt;:Transputer,Self]:ReplicatedTransputer[T,Self]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ReplicatedTransputer.html"><span class="name">ReplicatedTransputer</span></a><span class="tparams">[<span name="T">T &lt;: <a href="../Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></span>, <span name="Self">Self</span>]</span><span class="result"> extends <a href="../ParTransputer.html" class="extype" name="gopher.ParTransputer">ParTransputer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@ReplicatedTransputer[T&lt;:gopher.Transputer,Self]extendsParTransputer" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.SharePortAdapter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SharePortAdapter[P[_],A]extendsPortAdapter[P,A]"></a>
+      <a id="SharePortAdapter[P[_],A]:SharePortAdapter[P,A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SharePortAdapter.html"><span class="name">SharePortAdapter</span></a><span class="tparams">[<span name="P">P<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result"> extends <a href="PortAdapter.html" class="extype" name="gopher.transputers.PortAdapter">PortAdapter</a>[<span class="extype" name="gopher.transputers.SharePortAdapter.P">P</span>, <span class="extype" name="gopher.transputers.SharePortAdapter.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@SharePortAdapter[P[_],A]extendsPortAdapter[P,A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.TransputerSupervisor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransputerSupervisorextendsActorwithActorLogging"></a>
+      <a id="TransputerSupervisor:TransputerSupervisor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TransputerSupervisor.html"><span class="name">TransputerSupervisor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span> with <span class="extype" name="akka.actor.ActorLogging">ActorLogging</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@TransputerSupervisorextendsActorwithActorLogging" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">one actor, which perform operations for starting/stopping
+</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="gopher.transputers.PortAdapters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PortAdapters"></a>
+      <a id="PortAdapters:PortAdapters"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PortAdapters$.html"><span class="name">PortAdapters</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@PortAdapters" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.Replicate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Replicate"></a>
+      <a id="Replicate:Replicate"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Replicate$.html"><span class="name">Replicate</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@Replicate" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.transputers.TransputerSupervisor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransputerSupervisor"></a>
+      <a id="TransputerSupervisor:TransputerSupervisor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TransputerSupervisor$.html"><span class="name">TransputerSupervisor</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.transputers.package@TransputerSupervisor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

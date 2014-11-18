@@ -55,7 +55,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="ParTransputer.html" class="extype" name="gopher.ParTransputer">ParTransputer</a>, <a href="SelectTransputer.html" class="extype" name="gopher.SelectTransputer">SelectTransputer</a></div>
+            <div class="subClasses hiddenContent"><a href="ParTransputer.html" class="extype" name="gopher.ParTransputer">ParTransputer</a>, <a href="transputers/ReplicatedTransputer.html" class="extype" name="gopher.transputers.ReplicatedTransputer">ReplicatedTransputer</a>, <a href="SelectTransputer.html" class="extype" name="gopher.SelectTransputer">SelectTransputer</a>, <a href="transputers/ReplicatedTransputer$SelectorRunner.html" class="extype" name="gopher.transputers.ReplicatedTransputer.SelectorRunner">SelectorRunner</a></div>
           </div></div>
         
 
@@ -186,6 +186,23 @@ statement and then can be combined into larger structures</p><p>Transputers can 
     </span>
       <p class="shortcomment cmt">Used for recover failed instances
 </p>
+    </li><li name="gopher.Transputer#stop" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="stop():Unit"></a>
+      <a id="stop():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stop</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@stop():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -349,7 +366,8 @@ statement and then can be combined into larger structures</p><p>Transputers can 
         <img src="../lib/permalink.png" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">copy conection from previous instance when transputer is
+restarted.</p>
     </li><li name="gopher.Transputer#copyState" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="copyState(prev:gopher.Transputer):Unit"></a>
       <a id="copyState(Transputer):Unit"></a>
@@ -563,6 +581,25 @@ can be overriden in subclasses (by default: do nothing)</p><p>Note, that port co
     </span>
       <p class="shortcomment cmt">called when failure is escalated.</p><div class="fullcomment"><div class="comment cmt"><p>called when failure is escalated.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="gopher.Transputer#onRestart" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onRestart(prev:gopher.Transputer):Unit"></a>
+      <a id="onRestart(Transputer):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onRestart</span><span class="params">(<span name="prev">prev: <a href="" class="extype" name="gopher.Transputer">Transputer</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@onRestart(prev:gopher.Transputer):Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">called when transducer is restarted.</p><div class="fullcomment"><div class="comment cmt"><p>called when transducer is restarted.
+</p></div><dl class="paramcmts block"><dt class="param">prev</dt><dd class="cmt"><p>- previous (i.e. failed) instance of trnasputer.
+</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="gopher.Transputer#onResume" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="onResume():Unit"></a>
       <a id="onResume():Unit"></a>
@@ -580,6 +617,24 @@ can be overriden in subclasses (by default: do nothing)</p><p>Note, that port co
       </a>
     </span>
       <p class="shortcomment cmt">called when transducer is choose resume durign recovery.</p><div class="fullcomment"><div class="comment cmt"><p>called when transducer is choose resume durign recovery.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="gopher.Transputer#onStart" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onStart():Unit"></a>
+      <a id="onStart():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onStart</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@onStart():Unit" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">called when transducer is started.</p><div class="fullcomment"><div class="comment cmt"><p>called when transducer is started.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="gopher.Transputer#onStop" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="onStop():Unit"></a>
@@ -617,6 +672,26 @@ can be overriden in subclasses (by default: do nothing)</p><p>Note, that port co
     </span>
       <p class="shortcomment cmt">set recover function
 </p>
+    </li><li name="gopher.Transputer#replica" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="replica:Int"></a>
+      <a id="replica:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">replica</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.Transputer@replica:Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">return replica number of current instance, if
+transponder run replicated.</p><div class="fullcomment"><div class="comment cmt"><p>return replica number of current instance, if
+transponder run replicated.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="gopher.Transputer#start" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="start():scala.concurrent.Future[Unit]"></a>
       <a id="start():Future[Unit]"></a>
