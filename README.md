@@ -234,6 +234,45 @@ Also note, that you can provide own Input and Output implementations by implemen
         }  
 ```
 
+## Transputers
+
+  Logic of data transformation between channels can be incapsulated in special `Transputer` concept. (Word 'transputer' was choosed
+ as a reminder about INMOS processor, for which one of first CSP languages, Occam, was developed).  Transputer can be viewd as 
+ restartable representation of process and consists from:
+ 
+ * Set of named input and output posts.
+ * Logic of propagating information from input ports to output.
+ * Possible state
+ * Logic of error recovering.
+
+I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides unblocked reaction to incoming messages from mailbox and sending signals to other actors, when Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports, and when operations inside Actor must be unblocked, operations inside Transputer can wait.
+
+Transformers ara build hierarchically with help of 3 operations:
+ * select  (logic is execution of select statement )
+ * parallel combination  (logic is parallel execution of parts)
+ * replication           (logic is parallel execution of set of identical transformers.)
+
+### Select transputer
+
+```
+ trait BingoTransputer extends SelectTransputer
+ {
+    val inA = InPort[Int]
+    val inB = InPort[Int]
+    val out = OutPort[Int]
+
+    loop {
+      case x:inA.read =>
+             y = inB.read
+             if (x==y) {
+               out.write(x)
+             }
+    }
+
+ }
+```
+
+
 
 ## Unsugared interfaces
    
