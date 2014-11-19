@@ -240,12 +240,12 @@ Also note, that you can provide own Input and Output implementations by implemen
  as a reminder about INMOS processor, for which one of first CSP languages, Occam, was developed).  Transputer can be viewd as 
  restartable representation of process and consists from:
  
- * Set of named input and output posts.
- * Logic of propagating information from input ports to output.
+ * Set of named input and output ports.
+ * Logic of propagating information from input ports to output ports.
  * Possible state
  * Logic of error recovering.
 
-I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides unblocked reaction to incoming messages from mailbox and sending signals to other actors, when Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports, and when operations inside Actor must be unblocked, operations inside Transputer can wait.
+I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must be unblocked, operations inside Transputer can wait.
 
 Transformers ara build hierarchically with help of 3 operations:
  * select  (logic is execution of select statement )
