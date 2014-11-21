@@ -102,6 +102,11 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 object GopherAPI
 {
 
+  //oject RecoveryPolicy {
+  //   def AlwaysRestart: PartialFunction[Throwable,SupervisorStrategy.Directive] = 
+  //            { case NonFatal(ex) => SupervisorStrategy.Restart }
+  //}
+
   def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
     import c.universe._
     //----------------------------------------------

@@ -207,7 +207,7 @@ trait Transputer
  {
    if (!(prev eq null)) {
       recoveryStatistics = prev.recoveryStatistics
-      recoveryPolicy = prev.recoveryPolicy
+      recoveryLimits = prev.recoveryLimits
       recoveryFunction = prev.recoveryFunction
       parent = prev.parent
    }
@@ -215,7 +215,7 @@ trait Transputer
  }
 
  private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
- private[gopher] var recoveryPolicy = Transputer.RecoveryPolicy( )
+ private[gopher] var recoveryLimits = Transputer.RecoveryLimits( )
  private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty 
  private[gopher] var parent: Option[Transputer] = None
  private[gopher] var flowTermination: PromiseFlowTermination[Unit] = createFlowTermination()
@@ -273,21 +273,21 @@ object Transputer
     var lastFailure: Option[Throwable] = None
  ) {
 
-     def failure(ex: Throwable, recoveryPolicy: RecoveryPolicy, nanoNow: Long): Boolean =
+     def failure(ex: Throwable, recoveryLimits: RecoveryLimits, nanoNow: Long): Boolean =
      {
-       val same = sameWindow(recoveryPolicy, nanoNow)
+       val same = sameWindow(recoveryLimits, nanoNow)
        nFailures +=1
        if (firstFailure.isEmpty) {
            firstFailure = Some(ex)
        }
        lastFailure = Some(ex)
-       return (same && nFailures >= recoveryPolicy.maxFailures) 
+       return (same && nFailures >= recoveryLimits.maxFailures) 
      }
      
 
-     def sameWindow(recoveryPolicy: RecoveryPolicy, nanoNow: Long): Boolean =
+     def sameWindow(recoveryLimits: RecoveryLimits, nanoNow: Long): Boolean =
      {
-       if ((nanoNow - windowStart) > recoveryPolicy.windowDuration.toNanos) {
+       if ((nanoNow - windowStart) > recoveryLimits.windowDuration.toNanos) {
             nFailures = 0
             windowStart = nanoNow
             firstFailure = None
@@ -301,7 +301,7 @@ object Transputer
  }
    
 
- case class RecoveryPolicy(
+ case class RecoveryLimits(
     var maxFailures: Int = 10,
     var windowDuration: Duration = 1 second
  )

@@ -237,22 +237,26 @@ Also note, that you can provide own Input and Output implementations by implemen
 ## Transputers
 
   Logic of data transformation between channels can be incapsulated in special `Transputer` concept. (Word 'transputer' was choosed
- as a reminder about INMOS processor, for which one of first CSP languages, Occam, was developed).  Transputer can be viewd as 
- restartable representation of process and consists from:
+ as a reminder about INMOS processor, for which one of first CSP languages, Occam, was developed).  Transputer can be viewed as 
+ representation of restartable process wich consists from:
  
  * Set of named input and output ports.
  * Logic of propagating information from input ports to output ports.
  * Possible state
  * Logic of error recovering.
 
-I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must be unblocked, operations inside Transputer can wait.
+I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must not be blocked, operations inside Transputer can wait.
 
 Transformers ara build hierarchically with help of 3 operations:
+
  * select  (logic is execution of select statement )
  * parallel combination  (logic is parallel execution of parts)
  * replication           (logic is parallel execution of set of identical transformers.)
 
 ### Select transputer
+
+ Let's look on simple example: transputer with two input ports and one output. When same number is come from `inA` and `inB`, than
+transputer prints `Bingo` on console and output this number to `out`:
 
 ```
  trait BingoTransputer extends SelectTransputer
@@ -265,6 +269,7 @@ Transformers ara build hierarchically with help of 3 operations:
       case x:inA.read =>
              y = inB.read
              if (x==y) {
+               Console.println(s"Bingo: ${x}")
                out.write(x)
              }
     }
@@ -272,6 +277,13 @@ Transformers ara build hierarchically with help of 3 operations:
  }
 ```
 
+  Select loop is described in `loop` statement.
+  
+  To create transformer we can use `gopherApi.makeTransformer` call:
+  ```
+  val t = gopherApi.makeTransputer[BingoTransputer](RecoveryPolicy.AlwaysRestart)
+  ```
+ 
 
 
 ## Unsugared interfaces

@@ -36,7 +36,7 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
   def handleFailure(t: Transputer, ex: Throwable)  =
   {
     import SupervisorStrategy.{Resume,Restart,Stop,Escalate}
-    if (t.recoveryStatistics.failure(ex,t.recoveryPolicy,System.nanoTime)) {
+    if (t.recoveryStatistics.failure(ex,t.recoveryLimits,System.nanoTime)) {
         escalate(t, new Transputer.TooManyFailures(t))
     } else if (t.recoveryFunction.isDefinedAt(ex)) {
         t.recoveryFunction(ex) match {
