@@ -7,7 +7,7 @@ import transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor._
-
+ 
 
 /**
  * Reusable unit of application structure, which consists from  
@@ -120,6 +120,12 @@ trait Transputer
   **/
  def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): Unit =
   { recoveryFunction = f }
+
+ /**
+  * append recover function to existing
+  **/
+ def recoverAppend(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): Unit =
+  { recoveryFunction = recoveryFunction orElse f }
 
  def api: GopherAPI
 
@@ -310,6 +316,20 @@ object Transputer
  {
    addSuppressed(t.recoveryStatistics.lastFailure.get) 
  }
+
+ object RecoveryPolicy {
+     import scala.util.control._
+
+     val AlwaysRestart: PartialFunction[Throwable,SupervisorStrategy.Directive] =
+              { case x: TooManyFailures => SupervisorStrategy.Escalate
+                case NonFatal(ex) => SupervisorStrategy.Restart 
+              }
+
+     val AlwaysEscalate: PartialFunction[Throwable,SupervisorStrategy.Directive] =
+              { case ex => SupervisorStrategy.Escalate }
+              
+ }
+
 
 
 

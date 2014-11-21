@@ -55,6 +55,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
+  def makeTransputer[T <: Transputer](recoveryPolicy:PartialFunction[Throwable,SupervisorStrategy.Directive]): T = macro GopherAPI.makeTransputerImpl2[T]
+
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
   def replicate[T<: Transputer](n:Int): Transputer = macro Replicate.replicateImpl[T]
@@ -102,12 +104,12 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 object GopherAPI
 {
 
-  //oject RecoveryPolicy {
-  //   def AlwaysRestart: PartialFunction[Throwable,SupervisorStrategy.Directive] = 
-  //            { case NonFatal(ex) => SupervisorStrategy.Restart }
-  //}
-
   def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
+    import c.universe._
+    c.Expr[T](q"${c.prefix}.makeTransputer[${weakTypeOf[T]}](gopher.Transputer.RecoveryPolicy.AlwaysRestart)")
+  }
+
+  def makeTransputerImpl2[T <: Transputer : c.WeakTypeTag](c:Context)(recoveryPolicy:c.Expr[PartialFunction[Throwable,SupervisorStrategy.Directive]]):c.Expr[T] = {
     import c.universe._
     //----------------------------------------------
     // generate incorrect code: see  https://issues.scala-lang.org/browse/SI-8953
@@ -127,7 +129,9 @@ object GopherAPI
                         def api = ${c.prefix}
                         def recoverFactory = () => new ${implName}
                     }
-                    new ${implName}
+                    val retval = new ${implName}
+                    retval.recoverAppend(${recoveryPolicy})
+                    retval
                   }
                """)
   }
