@@ -245,7 +245,7 @@ Also note, that you can provide own Input and Output implementations by implemen
  * Possible state
  * Logic of error recovering.
 
-I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transformers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must not be blocked, operations inside Transputer can wait.
+I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transputers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must not be blocked, operations inside Transputer can wait.
 
 Transformers ara build hierarchically with help of 3 operations:
 
