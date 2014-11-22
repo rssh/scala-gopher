@@ -118,14 +118,30 @@ trait Transputer
  /**
   * set recover function 
   **/
- def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): Unit =
-  { recoveryFunction = f }
+ def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type =
+  { recoveryFunction = f 
+    this
+  }
 
  /**
   * append recover function to existing
   **/
- def recoverAppend(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): Unit =
-  { recoveryFunction = recoveryFunction orElse f }
+ def recoverAppend(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type =
+  { recoveryFunction = recoveryFunction orElse f 
+    this
+  }
+
+ /**
+  * set failure limit.
+  * (when number of failures during windowsDuration is bigger than maxFailures,
+  * TooManyFailures exception is escalated to parent transputer.
+  **/
+ def failureLimit(maxFailures:Int = recoveryLimits.maxFailures,
+                  windowDuration: Duration = recoveryLimits.windowDuration): this.type =
+ {
+   recoveryLimits = Transputer.RecoveryLimits(maxFailures, windowDuration)
+   this
+ }
 
  def api: GopherAPI
 

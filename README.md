@@ -263,14 +263,14 @@ transputer prints `Bingo` on console and output this number to `out`:
  {
     val inA = InPort[Int]
     val inB = InPort[Int]
-    val out = OutPort[Int]
+    val out = OutPort[Boolean]
 
     loop {
       case x:inA.read =>
              y = inB.read
+             out.write(x==y)
              if (x==y) {
                Console.println(s"Bingo: ${x}")
-               out.write(x)
              }
     }
 
@@ -281,10 +281,79 @@ transputer prints `Bingo` on console and output this number to `out`:
   
   To create transformer we can use `gopherApi.makeTransformer` call:
   ```
-  val t = gopherApi.makeTransputer[BingoTransputer](RecoveryPolicy.AlwaysRestart)
+  val bing = gopherApi.makeTransputer[BingoTransputer]
   ```
- 
+  after this we can create channels, connect one to ports and start transformer. 
+  
+  ```
+  val inA = makeChannel[Int]()
+  bingo.inA.connect(inA)
+  val inB = makeChannel[Int]()
+  bingo.inB.connect(inB)
+  val out = makeChannel[Int]()
+  bingo.out.connect(out)
 
+  val shutdownFuture = bingo.start()
+  
+  ```
+  Then after we will write to `inA` and `inB` values `(1,1)` then true will become available for reading from `out`.
+
+#### Error recovery 
+  
+  On exception in loop statement, transformer is restarted, with ports, connected to the same channels. This is default behaviour, we can configure one by setting recovery policy:
+  
+  ```
+  val t = makeTransputer[MyType].recover {
+              case ex: MyException => SupervisorStrategy.Escalate
+          }
+  ```  
+ 
+ Recovery policy is a partial function from throwable to akka SupervisorStrategy.Direction. Escalated exceptions are passed to parent transputers or to special TransputerSupervisor actor, which handle failures according to akka default supervisor strategy.
+ 
+ How many times transputer can be restarted withing given time period can be configured via failureLimit call:
+ 
+ ```
+ t.failureLimit(maxFailures = 20, windowDuration = 10 seconds)
+ ```
+ 
+ This setting mean that if 20 failres will occured during 10 seconds, than exception Transputer.TooManyFailures will be escalated to parent.
+ 
+### Par transputers.
+ 
+ This is just group of transputers running in parallel. Par transputer can be created with help of plus operator:
+ 
+ ```
+  val par = (t1 + t1 + t3)
+  par.start()
+ ``` 
+ 
+ When one from `t1`, `t2` ... is stopped or failed, than all other members of `par` is stopped. After this `par` can be restarted according to current recovery policy.
+
+
+### Replication 
+ 
+ Replicated transputer is a set of identical transputers t_{i}, running in parrallel.  It cam be created with help of gopherApi.replicate call. Next code fragment:
+ 
+ ```
+  val r = gopherApi.replicate[MyTransputer](10)
+ ```
+ 
+ will create 10 copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of container. (I.e. if we will write something to input port than it will be readed by one of replicas; if one of replicas will write something to out port, this will be visible in out port of container.)
+ 
+ Mapping from container to replica port can be changed from sharing to other approaches, like duplicating or distributing, via applying port transformations.
+ 
+ For example, next code fragment:
+
+ ```
+   r.inA.duplicate()
+    .inB.distribute( _.hashCode )
+ ```
+ 
+  will set port `inA` be duplicated in replicas (i.e. message, sended to container port `inA` will be receivded by each instance) and routing messages from `inB` will be distributed by hashcode: i.e. if message with same hashcode will be directed to same replica instance.  This is useful when we keep in replicated transputer some state information about messages.
+  
+  Stopping and recovering of replicated transformer is the same as in `par` (i.e. stopping/failing of one instance will cause stopping/failing of container)
+  
+  Also not, that we can receive sequence of replicated instances with help of `ReplicateTransformer.replicated` methods.
 
 ## Unsugared interfaces
    
