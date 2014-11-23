@@ -279,7 +279,7 @@ transputer prints `Bingo` on console and output this number to `out`:
 
   Select loop is described in `loop` statement.
   
-  To create transformer we can use `gopherApi.makeTransformer` call:
+  To create transputer we can use `gopherApi.makeTransputer` call:
   ```
   val bing = gopherApi.makeTransputer[BingoTransputer]
   ```
@@ -300,7 +300,7 @@ transputer prints `Bingo` on console and output this number to `out`:
 
 #### Error recovery 
   
-  On exception in loop statement, transformer is restarted, with ports, connected to the same channels. This is default behaviour, we can configure one by setting recovery policy:
+  On exception in loop statement transputer will be restarted with ports, connected to the same channels. This is default behaviour, we can configure one by setting recovery policy:
   
   ```
   val t = makeTransputer[MyType].recover {
