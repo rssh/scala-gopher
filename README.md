@@ -353,7 +353,7 @@ transputer prints `Bingo` on console and output this number to `out`:
   
   Stopping and recovering of replicated transformer is the same as in `par` (i.e. stopping/failing of one instance will cause stopping/failing of container)
   
-  Also not, that we can receive sequence of replicated instances with help of `ReplicateTransformer.replicated` methods.
+  Also note, that we can receive sequence of replicated instances with help of `ReplicateTransformer.replicated` methods.
 
 ## Unsugared interfaces
    
