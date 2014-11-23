@@ -1,4 +1,5 @@
 
 - now by default transputers are restarted on exception.
 - transputer recover now return `this.type` to be usable as part of builder.
+- transputers documented in README
 
