@@ -15,16 +15,16 @@
 
 ## Overview
 
-   Scala-gopher is a scala library, build on top of akka and SIP-22 async, which provide implementation of 
- CSP [Communicate Sequential Processes] primitives, known as 'Go-like channels'. Also analogs of go/defer/recover control flow constructions are provided. 
+   Scala-gopher is a scala library, build on top of Akka and SIP-22 async, which provide implementation of 
+ CSP [Communicate Sequential Processes] primitives, known as 'Go-like channels'. Also, analogs of go/defer/recover control-flow constructions are provided. 
 
-Note, that this is not an emulation of go language constructions in scala, but rather reimplementation of key ideas in 'scala-like' maner.
+Note, which this is not an emulation of go language constructions in scala, but rather reimplementation of key ideas in 'scala-like' mamner.
   
 
 
 ### Initialization
  
- You need instance of gopherApi for creating channels and selectors.  The most easy way is to use one as Akka extension:
+ You need instance of gopherApi for creating channels and selectors.  The easiest way is to use one as Akka extension:
  
       import akka.actors._
       import gopher._
@@ -68,16 +68,16 @@ Note, that this is not an emulation of go language constructions in scala, but r
   
     }
 
-  Here statements inside defer block are executed at the end of goScope block in reverse order.
+  Here statements inside defer block executed at the end of goScope block in reverse order.
 
-  Basically, inside goScope we can use two pseudofunctions:
+  Inside goScope we can use two pseudo functions:
 
 * `defer(body: =>Unit):Unit` - defer execution of `body` until the end of `go` or `goScope` block and previous defered blocks.
 * `recover[T](f:PartialFunction[Throwable,T]):Boolean` -- can be used only within `defer` block with next semantics:
-* * if exeception was raised inside `go` or `goScope` than `recover` try to apply  `f` to this exception and
+* * if exception was raised inside `go` or `goScope` than `recover` try to apply  `f` to this exception and
 * * * if   `f` is applicable - set `f(e)` as return value of the block and return true
 * * * otherwise - do nothing and return false 
-* * during normal exit - return fase.
+* * during normal exit - return false.
 
 You can look on `defer` as on stackable finally clauses, and on `defer` with `recover` inside as on `catch` clause. Small example:
 
@@ -98,11 +98,11 @@ You can look on `defer` as on stackable finally clauses, and on `defer` with `re
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asyncronics execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
-  Basically, go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
+  Go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
 
 ## Channels
 
-You can look on channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
+You can look on the channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
 
 
      val channel = gopherApi.makeChannel[Int];
@@ -117,46 +117,46 @@ You can look on channel as on classic blocked queue with fixed size. Different e
 
   
   
-* `channel.write(x)` - send x to channel and wait until one will be send (it is possible us as synonims `channel<~x` and `channel!x` if you prefere short syntax)
+* `channel.write(x)` - send x to channel and wait until one will be sent (it is possible us as synonyms `channel<~x` and `channel!x` if you prefer short syntax)
 * `channel.read` or `(channel ?)` - blocking read
 
 Blocking operations can be used only inside `go` or `Async.await` blocks. 
 
-Outside we can use asynchronics version:
+Outside we can use asynchronous version:
 
 * `channel.awrite(x)` will write `x` and return to us `Future[Unit]` which will be executed after x will send
-* `channel.aread` will reaturn feature to value, which will be readed.
+* `channel.aread` will return future to the value, which will be read.
 
-Also channels can be closed, after this attempt to write will cause throwing of 'ClosedChannelException', reading is possible up to 'last written value', after this attempt to read will cause same exception.  
+Also, channels can be closed. after this attempt to write will cause throwing of 'ClosedChannelException'. Reading will still possible up to 'last written value', after this attempt to read will cause the same exception.  
 
-Note, that closing channels is not mandatory, unreachable channels are garbage-collected regardless of they are closed or not. 
+Note, closing channels is not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
 
-Also you can use only 'Input' or 'Output' interfaces, where appropriative read/write operations is defined. 
-For input we have defined usual collection functions, like `map`, `zip`, `takeN` . Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also we can use scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
+Also, you can use only 'Input' or 'Output' interfaces, where appropriative read/write operations are defined. 
+For an input we have defined usual collection functions, like `map`, `zip`, `takeN`. Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also, we can use scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
 
-`|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read vaue from channel x or y when one will be available.
+`|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read value from channel x or y when one will be available.
 
-For each input and output you can create facility with tracked timeout, i.e. if `in` is input, than
+For each input and output you can create a facility with tracked timeout, i.e. if `in` is input, than
 ```
  val (inReady, inTimeouts) = in.withInputTimeouts(10 seconds)
 ```
-will return two inputs, where reading from `inReady` will return the same as reading from `in`, and if waiting for reading takes longer than 10 seconds then value of timeout will be available in `inTimeouts`. Analogically we can create output with timeouts:
+will return two inputs, where reading from `inReady` will return the same as reading from `in`. And if waiting for reading takes longer than 10 seconds then value of timeout will be available in `inTimeouts`. Analogically we can create output with timeouts:
 ```
  val (outReady, outTimeouts) = out.withOutputTimeouts(10 seconds)
 ```
 
 
-Also note, that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
+Also note that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
 
 
 ## Select loops
 
-  'select statement' is somewhat simular to unix 'select' syscall:
-  from set of blocking operations select one which is ready for input/output and run it.
+  'select statement' is somewhat similar to Unix 'select' syscall:
+  from a set of blocking operations select one which is ready for input/output and run it.
 
-  The common pattern of channel processing in go language is wrap select operation into endless loop.
+  The common pattern of channel processing in go language is to wrap select operation into an endless loop.
  
-  Gopher provides simular functionality with 'select loops':
+  Gopher provides similar functionality:
 
     go{
      for( s <- gopherApi.select.forever) 
@@ -166,19 +166,19 @@ Also note, that you can provide own Input and Output implementations by implemen
       }
     }
    
-  Here we read in loop from channelA or channelB. 
+  Here we read in the loop from channelA or channelB. 
 
-  Body of select loop must consists only from one `match` statement where 
-  left parts in `case` clauses must have form
+  Body of select loop must consist only from one `match` statement where 
+  left parts in `case` clauses must have next form
    
   * `v:channel.read` (for reading from channel) 
-  * `v:Type if (v==read(ch))` (for reading from channel or future) 
+  * `v:Tye if (v==read(ch))` (for reading from channel or future) 
   * `v:channel.write if (v==expr)` (for writing `expr` into channel).
   * `v:Type if (v==write(ch,expr))` (for writing `expr` into channel).
   * `_` - for 'idle' action.
 
 
-  For endless loop inside go we can use shortcut with syntax of partial function:
+  For endless loop inside `go` we can use the shortcut with syntax of partial function:
     
 ```
      gopherApi.select.forever{ 
@@ -188,7 +188,7 @@ Also note, that you can provide own Input and Output implementations by implemen
 ```
     
  
-  Inside case actions we can use blocking read/writes and await operations.  Call of doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[Unit]`) can be used for exiting from loop.
+  Inside case actions we can use blocking read/writes and await operations.  Call of doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop.
   
   Example: 
 
@@ -208,7 +208,7 @@ Also note, that you can provide own Input and Output implementations by implemen
       Await.ready(consumer, 5.second)
 
 
-   For using select operation not enclosed in loop, scala-gopher provide
+   For using select operation not enclosed in a loop, scala-gopher provide
    *select.once* syntax:
    
 ```
@@ -219,7 +219,7 @@ Also note, that you can provide own Input and Output implementations by implemen
 ```
 
 
-   Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`
+   Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`.
     
 
 ```
@@ -236,26 +236,27 @@ Also note, that you can provide own Input and Output implementations by implemen
 
 ## Transputers
 
-  Logic of data transformation between channels can be incapsulated in special `Transputer` concept. (Word 'transputer' was choosed
- as a reminder about INMOS processor, for which one of first CSP languages, Occam, was developed).  Transputer can be viewed as 
- representation of restartable process wich consists from:
+  Logic of data transformation between channels can be encapsulated in special `Transputer` concept. (Word 'transputer' was choosed
+ as a reminder about INMOS processor, for which one of the first CSP languages, Occam, was developed).  You can view on transputer as 
+ representation of restartable process that consists from:
  
  * Set of named input and output ports.
- * Logic of propagating information from input ports to output ports.
+ * Logic for propagating information from the input to the output ports.
  * Possible state
  * Logic of error recovering.
 
-I.e. we seen that Transputer is simular to Actor with next difference: when Actor provides reaction to incoming messages from mailbox and sending signals to other actors, Transputers provide processing of incoming messages from input ports and sending outcoming messages to output ports; and when operations inside Actor must not be blocked, operations inside Transputer can wait.
+I.e. we saw that Transputer is simular to Actor with next difference: 
+ When Actor provides reaction to incoming messages from the mailbox and sending signals to other actors, Transputers provide processing of incoming messages from input ports and sending outcoming messages to output ports. When operations inside Actor must not be blocked, operations inside Transputer can wait.
 
-Transformers ara build hierarchically with help of 3 operations:
+Transformers are build hierarchically with help of 3 operations:
 
- * select  (logic is execution of select statement )
+ * select  (logic is execution of a select statement )
  * parallel combination  (logic is parallel execution of parts)
- * replication           (logic is parallel execution of set of identical transformers.)
+ * replication           (logic is parallel execution of a set of identical transformers.)
 
 ### Select transputer
 
- Let's look on simple example: transputer with two input ports and one output. When same number is come from `inA` and `inB`, than
+ Let's look on a simple example: transputer with two input ports and one output. When same number is come from `inA` and `inB`, then
 transputer prints `Bingo` on console and output this number to `out`:
 
 ```
@@ -283,7 +284,7 @@ transputer prints `Bingo` on console and output this number to `out`:
   ```
   val bing = gopherApi.makeTransputer[BingoTransputer]
   ```
-  after this we can create channels, connect one to ports and start transformer. 
+  after creation of transputer, we can create channels, connect one to ports and start transformer. 
   
   ```
   val inA = makeChannel[Int]()
@@ -300,7 +301,7 @@ transputer prints `Bingo` on console and output this number to `out`:
 
 #### Error recovery 
   
-  On exception in loop statement transputer will be restarted with ports, connected to the same channels. This is default behaviour, we can configure one by setting recovery policy:
+  On an exception in a loop statement, transputer will be restarted with ports, connected to the same channels. Such behaviour is default; we can configure one by setting recovery policy:
   
   ```
   val t = makeTransputer[MyType].recover {
@@ -308,37 +309,37 @@ transputer prints `Bingo` on console and output this number to `out`:
           }
   ```  
  
- Recovery policy is a partial function from throwable to akka SupervisorStrategy.Direction. Escalated exceptions are passed to parent transputers or to special TransputerSupervisor actor, which handle failures according to akka default supervisor strategy.
+ Recovery policy is a partial function from throwable to akka `SupervisorStrategy.Direction`. Escalated exceptions are passed to parent transputers or to special TransputerSupervisor actor, which handle failures according to akka default supervisor strategy.
  
- How many times transputer can be restarted withing given time period can be configured via failureLimit call:
+ How many times transputer can be restarted within given period can be configured via failureLimit call:
  
  ```
  t.failureLimit(maxFailures = 20, windowDuration = 10 seconds)
  ```
  
- This setting mean that if 20 failres will occured during 10 seconds, than exception Transputer.TooManyFailures will be escalated to parent.
+ This setting mean that if 20 failures will occur during 10 seconds, then exception Transputer.TooManyFailures will be escalated to parent.
  
 ### Par transputers.
  
- This is just group of transputers running in parallel. Par transputer can be created with help of plus operator:
+ This is just group of transputers running in parallel. Par transputer can be created with the help of plus operator:
  
  ```
   val par = (t1 + t1 + t3)
   par.start()
  ``` 
  
- When one from `t1`, `t2` ... is stopped or failed, than all other members of `par` is stopped. After this `par` can be restarted according to current recovery policy.
+ When one from `t1`, `t2`, ...  is stopped or failed, than all other members of `par` is stopped. After this `par` can be restarted according to current recovery policy.
 
 
 ### Replication 
  
- Replicated transputer is a set of identical transputers t_{i}, running in parrallel.  It cam be created with help of gopherApi.replicate call. Next code fragment:
+ Replicated transputer is a set of identical transputers t_{i}, running in parallel.  It cam be created with `gopherApi.replicate` call. Next code fragment:
  
  ```
   val r = gopherApi.replicate[MyTransputer](10)
  ```
  
- will create 10 copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of container. (I.e. if we will write something to input port than it will be readed by one of replicas; if one of replicas will write something to out port, this will be visible in out port of container.)
+ will create 10 copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of container. (I.e. if we will write something to input port than it will be read by one of replicas; if one of replicas will write something to out port, this will be visible in out port of container.)
  
  Mapping from container to replica port can be changed from sharing to other approaches, like duplicating or distributing, via applying port transformations.
  
@@ -349,15 +350,15 @@ transputer prints `Bingo` on console and output this number to `out`:
     .inB.distribute( _.hashCode )
  ```
  
-  will set port `inA` be duplicated in replicas (i.e. message, sended to container port `inA` will be receivded by each instance) and routing messages from `inB` will be distributed by hashcode: i.e. if message with same hashcode will be directed to same replica instance.  This is useful when we keep in replicated transputer some state information about messages.
+  will set port `inA` be duplicated in replicas (i.e. message, send to container port `inA` will be receivded by each instance) and messages from `inB` will be distributed by hashcode: i.e. message with same hashcode will be directed to same replica instance.  This is useful when we keep in replicated transputer some state information about messages.
   
   Stopping and recovering of replicated transformer is the same as in `par` (i.e. stopping/failing of one instance will cause stopping/failing of container)
   
-  Also note, that we can receive sequence of replicated instances with help of `ReplicateTransformer.replicated` methods.
+  Also note, that we can receive sequence of replicated instances with the help of `ReplicateTransformer.replicated` methods.
 
 ## Unsugared interfaces
    
-   It's not worse to know that exists gopher API without macro-based syntax sugar.  
+   It is not worse to know that exists gopher API without macro-based syntax sugar.  
    
       (
        new ForeverSelectorBuilder(gopherApi)
@@ -366,9 +367,9 @@ transputer prints `Bingo` on console and output this number to `out`:
             .idle(something idle).go
       )
     
-   can be used instead appropriative macro-based call.  
+   can be used instead of appropriative macro-based call.  
    
-   And for really tricky things exists even low-level interface, which can combine computations by adding to functional interfaces, simular to continuations:
+   Moreover, for tricky things exists even low-level interface, which can combine computations by adding to functional interfaces, similar to continuations:
    
      {
       val selector = new Selector[Unit](gopherApi)
