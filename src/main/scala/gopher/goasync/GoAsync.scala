@@ -23,14 +23,21 @@ object GoAsync
    {
      import c.universe._
      if (containsDefer(c)(body)) {
-       val defers = c.freshName
-       val nbody = transformDefer(c)(body)
-       //  TODO: run async only if we have await inside go
-       c.Expr[Future[T]](q"""{implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
-                              scala.async.Async.async(${nbody})(${ec}).collect(
-                                  ${defers}.processResult(_)
-                              )
-                             }
+       val defers = TermName(c.freshName)
+       val promise = TermName(c.freshName)
+       // asyn transform wantstyped tree on entry, so we must substitute 'defers' to untyped 
+       // values after it, no before.
+       c.Expr[Future[T]](
+                         q"""
+                             gopher.goasync.GoAsync.transformDeferMacro[${c.weakTypeOf[T]}](
+                               {implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
+                                val ${promise} = Promise[${c.weakTypeOf[T]}]()
+                                scala.async.Async.async(${body})(${ec}).onComplete( x =>
+                                     ${promise}.complete(${defers}.tryProcess(x))
+                                )(${ec})
+                                ${promise}.future
+                               }
+                             )
                           """)
      } else {
        c.Expr[Future[T]](q"scala.async.Async.async(${body})(${ec})")
@@ -41,7 +48,7 @@ object GoAsync
    {
      import c.universe._
      if (containsDefer(c)(body)) {
-       val nbody = transformDefer(c)(body)
+       val nbody = transformDefer[T](c)(body.tree)
        c.Expr[T](q"""{implicit val defered = new gopher.Defers[${c.weakTypeOf[T]}]()
                       defered.processResult(gopher.Defers.controlTry(${c.untypecheck(nbody)}))
                      }""")
@@ -69,8 +76,14 @@ object GoAsync
     findDefer.found
    }
 
+   def transformDeferMacro[T](body:Future[T]):Future[T] = macro transformDeferMacroImpl[T]
 
-   def transformDefer[T:c.WeakTypeTag](c:Context)(body:c.Expr[T]):c.Tree = 
+   def transformDeferMacroImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[Future[T]]):c.Expr[Future[T]] = 
+   {
+     c.Expr[Future[T]](c.untypecheck(transformDefer[T](c)(body.tree)))
+   }
+
+   def transformDefer[T:c.WeakTypeTag](c:Context)(body:c.Tree):c.Tree = 
    {
     import c.universe._
     val transformer = new Transformer {
@@ -84,7 +97,7 @@ object GoAsync
                       super.transform(tree)
        }
     }
-    transformer.transform(body.tree)
+    transformer.transform(body)
    }
 
    

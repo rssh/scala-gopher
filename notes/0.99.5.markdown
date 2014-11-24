@@ -1,5 +1,6 @@
 
 - now by default transputers are restarted on exception.
-- transputer recover now return `this.type` to be usable as part of builder.
+- transputer recover now return `this.type` (ie recover statement can be usable in a builder).
 - transputers documented in README
+- fixed error that was preventing `defer` inside `go` statement from compilation.
 

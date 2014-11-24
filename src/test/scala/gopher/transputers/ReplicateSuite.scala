@@ -105,7 +105,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 class ReplicateSuite extends FunSuite
 {
 
-  test(" define replication of TestDupper with port adapters", Now) {
+  test(" define replication of TestDupper with port adapters") {
     val r = gopherApi.replicate[TestDupper](10)
     import PortAdapters._
     ( r.in.distribute( (_ % 37 ) ).

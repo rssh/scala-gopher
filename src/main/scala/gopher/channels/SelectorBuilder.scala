@@ -323,8 +323,8 @@ object SelectorBuilder
                     val termName = name.toTermName 
                     // when debug problems on later compilation steps, you can create freshName and see visually:
                     // is oldName steel leaked to later compilation phases.
-                    //val newName = c.freshName(termName)
-                    val newName = termName
+                    val newName = c.freshName(termName)
+                    //val newName = termName
                     val tpoa = clearCaseDefOwner(name, newName, if (tp.original.isEmpty) tp else tp.original)
                     val tpo = skipAnnotation( tpoa )
                     val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa ,EmptyTree)
@@ -380,8 +380,6 @@ object SelectorBuilder
                       case _ =>
                                      MacroUtil.shortString(c)(x)
                     }
-                    System.err.println("x:"+x)
-                    System.err.println("raw x:"+showRaw(x))
                     c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
       case _ =>
             c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read");
