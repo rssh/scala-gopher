@@ -103,7 +103,10 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
       val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
       val w = new Waiter()
       val f1 = chReady.awrite(1)
-      f1 onComplete { case Success(x) => w{assert(x==1) }; w.dismiss()  }
+      f1 onComplete { 
+                       case Success(x) => w{assert(x==1) }; w.dismiss()  
+                       case Failure(th) => w{ throw th }; w.dismiss()
+                    }
       Await.ready(f1, 1 second)
       ch.close()
       val f2 = chReady.awrite(2)
