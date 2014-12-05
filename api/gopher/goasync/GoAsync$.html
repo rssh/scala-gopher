@@ -430,18 +430,52 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="gopher.goasync.GoAsync#transformDefer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="transformDefer[T](c:scala.reflect.macros.blackbox.Context)(body:c.Expr[T])(implicitevidence$4:c.WeakTypeTag[T]):c.Tree"></a>
-      <a id="transformDefer[T](Context)(scala.reflect.macros.blackbox.Context.Expr[T])(scala.reflect.macros.blackbox.Context.WeakTypeTag[T]):scala.reflect.macros.blackbox.Context.Tree"></a>
+      <a id="transformDefer[T](c:scala.reflect.macros.blackbox.Context)(body:c.Tree)(implicitevidence$5:c.WeakTypeTag[T]):c.Tree"></a>
+      <a id="transformDefer[T](Context)(scala.reflect.macros.blackbox.Context.Tree)(scala.reflect.macros.blackbox.Context.WeakTypeTag[T]):scala.reflect.macros.blackbox.Context.Tree"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">transformDefer</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>)</span><span class="params">(<span name="body">body: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.blackbox.Context.Expr</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDefer.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.macros.Aliases.WeakTypeTag">scala.reflect.macros.blackbox.Context.WeakTypeTag</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDefer.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.blackbox.Context.Tree</span></span>
+        <span class="name">transformDefer</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>)</span><span class="params">(<span name="body">body: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.blackbox.Context.Tree</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.macros.Aliases.WeakTypeTag">scala.reflect.macros.blackbox.Context.WeakTypeTag</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDefer.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Tree">scala.reflect.macros.blackbox.Context.Tree</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.goasync.GoAsync$@transformDefer[T](c:scala.reflect.macros.blackbox.Context)(body:c.Expr[T])(implicitevidence$4:c.WeakTypeTag[T]):c.Tree" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.goasync.GoAsync$@transformDefer[T](c:scala.reflect.macros.blackbox.Context)(body:c.Tree)(implicitevidence$5:c.WeakTypeTag[T]):c.Tree" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.goasync.GoAsync#transformDeferMacro" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="transformDeferMacro[T](body:scala.concurrent.Future[T]):scala.concurrent.Future[T]"></a>
+      <a id="transformDeferMacro[T](Future[T]):Future[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transformDeferMacro</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="body">body: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDeferMacro.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDeferMacro.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.goasync.GoAsync$@transformDeferMacro[T](body:scala.concurrent.Future[T]):scala.concurrent.Future[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.goasync.GoAsync#transformDeferMacroImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="transformDeferMacroImpl[T](c:scala.reflect.macros.blackbox.Context)(body:c.Expr[scala.concurrent.Future[T]])(implicitevidence$4:c.WeakTypeTag[T]):c.Expr[scala.concurrent.Future[T]]"></a>
+      <a id="transformDeferMacroImpl[T](Context)(scala.reflect.macros.blackbox.Context.Expr[Future[T]])(scala.reflect.macros.blackbox.Context.WeakTypeTag[T]):scala.reflect.macros.blackbox.Context.Expr[Future[T]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transformDeferMacroImpl</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>)</span><span class="params">(<span name="body">body: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.blackbox.Context.Expr</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDeferMacroImpl.T">T</span>]]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.macros.Aliases.WeakTypeTag">scala.reflect.macros.blackbox.Context.WeakTypeTag</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDeferMacroImpl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.blackbox.Context.Expr</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.goasync.GoAsync.transformDeferMacroImpl.T">T</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.goasync.GoAsync$@transformDeferMacroImpl[T](c:scala.reflect.macros.blackbox.Context)(body:c.Expr[scala.concurrent.Future[T]])(implicitevidence$4:c.WeakTypeTag[T]):c.Expr[scala.concurrent.Future[T]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" />
       </a>
     </span>

@@ -423,6 +423,26 @@ can be overriden in subclasses (by default: do nothing)</p><p>Note, that port co
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.Transputer#failureLimit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="failureLimit(maxFailures:Int,windowDuration:scala.concurrent.duration.Duration):Transputer.this.type"></a>
+      <a id="failureLimit(Int,Duration):SelectTransputer.this.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">failureLimit</span><span class="params">(<span name="maxFailures">maxFailures: <span class="extype" name="scala.Int">Int</span> = <span class="symbol"><span class="name"><a href="Transputer$$RecoveryLimits.html#maxFailures:Int">recoveryLimits.maxFailures</a></span></span></span>, <span name="windowDuration">windowDuration: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span> = <span class="symbol"><span class="name"><a href="Transputer$$RecoveryLimits.html#windowDuration:scala.concurrent.duration.Duration">recoveryLimits.windowDuration</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="gopher.SelectTransputer">SelectTransputer</a>.this.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.SelectTransputer@failureLimit(maxFailures:Int,windowDuration:scala.concurrent.duration.Duration):Transputer.this.type" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">set failure limit.</p><div class="fullcomment"><div class="comment cmt"><p>set failure limit.
+(when number of failures during windowsDuration is bigger than maxFailures,
+TooManyFailures exception is escalated to parent transputer.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -879,23 +899,42 @@ example of usage:</p><pre>go {
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="channels/ForeverSelectorBuilder.html" class="extype" name="gopher.channels.ForeverSelectorBuilder">ForeverSelectorBuilder</a></dd></dl></div>
     </li><li name="gopher.Transputer#recover" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Unit"></a>
-      <a id="recover(PartialFunction[Throwable,Directive]):Unit"></a>
+      <a id="recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Transputer.this.type"></a>
+      <a id="recover(PartialFunction[Throwable,Directive]):SelectTransputer.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">recover</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="akka.actor.SupervisorStrategy.Directive">Directive</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">recover</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="akka.actor.SupervisorStrategy.Directive">Directive</span>]</span>)</span><span class="result">: <a href="" class="extype" name="gopher.SelectTransputer">SelectTransputer</a>.this.type</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#gopher.SelectTransputer@recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Unit" title="Permalink" target="_top">
+      <a href="../index.html#gopher.SelectTransputer@recover(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Transputer.this.type" title="Permalink" target="_top">
         <img src="../lib/permalink.png" />
       </a>
     </span>
       <p class="shortcomment cmt">set recover function
 </p><div class="fullcomment"><div class="comment cmt"><p>set recover function
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></dd></dl></div>
+    </li><li name="gopher.Transputer#recoverAppend" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recoverAppend(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Transputer.this.type"></a>
+      <a id="recoverAppend(PartialFunction[Throwable,Directive]):SelectTransputer.this.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recoverAppend</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="akka.actor.SupervisorStrategy.Directive">Directive</span>]</span>)</span><span class="result">: <a href="" class="extype" name="gopher.SelectTransputer">SelectTransputer</a>.this.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.SelectTransputer@recoverAppend(f:PartialFunction[Throwable,akka.actor.SupervisorStrategy.Directive]):Transputer.this.type" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">append recover function to existing
+</p><div class="fullcomment"><div class="comment cmt"><p>append recover function to existing
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Transputer.html" class="extype" name="gopher.Transputer">Transputer</a></dd></dl></div>
     </li><li name="gopher.Transputer#replica" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replica:Int"></a>
