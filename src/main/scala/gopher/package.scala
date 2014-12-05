@@ -1,5 +1,6 @@
 
 import scala.language.experimental.macros
+import scala.language.implicitConversions
 
 /**
  * Provides scala API for 'go-like' CSP channels.

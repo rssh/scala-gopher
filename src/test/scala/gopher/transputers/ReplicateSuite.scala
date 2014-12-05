@@ -1,5 +1,6 @@
 package gopher.transputers
 
+import scala.language._
 import gopher._
 import gopher.channels._
 import gopher.util._

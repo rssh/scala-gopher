@@ -1,5 +1,6 @@
 package gopher.channels
 
+import scala.language.postfixOps
 import scala.concurrent._
 import scala.util._
 import gopher._

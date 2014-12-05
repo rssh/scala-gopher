@@ -8,6 +8,7 @@ import scala.reflect.macros.whitebox.Context
 import scala.reflect.api._
 import scala.concurrent._
 import scala.annotation._
+import scala.language.higherKinds
 import async.Async._
 
 import scala.collection.mutable.ArraySeq

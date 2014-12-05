@@ -2,6 +2,7 @@ package example
 
 import gopher._
 import gopher.channels._
+import scala.language._
 import scala.async.Async._
 import scala.concurrent._
 import scala.concurrent.duration._

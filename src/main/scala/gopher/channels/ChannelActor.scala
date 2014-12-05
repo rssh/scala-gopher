@@ -1,6 +1,7 @@
 package gopher.channels
 
 import akka.actor._
+import scala.language._
 import scala.concurrent._
 import scala.collection.immutable._
 import gopher._

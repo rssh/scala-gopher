@@ -7,6 +7,7 @@ import gopher.transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.experimental.macros
+import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.util._
 import java.util.concurrent.atomic.AtomicLong

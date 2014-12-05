@@ -3,6 +3,7 @@ package gopher.channels
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.experimental.macros
+import scala.language.reflectiveCalls
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import scala.util._

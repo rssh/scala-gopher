@@ -4,6 +4,7 @@ import gopher._
 import gopher.channels._
 import gopher.tags._
 import org.scalatest._
+import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor._

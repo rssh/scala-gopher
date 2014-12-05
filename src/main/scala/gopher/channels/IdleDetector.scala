@@ -3,6 +3,8 @@ package gopher.channels
 import gopher._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.language.postfixOps 
+import scala.language.existentials
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.{LinkedList => JLinkedList}

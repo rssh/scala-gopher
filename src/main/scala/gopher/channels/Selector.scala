@@ -5,6 +5,7 @@ import akka.actor._
 import akka.pattern._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentLinkedQueue

@@ -4,6 +4,7 @@ import org.scalatest._
 import gopher._
 import gopher.tags._
 import akka.actor._
+import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
 import CommonTestObjects._

@@ -3,6 +3,7 @@ package gopher.channels
 import gopher._
 import gopher.channels._
 import gopher.tags._
+import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util._

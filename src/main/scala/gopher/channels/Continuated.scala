@@ -1,5 +1,6 @@
 package gopher.channels;
 
+import scala.language._
 import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 import gopher._
