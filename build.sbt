@@ -3,7 +3,7 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.5"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -11,7 +11,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" /*, "-Ymacro-debug-lite" , "-Ydebug"  , "-Ylog:lambdalift" */ )
 
-libraryDependencies <+= (scalaVersion){ "org.scala-lang" % "scala-reflect" % _ }
+libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
