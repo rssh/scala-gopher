@@ -141,13 +141,13 @@ For an input we have defined usual collection functions, like `map`, `zip`, `tak
 `|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read value from channel x or y when one will be available.
 
 For each input and output you can create a facility with tracked timeout, i.e. if `in` is input, than
-```
+~~~ scala
  val (inReady, inTimeouts) = in.withInputTimeouts(10 seconds)
-```
+~~~
 will return two inputs, where reading from `inReady` will return the same as reading from `in`. And if waiting for reading takes longer than 10 seconds then value of timeout will be available in `inTimeouts`. Analogically we can create output with timeouts:
-```
+~~~ scala
  val (outReady, outTimeouts) = out.withOutputTimeouts(10 seconds)
-```
+~~~
 
 
 Also note that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
@@ -229,17 +229,17 @@ gopherApi.select.once{
    Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`.
     
 
-```
-       go {
-         .....
-         val s = for(s <-gopherApi.select.once) 
+~~~ scala
+go {
+  .....
+  val s = for(s <-gopherApi.select.once) 
              s match {
                case i: channelA.read => s"Readed(${i})"
                case x: channelB.write if (x==1) => s"Written(${x})" 
              }
       
-        }  
-```
+}  
+~~~
 
 ## Transputers
 
@@ -288,9 +288,9 @@ transputer prints `Bingo` on console and output this number to `out`:
   Select loop is described in `loop` statement.
   
   To create transputer we can use `gopherApi.makeTransputer` call:
-  ```
-  val bing = gopherApi.makeTransputer[BingoTransputer]
-  ```
+~~~ scala
+val bing = gopherApi.makeTransputer[BingoTransputer]
+~~~
   after creation of transputer, we can create channels, connect one to ports and start transformer. 
   
 ~~~ scala

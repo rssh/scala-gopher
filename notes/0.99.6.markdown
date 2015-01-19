@@ -1,3 +1,5 @@
 
-- updated to akka-2.3.8
+- updated to akka-2.3.8, scala-2.11.5
+- added scala coloring to README.md
+
 
