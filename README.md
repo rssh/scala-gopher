@@ -84,14 +84,15 @@ object CopyFile {
 
 You can look on `defer` as on stackable finally clauses, and on `defer` with `recover` inside as on `catch` clause. Small example:
 
-      val s = goScope{ 
-                defer{ recover{
-                         case ex: Throwable => "CCC"
-                      } } 
-                throw new Exception("")
-               "QQQ" 
-            }
-
+~~~ scala
+val s = goScope{ 
+           defer{ recover{
+                     case ex: Throwable => "CCC"
+           }    } 
+           throw new Exception("")
+           "QQQ" 
+        }
+~~~
 
   will set `s` to "CCC".
 
@@ -161,13 +162,15 @@ Also note that you can provide own Input and Output implementations by implement
  
   Gopher provides similar functionality:
 
-    go{
-     for( s <- gopherApi.select.forever) 
-      s match {
-        case i:channelA.read => ..do-something-with-i
-        case ch:channelB.read .. do-something-with-b
-      }
-    }
+~~~ scala
+go{
+  for( s <- gopherApi.select.forever) 
+    s match {
+      case i:channelA.read => ..do-something-with-i
+      case ch:channelB.read .. do-something-with-b
+  }
+}
+~~~
    
   Here we read in the loop from channelA or channelB. 
 
@@ -183,43 +186,44 @@ Also note that you can provide own Input and Output implementations by implement
 
   For endless loop inside `go` we can use the shortcut with syntax of partial function:
     
-```
+~~~ scala
      gopherApi.select.forever{ 
-         case i:channelA.read => ..do-something-with-i
-         case ch:channelB.read .. do-something-with-b
+         case i:channelA.read => ... do-something-with-i
+         case ch:channelB.read ... do-something-with-b
      }
-```
+~~~
     
  
   Inside case actions we can use blocking read/writes and await operations.  Call of doExit in implicit instance of `FlowTermination[T]`  (for forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop.
   
   Example: 
 
-      val channel = gopherApi.makeChannel[Int](100)
+~~~ scala
+val channel = gopherApi.makeChannel[Int](100)
      
-      val producer = channel.awrite(1 to 1000)
+val producer = channel.awrite(1 to 1000)
      
-      @volatile var sum = 0;
-      val consumer = gopherApi.select.forever{
-          case i: channerl.read  =>
+@volatile var sum = 0;
+val consumer = gopherApi.select.forever{
+        case i: channerl.read  =>
                   sum = sum + i
                   if (i==1000)  {
                     implictily[FlowTermination[Unit]].doExit(())
                   }
-      }
+}
      
-      Await.ready(consumer, 5.second)
-
+Await.ready(consumer, 5.second)
+~~~
 
    For using select operation not enclosed in a loop, scala-gopher provide
    *select.once* syntax:
    
-```
-      gopherApi.select.once{
-         case i: channelA.read => s"Readed(${i})"
-         case x:channelB.write if (x==1) => s"Written(${x})" 
-      }
-```
+~~~ scala
+gopherApi.select.once{
+  case i: channelA.read => s"Readed(${i})"
+  case x:channelB.write if (x==1) => s"Written(${x})" 
+}
+~~~
 
 
    Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`.
@@ -262,7 +266,7 @@ Transformers are build hierarchically with help of 3 operations:
  Let's look on a simple example: transputer with two input ports and one output. When same number is come from `inA` and `inB`, then
 transputer prints `Bingo` on console and output this number to `out`:
 
-```
+~~~ scala
  trait BingoTransputer extends SelectTransputer
  {
     val inA = InPort[Int]
@@ -279,7 +283,7 @@ transputer prints `Bingo` on console and output this number to `out`:
     }
 
  }
-```
+~~~
 
   Select loop is described in `loop` statement.
   
@@ -289,36 +293,37 @@ transputer prints `Bingo` on console and output this number to `out`:
   ```
   after creation of transputer, we can create channels, connect one to ports and start transformer. 
   
-  ```
-  val inA = makeChannel[Int]()
-  bingo.inA.connect(inA)
-  val inB = makeChannel[Int]()
-  bingo.inB.connect(inB)
-  val out = makeChannel[Int]()
-  bingo.out.connect(out)
+~~~ scala
+val inA = makeChannel[Int]()
+bingo.inA.connect(inA)
+val inB = makeChannel[Int]()
+bingo.inB.connect(inB)
+val out = makeChannel[Int]()
+bingo.out.connect(out)
 
-  val shutdownFuture = bingo.start()
-  
-  ```
+val shutdownFuture = bingo.start()
+~~~
+
+
   Then after we will write to `inA` and `inB` values `(1,1)` then true will become available for reading from `out`.
 
 #### Error recovery 
   
   On an exception in a loop statement, transputer will be restarted with ports, connected to the same channels. Such behaviour is default; we can configure one by setting recovery policy:
   
-  ```
-  val t = makeTransputer[MyType].recover {
-              case ex: MyException => SupervisorStrategy.Escalate
-          }
-  ```  
+~~~ scala
+val t = makeTransputer[MyType].recover {
+           case ex: MyException => SupervisorStrategy.Escalate
+        }
+~~~  
  
  Recovery policy is a partial function from throwable to akka `SupervisorStrategy.Direction`. Escalated exceptions are passed to parent transputers or to special TransputerSupervisor actor, which handle failures according to akka default supervisor strategy.
  
  How many times transputer can be restarted within given period can be configured via failureLimit call:
  
- ```
+~~~ scala
  t.failureLimit(maxFailures = 20, windowDuration = 10 seconds)
- ```
+~~~
  
  This setting mean that if 20 failures will occur during 10 seconds, then exception Transputer.TooManyFailures will be escalated to parent.
  
@@ -326,10 +331,10 @@ transputer prints `Bingo` on console and output this number to `out`:
  
  This is just group of transputers running in parallel. Par transputer can be created with the help of plus operator:
  
- ```
-  val par = (t1 + t1 + t3)
-  par.start()
- ``` 
+~~~ scala 
+val par = (t1 + t1 + t3)
+par.start()
+~~~
  
  When one from `t1`, `t2`, ...  is stopped or failed, than all other members of `par` is stopped. After this `par` can be restarted according to current recovery policy.
 
@@ -338,9 +343,9 @@ transputer prints `Bingo` on console and output this number to `out`:
  
  Replicated transputer is a set of identical transputers t_{i}, running in parallel.  It cam be created with `gopherApi.replicate` call. Next code fragment:
  
- ```
-  val r = gopherApi.replicate[MyTransputer](10)
- ```
+~~~ scala 
+val r = gopherApi.replicate[MyTransputer](10)
+~~~
  
  will create 10 copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of container. (I.e. if we will write something to input port than it will be read by one of replicas; if one of replicas will write something to out port, this will be visible in out port of container.)
  
@@ -348,10 +353,10 @@ transputer prints `Bingo` on console and output this number to `out`:
  
  For example, next code fragment:
 
- ```
-   r.inA.duplicate()
-    .inB.distribute( _.hashCode )
- ```
+~~~ scala
+r.inA.duplicate()
+ .inB.distribute( _.hashCode )
+~~~
  
   will set port `inA` be duplicated in replicas (i.e. message, send to container port `inA` will be receivded by each instance) and messages from `inB` will be distributed by hashcode: i.e. message with same hashcode will be directed to same replica instance.  This is useful when we keep in replicated transputer some state information about messages.
   
@@ -363,28 +368,32 @@ transputer prints `Bingo` on console and output this number to `out`:
    
    It is not worse to know that exists gopher API without macro-based syntax sugar.  
    
-      (
-       new ForeverSelectorBuilder(gopherApi)
-            .reading(ch1){ x => something-x }
-            .writing(ch2,y){ y => something-y }
-            .idle(something idle).go
-      )
+~~~ scala
+(
+   new ForeverSelectorBuilder(gopherApi)
+          .reading(ch1){ x => something-x }
+          .writing(ch2,y){ y => something-y }
+          .idle(something idle).go
+)
+~~~
     
    can be used instead of appropriative macro-based call.  
    
    Moreover, for tricky things exists even low-level interface, which can combine computations by adding to functional interfaces, similar to continuations:
    
-     {
-      val selector = new Selector[Unit](gopherApi)
-      selector.addReader(ch1, cont=>Some{ in => something-x
-                                         Future successful cont
-                                     }
-                        )
-      selector.addWriter(ch2, cont=>Some{(y,{something y;
-                                             Future successful cont
-                                           })})                  
-      selector.addIdle(cont => {..do-something-when-idle; Future successful cont})
-     } 
+~~~ scala
+{
+  val selector = new Selector[Unit](gopherApi)
+  selector.addReader(ch1, cont=>Some{ in => something-x
+                                        Future successful cont
+                                    }
+                    )
+ selector.addWriter(ch2, cont=>Some{(y,{something y;
+                                           Future successful cont
+                    })})                  
+ selector.addIdle(cont => {..do-something-when-idle; Future successful cont})
+} 
+~~~
    
    Please, consult with source code for details.
 
