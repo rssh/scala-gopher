@@ -1,5 +1,9 @@
 
-Related work:
+
+CSP for scala: implementation, papers, ect ..
+
+
+* scala-gopher:  this project https://github.com/rssh/scala-gopher 
 
 * Early attempt of message-passsssing concurrency for scala use byte-code transformation:
                                                                      http://wotug.org/papers/CPA-2013/Bate13/Bate13.pdf
