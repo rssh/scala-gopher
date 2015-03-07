@@ -17,4 +17,4 @@ CSP for scala: implementation, papers, ect ..
 * Minimalistics implementation of clojure core-async in scala: http://blog.podsnap.com/scasync.html
 
 ------------------
-  part os [scala-gopher](https://github.com/rssh/scala-gopher)
+  part of [scala-gopher](https://github.com/rssh/scala-gopher)
