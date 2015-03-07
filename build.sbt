@@ -3,7 +3,7 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -17,7 +17,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.9"
 
 //TODO: enable after 1.0
 //libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"

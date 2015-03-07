@@ -110,7 +110,7 @@ class MacroSelectSuite extends FunSuite
      var res = 0
      val r = select.forever{
                 case x: Int if (x==channel1.write(3)) => 
-                                     Console.println(s"write to output")
+                                     Console.println(s"write to channel1: ${x} ")
                 case x: Int if (x==channel2.read) => 
                                      Console.println(s"readed from channel2: ${x}")
                 case x: Int if (x==(Future successful 10).read) => 
