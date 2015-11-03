@@ -75,7 +75,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
 
   test("messsaged from timeouts must be appear during attempt to write to filled channel") {
       val ch = gopherApi.makeChannel[Int]()
-      val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
+      val (chReady, chTimeout) = ch.withOutputTimeouts(150 milliseconds)
       @volatile var count = 1
       val f = gopherApi.select.forever {
                 case x: chReady.write if (x==count) => 
