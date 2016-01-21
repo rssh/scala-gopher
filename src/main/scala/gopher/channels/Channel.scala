@@ -35,11 +35,11 @@ class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherA
          futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(5 seconds)
                                      f.onFailure{
                                           case e: AskTimeoutException => applyClosed()
-                                     }
+                                     }(api.executionContext)
                                      f.onSuccess{
                                           case ChannelCloseProcessed(0) =>
                                                                   closedEmpty = true
-                                     }
+                                     }(api.executionContext)
                                  }
      }
    } else {
