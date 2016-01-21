@@ -330,7 +330,9 @@ object Transputer
 
  class TooManyFailures(t: Transputer) extends RuntimeException(s"Too many failures for ${t}", t.recoveryStatistics.firstFailure.get)
  {
-   addSuppressed(t.recoveryStatistics.lastFailure.get) 
+  val lastFailure = t.recoveryStatistics.lastFailure.get
+  //wait for jdk 8
+  // addSuppressed(t.recoveryStatistics.lastFailure.get) 
  }
 
  object RecoveryPolicy {

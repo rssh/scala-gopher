@@ -26,16 +26,16 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.13"
 
 version:="0.99.6-SNAPSHOT"
 
-
-publishMavenStyle := true
-
-publishTo <<= version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT")) 
-    Some("snapshots" at nexus + "content/repositories/snapshots") 
-  else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+// disable publish to sonatype from community build:
+//publishMavenStyle := true
+//
+//publishTo <<= version { (v: String) =>
+//  val nexus = "https://oss.sonatype.org/"
+//  if (v.trim.endsWith("SNAPSHOT")) 
+//    Some("snapshots" at nexus + "content/repositories/snapshots") 
+//  else
+//    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+//}
 
 
 publishArtifact in Test := false
