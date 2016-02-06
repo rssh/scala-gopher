@@ -405,6 +405,7 @@ r.inA.duplicate()
 * source code: https://github.com/rssh/scala-gopher
 * presentation: http://www.slideshare.net/rssh1/scala-gopher2014
 
+
   Some related links:
 
 * [Communicating Sequential Processes book by Tony Hoare](http://www.usingcsp.com)

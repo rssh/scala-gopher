@@ -15,16 +15,16 @@ libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.5"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.13"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.1"
 
 //TODO: enable after 1.0
 //libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 
-version:="0.99.6-SNAPSHOT"
+version:="0.99.6"
 
 
 publishMavenStyle := true

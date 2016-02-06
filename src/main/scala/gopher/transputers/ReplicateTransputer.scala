@@ -89,7 +89,12 @@ class AggregatePortAdapter[A](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter
 
 }
 
-
+/**
+ * <code>Replicated[X]</code> is transputer which keep <code> n </code> instances of <code>X</code>
+ * where ports of replicated consumer are connected to appropriative ports of instances in parallel.
+ *
+ *@see gopher.GopherAPI#replicate
+ */
 abstract class ReplicatedTransputer[T<:Transputer, Self](api: GopherAPI, n: Int) extends ParTransputer(api,List())
 {
 

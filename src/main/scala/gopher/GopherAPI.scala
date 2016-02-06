@@ -52,20 +52,43 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
      new IOChannel[A](futureChannelRef, this)
     }
 
+  /**
+   * Represent Scala future as channel from which we can read one value.
+   *@see gopher.channels.FutureInput
+   */
   def futureInput[A](future:Future[A]): FutureInput[A] = new FutureInput(future, this)
 
+  /**
+   * Represent Scala collection as channel, where all values can be readed in order of iteration.
+   */
   def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
   def makeTransputer[T <: Transputer](recoveryPolicy:PartialFunction[Throwable,SupervisorStrategy.Directive]): T = macro GopherAPI.makeTransputerImpl2[T]
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
+  /**
+   * create transputet which contains <code>n</code> instances of <code>X</code>
+   * where ports are connected to the appropriate ports of each instance in paraller.
+   * {{{
+   *   val persistStep = replicate[PersistTransputer](nDBConnections)
+   * }}}
+   */
   def replicate[T<: Transputer](n:Int): Transputer = macro Replicate.replicateImpl[T]
 
+  /**
+   * actor system which was passed during creation
+   **/
   def actorSystem: ActorSystem = as
 
+  /**
+   * execution context used for managing calculation steps in channels engine.
+   **/
   def executionContext: ExecutionContext = es
 
+  /**
+   * the configuration of the gopher system. By default is contained under 'gopher' key in top-level config.
+   **/
   def config: Config = as.settings.config.atKey("gopher")
 
   def currentFlow = CurrentFlowTermination
