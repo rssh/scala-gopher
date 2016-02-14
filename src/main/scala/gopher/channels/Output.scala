@@ -93,7 +93,7 @@ trait Output[A]
    *select.forever {
    *  case x: chReady.write if (x==somethingToWrite) =>
    *                    Console.println(s" ${x} send")
-   *  case t: chTimeouts.read if (x==somethingToWrite) =>
+   *  case t: chTimeouts.read  =>
    *                    Console.println(s"timeout during writing")
    *}
    *```
@@ -105,6 +105,11 @@ trait Output[A]
 
 object Output
 {
+
+  class Aux[A]
+  {
+    type O = Output[A]
+  }
 
   def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[A] =
   {

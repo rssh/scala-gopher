@@ -12,7 +12,7 @@
 
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.6"
 
-    Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
+Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
 
 ## Overview
 

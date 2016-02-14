@@ -136,6 +136,7 @@ trait Input[A]
 
      }
 
+
   def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
 
   def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
@@ -145,6 +146,33 @@ trait Input[A]
    * (i.e. non-determenistics choice)
    **/
   def |(other:Input[A]):Input[A] = new OrInput(this,other)
+
+  /**
+   * synonim for non-deteremenistics choice.
+   **/
+  def or(other:Input[A]):Input[A] = new OrInput(this,other)
+
+  /**
+   * when the first channel is exhaused, read from second.
+   **/
+  def append(other:Input[A]):Input[A] = new Input[A] {
+
+        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+        {
+         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+         {  val contA = ContRead(f,this,cont.flowTermination)
+            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
+                                  case ContRead.Skip => Future successful cont
+                                  case ContRead.ChannelClosed => Future successful ContRead(f,other,cont.flowTermination)
+                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
+                         })
+         }
+         thisInput.cbread(mf,ft)
+        }
+
+        def api = thisInput.api
+
+  }
 
   /**
    * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`

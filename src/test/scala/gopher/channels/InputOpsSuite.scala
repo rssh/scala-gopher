@@ -257,6 +257,46 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
       w.await(timeout(10 seconds), dismissals(2))
   }
 
+  test("append for finite stream") {
+      val w = new Waiter
+      val ch1 = gopherApi.makeChannel[Int]() 
+      val ch2 = gopherApi.makeChannel[Int]() 
+      val appended = ch1 append ch2
+      var sum = 0
+      var prev = 0
+      var monotonic = true
+      val f = go { for(s <- appended) {
+                     // bug in compiler 2.11.7
+                     //w{assert(prev < s)}
+                     //if (prev >= s) w{assert(false)}
+                     if (prev >= s) monotonic=false
+                     prev = s
+                     sum += s  
+                 }  }
+      val a1 = ch1.awriteAll(1 to 10) 
+      val a2 = ch2.awriteAll((1 to 10)map(_*100)) 
+      // it works, but in theory onComplete can be scheduled before. So, <= instead ==
+      a1.onComplete{ case _ => { w{assert(sum <= 55)};  ch1.close(); w.dismiss() } }
+      a2.onComplete{ case _ => { w{assert(sum <= 5555)}; w{assert(monotonic)}; w.dismiss() } }
+      w.await(timeout(10 seconds), dismissals(2))
+      assert(sum==5555)
+      assert(monotonic)
+  }
+         
+  test("append for empty stream") {
+      val w = new Waiter
+      val ch1 = gopherApi.makeChannel[Int]() 
+      val ch2 = gopherApi.makeChannel[Int]() 
+      val appended = ch1 append ch2
+      val f = appended.atake(10).map(_.sum)
+      f.onComplete{ case Success(x) => { w{assert(x==55)}; w.dismiss() } 
+                    case Failure(_) => { w{assert(false)}; w.dismiss() }
+                  }
+      ch1.close()
+      val a2 = ch2.awriteAll(1 to 10) 
+      w.await(timeout(10 seconds), dismissals(1))
+  }
+
   def gopherApi = CommonTestObjects.gopherApi
 
   
