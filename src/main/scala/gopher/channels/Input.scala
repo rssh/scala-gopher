@@ -141,6 +141,30 @@ trait Input[A]
 
   def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
 
+  def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = new Input[B] {
+
+      def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+      {
+       def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+       { val contA = ContRead(f,this,cont.flowTermination)
+           f(contA) map { f1 => {
+              case v@ContRead.Value(a) => Future successful ContRead(f,op(g(a),this),cont.flowTermination)
+              case ContRead.Skip => Future successful cont
+              case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
+              case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
+       }}}
+       thisInput.cbread(mf,ft)
+      }
+
+      def api = thisInput.api
+  }
+
+  def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ or _)
+
+  def seq = new {
+    def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ append _ )
+  }
+
   /**
    * return input merged with 'other'.
    * (i.e. non-determenistics choice)

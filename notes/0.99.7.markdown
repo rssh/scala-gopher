@@ -1,4 +1,5 @@
 
-- added append operation for inputs.
+- added append and flatMap operation for inputs.
+- added Sieve to set of examples
 
 

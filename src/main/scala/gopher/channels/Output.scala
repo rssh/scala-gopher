@@ -106,11 +106,6 @@ trait Output[A]
 object Output
 {
 
-  class Aux[A]
-  {
-    type O = Output[A]
-  }
-
   def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[A] =
   {
    import c.universe._
