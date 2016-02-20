@@ -12,7 +12,7 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 
 // TODO: change channelRef to channelSelector
-class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Input[A] with Output[A]
+class IOChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends InputOutput[A]
 {
 
   def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
