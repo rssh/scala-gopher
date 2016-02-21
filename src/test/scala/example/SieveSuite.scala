@@ -3,7 +3,7 @@ package example
 import gopher._
 import gopher.channels._
 import CommonTestObjects.gopherApi._
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -17,14 +17,14 @@ import org.scalatest._
 object Sieve
 {
 
-  def generate(n:Int, quit:Promise[Boolean]):IOChannel[Int] =
+  def generate(n:Int, quit:Promise[Boolean]):Channel[Int] =
   {
     val channel = makeChannel[Int]()
     channel.awriteAll(2 to n) foreach (_ => quit success true)
     channel
   }
 
-  def filter(in:IOChannel[Int]):Input[Int] =
+  def filter(in:Channel[Int]):Input[Int] =
   {
     val filtered = makeChannel[Int]()
     var proxy: Input[Int] = in;

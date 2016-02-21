@@ -17,7 +17,7 @@ import org.scalatest._
 object BetterSieve
 {
 
-  def generate(n:Int, quit:Promise[Boolean]):IOChannel[Int] =
+  def generate(n:Int, quit:Promise[Boolean]):Input[Int] =
   {
     val channel = makeChannel[Int]()
     channel.awriteAll(2 to n) foreach (_ => quit success true)
@@ -27,7 +27,7 @@ object BetterSieve
   /**
    * flatFold modify channel with each read
    */
-  def filter(in:IOChannel[Int]):Input[Int] = 
+  def filter(in:Input[Int]):Input[Int] = 
     in.flatFold{ (s,prime) => s.filter( _ % prime != 0) }
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
