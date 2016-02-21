@@ -4,7 +4,7 @@ import akka.actor._
 import akka.pattern._
 import gopher.channels._
 import gopher.transputers._
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.language.experimental.macros
 import scala.language.postfixOps
@@ -49,7 +49,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
                              )(10 seconds)
                               .asInstanceOf[Future[ActorRef]]
                             )
-     new IOChannel[A](futureChannelRef, this)
+     new Channel[A](futureChannelRef, this)
     }
 
   /**

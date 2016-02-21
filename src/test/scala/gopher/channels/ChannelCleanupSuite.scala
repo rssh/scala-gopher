@@ -2,7 +2,7 @@ package gopher.channels
 
 
 import org.scalatest._
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import gopher._
 import gopher.tags._
@@ -37,7 +37,7 @@ class ChannelCleanupSuite extends FunSuite
      val cleanedObjectRq = new ReferenceQueue[CleanedObject]();
      var weakRef: WeakReference[CleanedObject] = null;
 
-     def createChannel(): IOChannel[CleanedObject] =
+     def createChannel(): Channel[CleanedObject] =
      {
        val channel = gopherApi.makeChannel[CleanedObject](100)
        var obj = new CleanedObject(1)

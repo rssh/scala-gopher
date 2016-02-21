@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
    */
 object ReadCoroutines {
   
-  lazy val integers:IOChannel[Int] =
+  lazy val integers:InputOutput[Int] =
   {
     val y = gopherApi.makeChannel[Int]()
     @volatile var count = 0

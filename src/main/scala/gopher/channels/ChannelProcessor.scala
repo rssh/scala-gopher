@@ -36,7 +36,6 @@ class ChannelProcessor(api: GopherAPI) extends Actor
       case Never => /* do nothing */
    }
 
-   def cont(x:Future[Continuated[_]]):Unit = x.foreach(self.tell(_,self))
 
    implicit val ec: ExecutionContext = api.executionContext
 

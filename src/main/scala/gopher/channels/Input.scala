@@ -10,6 +10,7 @@ import scala.util._
 import java.util.concurrent.ConcurrentLinkedQueue
 import gopher._
 
+import java.util.concurrent.atomic._
 
 /**
  * Entity, from which we can read objects of type A.
@@ -186,8 +187,10 @@ trait Input[A]
          def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
          {  val contA = ContRead(f,this,cont.flowTermination)
             f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
-                                  case ContRead.Skip => Future successful cont
-                                  case ContRead.ChannelClosed => Future successful ContRead(f,other,cont.flowTermination)
+                                  case ContRead.Skip => f1(ContRead.Skip) 
+                                                       Future successful cont
+                                  case ContRead.ChannelClosed => f1(ContRead.Skip) 
+                                                       Future successful ContRead(f,other,cont.flowTermination)
                                   case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
                          })
          }
@@ -197,6 +200,27 @@ trait Input[A]
         def api = thisInput.api
 
   }
+
+  def prepend(a:A):Input[A] = new Input[A] {
+
+        val aReaded = new AtomicBoolean(false)
+
+        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+        {
+         f(ContRead(f,this,ft)) map { f1 => 
+           if (aReaded.compareAndSet(false,true)) {
+               f1(ContRead.Value(a))
+           } else {
+               api.continuatedProcessorRef ! ContRead(f,thisInput,ft)      
+               f1(ContRead.Skip)
+           }
+         }
+        }
+
+        def api = thisInput.api
+
+  }
+
 
   /**
    * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`
@@ -262,6 +286,36 @@ trait Input[A]
     ft.future
   }
 
+  def flatFold(fun:(Input[A],A)=>Input[A]):Input[A] = new Input[A] {
+         
+      val current = new AtomicReference[Input[A]](thisInput)
+
+      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+      {
+        def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+          f(ContRead(f,this,ft)) map { next =>
+            { case ContRead.Value(a) => 
+                           var changed = false
+                           while(!changed) {
+                             var prev = current.get
+                             var next = fun(prev,a)
+                             changed = current.compareAndSet(prev,next) 
+                           } 
+                           next(ContRead.Value(a))
+                         //  fp-version.
+                         // next(ContRead.Skip)
+                         //ContRead(f, one(a) append (fun(this,a) flatFold fun),ft)
+              case v@_ => next(v)
+          }   }
+        current.get.cbread(mf,ft)
+      }
+
+      def api = thisInput.api
+     
+  }
+
+  //def fold[S](s0:S)(f:(S,A)=>(S,Option[A]))
+
 }
 
 object Input
@@ -283,6 +337,28 @@ object Input
                               )
    }
 
+   def closed[A](implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
+
+     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+      f(ContRead(f,this,ft)) map (f1 => f1(ContRead.ChannelClosed))
+
+     def api = gopherApi
+   }
+
+   def one[A](a:A)(implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
+
+     val readed: AtomicBoolean = new AtomicBoolean(false)
+
+     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+      f(ContRead(f,this,ft)) map (f1 => f1(
+                                    if (readed.compareAndSet(false,true)) {
+                                        ContRead.Value(a) 
+                                    }else{
+                                        ContRead.ChannelClosed
+                                    }))
+
+     def api = gopherApi
+   }
 
 }
 

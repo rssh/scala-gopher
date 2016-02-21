@@ -3,7 +3,7 @@ package example
 import gopher._
 import gopher.channels._
 import CommonTestObjects.gopherApi._
-import scala.concurrent.{Channel=>_,_}
+import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -12,39 +12,30 @@ import scala.language.postfixOps
 import org.scalatest._
 
 /**
- * this is direct translation from appropriative go example.
+ * more 'scala-like' sieve
  **/
-object Sieve
+object BetterSieve
 {
 
-  def generate(n:Int, quit:Promise[Boolean]):Channel[Int] =
+  def generate(n:Int, quit:Promise[Boolean]):Input[Int] =
   {
     val channel = makeChannel[Int]()
     channel.awriteAll(2 to n) foreach (_ => quit success true)
     channel
   }
 
-  def filter(in:Channel[Int]):Input[Int] =
-  {
-    val filtered = makeChannel[Int]()
-    var proxy: Input[Int] = in;
-    go {
-      // since proxy is var, we can't select from one in forever loop.
-      while(true) {
-          val prime = proxy.read
-          proxy = proxy.filter(_ % prime != 0)
-          filtered.write(prime)
-      } 
-    }
-    filtered
-  }
+  /**
+   * flatFold modify channel with each read
+   */
+  def filter(in:Input[Int]):Input[Int] = 
+    in.flatFold{ (s,prime) => s.filter( _ % prime != 0) }
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
     filter(generate(n,quit))
 
 }
 
-class SieveSuite extends FunSuite
+class BetterSieveSuite extends FunSuite
 {
 
  test("last prime before 1000") {

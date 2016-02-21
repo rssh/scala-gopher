@@ -18,7 +18,7 @@ class OutputWithTimeouts[A](origin: Output[A], timeout: FiniteDuration)
 
   def pair:(Output[A],Input[FiniteDuration]) = (wrapped, timeouts)
 
-  val timeouts: IOChannel[FiniteDuration] = api.makeChannel[FiniteDuration]()
+  val timeouts: Channel[FiniteDuration] = api.makeChannel[FiniteDuration]()
 
   val wrapped: Output[A] = new Output[A] {
 
