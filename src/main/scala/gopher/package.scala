@@ -56,7 +56,7 @@ import scala.language.implicitConversions
  *}}}
  *
  *@see [[GopherAPI]]
- *@see [[channels.IOChannel]]
+ *@see [[channels.Channel]]
  *@see [[channels.SelectorBuilder]]
  *@see [[channels.SelectFactory]]
  *@author Ruslan Shevchenko <ruslan@shevchenko.kiev.ua>

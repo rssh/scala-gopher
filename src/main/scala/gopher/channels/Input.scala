@@ -229,7 +229,7 @@ trait Input[A]
    *```
    * val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
    * select.forever {
-   *   case x: inReady.read => Console.println(s"received value ${value}")
+   *   case x: inReady.read => Console.println(s"received value \${value}")
    *   case x: inTimeouts.read => Console.println(s"timeout occured")
    * }
    *```
