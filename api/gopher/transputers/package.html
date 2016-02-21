@@ -28,11 +28,11 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../lib/package_big.png" />
+        <img alt="Package" src="../../lib/package_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>transputers</h1> <span class="permalink">
+        <h1>transputers</h1><span class="permalink">
       <a href="../../index.html#gopher.transputers.package" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -47,13 +47,36 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"></div>
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>transputers  implementations
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>gopher.transputers.ReplicatedTransputer</p></span><span class="cmt"><p>gopher.transputers.TransputerSupervisor</p></span></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
         
 
       <div id="mbrsel">
         <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        
-        
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="gopher.transputers"><span>transputers</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -79,7 +102,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@AggregatePortAdapter[A]extendsPortAdapter[gopher.channels.Output,A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -96,7 +119,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@DistributePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -113,7 +136,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@DuplicatePortAdapter[A]extendsPortAdapter[gopher.channels.Input,A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -130,11 +153,11 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@PortAdapter[P[_],A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="gopher.transputers.ReplicatedTransputer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.transputers.ReplicatedTransputer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ReplicatedTransputer[T&lt;:gopher.Transputer,Self]extendsParTransputer"></a>
       <a id="ReplicatedTransputer[T&lt;:Transputer,Self]:ReplicatedTransputer[T,Self]"></a>
       <h4 class="signature">
@@ -147,10 +170,13 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@ReplicatedTransputer[T&lt;:gopher.Transputer,Self]extendsParTransputer" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt"><code>Replicated[X]</code> is transputer which keep <code> n </code> instances of <code>X</code>
+where ports of replicated consumer are connected to appropriative ports of instances in parallel.</code></code></code></p><div class="fullcomment"><div class="comment cmt"><p><code>Replicated[X]</code> is transputer which keep <code> n </code> instances of <code>X</code>
+where ports of replicated consumer are connected to appropriative ports of instances in parallel.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>gopher.GopherAPI#replicate</p></span></dd></dl></div>
     </li><li name="gopher.transputers.SharePortAdapter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SharePortAdapter[P[_],A]extendsPortAdapter[P,A]"></a>
       <a id="SharePortAdapter[P[_],A]:SharePortAdapter[P,A]"></a>
@@ -164,7 +190,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@SharePortAdapter[P[_],A]extendsPortAdapter[P,A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -181,7 +207,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@TransputerSupervisorextendsActorwithActorLogging" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">one actor, which perform operations for starting/stopping
@@ -206,7 +232,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@PortAdapters" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -223,7 +249,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@Replicate" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -240,7 +266,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.transputers.package@TransputerSupervisor" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -253,7 +279,11 @@
         </div>
 
         <div id="inheritedMembers">
-        
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
         </div>
 

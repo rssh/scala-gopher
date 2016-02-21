@@ -28,11 +28,11 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../lib/package_big.png" />
+        <img alt="Package" src="../../lib/package_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a></p>
-        <h1>channels</h1> <span class="permalink">
+        <h1>channels</h1><span class="permalink">
       <a href="../../index.html#gopher.channels.package" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -47,7 +47,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
 Instance of <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> represent one step of computations and leave in queue inside <a href="ChannelProcessor.html" class="extype" name="gopher.channels.ChannelProcessor">ChannelProcessor</a> or <a href="ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>
 <a href="Selector.html" class="extype" name="gopher.channels.Selector">Selector</a> transform <a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> to executed exclusive with each other within one selector. Also we have <a href="IdleDetector.html" class="extype" name="gopher.channels.IdleDetector">IdleDetector</a> which
 determinate idle selectors and activer appropriative actions.</p></div><div class="toggleContainer block">
@@ -78,7 +78,6 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -105,7 +104,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncFullReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -122,7 +121,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncFullSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -139,7 +138,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncFullWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -156,7 +155,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncNoGenReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -173,7 +172,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncNoOptSkipSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -190,7 +189,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncNoOptWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -207,7 +206,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncNoOptionReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -224,7 +223,24 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@AsyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Channel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Channel[A]extendsInputOutput[A]"></a>
+      <a id="Channel[A]:Channel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Channel.html"><span class="name">Channel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Channel[A]extendsInputOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -241,7 +257,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelActor[A]extendsActor" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">ChannelActor - actor, which leave
@@ -259,7 +275,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelActorMessageextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -276,7 +292,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelCloseProcessedextendsChannelActorMessagewithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">result of CloseChannelRead, return number of elements
@@ -295,7 +311,7 @@ left to read
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelProcessorextendsActor" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -312,7 +328,7 @@ left to read
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelSupervisorextendsActor" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -329,7 +345,7 @@ left to read
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@CloseChannelextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -346,7 +362,7 @@ left to read
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ClosedChannelReadextendsChannelActorMessagewithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">this is message wich send to ChannelActor, when we
@@ -369,7 +385,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ContRead[A,B]extendsFlowContinuated[B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">read A and compute B as result.</p>
@@ -386,7 +402,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ContWrite[A,B]extendsFlowContinuated[B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">write A and compute B as result
@@ -404,7 +420,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Continuated[+A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">represent continuated computation from A to B.</p>
@@ -421,7 +437,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Done[A]extendsFlowContinuated[A]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -438,7 +454,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@DuppedInput[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -455,7 +471,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@FlowContinuated[A]extendsContinuated[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -472,7 +488,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ForeverSelectorBuilderextendsSelectorBuilder[Unit]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Builder for 'forever' selector.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for 'forever' selector. Can be obtained as <code>gopherApi.select.forever</code>.
@@ -490,7 +506,7 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@FutureInput[A]extendsInput[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Future[A], represented as input which produce a value when completed, after this
@@ -507,23 +523,6 @@ select.forever{
    <span class="kw">case</span> x: T <span class="kw">if</span> (x==future.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"we receive value from future: ${x}"</span>)
    <span class="kw">case</span> x: T <span class="kw">if</span> (x==channel.read) <span class="kw">=&gt;</span> <span class="std">Console</span>.println(s<span class="lit">"value from channel: ${x}"</span>)
 }</pre></div></div>
-    </li><li name="gopher.channels.IOChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="IOChannel[A]extendsInput[A]withOutput[A]"></a>
-      <a id="IOChannel[A]:IOChannel[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="IOChannel.html"><span class="name">IOChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>] with <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.IOChannel.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.package@IOChannel[A]extendsInput[A]withOutput[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="gopher.channels.IdleDetector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IdleDetectorextendsAnyRef"></a>
       <a id="IdleDetector:IdleDetector"></a>
@@ -537,7 +536,7 @@ select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@IdleDetectorextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -554,10 +553,27 @@ select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Input[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Entity, from which we can read objects of type A.</p>
+    </li><li name="gopher.channels.InputOutput" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="InputOutput[A]extendsInput[A]withOutput[A]"></a>
+      <a id="InputOutput[A]:InputOutput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="InputOutput.html"><span class="name">InputOutput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.InputOutput.A">A</span>] with <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.InputOutput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@InputOutput[A]extendsInput[A]withOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.InputWithTimeouts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="InputWithTimeouts[A]extendsAnyRef"></a>
       <a id="InputWithTimeouts[A]:InputWithTimeouts[A]"></a>
@@ -571,14 +587,13 @@ select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@InputWithTimeouts[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Wrap <code>origin</code> input into input, which produce 'timeout' value into <code>timeouts</code> channel
 when reading from wrapped channel take more time than <code>timeout</code> .</p><div class="fullcomment"><div class="comment cmt"><p>Wrap <code>origin</code> input into input, which produce 'timeout' value into <code>timeouts</code> channel
 when reading from wrapped channel take more time than <code>timeout</code> .
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>InputChannel.withInputTimeouts
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>InputChannel.withInputTimeouts</p></span></dd></dl></div>
     </li><li name="gopher.channels.LazyChannel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LazyChannel[A]extendsInput[A]withOutput[A]"></a>
       <a id="LazyChannel[A]:LazyChannel[A]"></a>
@@ -592,7 +607,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@LazyChannel[A]extendsInput[A]withOutput[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">lazy channel, which created during first input/output operations.</p><div class="fullcomment"><div class="comment cmt"><p>lazy channel, which created during first input/output operations.
@@ -611,7 +626,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@NewChannelextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -628,7 +643,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@OnceSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Builder for 'once' selector.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for 'once' selector. Can be obtained as <code>gopherApi.select.once</code>.
@@ -646,7 +661,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@OrInput[A]extendsInput[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Input, which combine two other inputs.</p><div class="fullcomment"><div class="comment cmt"><p>Input, which combine two other inputs.</p><p>can be created with '|' operator.</p><pre><span class="kw">val</span> x = read(x|y)</pre></div></div>
@@ -663,7 +678,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Output[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Entity, where we can write objects of type A.</p>
@@ -680,7 +695,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@OutputWithTimeouts[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt"></p>
@@ -697,7 +712,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@PromiseFlowTermination[A]extendsFlowTermination[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -714,7 +729,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ReadSelectorArgument[A,B]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -731,7 +746,7 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SelectFactoryextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Factory for select instantiation.</p><div class="fullcomment"><div class="comment cmt"><p>Factory for select instantiation.
@@ -750,7 +765,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Selector[A]extendsPromiseFlowTermination[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -767,7 +782,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SelectorBuilder[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -784,7 +799,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Skip[A]extendsFlowContinuated[A]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">skip (i.e.</p><div class="fullcomment"><div class="comment cmt"><p>skip (i.e. do some operation not related to reading or writing.)
@@ -802,7 +817,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SkipSelectorArgument[A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -819,7 +834,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SyncPairReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -836,7 +851,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SyncReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -853,7 +868,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SyncSelectorArgument[A]extendsSkipSelectorArgument[A]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -870,7 +885,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SyncWriteSelectorArgument[A,B]extendsWriteSelectorArgument[A,B]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -887,7 +902,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@WriteSelectorArgument[A,B]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -904,7 +919,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ZippedInput[A,B]extendsInput[(A,B)]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -928,7 +943,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelClose" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -945,7 +960,7 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelRefDecrement" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">this message is send, when all references to
@@ -968,7 +983,7 @@ channel incarnation), than we must destroy channel.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ChannelRefIncrement" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">this message is send, when we create new remote
@@ -986,7 +1001,7 @@ reference to channel, backed by this actor.</p>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ContRead" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1003,7 +1018,7 @@ reference to channel, backed by this actor.</p>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@CurrentFlowTermination" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1020,7 +1035,7 @@ reference to channel, backed by this actor.</p>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@GracefullChannelStop" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">When we decide to stop channel, do it via special message,
@@ -1040,7 +1055,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Input" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1057,7 +1072,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@InputMacro" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1074,7 +1089,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Never" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">never means the end of conversation
@@ -1092,7 +1107,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@Output" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1109,7 +1124,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@PromiseFlowTermination" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1126,7 +1141,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@SelectorBuilder" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -1143,7 +1158,7 @@ to process one after messages, which exists now in queue.</p><p>Note, that chann
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@ZippedInput" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" />
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       

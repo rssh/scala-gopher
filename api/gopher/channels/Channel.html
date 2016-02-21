@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>LazyChannel - gopher.channels.LazyChannel</title>
-          <meta name="description" content="LazyChannel - gopher.channels.LazyChannel" />
-          <meta name="keywords" content="LazyChannel gopher.channels.LazyChannel" />
+          <title>Channel - gopher.channels.Channel</title>
+          <meta name="description" content="Channel - gopher.channels.Channel" />
+          <meta name="keywords" content="Channel gopher.channels.Channel" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../../index.html';
-            var hash = 'gopher.channels.LazyChannel';
+            var hash = 'gopher.channels.Channel';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -30,10 +30,10 @@
       <div id="definition">
         <img alt="Class" src="../../lib/class_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="gopher">gopher</a>.<a href="package.html" class="extype" name="gopher.channels">channels</a></p>
-        <h1>LazyChannel</h1><h3><span class="morelinks"><div>Related Doc:
+        <h1>Channel</h1><h3><span class="morelinks"><div>Related Doc:
             <a href="package.html" class="extype" name="gopher.channels">package channels</a>
           </div></span></h3><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -45,15 +45,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">LazyChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>] with <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">Channel</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>lazy channel, which created during first input/output operations.
-(used in transputers as default value for In/Out Ports)
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -71,7 +69,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="gopher.channels.LazyChannel"><span>LazyChannel</span></li><li class="in" name="gopher.channels.Output"><span>Output</span></li><li class="in" name="gopher.channels.Input"><span>Input</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="gopher.channels.Channel"><span>Channel</span></li><li class="in" name="gopher.channels.InputOutput"><span>InputOutput</span></li><li class="in" name="gopher.channels.Output"><span>Output</span></li><li class="in" name="gopher.channels.Input"><span>Input</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -90,19 +88,19 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="gopher.channels.LazyChannel#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.LazyChannel[A]"></a>
-      <a id="&lt;init&gt;:LazyChannel[A]"></a>
+              <ol><li name="gopher.channels.Channel#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(futureChannelRef:scala.concurrent.Future[akka.actor.ActorRef],api:gopher.GopherAPI):gopher.channels.Channel[A]"></a>
+      <a id="&lt;init&gt;:Channel[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">LazyChannel</span><span class="params">(<span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
+        <span class="name">Channel</span><span class="params">(<span name="futureChannelRef">futureChannelRef: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="akka.actor.ActorRef">ActorRef</span>]</span>, <span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@&lt;init&gt;(api:gopher.GopherAPI):gopher.channels.LazyChannel[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@&lt;init&gt;(futureChannelRef:scala.concurrent.Future[akka.actor.ActorRef],api:gopher.GopherAPI):gopher.channels.Channel[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -121,10 +119,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $less$tilde" class="name">&lt;~</span><span class="result"> = <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span title="gt4s: $less$tilde" class="name">&lt;~</span><span class="result"> = <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@&lt;~=A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@&lt;~=A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -138,10 +136,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="result"> = <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span class="name">read</span><span class="result"> = <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@read=A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@read=A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -155,10 +153,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="result"> = <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span class="name">write</span><span class="result"> = <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@write=A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@write=A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -172,10 +170,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">writeExp</span><span class="tparams">[<span name="X">X</span>]</span><span class="result"> = <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span class="name">writeExp</span><span class="tparams">[<span name="X">X</span>]</span><span class="result"> = <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@writeExp[X]=A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@writeExp[X]=A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -189,10 +187,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $tilde$greater" class="name">~&gt;</span><span class="result"> = <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span title="gt4s: $tilde$greater" class="name">~&gt;</span><span class="result"> = <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@~&gt;=A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@~&gt;=A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -213,10 +211,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang" class="name">!</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span title="gt4s: $bang" class="name">!</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Channel.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@!(a:A):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@!(a:A):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -234,7 +232,7 @@
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -251,7 +249,7 @@
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@##():Int" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@##():Int" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -265,10 +263,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $less$tilde" class="name">&lt;~</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>)</span><span class="result">: <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span title="gt4s: $less$tilde" class="name">&lt;~</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Channel.A">A</span></span>)</span><span class="result">: <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@&lt;~(a:A):gopher.channels.Output[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@&lt;~(a:A):gopher.channels.Output[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -286,7 +284,7 @@
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -300,10 +298,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $qmark" class="name">?</span><span class="result">: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span title="gt4s: $qmark" class="name">?</span><span class="result">: <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@?:A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@?:A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -318,15 +316,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">aforeach</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">aforeach</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@aforeach(f:A=&gt;Unit):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@aforeach(f:A=&gt;Unit):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
-    </li><li name="gopher.channels.LazyChannel#api" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.Channel#api" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="api:gopher.GopherAPI"></a>
       <a id="api:GopherAPI"></a>
       <h4 class="signature">
@@ -338,13 +336,13 @@
         <span class="name">api</span><span class="result">: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@api:gopher.GopherAPI" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@api:gopher.GopherAPI" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">instance of gopher API
 </p><div class="fullcomment"><div class="comment cmt"><p>instance of gopher API
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.LazyChannel">LazyChannel</a> → <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a> → <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.Channel">Channel</a> → <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a> → <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
     </li><li name="gopher.channels.Input#append" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="append(other:gopher.channels.Input[A]):gopher.channels.Input[A]"></a>
       <a id="append(Input[A]):Input[A]"></a>
@@ -354,10 +352,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">append</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@append(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@append(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -372,10 +370,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">aread</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">aread</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@aread:scala.concurrent.Future[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@aread:scala.concurrent.Future[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -394,7 +392,7 @@ in case of stream is closed.
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -411,7 +409,7 @@ in case of stream is closed.
         <span class="name">async</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span> { ... /* 3 definitions in type refinement */ }</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@async:AnyRef{defforeach(f:A=&gt;Unit):scala.concurrent.Future[Unit];defforeachSync(f:A=&gt;Unit):scala.concurrent.Future[Unit];defforeachAsync(f:A=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]}" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@async:AnyRef{defforeach(f:A=&gt;Unit):scala.concurrent.Future[Unit];defforeachSync(f:A=&gt;Unit):scala.concurrent.Future[Unit];defforeachAsync(f:A=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]}" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -425,10 +423,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">atake</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]]</span>
+        <span class="name">atake</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="gopher.channels.Channel.A">A</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@atake(n:Int):scala.concurrent.Future[IndexedSeq[A]]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@atake(n:Int):scala.concurrent.Future[IndexedSeq[A]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -443,10 +441,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">awrite</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">awrite</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Channel.A">A</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@awrite(a:A):scala.concurrent.Future[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@awrite(a:A):scala.concurrent.Future[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -460,15 +458,15 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">awriteAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="gopher.channels.Output.awriteAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">awriteAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="gopher.channels.Output.awriteAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@awriteAll[C&lt;:Iterable[A]](c:C):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@awriteAll[C&lt;:Iterable[A]](c:C):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
-    </li><li name="gopher.channels.LazyChannel#cbread" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.Channel#cbread" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit"></a>
       <a id="cbread[B]((ContRead[A,B])⇒Option[(In[A])⇒Future[Continuated[B]]],FlowTermination[B]):Unit"></a>
       <h4 class="signature">
@@ -477,17 +475,17 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cbread</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>, <span class="extype" name="gopher.channels.LazyChannel.cbread.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.LazyChannel.cbread.B">B</span>]]]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.LazyChannel.cbread.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">cbread</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>, <span class="extype" name="gopher.channels.Channel.cbread.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<a href="ContRead$$In.html" class="extype" name="gopher.channels.ContRead.In">In</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.Channel.cbread.B">B</span>]]]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.Channel.cbread.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@cbread[B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">apply f, when input will be ready and send result to API processor
 </p><div class="fullcomment"><div class="comment cmt"><p>apply f, when input will be ready and send result to API processor
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.LazyChannel">LazyChannel</a> → <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
-    </li><li name="gopher.channels.LazyChannel#cbwrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.Channel">Channel</a> → <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
+    </li><li name="gopher.channels.Channel#cbwrite" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],flwt:gopher.FlowTermination[B]):Unit"></a>
       <a id="cbwrite[B]((ContWrite[A,B])⇒Option[(A,Future[Continuated[B]])],FlowTermination[B]):Unit"></a>
       <h4 class="signature">
@@ -496,15 +494,15 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cbwrite</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>, <span class="extype" name="gopher.channels.LazyChannel.cbwrite.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.channels.LazyChannel.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.LazyChannel.cbwrite.B">B</span>]])]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.LazyChannel.cbwrite.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">cbwrite</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>, <span class="extype" name="gopher.channels.Channel.cbwrite.B">B</span>]) ⇒ <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="gopher.channels.Channel.A">A</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a>[<span class="extype" name="gopher.channels.Channel.cbwrite.B">B</span>]])]</span>, <span name="flwt">flwt: <a href="../FlowTermination.html" class="extype" name="gopher.FlowTermination">FlowTermination</a>[<span class="extype" name="gopher.channels.Channel.cbwrite.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@cbwrite[B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])],flwt:gopher.FlowTermination[B]):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">apply f and send result to channels processor.</p><div class="fullcomment"><div class="comment cmt"><p>apply f and send result to channels processor.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.LazyChannel">LazyChannel</a> → <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.Channel">Channel</a> → <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -517,7 +515,7 @@ in case of stream is closed.
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@clone():Object" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@clone():Object" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -528,6 +526,23 @@ in case of stream is closed.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="gopher.channels.Channel#close" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="close():Unit"></a>
+      <a id="close():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Channel@close():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.Input#dup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dup():(gopher.channels.Input[A],gopher.channels.Input[A])"></a>
       <a id="dup():(Input[A],Input[A])"></a>
@@ -537,10 +552,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dup</span><span class="params">()</span><span class="result">: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>])</span>
+        <span class="name">dup</span><span class="params">()</span><span class="result">: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>])</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@dup():(gopher.channels.Input[A],gopher.channels.Input[A])" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@dup():(gopher.channels.Input[A],gopher.channels.Input[A])" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -559,7 +574,7 @@ in case of stream is closed.
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -576,7 +591,7 @@ in case of stream is closed.
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -590,15 +605,15 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filter</span><span class="params">(<span name="p">p: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">filter</span><span class="params">(<span name="p">p: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@filter(p:A=&gt;Boolean):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@filter(p:A=&gt;Boolean):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="gopher.channels.Channel#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
       <h4 class="signature">
@@ -610,17 +625,11 @@ in case of stream is closed.
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@finalize():Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@finalize():Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Throwable]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="gopher.channels.Channel">Channel</a> → AnyRef</dd></dl></div>
     </li><li name="gopher.channels.Input#flatFold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flatFold(fun:(gopher.channels.Input[A],A)=&gt;gopher.channels.Input[A]):gopher.channels.Input[A]"></a>
       <a id="flatFold((Input[A],A)⇒Input[A]):Input[A]"></a>
@@ -630,10 +639,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatFold</span><span class="params">(<span name="fun">fun: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">flatFold</span><span class="params">(<span name="fun">fun: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@flatFold(fun:(gopher.channels.Input[A],A)=&gt;gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@flatFold(fun:(gopher.channels.Input[A],A)=&gt;gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -647,10 +656,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMap.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMap.B">B</span>]</span>
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMap.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMap.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@flatMap[B](g:A=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@flatMap[B](g:A=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -664,10 +673,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatMapOp</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>)</span><span class="params">(<span name="op">op: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>
+        <span class="name">flatMapOp</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>)</span><span class="params">(<span name="op">op: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]) ⇒ <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.flatMapOp.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@flatMapOp[B](g:A=&gt;gopher.channels.Input[B])(op:(gopher.channels.Input[B],gopher.channels.Input[B])=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@flatMapOp[B](g:A=&gt;gopher.channels.Input[B])(op:(gopher.channels.Input[B],gopher.channels.Input[B])=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -681,10 +690,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">foreach</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">foreach</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@foreach(f:A=&gt;Unit):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@foreach(f:A=&gt;Unit):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -699,10 +708,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">foreachAsync</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">foreachAsync</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@foreachAsync(f:A=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@foreachAsync(f:A=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -716,10 +725,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">foreachSync</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">foreachSync</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@foreachSync(f:A=&gt;Unit):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@foreachSync(f:A=&gt;Unit):scala.concurrent.Future[Unit]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -736,7 +745,7 @@ in case of stream is closed.
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -753,11 +762,28 @@ in case of stream is closed.
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@hashCode():Int" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@hashCode():Int" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gopher.channels.Channel#isClosed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isClosed:Boolean"></a>
+      <a id="isClosed:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isClosed</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Channel@isClosed:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -770,7 +796,7 @@ in case of stream is closed.
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -784,10 +810,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="gopher.channels.Input.map.B">B</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.map.B">B</span>]</span>
+        <span class="name">map</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="gopher.channels.Input.map.B">B</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.map.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@map[B](g:A=&gt;B):gopher.channels.Input[B]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@map[B](g:A=&gt;B):gopher.channels.Input[B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -804,7 +830,7 @@ in case of stream is closed.
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -821,7 +847,7 @@ in case of stream is closed.
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@notify():Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@notify():Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -838,7 +864,7 @@ in case of stream is closed.
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -852,32 +878,15 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">or</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">or</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@or(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@or(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">synonim for non-deteremenistics choice.</p><div class="fullcomment"><div class="comment cmt"><p>synonim for non-deteremenistics choice.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Input.html" class="extype" name="gopher.channels.Input">Input</a></dd></dl></div>
-    </li><li name="gopher.channels.LazyChannel#origin" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="origin:gopher.channels.Channel[A]"></a>
-      <a id="origin:Channel[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">origin</span><span class="result">: <a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@origin:gopher.channels.Channel[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="gopher.channels.Input#prepend" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="prepend(a:A):gopher.channels.Input[A]"></a>
       <a id="prepend(A):Input[A]"></a>
@@ -887,10 +896,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">prepend</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">prepend</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Channel.A">A</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@prepend(a:A):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@prepend(a:A):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -904,10 +913,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="result">: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span class="name">read</span><span class="result">: <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@read:A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@read:A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -925,7 +934,7 @@ in case of stream is closed.
         <span class="name">seq</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span> { def flatMap[B](g: A =&gt; gopher.channels.Input[B]): gopher.channels.Input[B] }</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@seq:AnyRef{defflatMap[B](g:A=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]}" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@seq:AnyRef{defflatMap[B](g:A=&gt;gopher.channels.Input[B]):gopher.channels.Input[B]}" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -942,7 +951,7 @@ in case of stream is closed.
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -959,7 +968,7 @@ in case of stream is closed.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@toString():String" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@toString():String" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -976,7 +985,7 @@ in case of stream is closed.
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@wait():Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@wait():Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -999,7 +1008,7 @@ in case of stream is closed.
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1022,7 +1031,7 @@ in case of stream is closed.
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1042,10 +1051,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withFilter</span><span class="params">(<span name="p">p: (<span class="extype" name="gopher.channels.LazyChannel.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span class="name">withFilter</span><span class="params">(<span name="p">p: (<span class="extype" name="gopher.channels.Channel.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@withFilter(p:A=&gt;Boolean):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@withFilter(p:A=&gt;Boolean):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1059,10 +1068,10 @@ in case of stream is closed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withInputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
+        <span class="name">withInputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@withInputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Input[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@withInputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Input[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1085,10 +1094,10 @@ select.forever {
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withOutputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
+        <span class="name">withOutputTimeouts</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: (<a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>], <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span>])</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@withOutputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Output[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@withOutputTimeouts(timeout:scala.concurrent.duration.FiniteDuration):(gopher.channels.Output[A],gopher.channels.Input[scala.concurrent.duration.FiniteDuration])" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1115,10 +1124,10 @@ select.forever {
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>)</span><span class="result">: <span class="extype" name="gopher.channels.LazyChannel.A">A</span></span>
+        <span class="name">write</span><span class="params">(<span name="a">a: <span class="extype" name="gopher.channels.Channel.A">A</span></span>)</span><span class="result">: <span class="extype" name="gopher.channels.Channel.A">A</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@write(a:A):A" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@write(a:A):A" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1135,10 +1144,10 @@ Note, that this method can be called only inside
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>]</span><span class="params">(<span name="it">it: <span class="extype" name="gopher.channels.Output.writeAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">writeAll</span><span class="tparams">[<span name="C">C &lt;: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>]</span><span class="params">(<span name="it">it: <span class="extype" name="gopher.channels.Output.writeAll.C">C</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@writeAll[C&lt;:Iterable[A]](it:C):Unit" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@writeAll[C&lt;:Iterable[A]](it:C):Unit" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1152,10 +1161,10 @@ Note, that this method can be called only inside
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zip</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="x">x: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.zip.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[(<span class="extype" name="gopher.channels.LazyChannel.A">A</span>, <span class="extype" name="gopher.channels.Input.zip.B">B</span>)]</span>
+        <span class="name">zip</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="x">x: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Input.zip.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[(<span class="extype" name="gopher.channels.Channel.A">A</span>, <span class="extype" name="gopher.channels.Input.zip.B">B</span>)]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@zip[B](x:gopher.channels.Input[B]):gopher.channels.Input[(A,B)]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@zip[B](x:gopher.channels.Input[B]):gopher.channels.Input[(A,B)]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1169,10 +1178,10 @@ Note, that this method can be called only inside
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zip</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.Input.zip.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[(<span class="extype" name="gopher.channels.LazyChannel.A">A</span>, <span class="extype" name="gopher.channels.Input.zip.B">B</span>)]</span>
+        <span class="name">zip</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="gopher.channels.Input.zip.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[(<span class="extype" name="gopher.channels.Channel.A">A</span>, <span class="extype" name="gopher.channels.Input.zip.B">B</span>)]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@zip[B](x:Iterable[B]):gopher.channels.Input[(A,B)]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@zip[B](x:Iterable[B]):gopher.channels.Input[(A,B)]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1186,10 +1195,10 @@ Note, that this method can be called only inside
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bar" class="name">|</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</span>
+        <span title="gt4s: $bar" class="name">|</span><span class="params">(<span name="other">other: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.LazyChannel@|(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.Channel@|(other:gopher.channels.Input[A]):gopher.channels.Input[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1205,10 +1214,12 @@ Note, that this method can be called only inside
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="gopher.channels.Output">
-              <h3>Inherited from <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</h3>
+        <div class="parent" name="gopher.channels.InputOutput">
+              <h3>Inherited from <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</h3>
+            </div><div class="parent" name="gopher.channels.Output">
+              <h3>Inherited from <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</h3>
             </div><div class="parent" name="gopher.channels.Input">
-              <h3>Inherited from <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.LazyChannel.A">A</span>]</h3>
+              <h3>Inherited from <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">

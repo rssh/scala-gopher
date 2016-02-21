@@ -28,11 +28,11 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../lib/package_big.png" />
+        <img alt="Package" src="../lib/package_big.png" />
         
-        <h1>gopher</h1> <span class="permalink">
+        <h1>gopher</h1><span class="permalink">
       <a href="../index.html#gopher.package" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -74,7 +74,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
        f.close()
     }
   }
-}</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">channels.IOChannel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
+}</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">channels.Channel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -102,7 +102,6 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -129,7 +128,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@ChannelClosedExceptionextendsIllegalStateException" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">throwed when channel is closed:</p><div class="fullcomment"><div class="comment cmt"><p>throwed when channel is closed:</p><ul><li> during attempt to write to closed channel.</li><li> during attempt to read from closed channel 'behind' last message.</li></ul></div></div>
@@ -146,7 +145,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@Defers[T]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Construction Defers: defer/recover is alternative mechanism to exception handling,
@@ -195,7 +194,7 @@ def parseCsv(fname: String): Either[String, Seq[Seq[Double]]] =
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@FlowTermination[-A]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">FlowTermination[-A] - termination of flow.</p><div class="fullcomment"><div class="comment cmt"><p>FlowTermination[-A] - termination of flow.</p><p>Inside each block in select loop or
@@ -218,7 +217,7 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@FutureWithRead[T]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">sugar for reading value from future.</p>
@@ -235,7 +234,7 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherAPIextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Api for providing access to channel and selector interfaces.</p>
@@ -252,11 +251,10 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherImplextendsGopherAPIwithExtension" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI
-</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Akka extension which provide gopherApi interface</p><div class="fullcomment"><div class="comment cmt"><p>Akka extension which provide gopherApi interface</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>GopherAPI</p></span></dd></dl></div>
     </li><li name="gopher.ParTransputer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ParTransputerextendsTransputer"></a>
       <a id="ParTransputer:ParTransputer"></a>
@@ -270,7 +268,7 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@ParTransputerextendsTransputer" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -287,7 +285,7 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@SelectTransputerextendsForeverSelectorBuilderwithTransputer" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Transputer, where dehaviour can be described by selector function</p>
@@ -304,7 +302,7 @@ exiting the loop.</p><pre>select.forever{
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@TransputerextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Reusable unit of application structure, which consists from
@@ -325,7 +323,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@TransputerLoggingextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">mix this trait to ypu transputer for access to akka logging.</p>
@@ -349,7 +347,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@Defers" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -366,7 +364,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@Gopher" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Factory object for Akka extension</p><div class="fullcomment"><div class="comment cmt"><p>Factory object for Akka extension</p><pre><span class="kw">val</span> actorSystem = ActorSystem(<span class="lit">"myapp"</span>)
@@ -384,7 +382,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherAPI" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -401,7 +399,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@GopherAPIExtensionHelper" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -418,7 +416,7 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@Transputer" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -435,10 +433,10 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@channels" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.</p><div class="fullcomment"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="channels/IOChannel.html" class="extype" name="gopher.channels.IOChannel">IOChannel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
+      <p class="shortcomment cmt">Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.</p><div class="fullcomment"><div class="comment cmt"><h4> Overview </h4><ul><li> <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a> and <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a> provide callback-based interfaces for input/output facilities.</li><li> <a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">Channel</a> provide implementation for asynchronics channels processing inside JVM.</li><li> <a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a> is a way to create selectors.</li></ul><h4> Internals </h4><p>Core entity is <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> which provide iteratee-like structure for reading and writing.
 Instance of <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> represent one step of computations and leave in queue inside <a href="channels/ChannelProcessor.html" class="extype" name="gopher.channels.ChannelProcessor">ChannelProcessor</a> or <a href="channels/ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>
 <a href="channels/Selector.html" class="extype" name="gopher.channels.Selector">Selector</a> transform <a href="channels/Continuated.html" class="extype" name="gopher.channels.Continuated">Continuated</a> to executed exclusive with each other within one selector. Also we have <a href="channels/IdleDetector.html" class="extype" name="gopher.channels.IdleDetector">IdleDetector</a> which
 determinate idle selectors and activer appropriative actions.</p></div></div>
@@ -455,7 +453,7 @@ determinate idle selectors and activer appropriative actions.</p></div></div>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@compileTimeFlowTermination[A]:gopher.FlowTermination[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
@@ -478,7 +476,7 @@ determinate idle selectors and activer appropriative actions.</p></div></div>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@defer(x:=&gt;Unit):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">pseudostatement which can be used inside go/goScope block.</p><div class="fullcomment"><div class="comment cmt"><p>pseudostatement which can be used inside go/goScope block.
@@ -502,7 +500,7 @@ determinate idle selectors and activer appropriative actions.</p></div></div>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@go[T](body:T)(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[T]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">starts asyncronics execution of <code>body</code> in provided execution context.</p><div class="fullcomment"><div class="comment cmt"><p>starts asyncronics execution of <code>body</code> in provided execution context.
@@ -520,7 +518,7 @@ Inside go we can use <code>defer</code>/<code>recover</code> clauses and blocked
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@goScope[T](body:T):T" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">provide access to using defer/recover inside body in the current thread of execution.</p>
@@ -537,7 +535,7 @@ Inside go we can use <code>defer</code>/<code>recover</code> clauses and blocked
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@goasync" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -554,13 +552,12 @@ Inside go we can use <code>defer</code>/<code>recover</code> clauses and blocked
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@recover[T](f:PartialFunction[Throwable,T]):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">can be called only from defer block.</p><div class="fullcomment"><div class="comment cmt"><p>can be called only from defer block. If we in handling exception, try to apply <code> f </code>
 to exception and if it's applied - stop panic and return true, otherwise return false.
-</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>- partial function for recovering exception.</p></dd><dt>returns</dt><dd class="cmt"><p>true if exception was recovered, false otherwise
-</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>- partial function for recovering exception.</p></dd><dt>returns</dt><dd class="cmt"><p>true if exception was recovered, false otherwise</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@compileTimeOnly</span><span class="args">(<span>
       
       <span class="defval" name="&quot;defer/recover method usage outside go / goScope &quot;">...</span>
@@ -580,7 +577,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncFullReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;Option[gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -597,7 +594,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncFullSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;Option[scala.concurrent.Future[gopher.channels.Continuated[A]]]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -614,7 +611,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncFullWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;Option[(A,scala.concurrent.Future[gopher.channels.Continuated[B]])]):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -631,7 +628,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncNoGenReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(A=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -648,7 +645,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncNoOptSkipSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[A]]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -665,7 +662,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncNoOptWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -682,7 +679,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncNoOptionReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -699,7 +696,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toAsyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;scala.concurrent.Future[gopher.channels.Continuated[B]]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -716,7 +713,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toSyncPairReadSelectorArgument[A,B](f:(A,gopher.channels.ContRead[A,B])=&gt;gopher.channels.Continuated[B]):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -733,7 +730,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toSyncReadSelectorArgument[A,B](f:gopher.channels.ContRead[A,B]=&gt;(gopher.channels.ContRead.In[A]=&gt;gopher.channels.Continuated[B])):gopher.channels.ReadSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -750,7 +747,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toSyncSelectorArgument[A](f:gopher.channels.Skip[A]=&gt;gopher.channels.Continuated[A]):gopher.channels.SkipSelectorArgument[A]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -767,11 +764,11 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@toSyncWriteSelectorArgument[A,B](f:gopher.channels.ContWrite[A,B]=&gt;(A,gopher.channels.Continuated[B])):gopher.channels.WriteSelectorArgument[A,B]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="gopher.transputers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.transputers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="transputers"></a>
       <a id="transputers:transputers"></a>
       <h4 class="signature">
@@ -784,10 +781,12 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@transputers" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">transputers  implementations
+</p><div class="fullcomment"><div class="comment cmt"><p>transputers  implementations
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>gopher.transputers.ReplicatedTransputer</p></span><span class="cmt"><p>gopher.transputers.TransputerSupervisor</p></span></dd></dl></div>
     </li><li name="gopher.util" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="util"></a>
       <a id="util:util"></a>
@@ -801,7 +800,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@util" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -818,7 +817,7 @@ to exception and if it's applied - stop panic and return true, otherwise return 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@withDefer" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">syntax sugar, for calling Defers.</p>
