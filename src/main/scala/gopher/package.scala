@@ -57,6 +57,8 @@ import scala.language.implicitConversions
  *
  *@see [[GopherAPI]]
  *@see [[channels.Channel]]
+ *@see [[channels.Input]]
+ *@see [[channels.Output]]
  *@see [[channels.SelectorBuilder]]
  *@see [[channels.SelectFactory]]
  *@author Ruslan Shevchenko <ruslan@shevchenko.kiev.ua>
@@ -168,6 +170,15 @@ import gopher.goasync._
    def read: T = macro InputMacro.read[T]
 
    def aread: Future[T] = f
+ }
+
+ //import scala.language.experimental.macros
+ import scala.reflect.macros.blackbox.Context
+ import scala.reflect.api._
+ def awaitImpl[T](c:Context)(v:c.Expr[Future[T]]):c.Expr[T] =
+ {
+   import c.universe._
+   c.Expr[T](q"scala.async.Async.await($v)")
  }
 
 }

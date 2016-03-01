@@ -314,7 +314,14 @@ trait Input[A]
      
   }
 
-  //def fold[S](s0:S)(f:(S,A)=>(S,Option[A]))
+
+/*
+  def fold[S,B](s0:S)(f:(S,A)=>(S,Option[B])) = new Input[A] {
+
+      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+
+  }
+*/
 
 }
 

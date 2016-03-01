@@ -12,9 +12,9 @@ object CurrentFlowTermination
 
 
    @compileTimeOnly("exit must be used only inside goScope or selector callbacks")
-   def exit[A](a: A): Unit = ???
+   def exit[A](a: A): A = ???
 
-   def exitDelayed[A](a: A): Unit = 
+   def exitDelayed[A](a: A): A = 
           macro exitImpl[A]
 
 
@@ -22,10 +22,12 @@ object CurrentFlowTermination
           macro doThrowImpl
 
 
-   def exitImpl[A:c.WeakTypeTag](c:Context)(a: c.Expr[A])(implicit wtt: c.WeakTypeTag[A]): c.Expr[Unit]=
+   def exitImpl[A](c:Context)(a: c.Expr[A])(implicit wtt: c.WeakTypeTag[A]): c.Expr[A]=
    {
     import c.universe._
-    c.Expr[Unit](q"implicitly[FlowTermination[${wtt}]].doExit(${a})")
+    c.Expr[A](q"""
+                    implicitly[FlowTermination[${wtt}]].doExit(${a})
+                  """)
    }
 
    def doThrowImpl(c:Context)(e: c.Expr[Throwable]): c.Expr[Unit]=

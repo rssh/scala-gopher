@@ -23,8 +23,11 @@ trait PromiseFlowTermination[A] extends FlowTermination[A]
    }
   }
 
-  def doExit(a: A): Unit =
-    p trySuccess a
+  def doExit(a: A): A =
+    {
+     p trySuccess a
+     a
+    }
 
   def future =
     p future
