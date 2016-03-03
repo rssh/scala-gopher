@@ -18,7 +18,7 @@ import scala.annotation.unchecked._
  *   for(s <- selector) ...
  * }}}
  */
-class SelectFactory(api: GopherAPI)
+class SelectFactory(val api: GopherAPI)
 {
  
   selectFactory =>
@@ -44,8 +44,9 @@ class SelectFactory(api: GopherAPI)
    */
   def loop[A]: SelectorBuilder[A] = new SelectorBuilder[A] with SelectFactoryApi {}
 
+  def afold[S](s:S)(op:(S,Any)=>S):Future[S] = macro FoldSelectorBuilderImpl.afold[S]
   
-  def fold[S](s:S)(op:(S,Any)=>S):S = macro FoldSelectorBuilder.foldImpl[S]
+  def fold[S](s:S)(op:(S,Any)=>S):S = macro FoldSelectorBuilderImpl.fold[S]
 
 
 }

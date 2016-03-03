@@ -109,18 +109,18 @@ object SelectorBuilder
      import c.universe._
      val transformer = new Transformer {
         override def transform(tree:Tree): Tree =
-          tree match {
-             case Apply(TypeApply(Select(obj,TermName("implicitly")),List(objType)), args) =>
+            tree match {
+               case Apply(TypeApply(Select(obj,TermName("implicitly")),List(objType)), args) =>
                     // unresolve implicit references of specific type
-                    if (obj.tpe =:= typeOf[Predef.type] &&
+                    if (!(obj.tpe eq null) && obj.tpe =:= typeOf[Predef.type] &&
                         objType.tpe <:< typeOf[FlowTermination[Nothing]]
                         ) {
                        TypeApply(Select(obj,TermName("implicitly")),List(objType))
                     } else {
                        super.transform(tree)
                     }
-             case Apply(TypeApply(Select(obj,member),objType), args) =>
-                    if (obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
+               case Apply(TypeApply(Select(obj,member),objType), args) =>
+                    if (!(obj.tpe eq null) && obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
                        member match {
                           case TermName("exit") => 
                                  Apply(TypeApply(Select(obj,TermName("exitDelayed")),objType), args) 
@@ -129,8 +129,8 @@ object SelectorBuilder
                     } else {
                        super.transform(tree)
                     }
-             case Apply(Select(obj,member), args) =>
-                    if (obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
+                case Apply(Select(obj,member), args) =>
+                    if (!(obj.tpe eq null) && obj.tpe =:= typeOf[CurrentFlowTermination.type] ) {
                        member match {
                           case TermName("exit") => 
                                    Apply(Select(obj,TermName("exitDelayed")),args)
@@ -139,7 +139,7 @@ object SelectorBuilder
                     } else {
                        super.transform(tree)
                     }
-             case _ => 
+                case _ => 
                     super.transform(tree)
           }
      }
@@ -183,10 +183,10 @@ object SelectorBuilder
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) =>
                                 // TOD: check that forvals and choice are same 
-                                foreachTransformMatch(c)(cases)
+                                foreachBuildMatch(c)(cases)
        // TODO: think, are we need syntax with common-expr ?
        //case Function(forvals,Block(commonExpr,Match(choice,cases))) =>  
-       //                         foreachTransformMatch(c)(forvals,choice,cases, commonExpr)
+       //                         foreachBuildMatch(c)(forvals,choice,cases, commonExpr)
        case Function(a,b) =>
                      c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(b)} ");
        case _ => {
@@ -201,7 +201,7 @@ object SelectorBuilder
      import c.universe._
      f.tree match {
         case q"{case ..$cases}" =>
-                  foreachTransformMatch(c)(cases)
+                  foreachBuildMatch(c)(cases)
         case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
      }
    }
@@ -223,20 +223,26 @@ object SelectorBuilder
      c.Expr[Unit](c.untypecheck(q"{selectorInit = ()=>${builder}; selectorInit()}"))
    }
 
-   def foreachTransformMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
+   def foreachBuildMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
    {
      import c.universe._
      val bn = TermName(c.freshName)
-     val calls = cases map { cs =>
+     val calls = transformSelectMatch(c)(bn,cases)
+     q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
+   }
+
+   def transformSelectMatch(c:Context)(bn: c.universe.TermName, cases:List[c.universe.CaseDef]):List[c.Tree] =
+   {
+     import c.universe._
+     cases map { cs =>
         cs.pat match {
-           case Bind(ident, t)
-                      => foreachTransformReadWriteCaseDef(c)(bn,cs)
+           case Bind(ident, t) => foreachTransformReadWriteCaseDef(c)(bn,cs)
            case Ident(TermName("_")) => foreachTransformIdleCaseDef(c)(bn,cs)
            case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+cs.pat)
         }
      }
-     q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
    }
+
 
    def foreachTransformReadWriteCaseDef(c:Context)(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
    {
