@@ -272,7 +272,7 @@ object SelectorBuilder
             {
               tree match {
                case Typed(ident@Ident(`oldTermName`),_) => if (ident.symbol!=null && ownerWillBeErased(ident.symbol))   
-                                                               Ident(newName)
+                                                               atPos(tree.pos)(Ident(newName))
                                                            else
                                                                super.transform(tree)
                case _ =>
@@ -280,30 +280,37 @@ object SelectorBuilder
                     if (ownerWillBeErased(tree.symbol)) {
                           var prevMustBeErased = insideMustBeErased
                           insideMustBeErased = true
-                          val rtree = doClear(tree)
+                          val (done, rtree) = doClear(tree)
                           insideMustBeErased = prevMustBeErased
-                          rtree
+                          if (done) {
+                            rtree
+                          } else {
+                            super.transform(tree)
+                          }
                     } else super.transform(tree)
                 } else {
                    if (false && insideMustBeErased) {
-                       doClear(tree)
+                       val (done, rtree) = doClear(tree)
+                       if (done) rtree else super.transform(rtree)
                    } else 
                        super.transform(tree)
                 }
               }
             }
 
-            def doClear(tree: c.Tree):c.Tree =
+            def doClear(tree: c.Tree):(Boolean, c.Tree) =
             {
               tree match {
-                  case Ident(name:TermName) => Ident(changeName(name)) // TODO: setPos
+                  case Ident(name:TermName) => 
+                        (true, atPos(tree.pos)(Ident(changeName(name))))
                   case Bind(name:TermName,body) => 
-                                    Bind(changeName(name),transform(body)) // TODO: setPos
+                        (true, atPos(tree.pos)(Bind(changeName(name),transform(body))) )
                   case ValDef(mods,name,tpt,rhs) => 
-                                    ValDef(mods,changeName(name),transform(tpt),transform(rhs))
+                        (true, atPos(tree.pos)(ValDef(mods,changeName(name),transform(tpt),transform(rhs))))
                   case _   => 
-                      c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
-                                         please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
+                        (false, tree)
+                    //c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
+                    //                   please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
               }
             }
 
@@ -312,11 +319,6 @@ object SelectorBuilder
       transformer.transform(tree)
     }
 
-    def skipAnnotation(x: Tree):Tree =
-     x match {
-        case Annotated(_,arg) => arg
-        case _ => x
-     }
 
     def unUnapplyPattern(x:Tree):Tree =
       x match {
@@ -332,7 +334,7 @@ object SelectorBuilder
                     val newName = c.freshName(termName)
                     //val newName = termName
                     val tpoa = clearCaseDefOwner(name, newName, if (tp.original.isEmpty) tp else tp.original)
-                    val tpo = skipAnnotation( tpoa )
+                    val tpo = MacroUtil.skipAnnotation(c)( tpoa )
                     val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa ,EmptyTree)
                     val body = clearCaseDefOwner(name,newName,caseDef.body)
                     tpo match {

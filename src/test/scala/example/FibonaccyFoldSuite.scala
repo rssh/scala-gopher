@@ -21,8 +21,7 @@ object FibonaccyFold {
   def fibonacci(c: Output[Long], quit: Input[Int]): Future[(Long,Long)] = 
      gopherApi.select.afold((0L,1L)) { case ((x,y),s) =>
       s match {
-        case z: c.write if (z == x) => 
-                      (y, x+y)
+        case x: c.write =>  (y, x+y)
         case q: quit.read =>
                  implicitly[FlowTermination[(Long,Long)]].doExit((x,y))
       }

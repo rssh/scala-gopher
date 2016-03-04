@@ -28,6 +28,7 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
    def writing[A](ch: Output[A],x:A)(f: A=>T): FoldSelectorBuilder[T] =
         macro SelectorBuilder.writingImpl[A,T,FoldSelectorBuilder[T]]
 
+
    @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): this.type =
        withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
@@ -123,7 +124,7 @@ class FoldSelectorBuilderImpl(val c:Context)
      selectCases: List[CaseDef]
    )
 
-   def withProjAssignments(fp:FoldParse,body:c.Tree):c.Tree =
+   def withProjAssignments(fp:FoldParse, patSymbol: Symbol, body:c.Tree):c.Tree =
    {
      val stateName=fp.stateVal.name
      val projAssignments = (fp.projections.zipWithIndex) map { 
@@ -131,7 +132,7 @@ class FoldSelectorBuilderImpl(val c:Context)
         val pf = TermName("_" + (i+1).toString)
         q"val ${sym.name.toTermName} = $stateName.$pf"  
      }
-     val nbody = cleanIdents(body,fp.projections.toSet + fp.stateVal.symbol)
+     val nbody = cleanIdents(body,fp.projections.toSet + fp.stateVal.symbol + patSymbol)
      if (projAssignments.isEmpty)
        nbody
      else {
@@ -148,6 +149,12 @@ class FoldSelectorBuilderImpl(val c:Context)
                              // create new tree without associated symbol.
                              //(typer wil reassociate one).
                              atPos(tree.pos)(Ident(s))
+                           } else {
+                             super.transform(tree)
+                           }
+          case ValDef(m,s,rhs,lhs) => if (symbols.contains(tree.symbol)) {
+                             atPos(tree.pos)(ValDef(m,s,rhs,lhs))
+                             super.transform(tree)
                            } else {
                              super.transform(tree)
                            }
@@ -183,19 +190,61 @@ class FoldSelectorBuilderImpl(val c:Context)
      return transformer.transform(body)
    } 
 
-   def preTransformCaseDefBody(fp:FoldParse,body:c.Tree):c.Tree =
+   def preTransformCaseDefBody(fp:FoldParse, patSymbol: Symbol, body:c.Tree):c.Tree =
    {
      val sName = fp.stateVal.name
      val tmpName = TermName(c.freshName("tmp"))
      q"""
-         val $tmpName = ${withProjAssignments(fp,body)}
+         val $tmpName = ${withProjAssignments(fp,patSymbol,body)}
          $sName = $tmpName
          $sName
      """
    }
 
    def preTransformCaseDef(fp:FoldParse,cd:CaseDef):CaseDef =
-     atPos(cd.pos)(CaseDef(cd.pat,substProj(fp,cd.guard),preTransformCaseDefBody(fp,cd.body)))
+   {
+     val patSymbol = cd.pat.symbol
+     if (cd.guard.isEmpty) {
+         val (pat, guard) = cd.pat match {
+                     case Bind(name,t) => 
+                       fp.projections.indexWhere(_.name == name) match {
+                          case -1 => (cd.pat, cd.guard)
+                          case idx => 
+                            // TODO: move parsing of rw-select to ASTUtil and
+                            // eliminate code duplication with SelectorBuilder
+                            t match {
+                              case Typed(_,tp:TypeTree) =>
+                                  val tpoa = if (tp.original.isEmpty) tp else tp.original
+                                  val tpo = MacroUtil.skipAnnotation(c)(tpoa)
+                                  tpo match {
+                                     case Select(ch,TypeName("read")) =>
+                                               //TODO (low priority): implement shadowing instead abort
+                                               c.abort(cd.pat.pos,"Symbol in pattern shadow symbol in state")
+                                     case Select(ch,TypeName("write")) =>
+                                               val newName = TermName(c.freshName("wrt"))
+                                               val newPat = atPos(cd.pat.pos)(Bind(newName,t))
+                                               if (!cd.guard.isEmpty) {
+                                                  c.abort(cd.pos,"guard must be empty");
+                                               }
+                                               val sName = fp.stateVal.name.toTermName
+                                               val proj = TermName("_"+(idx+1))
+                                               val newGuard = q"${newName} == $sName.$proj" 
+                                               (newPat,newGuard)
+                                     case _ => 
+                                               //TODO: implement read/write syntax
+                                               c.abort(cd.pat.pos,"read/write is required we have "+
+                                                                         MacroUtil.shortString(c)(t))
+                                  }
+                               case _ =>
+                                     c.abort(cd.pat.pos,"x:channel.read or x:channel.write form is required")
+                            }
+                       }
+                   }
+       atPos(cd.pos)(CaseDef(pat,substProj(fp,guard),preTransformCaseDefBody(fp,patSymbol,cd.body)))
+     }else{
+       atPos(cd.pos)(CaseDef(cd.pat,substProj(fp,cd.guard),preTransformCaseDefBody(fp,patSymbol,cd.body)))
+     }
+   }
 
    def parseFold[S](op: c.Expr[(S,FoldSelect[S])=>S]): FoldParse = 
    {
@@ -246,6 +295,7 @@ class FoldSelectorBuilderImpl(val c:Context)
                c.abort(op.tree.pos,"inline function is expected in select.fold, we have: "+MacroUtil.shortString(c)(op.tree));
     }
    }
+
 
 }
 

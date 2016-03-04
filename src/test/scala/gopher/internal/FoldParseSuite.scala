@@ -9,10 +9,6 @@ import scala.concurrent.duration._
 import org.scalatest._
 import gopher.tags._
 
-/*
- * code from go tutorial: http://tour.golang.org/#66
-* 
-*/
 
 object FoldData {
 
@@ -28,6 +24,17 @@ object FoldData {
                            }
      }
   
+  def foldWithCaseWithoutGuard(c: Output[Long], quit: Input[Int]): Future[(Long,Long,Long)] = 
+     gopherApi.select.afold((0L,1L,2L)) {
+       case ((x,y,z), s) => s match {
+                             case x: c.write =>
+                                        (y,z,y+z)
+                             case q: quit.read =>
+                                       CurrentFlowTermination.exit((x,y,z))
+                           }
+     }
+  
+
   def foldWithoutCase(c: Output[Long], quit: Input[Int]): Future[Long] = 
      gopherApi.select.afold(1L) { (x,s) =>
         s match {
@@ -57,6 +64,7 @@ object FoldData {
     
   }
   
+
   def gopherApi = CommonTestObjects.gopherApi 
   
 }
@@ -68,6 +76,9 @@ class FoldParseSuite extends FunSuite
     @volatile var last:Long = 0;
     Await.ready( FoldData.run1(50, last = _ ), 10 seconds )
     assert(last != 0)
+  }
+
+  test("case var must shadow text") {
   }
 
 }
