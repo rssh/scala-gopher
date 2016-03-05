@@ -7,7 +7,7 @@ package gopher
  *
  *<ul>
  * <li> [[Input]] and [[Output]] provide callback-based interfaces for input/output facilities. </li>
- * <li> [[IOChannel]] provide implementation for asynchronics channels processing inside JVM. </li>
+ * <li> [[Channel]] provide implementation for asynchronics channels processing inside JVM. </li>
  * <li> [[SelectorBuilder]] is a way to create selectors. </li>
  *</ul>
  *

@@ -39,6 +39,20 @@ object Sieve
     filtered
   }
 
+/*
+  def filter1(in:Channel[Int]):Input[Int] =
+  {
+    val filtered = makeChannel[Int]()
+    val proxy = InPort[In]()
+    proxy.aforeach { prime =>
+       proxy <<= (_.filter(_ % prime != 0))
+       filtered <~ prime
+    }
+    filtered
+  }
+*/
+
+
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
     filter(generate(n,quit))
 

@@ -92,7 +92,7 @@ trait Output[A]
    *val (chReady, chTimeouts) = ch withOutputTimeouts (5 seconds)
    *select.forever {
    *  case x: chReady.write if (x==somethingToWrite) =>
-   *                    Console.println(s" ${x} send")
+   *                    Console.println(s" \${x} send")
    *  case t: chTimeouts.read  =>
    *                    Console.println(s"timeout during writing")
    *}

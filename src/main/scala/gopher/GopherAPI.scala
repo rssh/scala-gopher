@@ -59,16 +59,20 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def futureInput[A](future:Future[A]): FutureInput[A] = new FutureInput(future, this)
 
   /**
-   * Represent Scala collection as channel, where all values can be readed in order of iteration.
+   * Represent Scala iterable as channel, where all values can be readed in order of iteration.
    */
   def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
+  /**
+   * create and start instance of transputer with given recovery policy.
+   *@see gopher.Transputer
+   */
   def makeTransputer[T <: Transputer](recoveryPolicy:PartialFunction[Throwable,SupervisorStrategy.Directive]): T = macro GopherAPI.makeTransputerImpl2[T]
 
   def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
 
   /**
-   * create transputet which contains <code>n</code> instances of <code>X</code>
+   * create transputer which contains <code>n</code> instances of <code>X</code>
    * where ports are connected to the appropriate ports of each instance in paraller.
    * {{{
    *   val persistStep = replicate[PersistTransputer](nDBConnections)

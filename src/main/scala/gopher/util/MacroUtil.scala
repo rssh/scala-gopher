@@ -21,5 +21,14 @@ object MacroUtil
    }
   }
 
+  def skipAnnotation(c:Context)(x: c.Tree):c.Tree =
+  {
+     import c.universe._
+     x match {
+        case Annotated(_,arg) => arg
+        case _ => x
+     }
+  }
+
   final val SHORT_LEN = 80
 }

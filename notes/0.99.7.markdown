@@ -1,5 +1,14 @@
 
 - added append and flatMap operation for inputs.
 - added Sieve to set of examples
+- implemented fold over selector. example:
+```
+  val fibbonachyGen = selector.afold{ case ((x,y),s) =>
+       s match {
+          case x:out.write => (y,x+y)
+          case s:quit.read => CurrentFlowTermination.exit((x,y))
+       }
+  }
+```
 
 

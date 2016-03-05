@@ -229,7 +229,7 @@ trait Input[A]
    *```
    * val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
    * select.forever {
-   *   case x: inReady.read => Console.println(s"received value ${value}")
+   *   case x: inReady.read => Console.println(s"received value \${value}")
    *   case x: inTimeouts.read => Console.println(s"timeout occured")
    * }
    *```
@@ -314,7 +314,14 @@ trait Input[A]
      
   }
 
-  //def fold[S](s0:S)(f:(S,A)=>(S,Option[A]))
+
+/*
+  def fold[S,B](s0:S)(f:(S,A)=>(S,Option[B])) = new Input[A] {
+
+      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+
+  }
+*/
 
 }
 
