@@ -30,9 +30,9 @@ trait WordCountTestTransputer extends SelectTransputer
   val topOut = OutPort[(Long,Seq[(String,Int)])]()
   val overflows = OutPort[OverflowMessage]()
 
-  @volatile var data = Map[Long,Map[String,Int]]()
-  @volatile var maxWords : Int = 100
-  @volatile var maxUsers : Int = 100
+  var data = Map[Long,Map[String,Int]]()
+  var maxWords : Int = 100
+  var maxUsers : Int = 100
 
   loop {
     case x : inS.read @unchecked => 
@@ -92,7 +92,7 @@ trait TestDupper extends SelectTransputer with TransputerLogging
 
     loop {
       case x: in.read =>
-                 log.info(s"testDupper, replica: ${replica} received ${x} from ${in.v}")
+                 log.info(s"testDupper, replica: ${replica} received ${x} from ${in}")
                  // TODO: implement gopherApi.time.wait
                  Thread.sleep(1000)
                  out.write(x)
