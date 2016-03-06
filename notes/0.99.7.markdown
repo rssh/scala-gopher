@@ -5,5 +5,6 @@
 - implemented EffectedInput/EffectedOutput
  (more detailed about fold over selected and Effected pattern can
   be readed at https://github.com/rssh/notes/blob/master/2016_03_05_see-ma-no-vars.md )
+- akka 2.4.2
 
 
