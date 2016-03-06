@@ -279,7 +279,7 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
       a1.onComplete{ case _ => { w{assert(sum <= 55)};  ch1.close(); w.dismiss() } }
       a2.onComplete{ case _ => { w{assert(sum <= 5555)}; w{assert(monotonic)}; w.dismiss() } }
       w.await(timeout(10 seconds), dismissals(2))
-      assert(sum==5555)
+      assert(sum<=5555)
       assert(monotonic)
   }
          

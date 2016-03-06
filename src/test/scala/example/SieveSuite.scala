@@ -24,7 +24,9 @@ object Sieve
     channel
   }
 
-  def filter(in:Channel[Int]):Input[Int] =
+  // direct translation from go
+
+  def filter0(in:Channel[Int]):Input[Int] =
   {
     val filtered = makeChannel[Int]()
     var proxy: Input[Int] = in;
@@ -39,18 +41,17 @@ object Sieve
     filtered
   }
 
-/*
+  // use effected input
   def filter(in:Channel[Int]):Input[Int] =
   {
     val filtered = makeChannel[Int]()
-    val proxy = makeInputPort(in)
-    proxy.aforeach { prime =>
-       proxy <<= (_.filter(_ % prime != 0))
+    val sieve = makeEffectedInput(in)
+    sieve.aforeach { prime =>
+       sieve apply (_.filter(_ % prime != 0))
        filtered <~ prime
     }
     filtered
   }
-*/
 
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =

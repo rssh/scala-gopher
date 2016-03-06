@@ -410,9 +410,11 @@ object InputMacro
             findAwait.traverse(body)
             if (findAwait.found) {
                val nbody = q"scala.async.Async.async(${body})"
-               c.Expr[Future[Unit]](q"${c.prefix}.foreachAsync(${Function(valdefs,nbody)})")
+               val nfunction = atPos(f.tree.pos)(Function(valdefs,nbody))
+               val ntree = q"${c.prefix}.foreachAsync(${nfunction})"
+               c.Expr[Future[Unit]](c.untypecheck(ntree))
             } else {
-               c.Expr[Future[Unit]](q"${c.prefix}.foreachSync(${Function(valdefs,body)})")
+               c.Expr[Future[Unit]](q"${c.prefix}.foreachSync(${f.tree})")
             }
      case _ => c.abort(c.enclosingPosition,"function expected")
    }
