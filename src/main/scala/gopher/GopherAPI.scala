@@ -52,7 +52,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
                               .asInstanceOf[Future[ActorRef]]
                             )
      
-     new ActorBackedChannel[A](futureChannelRef, this)
+     new ActorBackedBufferedChannel[A](futureChannelRef, this)
     }
 
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =
