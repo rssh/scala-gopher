@@ -195,7 +195,7 @@ class MacroSelectSuite extends FunSuite
      assert(x1+x2+x3+x4+x5==1)
    }
 
-   test("fold in selector")  {
+   test("fold over selector")  {
     import gopherApi._
     for(i <- 1 to 100) {
      val ch = makeChannel[Int](10)

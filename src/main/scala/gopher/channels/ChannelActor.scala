@@ -118,11 +118,14 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   private[this] def processReader[B](reader:ContRead[A,B]): Boolean =
    reader.function(reader) match {
        case Some(f1) => 
-              val cont = f1(ContRead.In value elementAt(readIndex) )
+              val readedElement = elementAt(readIndex)
               nElements-=1
               readIndex+=1
               readIndex%=capacity
-              api.continue(cont, reader.flowTermination)
+              Future{
+                val cont = f1(ContRead.In value readedElement )
+                api.continue(cont, reader.flowTermination)
+              }(api.executionContext)
               true
        case None =>
               false
@@ -216,7 +219,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 
 
   // boxed representation of type.
-  val buffer= new Array[AnyRef](capacity)
+  val buffer= new Array[AnyRef](capacity+1)
   var readIndex=0
   var writeIndex=0
   var nElements=0
