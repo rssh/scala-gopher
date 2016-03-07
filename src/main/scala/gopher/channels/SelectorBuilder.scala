@@ -331,8 +331,8 @@ object SelectorBuilder
                     val termName = name.toTermName 
                     // when debug problems on later compilation steps, you can create freshName and see visually:
                     // is oldName steel leaked to later compilation phases.
-                    val newName = c.freshName(termName)
-                    //val newName = termName
+                    //val newName = c.freshName(termName)
+                    val newName = termName
                     val tpoa = clearCaseDefOwner(name, newName, if (tp.original.isEmpty) tp else tp.original)
                     val tpo = MacroUtil.skipAnnotation(c)( tpoa )
                     val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa ,EmptyTree)
