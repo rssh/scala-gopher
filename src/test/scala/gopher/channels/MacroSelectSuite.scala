@@ -157,11 +157,11 @@ class MacroSelectSuite extends FunSuite
    test("multiple readers for one write")  {
      import gopherApi._
      val ch = makeChannel[Int](10)
-     @volatile var x1 = 0
-     @volatile var x2 = 0
-     @volatile var x3 = 0
-     @volatile var x4 = 0
-     @volatile var x5 = 0
+     var x1 = 0
+     var x2 = 0
+     var x3 = 0
+     var x4 = 0
+     var x5 = 0
      val f1 = select.once{
                 case x:ch.read =>
                             {};
@@ -194,6 +194,31 @@ class MacroSelectSuite extends FunSuite
      Await.ready(Future.sequence(List(f1,f2,f3,f4,f5)),1 second)
      assert(x1+x2+x3+x4+x5==1)
    }
+
+   test("fold in selector")  {
+    import gopherApi._
+    for(i <- 1 to 100) {
+     val ch = makeChannel[Int](10)
+     val back = makeChannel[Int]()
+     val quit = Promise[Boolean]()
+     val r = select.afold(0){ (x,s) =>
+               s match {
+                 case a:ch.read => back <~ a
+                                   x+a
+                 case q:Boolean if (q==quit.future.read) => CurrentFlowTermination.exit(x)
+               }
+             }
+     ch.awriteAll(1 to 10)
+     back.aforeach{ x =>
+       if (x==10) {
+         quit success true
+       }
+     }
+     val sum = Await.result(r, 1 second)
+     assert(sum==(1 to 10).sum)
+    }
+   }
+
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    

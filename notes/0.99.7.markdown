@@ -2,13 +2,9 @@
 - added append and flatMap operation for inputs.
 - added Sieve to set of examples
 - implemented fold over selector. example:
-```
-  val fibbonachyGen = selector.afold{ case ((x,y),s) =>
-       s match {
-          case x:out.write => (y,x+y)
-          case s:quit.read => CurrentFlowTermination.exit((x,y))
-       }
-  }
-```
+- implemented EffectedInput/EffectedOutput
+ (more detailed about fold over selected and Effected pattern can
+  be readed at https://github.com/rssh/notes/blob/master/2016_03_05_see-ma-no-vars.md )
+- akka 2.4.2
 
 

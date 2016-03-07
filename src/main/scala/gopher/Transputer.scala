@@ -79,7 +79,7 @@ trait Transputer
   {
    val ch = api.makeChannel[A](bufferSize)
    v = ch
-   inPort.v = ch
+   inPort.connect(ch)
   }
 
   def >~~> (x: Transputer#InPort[A]) = connect(x)
