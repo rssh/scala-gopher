@@ -11,7 +11,7 @@ import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 
-class ActorBackedBufferedChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Channel[A](api)
+class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Channel[A](api)
 {
 
   def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 

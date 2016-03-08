@@ -43,8 +43,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    */
   def makeChannel[A](capacity: Int = 1) =
     {
-     require(capacity > 0)
-     // TODO: add support for unbuffered channels.
+     require(capacity >= 0)
      val nextId = newChannelId
      val futureChannelRef = (channelSupervisorRef.ask(
                                   NewChannel(nextId, capacity)
@@ -52,7 +51,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
                               .asInstanceOf[Future[ActorRef]]
                             )
      
-     new ActorBackedBufferedChannel[A](futureChannelRef, this)
+     new ActorBackedChannel[A](futureChannelRef, this)
     }
 
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =
