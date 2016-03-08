@@ -20,21 +20,24 @@ class UnbufferedSelectSuite extends FunSuite with AsyncAssertions
   
    test("write without read must block ")  {
      import gopherApi._
-     val channel1 = makeChannel[Int](0)
-     val w1 = channel1.awrite(1)
+     for(i <- 0 until 100) {
+       val channel1 = makeChannel[Int](0)
+       val w1 = channel1.awrite(1)
 
-     assert(!w1.isCompleted)
+       assert(!w1.isCompleted)
 
-     val r1 = channel1.aread
+       val r1 = channel1.aread
 
-     Await.ready(r1, 10 seconds)
+       Await.ready(w1, 10 seconds)
+       Await.ready(r1, 10 seconds)
 
-     assert(w1.isCompleted)
-     assert(r1.isCompleted)
+       assert(w1.isCompleted)
+       assert(r1.isCompleted)
 
-     val rd = Await.result(r1, 10 seconds)
+       val rd = Await.result(r1, 10 seconds)
+       assert(rd==1)
+     }
 
-     assert(rd==1)
    }
 
    test("fold over selector with one-direction flow")  {
