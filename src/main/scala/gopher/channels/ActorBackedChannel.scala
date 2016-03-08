@@ -39,7 +39,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
                                           case ChannelCloseProcessed(0) =>
                                                                   closedEmpty = true
                                      }
-                                 }
+                                 }(api.executionContext)
      }
    } else {
      futureChannelRef.foreach( _ ! cont )
