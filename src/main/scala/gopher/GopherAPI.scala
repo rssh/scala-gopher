@@ -41,7 +41,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    *  channel.awrite(1 to 100)
    *}}}
    */
-  def makeChannel[A](capacity: Int = 1) =
+  def makeChannel[A](capacity: Int = 0) =
     {
      require(capacity >= 0)
      val nextId = newChannelId

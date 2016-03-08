@@ -14,6 +14,7 @@ import scala.reflect.api._
 abstract class Channel[A](override val api: GopherAPI) extends InputOutput[A]
 {
 
+
    def close(): Unit
 
 }
