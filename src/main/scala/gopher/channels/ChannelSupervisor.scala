@@ -12,7 +12,11 @@ class ChannelSupervisor(api: GopherAPI) extends Actor
 
    def receive = {
       case NewChannel(id,capacity) => 
-             val props = Props(classOf[ChannelActor[_]],id, capacity, api)
+             val props = if (capacity==0) {
+                            Props(classOf[UnbufferedChannelActor[_]],id, api)
+                         } else {
+                            Props(classOf[BufferedChannelActor[_]],id, capacity, api)
+                         }
              sender ! context.actorOf(props, name=id.toString)
       case CloseChannel(id) =>
              context.actorSelection(id.toString) ! ChannelClose

@@ -15,8 +15,8 @@ class DuppedInput[A](origin:Input[A])
 
   def pair = (sink1, sink2)
 
-  val sink1 = api.makeChannel[A]()
-  val sink2 = api.makeChannel[A]()
+  val sink1 = api.makeChannel[A](1)
+  val sink2 = api.makeChannel[A](1)
 
   // can't use macroses, so unroll by hands.
   private val selector = api.select.forever;

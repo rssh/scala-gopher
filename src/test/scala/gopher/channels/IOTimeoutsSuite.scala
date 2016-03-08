@@ -47,7 +47,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
 
   test("on input close it's timeout channel also must close") {
       val w = new Waiter()
-      val ch = gopherApi.makeChannel[String]()
+      val ch = gopherApi.makeChannel[String](1)
       Await.ready(ch.awrite("qqq"), 1 second)
       val (chReady, chTimeout) = ch.withInputTimeouts(300 milliseconds)
       ch.close()
@@ -73,8 +73,23 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
   }
 
 
-  test("messsaged from timeouts must be appear during attempt to write to filled channel") {
+  test("messsaged from timeouts must be appear during attempt to write to filled unbuffered channel") {
       val ch = gopherApi.makeChannel[Int]()
+      val (chReady, chTimeout) = ch.withOutputTimeouts(150 milliseconds)
+      @volatile var count = 1
+      val f = gopherApi.select.forever {
+                case x: chReady.write if (x==count) => 
+                            {};
+                            count += 1  // will newer called, since we have no reader
+                case t: chTimeout.read =>
+                            implicitly[FlowTermination[Unit]].doExit(count)
+              }
+      Await.ready(f, 1 second)
+      assert(count==1)
+  }
+
+  test("messsaged from timeouts must be appear during attempt to write to filled buffered channel") {
+      val ch = gopherApi.makeChannel[Int](1)
       val (chReady, chTimeout) = ch.withOutputTimeouts(150 milliseconds)
       @volatile var count = 1
       val f = gopherApi.select.forever {
@@ -89,7 +104,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
   }
 
   test("when we have where to write -- no timeouts") {
-      val ch = gopherApi.makeChannel[Int]()
+      val ch = gopherApi.makeChannel[Int](1)
       val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
       val f = gopherApi.select.once {
                  case x: chReady.write if (x==1) => 1
@@ -100,7 +115,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
   }
   
   test("on output close it's timeout channel also must close") {
-      val ch = gopherApi.makeChannel[Int]()
+      val ch = gopherApi.makeChannel[Int](1)
       val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
       val w = new Waiter()
       val f1 = chReady.awrite(1)

@@ -41,15 +41,17 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    *  channel.awrite(1 to 100)
    *}}}
    */
-  def makeChannel[A](capacity: Int = 1) =
+  def makeChannel[A](capacity: Int = 0) =
     {
+     require(capacity >= 0)
      val nextId = newChannelId
      val futureChannelRef = (channelSupervisorRef.ask(
                                   NewChannel(nextId, capacity)
                              )(10 seconds)
                               .asInstanceOf[Future[ActorRef]]
                             )
-     new Channel[A](futureChannelRef, this)
+     
+     new ActorBackedChannel[A](futureChannelRef, this)
     }
 
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =

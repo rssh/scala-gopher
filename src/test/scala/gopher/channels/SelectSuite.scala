@@ -118,14 +118,15 @@ class SelectSuite extends FunSuite
      val selector = gopherApi.select.forever.idle{ 
                       if (x >= 10) {
                          gopherApi.currentFlow.exit(())
-                      } 
-                      x=x+1
+                      } else { 
+                         x=x+1
+                      }
                     }.go
 
 
      Await.ready(selector, 10.second)
      assert(selector.isCompleted)
-     assert(x==11)
+     assert(x==10)
 
    }
    

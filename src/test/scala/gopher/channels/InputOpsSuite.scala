@@ -275,7 +275,7 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
                  }  }
       val a1 = ch1.awriteAll(1 to 10) 
       val a2 = ch2.awriteAll((1 to 10)map(_*100)) 
-      // it works, but in theory onComplete can be scheduled before. So, <= instead ==
+      // it works, but for buffered channeld onComplete can be scheduled before. So, <= instead ==
       a1.onComplete{ case _ => { w{assert(sum <= 55)};  ch1.close(); w.dismiss() } }
       a2.onComplete{ case _ => { w{assert(sum <= 5555)}; w{assert(monotonic)}; w.dismiss() } }
       w.await(timeout(10 seconds), dismissals(2))

@@ -6,52 +6,11 @@ import scala.concurrent._
 import scala.collection.immutable._
 import gopher._
 
-sealed trait ChannelActorMessage
-
-case object ChannelClose extends ChannelActorMessage
-
-/**
- * this is message wich send to ChannelActor, when we 
- * know, that channel is closed. In such case, we don't
- * konw: is actor stopped or not, So, we say this message
- * (instead read) and wait for reply. If reply is not received
- * within given timeout: think that channel is-dead.
- */
-case class ClosedChannelRead(cont: ContRead[_,_]) extends ChannelActorMessage
-
-/**
- * this message is send, when all references to 
- * some instance of this channel are unreachable, 
- * so if we have no other instances (i.e. remote 
- * channel incarnation), than we must destroy channel.
- **/
-case object ChannelRefDecrement extends ChannelActorMessage
-
-/**
- * this message is send, when we create new remote 
- * reference to channel, backed by this actor.
- **/
-case object ChannelRefIncrement extends ChannelActorMessage
-
-/**
- * result of CloseChannelRead, return number of elements
- * left to read
- */
-case class ChannelCloseProcessed(nElements: Int) extends ChannelActorMessage
-
-/**
- * When we decide to stop channel, do it via special message,
- * to process one after messages, which exists now in queue.
- *
- * Note, that channel-stop messages can be send only from ChannelActor
- */
-case object GracefullChannelStop extends ChannelActorMessage
-
 
 /**
  * ChannelActor - actor, which leave
  */
-class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
+class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 {
 
   def receive = {
@@ -118,11 +77,14 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
   private[this] def processReader[B](reader:ContRead[A,B]): Boolean =
    reader.function(reader) match {
        case Some(f1) => 
-              val cont = f1(ContRead.In value elementAt(readIndex) )
+              val readedElement = elementAt(readIndex)
               nElements-=1
               readIndex+=1
               readIndex%=capacity
-              api.continue(cont, reader.flowTermination)
+              Future{
+                val cont = f1(ContRead.In value readedElement )
+                api.continue(cont, reader.flowTermination)
+              }(api.executionContext)
               true
        case None =>
               false
@@ -216,7 +178,7 @@ class ChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Actor
 
 
   // boxed representation of type.
-  val buffer= new Array[AnyRef](capacity)
+  val buffer= new Array[AnyRef](capacity+1)
   var readIndex=0
   var writeIndex=0
   var nElements=0

@@ -25,6 +25,7 @@ trait Input[A]
   type <~ = A
   type read = A
 
+  // TODO: use closed in selector.
 
   /**
    * apply f, when input will be ready and send result to API processor

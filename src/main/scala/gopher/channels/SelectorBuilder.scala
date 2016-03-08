@@ -68,6 +68,12 @@ trait SelectorBuilder[A]
 
 }
 
+
+class SelectorBuilderImpl(c: Context)
+{
+
+}
+
 object SelectorBuilder
 {
 

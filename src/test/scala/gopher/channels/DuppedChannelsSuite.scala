@@ -49,7 +49,7 @@ class DuppedChannelsSuite extends FunSuite with AsyncAssertions {
   }
   
   test("on closing of main stream dupped outputs also closed.") {
-      val ch = gopherApi.makeChannel[Int]()
+      val ch = gopherApi.makeChannel[Int](1)
       val (in1, in2) = ch.dup
       val f1 = go {
           ch.write(1) 
