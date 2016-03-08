@@ -4,13 +4,15 @@ import gopher._
 import gopher.channels._
 import gopher.tags._
 
-import org.scalatest._
 
 import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
 
-class UnbufferedSelectSuite extends FunSuite 
+import org.scalatest._
+import org.scalatest.concurrent._
+
+class UnbufferedSelectSuite extends FunSuite with AsyncAssertions
 {
 
    import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,6 +54,31 @@ class UnbufferedSelectSuite extends FunSuite
     }
    }
 
+   test("append for finite unbuffered stream") {
+      val w = new Waiter
+      val ch1 = gopherApi.makeChannel[Int](0)
+      val ch2 = gopherApi.makeChannel[Int](0)
+      val appended = ch1 append ch2
+      var sum = 0
+      var prev = 0
+      var monotonic = true
+      val f = go { for(s <- appended) {
+                     // bug in compiler 2.11.7
+                     //w{assert(prev < s)}
+                     //if (prev >= s) w{assert(false)}
+                     if (prev >= s) monotonic=false
+                     prev = s
+                     sum += s
+                 }  }
+      val a1 = ch1.awriteAll(1 to 10)
+      val a2 = ch2.awriteAll((1 to 10)map(_*100))
+      // it works, but for buffered channeld onComplete can be scheduled before. So, <= instead ==
+      a1.onComplete{ case _ => { w{assert(sum == 55)};  ch1.close(); w.dismiss() } }
+      a2.onComplete{ case _ => { w{assert(sum == 5555)}; w{assert(monotonic)}; w.dismiss() } }
+      w.await(timeout(10 seconds), dismissals(2))
+      assert(sum==5555)
+      assert(monotonic)
+   }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    
