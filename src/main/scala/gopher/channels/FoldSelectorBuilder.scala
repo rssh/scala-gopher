@@ -33,7 +33,12 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): this.type =
        withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
 
+  def idle(body:T): FoldSelectorBuilder[T] =
+         macro SelectorBuilder.idleImpl[T,FoldSelectorBuilder[T]]
 
+   @inline
+   def idleWithFlowTerminationAsync[A](f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
+       withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
 }
 
@@ -239,6 +244,8 @@ class FoldSelectorBuilderImpl(val c:Context)
                                      c.abort(cd.pat.pos,"x:channel.read or x:channel.write form is required")
                             }
                        }
+                     case Ident(TermName("_")) => (cd.pat, cd.guard)
+                     case _ => c.abort(cd.pat.pos,"expected Bind or Default in pattern, have:"+cd.pat)
                    }
        atPos(cd.pos)(CaseDef(pat,substProj(fp,guard),preTransformCaseDefBody(fp,patSymbol,cd.body)))
      }else{

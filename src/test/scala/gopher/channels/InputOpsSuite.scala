@@ -259,8 +259,8 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
 
   test("append for finite stream") {
       val w = new Waiter
-      val ch1 = gopherApi.makeChannel[Int]() 
-      val ch2 = gopherApi.makeChannel[Int]() 
+      val ch1 = gopherApi.makeChannel[Int](10) 
+      val ch2 = gopherApi.makeChannel[Int](10) 
       val appended = ch1 append ch2
       var sum = 0
       var prev = 0
