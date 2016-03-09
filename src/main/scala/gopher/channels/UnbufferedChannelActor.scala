@@ -10,40 +10,26 @@ import gopher._
 /**
  * ChannelActor - actor, which leave
  */
-class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends Actor
+class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends ChannelActor[A](id,api)
 {
 
-  def receive = {
-    case cw@ContWrite(_,_,ft) =>
-            val cwa = cw.asInstanceOf[ContWrite[A,_]]
+  protected[this] def onContWrite(cw:ContWrite[A,_]):Unit =
+         if (closed) {
+               cw.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+         } else if (!processReaders(cw))  {
+               writers = writers :+ cw
+         }
+         
+
+  protected[this] def onContRead(cr:ContRead[A,_]):Unit =
             if (closed) {
-               ft.throwIfNotCompleted(new ChannelClosedException())
-            } else if (!processReaders(cwa))  {
-               writers = writers :+ cwa
+               processReaderClosed(cr)
+            } else if (!processWriters(cr)) {
+               readers = readers :+ cr;         
             }
-    case cr@ContRead(_,_,ft) =>
-            val cra = cr.asInstanceOf[ContRead[A,_]]
-            if (closed) {
-               processReaderClosed(cra)
-            } else if (!processWriters(cra)) {
-               readers = readers :+ cra;         
-            }
-     case ccr@ClosedChannelRead(_) =>
-            self ! ccr.cont
-            sender ! ChannelCloseProcessed(0)
-     case ChannelClose =>
-            closed=true
-            stopIfEmpty
-     case ChannelRefDecrement =>
-            nRefs -= 1
-            if (nRefs == 0) {
-               stopAll
-            }
-     case ChannelRefIncrement =>
-            nRefs += 1
-     case GracefullChannelStop =>
-            context.stop(self)
-  }
+
+  protected[this] def getNElements():Int = 0
+
 
   def processReaders(w: ContWrite[A,_]) : Boolean =
   {
@@ -74,13 +60,6 @@ class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends Actor
               }
        case None =>
               false
-   }
-
-  private[this] def processReaderClosed[B](reader:ContRead[A,B]): Boolean =
-   reader.function(reader) match {
-       case Some(f1) => api.continue(f1(ContRead.ChannelClosed), reader.flowTermination)
-                        true
-       case None => false
    }
 
   def processWriters[C](reader:ContRead[A,C]): Boolean =
@@ -121,25 +100,11 @@ class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends Actor
    }
 
 
-  private[this] def stopIfEmpty: Boolean =
+  def stopIfEmpty: Boolean =
   {
    require(closed==true)
-   while(!readers.isEmpty) {
-      val reader = readers.head
-      val c = reader.asInstanceOf[ContRead[A,reader.R]]
-      readers = readers.tail
-      c.function(c) foreach { f1 =>
-            api.continue(f1(ContRead.ChannelClosed), c.flowTermination)
-      }
-   }
-   while(!writers.isEmpty) {
-      val writer = writers.head
-      val c = writer.asInstanceOf[ContWrite[A,writer.R]]
-      writers = writers.tail
-      c.function(c) foreach {
-         f1 => c.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-      }
-   }
+   stopReaders()
+   stopWriters()
       if (nRefs == 0) {
         // here we leave 'closed' channels in actor-system untile they will be
         // garbage-collected.  TODO: think about actual stop ?
@@ -148,22 +113,8 @@ class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends Actor
       true
   }
 
-  def stopAll: Unit =
-  {
-    if (!closed) {
-       closed=true
-    } 
-    if (!stopIfEmpty) {
-       // stop anyway
-       self ! GracefullChannelStop
-    }
-  }
 
   private[this] implicit def ec: ExecutionContext = api.executionContext
 
-  var closed=false
-  var readers = Queue[ContRead[A,_]] ()
-  var writers = Queue[ContWrite[A,_]] ()
-  var nRefs = 1
 
 }

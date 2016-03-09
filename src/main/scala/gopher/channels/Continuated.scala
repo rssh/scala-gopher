@@ -91,6 +91,11 @@ case class ContWrite[A,B](function: ContWrite[A,B] => Option[(A,Future[Continuat
   type El = A
 }
 
+object ContWrite
+{
+   
+}
+
 /**
  * skip (i.e. do some operation not related to reading or writing.)
  */
