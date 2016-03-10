@@ -20,8 +20,6 @@ class GopherAPI
    **/
   def executionContext: ExecutionContext = ???
 
-  def currentFlow = CurrentFlowTermination
-
   private[gopher] def continue[A](next:Future[Continuated[A]], ft:FlowTermination[A]): Unit = ???
  
 
