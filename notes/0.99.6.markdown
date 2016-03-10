@@ -1,6 +1,0 @@
-
-- updated to akka-2.4.1, scala-async-0.9.5, scala-2.11.7, scalatest-2.2.6
-- added scala coloring to README.md
-- improvements in documentation 
-
-

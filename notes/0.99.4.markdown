@@ -1,8 +1,0 @@
-
-- implemented transputers replication.
-- transputers ports are initialized by 'lazy channel' 
-- allows @unchecked annotations in select caseDef patterns
-- fixed bug which causing compilation error when using pattern-matching in assignments of reading/writing value in caseDef body.
-- akka version updated to 2.3.7
-
-
