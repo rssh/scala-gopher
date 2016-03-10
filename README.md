@@ -107,7 +107,9 @@ val s = goScope{
 
 ## Channels
 
-Inside go blocks, you can look on the channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
+Channels are used for asynchronous communication between execution flows.
+
+When using channel inside *go* block, you can look at one as on classic blocked queue with fixed size with methods read and write:
 
 
      val channel = gopherApi.makeChannel[Int];
@@ -136,8 +138,11 @@ Also, channels can be closed. After this attempt to write will cause throwing 'C
 
 Note, closing channels is not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
 
-Also, you can use only 'Input' or 'Output' interfaces, where appropriative read/write operations are defined. 
-For an input, exists usual collection functions, like `map`, `zip`, `takeN`. Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
+Channels can be buffered and unbuffered. In a unbuffered channel, write return control to the caller after another side actually will start processing; buffered channel force provider to wait only if internal channel buffer is full.
+ 
+
+Also, you can use only `Input` or `Output` interfaces, where appropriative read/write operations are defined. 
+For `Input`, exists usual collection functions, like `map`, `zip`, `takeN`. Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
 
 `|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read a value from channel x or y when one will be available.
 
@@ -204,7 +209,7 @@ val channel = gopherApi.makeChannel[Int](100)
      
 val producer = channel.awrite(1 to 1000)
      
-@volatile var sum = 0;
+var sum = 0;
 val consumer = gopherApi.select.forever{
         case i: channerl.read  =>
                   sum = sum + i
@@ -215,6 +220,33 @@ val consumer = gopherApi.select.forever{
      
 Await.ready(consumer, 5.second)
 ~~~
+
+   Combination from variable and select loop better modeled with help 'fold over select'>
+
+~~~ scala
+val consumer = gopherApi.select.afold(0) { (state, selector) =>
+   selector match {
+        case i: channel.read  =>
+                          val nstate = state + i
+                          if (i==1000) {
+                            implictily[FlowTermination[Int]].doExit(nstate)
+                          }
+                          nstate
+   }
+}
+~~~
+
+   More than one variables in state can be modelled with partial function case syntax:
+
+~~~ scala
+val fib = select.afold((0,1)) { case ((x,y), s) =>
+    s match {
+      case x:channel.write => (y,y+x)
+      case q:quit.read => CurrentFlowTermination.exit((x,y))
+    }
+}
+~~~
+
 
    For using select operation not enclosed in a loop, scala-gopher provide
    *select.once* syntax:
@@ -240,6 +272,20 @@ go {
              }
       
 }  
+~~~
+
+ and afold become fold:
+
+~~~ scala
+go {
+  ...
+  val sum = select.fold(0) { (n,s) =>
+             s match {
+               case x: channelA.read => n+x
+               case q: quit.read => CurrentFlowTermination.exit(n)
+             }
+            }
+}
 ~~~
 
 ## Transputers
