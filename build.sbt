@@ -1,5 +1,5 @@
 
-name:="scala-gopher"
+name:="scala-gopher-illistration-to-so-in-typechecker"
 
 organization:="com.github.rssh"
 

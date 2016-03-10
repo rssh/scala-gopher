@@ -142,9 +142,6 @@ trait Input[A]
      }
 
 
-  def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
-
-  def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
 
   def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = new Input[B] {
 

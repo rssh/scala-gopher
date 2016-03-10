@@ -8,10 +8,6 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
 
-/**
- * Entity, where we can write objects of type A.
- *
- */
 trait Output[A]
 {
 
@@ -28,18 +24,9 @@ trait Output[A]
                   ], 
                   ft: FlowTermination[B]): Unit
 
-  def api: GopherAPI
+  def api: GopherAPI 
 
-  def  awrite(a:A):Future[A] =
-  {
-   val ft = PromiseFlowTermination[A]()
-   cbwrite[A]( cont => {
-            Some((a,Future.successful(Done(a,ft))))
-          }, 
-          ft
-         )
-   ft.future
-  }
+  def  awrite(a:A):Future[A] = ???
   
   /**
    * 'blocking' write of 'a' to channel.
@@ -59,47 +46,11 @@ trait Output[A]
   def !(a:A):Unit = macro Output.writeImpl[A]
 
 
-  def awriteAll[C <: Iterable[A]](c:C):Future[Unit] =
-  {
-    if (c.isEmpty) {
-      Future successful (())
-    } else {
-      val ft = PromiseFlowTermination[Unit]
-      val it = c.iterator
-      def f(cont:ContWrite[A,Unit]):Option[(A,Future[Continuated[Unit]])]=
-      {
-          val n = it.next()
-          if (it.hasNext) {
-            Some((n,Future successful ContWrite(f,this,ft)))
-          } else {
-            Some((n, Future successful Done((), ft) ))
-          }
-      }         
-      cbwrite(f,ft)
-      ft.future
-    }
-  }
+  def awriteAll[C <: Iterable[A]](c:C):Future[Unit] = ???
 
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
 
   
-  /**
-   *provide pair from Output and Input `(ready, timeouts)` such that writing to `ready` 
-   * will case writing to `output` and if it was not completed during ``timeout` than
-   * appropriative duration will be availabe in `timeouts` input.
-   *
-   *```
-   *val (chReady, chTimeouts) = ch withOutputTimeouts (5 seconds)
-   *select.forever {
-   *  case x: chReady.write if (x==somethingToWrite) =>
-   *                    Console.println(s" \${x} send")
-   *  case t: chTimeouts.read  =>
-   *                    Console.println(s"timeout during writing")
-   *}
-   *```
-   **/
-  def withOutputTimeouts(timeout: FiniteDuration): (Output[A],Input[FiniteDuration]) =
-        new OutputWithTimeouts(this, timeout).pair
 
 }
 
