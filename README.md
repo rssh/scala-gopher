@@ -223,7 +223,7 @@ val consumer = gopherApi.select.forever{
 Await.ready(consumer, 5.second)
 ~~~
 
-   Combination from variable and select loop better modeled with help 'fold over select'>
+   Combination from variable and select loop better modeled with help 'fold over select':
 
 ~~~ scala
 val consumer = gopherApi.select.afold(0) { (state, selector) =>
