@@ -146,45 +146,11 @@ trait Input[A]
 
 object Input
 {
-   def asInput[A](iterable:Iterable[A], api: GopherAPI): Input[A] = new IterableInput(iterable.iterator, api)
+   def asInput[A](iterable:Iterable[A], api: GopherAPI): Input[A] = ???
 
-   class IterableInput[A](it: Iterator[A], override val api: GopherAPI) extends Input[A]
-   {
+   def closed[A](implicit gopherApi: GopherAPI): Input[A] = ???
 
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => { val next = this.synchronized {
-                                                       if (it.hasNext) 
-                                                         ContRead.Value(it.next)
-                                                       else 
-                                                         ContRead.ChannelClosed
-                                                     }
-                                          api.continue(f1(next),ft)
-                                        }
-                              )
-   }
-
-   def closed[A](implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
-
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => f1(ContRead.ChannelClosed))
-
-     def api = gopherApi
-   }
-
-   def one[A](a:A)(implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
-
-     val readed: AtomicBoolean = new AtomicBoolean(false)
-
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => f1(
-                                    if (readed.compareAndSet(false,true)) {
-                                        ContRead.Value(a) 
-                                    }else{
-                                        ContRead.ChannelClosed
-                                    }))
-
-     def api = gopherApi
-   }
+   def one[A](a:A)(implicit gopherApi: GopherAPI): Input[A] = ???
 
 }
 
