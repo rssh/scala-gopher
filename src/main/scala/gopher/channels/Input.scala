@@ -15,11 +15,6 @@ import gopher.util._
 
 import java.util.concurrent.atomic._
 
-/**
- * Entity, from which we can read objects of type A.
- *
- *
- */
 trait Input[A]
 {
 
@@ -40,17 +35,7 @@ trait Input[A]
             ft: FlowTermination[B]): Unit
 
 
-  /**
-   * async version of read. Immediatly return future, which will contains result of read or failur with StreamClosedException
-   * in case of stream is closed.
-   */
-  def  aread:Future[A] = {
-    val ft = PromiseFlowTermination[A]() 
-    cbread[A](cont => Some(ContRead.liftIn(cont) {
-                                    a => Future.successful(Done(a,ft))
-                                 }), ft)
-    ft.future
-  }
+  def  aread:Future[A] = ???
 
   /**
    * instance of gopher API
@@ -67,33 +52,7 @@ trait Input[A]
    */
   def  ? : A = macro InputMacro.read[A]
 
-  /**
-   * return feature which contains sequence from first `n` elements.
-   */
-  def atake(n:Int):Future[IndexedSeq[A]] =
-  {
-    if (n==0) {
-      Future successful IndexedSeq()
-    } else {
-       val ft = PromiseFlowTermination[IndexedSeq[A]]
-       @volatile var i = 0;
-       @volatile var r: IndexedSeq[A] = IndexedSeq()
-       def takeFun(cont:ContRead[A,IndexedSeq[A]]):Option[ContRead.In[A]=>Future[Continuated[IndexedSeq[A]]]] =
-       Some{ 
-             ContRead.liftIn(cont) { a =>
-               i += 1
-               r = r :+ a
-               if (i<n) {
-                  Future successful ContRead(takeFun,this,ft)
-               } else {
-                  Future successful Done(r,ft)
-               }
-             }
-       }
-       api.continuatedProcessorRef ! ContRead(takeFun, this, ft)
-       ft.future
-    }
-  }
+  def atake(n:Int):Future[IndexedSeq[A]] = ???
 
   /**
    * run <code> f </code> each time when new object is arrived. Ended when input closes.
@@ -104,211 +63,23 @@ trait Input[A]
 
   def aforeach(f: A=>Unit): Future[Unit] = macro InputMacro.aforeachImpl[A]
 
-  def filter(p: A=>Boolean): Input[A] =
-       new Input[A] {
-
-          def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-           thisInput.cbread[B]( 
-                               (cont) => f(cont) map {
-                                            f1 => { case v@ContRead.Value(a) =>
-                                                              if (p(a)) f1(v) else Future successful cont
-                                                    case v@_ => f1(v)
-                                                  } }, ft)  
-
-           def api = thisInput.api
-
-       }
+  def filter(p: A=>Boolean): Input[A] = ???
 
   def withFilter(p: A=>Boolean): Input[A] = filter(p)
 
-  def map[B](g: A=>B): Input[B] =
-     new Input[B] {
+  def map[B](g: A=>B): Input[B] = ???
 
-        def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-         {  val contA = ContRead(f,this,cont.flowTermination)
-            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
-                                  case ContRead.Skip => Future successful cont
-                                  case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
-                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-                                } )
-         }
-         thisInput.cbread(mf,ft)
-        }
+  def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = ???
 
-        def api = thisInput.api
+  def append(other:Input[A]):Input[A] = ???
 
-     }
+  def prepend(a:A):Input[A] = ???
 
+  def foreachSync(f: A=>Unit): Future[Unit] = ???
 
+  def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] = ???
 
-  def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = new Input[B] {
-
-      def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-      {
-       def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-       { val contA = ContRead(f,this,cont.flowTermination)
-           f(contA) map { f1 => {
-              case v@ContRead.Value(a) => Future successful ContRead(f,op(g(a),this),cont.flowTermination)
-              case ContRead.Skip => Future successful cont
-              case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
-              case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-       }}}
-       thisInput.cbread(mf,ft)
-      }
-
-      def api = thisInput.api
-  }
-
-  def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ or _)
-
-  def seq = new {
-    def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ append _ )
-  }
-
-  /**
-   * return input merged with 'other'.
-   * (i.e. non-determenistics choice)
-   **/
-  def |(other:Input[A]):Input[A] = new OrInput(this,other)
-
-  /**
-   * synonim for non-deteremenistics choice.
-   **/
-  def or(other:Input[A]):Input[A] = new OrInput(this,other)
-
-  /**
-   * when the first channel is exhaused, read from second.
-   **/
-  def append(other:Input[A]):Input[A] = new Input[A] {
-
-        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-         {  val contA = ContRead(f,this,cont.flowTermination)
-            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
-                                  case ContRead.Skip => f1(ContRead.Skip) 
-                                                       Future successful cont
-                                  case ContRead.ChannelClosed => f1(ContRead.Skip) 
-                                                       Future successful ContRead(f,other,cont.flowTermination)
-                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-                         })
-         }
-         thisInput.cbread(mf,ft)
-        }
-
-        def api = thisInput.api
-
-  }
-
-  def prepend(a:A):Input[A] = new Input[A] {
-
-        val aReaded = new AtomicBoolean(false)
-
-        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         f(ContRead(f,this,ft)) map { f1 => 
-           if (aReaded.compareAndSet(false,true)) {
-               f1(ContRead.Value(a))
-           } else {
-               api.continuatedProcessorRef ! ContRead(f,thisInput,ft)      
-               f1(ContRead.Skip)
-           }
-         }
-        }
-
-        def api = thisInput.api
-
-  }
-
-
-  /**
-   * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`
-   * and if during reading you wait more than specified `timeout`, than timeout message is appear in `timeouts`
-   *
-   *```
-   * val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
-   * select.forever {
-   *   case x: inReady.read => Console.println(s"received value \${value}")
-   *   case x: inTimeouts.read => Console.println(s"timeout occured")
-   * }
-   *```
-   **/
-  def withInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
-                                               new InputWithTimeouts(this,timeout).pair
-
-
-  def async = new {
-  
-     def foreach(f: A=> Unit):Future[Unit] = macro InputMacro.aforeachImpl[A]
-
-     @inline
-     def foreachSync(f: A=>Unit): Future[Unit] =  thisInput.foreachSync(f)
-           
-     @inline
-     def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] =
-                                                  thisInput.foreachAsync(f)(ec)
-
-  }
-
-  def foreachSync(f: A=>Unit): Future[Unit] =
-  {
-    val ft = PromiseFlowTermination[Unit]
-    lazy val contForeach = ContRead(applyF,this,ft)
-    def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
-          Some( (in:ContRead.In[A]) =>
-                 in match {
-                   case ContRead.ChannelClosed => Future successful Done((),ft)
-                   case x => ContRead.liftIn(cont){ x => f(x)
-                                              Future successful contForeach
-                                            }(x)
-                 }
-              )
-    cbread(applyF, ft) 
-    ft.future
-  }
-
-  def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] =
-  {
-    val ft = PromiseFlowTermination[Unit]
-    def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
-          Some{
-                case ContRead.ChannelClosed => Future successful Done((),ft)
-                case in =>
-                     ContRead.liftIn(cont){ x => f(x) map ( _ => ContRead(applyF, this, ft) ) }(in)
-              } 
-    cbread(applyF,ft)
-    ft.future
-  }
-
-  def flatFold(fun:(Input[A],A)=>Input[A]):Input[A] = new Input[A] {
-         
-      val current = new AtomicReference[Input[A]](thisInput)
-
-      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-      {
-        def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-          f(ContRead(f,this,ft)) map { next =>
-            { case ContRead.Value(a) => 
-                           var changed = false
-                           while(!changed) {
-                             var prev = current.get
-                             var next = fun(prev,a)
-                             changed = current.compareAndSet(prev,next) 
-                           } 
-                           next(ContRead.Value(a))
-                         //  fp-version.
-                         // next(ContRead.Skip)
-                         //ContRead(f, one(a) append (fun(this,a) flatFold fun),ft)
-              case v@_ => next(v)
-          }   }
-        current.get.cbread(mf,ft)
-      }
-
-      def api = thisInput.api
-     
-  }
+  def flatFold(fun:(Input[A],A)=>Input[A]):Input[A] = ???
 
   /**
    * async incarnation of fold. Fold return future, which successed when channel is closed.

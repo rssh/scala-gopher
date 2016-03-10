@@ -14,8 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestGlobals
 {
-  lazy val actorSystem = akka.actor.ActorSystem.create("system")
-  lazy val gopherApi = Gopher(actorSystem)
+  lazy val gopherApi = new GopherAPI()
 }
 
 class InputOpsSuite extends FunSuite with AsyncAssertions {
@@ -30,7 +29,7 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
                     //s+(n1+n2) -- stack overflow in 2.11.8 compiler. TODO: submit bug
                     s+(n+n1)
                   }
-      scala.async.Async {
+      scala.async.Async.async {
        ch1.writeAll(1 to 10)
        ch2.writeAll(1 to 10)
        ch1.close()
