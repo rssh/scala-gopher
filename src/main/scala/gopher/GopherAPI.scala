@@ -3,7 +3,6 @@ package gopher
 import akka.actor._
 import akka.pattern._
 import gopher.channels._
-import gopher.transputers._
 import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.language.experimental.macros
@@ -73,23 +72,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def iterableInput[A](iterable:Iterable[A]): Input[A] = Input.asInput(iterable, this)
 
   /**
-   * create and start instance of transputer with given recovery policy.
-   *@see gopher.Transputer
-   */
-  def makeTransputer[T <: Transputer](recoveryPolicy:PartialFunction[Throwable,SupervisorStrategy.Directive]): T = macro GopherAPI.makeTransputerImpl2[T]
-
-  def makeTransputer[T <: Transputer]: T = macro GopherAPI.makeTransputerImpl[T]
-
-  /**
-   * create transputer which contains <code>n</code> instances of <code>X</code>
-   * where ports are connected to the appropriate ports of each instance in paraller.
-   * {{{
-   *   val persistStep = replicate[PersistTransputer](nDBConnections)
-   * }}}
-   */
-  def replicate[T<: Transputer](n:Int): Transputer = macro Replicate.replicateImpl[T]
-
-  /**
    * actor system which was passed during creation
    **/
   def actorSystem: ActorSystem = as
@@ -118,10 +100,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
     actorSystem.actorOf(props,name="channels")
   }
 
-  private[gopher] val transputerSupervisorRef: ActorRef = {
-    val props = Props(classOf[TransputerSupervisor], this)
-    actorSystem.actorOf(props,name="transputerSupervisor")
-  }
 
   private[gopher] def newChannelId: Long =
                         channelIdCounter.getAndIncrement
@@ -141,36 +119,5 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 object GopherAPI
 {
 
-  def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
-    import c.universe._
-    c.Expr[T](q"${c.prefix}.makeTransputer[${weakTypeOf[T]}](gopher.Transputer.RecoveryPolicy.AlwaysRestart)")
-  }
-
-  def makeTransputerImpl2[T <: Transputer : c.WeakTypeTag](c:Context)(recoveryPolicy:c.Expr[PartialFunction[Throwable,SupervisorStrategy.Directive]]):c.Expr[T] = {
-    import c.universe._
-    //----------------------------------------------
-    // generate incorrect code: see  https://issues.scala-lang.org/browse/SI-8953
-    //c.Expr[T](q"""{ def factory():${c.weakTypeOf[T]} = new ${c.weakTypeOf[T]} { 
-    //                                            def api = ${c.prefix} 
-    //                                            def recoverFactory = factory
-    //                                 }
-    //                val retval = factory()
-    //                retval
-    //              }
-    //           """)
-    //----------------------------------------------
-    // so, let's create subclass
-    val implName = c.freshName(c.symbolOf[T].name)
-    c.Expr[T](q"""{ 
-                    class ${implName} extends ${c.weakTypeOf[T]} { 
-                        def api = ${c.prefix}
-                        def recoverFactory = () => new ${implName}
-                    }
-                    val retval = new ${implName}
-                    retval.recoverAppend(${recoveryPolicy})
-                    retval
-                  }
-               """)
-  }
 
 }
