@@ -107,7 +107,7 @@ val s = goScope{
 
 ## Channels
 
-You can look on the channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
+Inside go blocks, you can look on the channel as on classic blocked queue with fixed size. Different execution flows can exchange messages via channels.
 
 
      val channel = gopherApi.makeChannel[Int];

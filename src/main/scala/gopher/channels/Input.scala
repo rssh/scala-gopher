@@ -318,10 +318,26 @@ trait Input[A]
      
   }
 
+  /**
+   * async incarnation of fold. Fold return future, which successed when channel is closed.
+   *Operations withing fold applyed on result on each other, starting with s0.
+   *```
+   * val fsum = ch.afold(0){ (s, n) => s+n }
+   *```
+   * Here in fsum will be future with value: sum of all elements in channel until one has been closed.
+   **/
+  def afold[S,B](s0:S)(f:(S,A)=>S): Future[S] = macro InputMacro.afoldImpl[A,S]
 
+  /**
+   * fold opeations, available inside async bloc.
+   *```
+   * go {
+   *   val sum = ch.fold(0){ (s,n) => s+n }
+   * }
+   *```
+   */
   def fold[S,B](s0:S)(f:(S,A)=>S): S = macro InputMacro.foldImpl[A,S]
 
-  def afold[S,B](s0:S)(f:(S,A)=>S): Future[S] = macro InputMacro.afoldImpl[A,S]
      
   
   def afoldSync[S,B](s0:S)(f:(S,A)=>S): Future[S] =

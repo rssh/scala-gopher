@@ -7,5 +7,6 @@
   be readed at https://github.com/rssh/notes/blob/master/2016_03_05_see-ma-no-vars.md )
 - akka 2.4.2, scala-2.11.8
 - channels by defaults now unbuffered. (as in Go)
+- implemented fold over input
 
 
