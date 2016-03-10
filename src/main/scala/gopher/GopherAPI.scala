@@ -12,25 +12,9 @@ import scala.util._
 import java.util.concurrent.atomic.AtomicLong
 import com.typesafe.config._
 
-/**
- * Api for providing access to channel and selector interfaces.
- */
 class GopherAPI(as: ActorSystem, es: ExecutionContext)
 {
 
-  /**
-   * obtain select factory
-   *
-   * {{{
-   *  goopherApi.select.once[String] {
-   *    case x: a.read => s"\${x} from A"
-   *    case x: b.read => s"\${x} from B"
-   *    case _ => "IDLE"
-   *  }
-   * }}}
-   */
-  def select: SelectFactory =
-    new SelectFactory(this)
 
   /**
    * obtain channel
@@ -52,12 +36,6 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
      
      new ActorBackedChannel[A](futureChannelRef, this)
     }
-
-  def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =
-     EffectedInput(in,threadingPolicy)
-
-  def makeEffectedOutput[A](out: Output[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =
-     EffectedOutput(out,threadingPolicy)
 
 
   /**

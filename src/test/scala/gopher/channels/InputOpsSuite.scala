@@ -22,18 +22,15 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
 
   import TestGlobals._ 
 
-  test("channel fold with async operation inside") {
+  test("channel afold with async operation inside") {
       val ch1 = gopherApi.makeChannel[Int](10) 
       val ch2 = gopherApi.makeChannel[Int](10) 
-      val fs = go {
-        val sum = ch1.fold(0){ (s,n) =>
+      val fs = ch1.afold(0){ (s,n) =>
                     val n1 = ch2.read
                     //s+(n1+n2) -- stack overflow in 2.11.8 compiler. TODO: submit bug
                     s+(n+n1)
                   }
-        sum
-      }
-      go {
+      scala.async.Async {
        ch1.writeAll(1 to 10)
        ch2.writeAll(1 to 10)
        ch1.close()
