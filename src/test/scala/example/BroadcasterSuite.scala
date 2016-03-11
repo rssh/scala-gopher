@@ -61,8 +61,9 @@ object Broadcaster {
   import scala.reflect.macros.blackbox.Context
   import scala.reflect.api._
 
-  class Receiver[A](var c: Channel[Message[A]])
+  class Receiver[A](initChannel: Channel[Message[A]])
   {
+     val current = makeEffectedChannel(initChannel)
 
      /**
       * return Some(a) when broadcaster is not closed; None when closed.
@@ -71,11 +72,11 @@ object Broadcaster {
       * In real life, interface will be better.
       **/
      def aread():Future[Option[A]] = go {
-       val b = c.read
-       c.write(b)
+       val b = current.read
+       current.write(b)
        b match {
           case ValueMessage(ch,v) =>
-                 c = ch
+                 current(_ => ch)
                  Some(v)
           case EndMessage =>
                  None
