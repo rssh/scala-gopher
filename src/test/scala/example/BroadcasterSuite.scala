@@ -25,7 +25,7 @@ class Broadcaster[A]
     val sendc:     Channel[A] = makeChannel()
     val quitc:     Channel[Boolean] = makeChannel()
 
-    select.afold(makeChannel[Message[A]]()) { (last,s) =>
+    val process = select.afold(makeChannel[Message[A]]()) { (last,s) =>
          s match {
            case v: sendc.read @unchecked =>
                     val next = makeChannel[Message[A]]()
@@ -40,25 +40,6 @@ class Broadcaster[A]
      }
 
       
-/*
-    go {
-      var last = makeChannel[Message[A]]()
-      for (s <- select.forever) {
-        s match {
-           case v: sendc.read @ unchecked =>
-                val c = makeChannel[Message[A]](1)
-                val b = ValueMessage(c,v)
-                last <~ b
-                last = c
-           case r: listenc.read @ unchecked =>
-                 r <~ last
-           case q: quitc.read =>
-                last write EndMessage
-                implicitly[FlowTermination[Unit]].doExit(())
-        }
-      }
-    }
-*/
 
     def alisten(): Future[Receiver[A]] = go {
       val c = makeChannel[Channel[Message[A]]]()  
