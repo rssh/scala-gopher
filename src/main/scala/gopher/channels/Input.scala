@@ -8,7 +8,10 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import scala.util._
 import java.util.concurrent.ConcurrentLinkedQueue
+
 import gopher._
+import gopher.util._
+
 
 import java.util.concurrent.atomic._
 
@@ -315,14 +318,66 @@ trait Input[A]
      
   }
 
+  /**
+   * async incarnation of fold. Fold return future, which successed when channel is closed.
+   *Operations withing fold applyed on result on each other, starting with s0.
+   *```
+   * val fsum = ch.afold(0){ (s, n) => s+n }
+   *```
+   * Here in fsum will be future with value: sum of all elements in channel until one has been closed.
+   **/
+  def afold[S,B](s0:S)(f:(S,A)=>S): Future[S] = macro InputMacro.afoldImpl[A,S]
 
-/*
-  def fold[S,B](s0:S)(f:(S,A)=>(S,Option[B])) = new Input[A] {
+  /**
+   * fold opeations, available inside async bloc.
+   *```
+   * go {
+   *   val sum = ch.fold(0){ (s,n) => s+n }
+   * }
+   *```
+   */
+  def fold[S,B](s0:S)(f:(S,A)=>S): S = macro InputMacro.foldImpl[A,S]
 
-      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-
+     
+  
+  def afoldSync[S,B](s0:S)(f:(S,A)=>S): Future[S] =
+  {
+    val ft = PromiseFlowTermination[S]
+    var s = s0
+    def applyF(cont:ContRead[A,S]):Option[ContRead.In[A]=>Future[Continuated[S]]] =
+    {
+          val contFold = ContRead(applyF,this,ft)
+          Some{
+            case ContRead.ChannelClosed => Future successful Done(s,ft)
+            case ContRead.Value(a) => s = f(s,a)  
+                                          Future successful contFold
+            case ContRead.Skip => Future successful contFold
+            case ContRead.Failure(ex) => Future failed ex
+          }
+    }
+    cbread(applyF,ft)
+    ft.future
   }
-*/
+
+  def afoldAsync[S,B](s0:S)(f:(S,A)=>Future[S])(implicit ec:ExecutionContext): Future[S] =
+  {
+    val ft = PromiseFlowTermination[S]
+    var s = s0
+    def applyF(cont:ContRead[A,S]):Option[ContRead.In[A]=>Future[Continuated[S]]] =
+    {
+          Some{
+            case ContRead.ChannelClosed => Future successful Done(s,ft)
+            case ContRead.Value(a) => f(s,a) map { x => 
+                                        s = x
+                                        ContRead(applyF,this,ft)
+                                      }
+            case ContRead.Skip => Future successful ContRead(applyF,this,ft)
+            case ContRead.Failure(ex) => Future failed ex
+          }
+    }
+    cbread(applyF,ft)
+    ft.future
+  }
 
 }
 
@@ -391,25 +446,10 @@ object InputMacro
   def aforeachImpl[A](c:Context)(f:c.Expr[A=>Unit]): c.Expr[Future[Unit]] =
   {
    import c.universe._
-   val findAwait = new Traverser {
-      var found = false
-      override def traverse(tree:Tree):Unit =
-      {
-       if (!found) {
-         tree match {
-            case Apply(TypeApply(Select(obj,TermName("await")),objType), args) =>
-                   if (obj.tpe =:= typeOf[scala.async.Async.type]) {
-                       found=true
-                   } else super.traverse(tree)
-            case _ => super.traverse(tree)
-         }
-       }
-      }
-   }
    f.tree match {
      case Function(valdefs,body) =>
-            findAwait.traverse(body)
-            if (findAwait.found) {
+            if (MacroUtil.hasAwait(c)(body)) {
+               // TODO: add support for flow-termination (?)
                val nbody = q"scala.async.Async.async(${body})"
                val nfunction = atPos(f.tree.pos)(Function(valdefs,nbody))
                val ntree = q"${c.prefix}.foreachAsync(${nfunction})"
@@ -418,6 +458,28 @@ object InputMacro
                c.Expr[Future[Unit]](q"${c.prefix}.foreachSync(${f.tree})")
             }
      case _ => c.abort(c.enclosingPosition,"function expected")
+   }
+  }
+
+  def foldImpl[A,S](c:Context)(s0:c.Expr[S])(f:c.Expr[(S,A)=>S]): c.Expr[S] =
+  {
+   import c.universe._
+   c.Expr[S](q"scala.async.Async.await(${afoldImpl(c)(s0)(f)})")
+  }
+
+  def afoldImpl[A,S](c:Context)(s0:c.Expr[S])(f:c.Expr[(S,A)=>S]): c.Expr[Future[S]] =
+  {
+   import c.universe._
+   f.tree match {
+     case Function(valdefs,body) =>
+            if (MacroUtil.hasAwait(c)(body)) {
+               val nbody = atPos(body.pos)(q"scala.async.Async.async(${body})")
+               val nfunction = atPos(f.tree.pos)(Function(valdefs,nbody))
+               val ntree = q"${c.prefix}.afoldAsync(${s0.tree})(${nfunction})"
+               c.Expr[Future[S]](c.untypecheck(ntree))
+            } else {
+               c.Expr[Future[S]](q"${c.prefix}.afoldSync(${s0.tree})(${f.tree})")
+            }
    }
   }
 

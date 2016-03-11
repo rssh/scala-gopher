@@ -219,6 +219,46 @@ class MacroSelectSuite extends FunSuite
     }
    }
 
+   test("fold over selector with idle")  {
+     import gopherApi._
+     val ch1 = makeChannel[Int](10)
+     val ch2 = makeChannel[Int](10)
+     ch1.awrite(1)
+     val sf = select.afold((0,0,0)){ case ((n1,n2,nIdle),s) =>
+       s match {
+         case x:ch1.read =>
+                 val nn1 = n1+1
+                 if (nn1 > 100) {
+                    CurrentFlowTermination.exit((nn1,n2,nIdle))
+                 }else{
+                     ch2.write(x)
+                     (nn1,n2,nIdle)
+                 }
+         case x:ch2.read =>
+                ch1.write(x)
+                (n1,n2+1,nIdle)
+         case _ =>
+                (n1,n2,nIdle+1)
+ 
+       }
+     }
+     val (n1,n2,ni) = Await.result(sf, 10 seconds)
+     assert (n1+n2+ni > 100)
+     val sf2 = select.afold((0,0)){ case ((n1,nIdle),s) =>
+       s match {
+         case x:ch1.read =>
+                      (n1+1,nIdle)
+         case _ =>
+                   val nni = nIdle+1
+                   if (nni > 3) {
+                      CurrentFlowTermination.exit((n1,nni))
+                   } else {
+                      (n1,nni)
+                   }
+     } }
+     val (n21,n2i) = Await.result(sf2, 10 seconds)
+     assert(n2i>3)
+   }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    
