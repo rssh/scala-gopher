@@ -7,9 +7,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util._
 
-import org.scalatest._
-import org.scalatest.concurrent._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestGlobals
@@ -17,11 +14,13 @@ object TestGlobals
   lazy val gopherApi = new GopherAPI()
 }
 
-class InputOpsSuite extends FunSuite with AsyncAssertions {
+class InputOpsSuite   {
 
   import TestGlobals._ 
 
-  test("channel afold with async operation inside") {
+  //test("channel afold with async operation inside") {
+  def fun(): Unit =
+  {
       val ch1 = gopherApi.makeChannel[Int](10) 
       val ch2 = gopherApi.makeChannel[Int](10) 
       val fs = ch1.afold(0){ (s,n) =>
@@ -35,7 +34,6 @@ class InputOpsSuite extends FunSuite with AsyncAssertions {
        ch1.close()
       }
       val r = Await.result(fs, 10 seconds)
-      assert(r==110)
   }
 
 

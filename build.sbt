@@ -15,8 +15,7 @@ libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.5"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
-
+//libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 //libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.2"
 
 //TODO: enable after 1.0
