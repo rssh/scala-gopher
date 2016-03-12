@@ -52,28 +52,10 @@ object ContRead
   }
 
    @inline
-   def liftInValue[A,B](prev: ContRead[A,B])(f: Value[A] => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] =
-      {
-        case v@Value(a) => f(v)
-        case Skip => Future successful prev
-        case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Never.future
-        case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Never.future
-      }
+   def liftInValue[A,B](prev: ContRead[A,B])(f: Value[A] => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] = ???
 
    @inline
-   def liftIn[A,B](prev: ContRead[A,B])(f: A => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] =
-    {
-      //    liftInValue(prev)(f(_.a)) 
-      // we do ilining by hands instead.
-      case Value(a) => f(a)
-      case Skip => Future successful prev
-      case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Never.future
-      case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Never.future
-    }
+   def liftIn[A,B](prev: ContRead[A,B])(f: A => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] = ???
 
 
    def chainIn[A,B](prev: ContRead[A,B])(fn: (In[A], In[A] => Future[Continuated[B]]) => Future[Continuated[B]] ): 
