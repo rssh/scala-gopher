@@ -7,7 +7,9 @@ package example.broadcast
  */
 
 import scala.concurrent.{Channel=>_,_}
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 import scala.async.Async._
 
 import gopher._
@@ -25,10 +27,10 @@ class Broadcaster[A]
     val sendc:     Channel[A] = makeChannel()
     val quitc:     Channel[Boolean] = makeChannel()
 
-    val process = select.afold(makeChannel[Message[A]]()) { (last,s) =>
+    val process = select.afold(makeChannel[Message[A]](1)) { (last,s) =>
          s match {
            case v: sendc.read @unchecked =>
-                    val next = makeChannel[Message[A]]()
+                    val next = makeChannel[Message[A]](1)
                     last <~ ValueMessage(next,v)
                     next
            case r: listenc.read @unchecked =>
@@ -46,11 +48,6 @@ class Broadcaster[A]
       listenc <~ c
       new Receiver(c.read)
     }
-
-
-    def write(a: A) = sendc.awrite(a)
-  
-    def stop() = quitc.awrite(true)
 
 }
 
@@ -76,7 +73,7 @@ object Broadcaster {
        current.write(b)
        b match {
           case ValueMessage(ch,v) =>
-                 current(_ => ch)
+                 current := ch
                  Some(v)
           case EndMessage =>
                  None
@@ -106,16 +103,48 @@ object Broadcaster {
 class BroadcaseSuite extends FunSuite
 {
 
-  def listen[A](r: Broadcaster.Receiver[A]): Unit = go {
-     val x = await(r.aread)
-
+  def listen[A](r: Broadcaster.Receiver[A],out:Output[A]): Future[Unit] = go {
+       var finish = false;
+       while(!finish) {
+          val x = await(r.aread)
+          // can't use foreach inside 'go' block.
+          if (!x.isEmpty) {
+             out.write(x.get)
+          } else {
+             finish = true
+          }
+       }
+       ();
   }
 
-  test("broadcast") {
+  def doBroadcast(out:Channel[Int]): Unit = go {
 
     val b = new Broadcaster[Int]()
 
+    val r1 = await(b.alisten())
+    val l1 = listen(r1,out)
+    val r2 = await(b.alisten())
+    val l2 = listen(r2,out)
 
+    b.sendc.write(1)
+
+    val r3 = await(b.alisten())
+    val l3 = listen(r3,out)
+
+    b.sendc.write(2)
+
+    b.quitc.write(true)
+
+    Thread.sleep(500)
+    out.close()
+  }
+
+  test("broadcast") {
+     val channel = makeChannel[Int]()
+     doBroadcast(channel);
+     val fsum = channel.afold(0){ (s,n) => s+n }
+     val sum = Await.result(fsum,10 seconds)
+     assert(sum==8)
   }
 
 }

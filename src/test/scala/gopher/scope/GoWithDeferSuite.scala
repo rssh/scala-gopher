@@ -30,6 +30,19 @@ class GoWithDeferSuite extends FunSuite {
     assert(Await.result(s, 1 second)=="CCC")
   }
 
+  test("2.2. go with defer and while") {
+     var x = 0;
+     var f:Future[Unit] = go {
+       defer{ x=3; }
+       var n=4;
+       while(n > 0) {
+         n = n-1;
+       }
+     }
+     Await.ready(f, 1 second)
+     assert(x === 3)
+  }
+
   // TODO: go with select.
 
 }
