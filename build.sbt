@@ -4,6 +4,9 @@ name:="scala-gopher-illistration-to-so-in-typechecker"
 organization:="com.github.rssh"
 
 scalaVersion := "2.11.8"
+//  for testing with latest version compile, we
+//   need publishLocal scala-async at first.
+//scalaVersion := "2.12.0-SNAPSHOT"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
