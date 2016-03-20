@@ -486,8 +486,8 @@ r.inA.duplicate()
 * API reference: http://rssh.github.io/scala-gopher/api/index.html#package
 * source code: https://github.com/rssh/scala-gopher
 * presentations: 
-** Odessa Java/Scala Labs; Kiev Scala Meetup: Oct. 2014: http://www.slideshare.net/rssh1/scala-gopher2014  
-** Wix R&D meetup. Mart 2016: http://www.slideshare.net/rssh1/csp-scala-wixmeetup2016
+     * Odessa Java/Scala Labs; Kiev Scala Meetup: Oct. 2014: http://www.slideshare.net/rssh1/scala-gopher2014  
+     * Wix R&D meetup. Mart 2016: http://www.slideshare.net/rssh1/csp-scala-wixmeetup2016
 
 
   Some related links:
