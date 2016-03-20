@@ -260,6 +260,17 @@ class MacroSelectSuite extends FunSuite
      assert(n2i>3)
    }
 
+   test("generic channel make")  {
+     val ch1 = gopherApi.make[Channel[Int]]()
+     val ch2 = gopherApi.make[Channel[Int]](1)
+     // yet not supported by compiler.
+     //val ch3 = gopherApi.make[Channel[Int]](capacity=3)
+     val f1 = ch1.awrite(1)
+     val f2 = ch2.awrite(2)
+     val x = Await.result(ch1.aread, 10 seconds)
+     assert(x==1)
+   }
+
    lazy val gopherApi = CommonTestObjects.gopherApi
    
 }
