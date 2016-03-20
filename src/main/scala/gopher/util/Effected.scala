@@ -9,6 +9,10 @@ trait Effected[T]
 
   @inline def <<=(f:T=>T): Unit = apply(f)
 
+  def replace(x: T): Unit = apply( _ => x)
+
+  @inline def :=(x:T): Unit = replace(x)
+
 }
 
 

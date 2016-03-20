@@ -328,7 +328,7 @@ object SelectorBuilder
 
     def unUnapplyPattern(x:Tree):Tree =
       x match {
-         case Bind(name, UnApply(fun,List(t@Typed(_,_))) ) => Bind(name,t)
+         case Bind(name, UnApply(_,List(t@Typed(_,_))) ) => Bind(name,t)
          case _ => x
       }
 

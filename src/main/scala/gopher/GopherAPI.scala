@@ -33,6 +33,8 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def select: SelectFactory =
     new SelectFactory(this)
 
+  def make[T](args: Any*): T = macro GopherAPI.makeImpl[T]
+
   /**
    * obtain channel
    *
@@ -41,18 +43,9 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    *  channel.awrite(1 to 100)
    *}}}
    */
+  @inline
   def makeChannel[A](capacity: Int = 0): Channel[A] =
-    {
-     require(capacity >= 0)
-     val nextId = newChannelId
-     val futureChannelRef = (channelSupervisorRef.ask(
-                                  NewChannel(nextId, capacity)
-                             )(10 seconds)
-                              .asInstanceOf[Future[ActorRef]]
-                            )
-     
-     new ActorBackedChannel[A](futureChannelRef, this)
-    }
+      Channel[A](capacity)(this)
 
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single): EffectedInput[A] =
      EffectedInput(in,threadingPolicy)
@@ -143,6 +136,17 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
 object GopherAPI
 {
+
+  def makeImpl[T : c.WeakTypeTag](c:Context)(args: c.Expr[Any]*): c.Expr[T] = {
+    import c.universe._
+    val wt = weakTypeOf[T]
+    if (wt.companion =:= NoType) {
+      c.abort(c.prefix.tree.pos,s"type ${wt.typeSymbol} have no companion")
+    } 
+    val sym = wt.typeSymbol.companion
+    val r = q"${sym}.apply[..${wt.typeArgs}](..${args})(${c.prefix})"
+    c.Expr[T](r)
+  }
 
   def makeTransputerImpl[T <: Transputer : c.WeakTypeTag](c:Context):c.Expr[T] = {
     import c.universe._

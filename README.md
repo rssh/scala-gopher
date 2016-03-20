@@ -21,7 +21,7 @@ Scala-gopher is open source (license is Apache2); binaries are available from th
    Scala-gopher is a scala library, build on top of Akka and SIP-22 async, which provide an implementation of 
  CSP [Communicate Sequential Processes] primitives, known as 'Go-like channels.' Also, analogs of go/defer/recover control-flow constructions are provided. 
 
-Note, which this is not an emulation of go language structures in Scala, but rather a reimplementation of key ideas in 'scala-like' manner.
+Note, which this is not an emulation of go language structures in Scala, but rather a reimplementation of the main ideas in 'scala-like' manner.
   
 
 
@@ -292,6 +292,35 @@ go {
 }
 ~~~
 
+## Effected{Input,Output,Channel}
+
+  One useful programming pattern, often used in CSP-style programming: have a channel from wich we read (or to where we write) as a part of a state.  In Go language, this is usually modelled as a mutable variable, changed inside the same select statement, where one is read/written.
+
+  In scala-gopher, we have the ability to use a technique of 'EffectedChannel', which can be seen as an entity, which holds channel, can be used in read/write and can be changed only via effect (operation, which accepts previous state and return next).
+
+Let's look on example:
+
+~~~ scala
+ def generate(n:Int, quit:Promise[Boolean]):Channel[Int] =
+  {
+    val channel = makeChannel[Int]()
+    channel.awriteAll(2 to n) andThen (_ => quit success true)
+    channel
+  }
+
+ def filter(in:Channel[Int]):Input[Int] =
+  {
+     val filtered = makeChannel[Int]()
+     val sieve = makeEffectedInput(in)
+     sieve.aforeach { prime =>
+            sieve <<= (_.filter(_ % prime != 0))
+            filtered <~ prime
+      }
+    filtered
+  }
+~~~
+
+Here in 'filter', we generate a set of prime numbers, and make a sieve of Eratosthenes by sequentially applying 'filter' effect to state of sieve EffectedInput.
 
 
 ## Transputers
