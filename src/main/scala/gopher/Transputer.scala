@@ -6,7 +6,6 @@ import gopher.util._
 import transputers._
 import scala.concurrent._
 import scala.concurrent.duration._
-import akka.actor._
  
 
 /**
@@ -104,32 +103,12 @@ trait Transputer
 
  def +(p: Transputer) = new ParTransputer(api, Seq(this,p))
  
- def start():Future[Unit] =
- {
-   onStart()
-   api.transputerSupervisorRef ! TransputerSupervisor.Start(this)
-   flowTermination.future
- }
+ def start():Future[Unit] = ???
 
  def goOnce: Future[Unit] 
 
  def stop(): Unit
 
- /**
-  * set recover function 
-  **/
- def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type =
-  { recoveryFunction = f 
-    this
-  }
-
- /**
-  * append recover function to existing
-  **/
- def recoverAppend(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type =
-  { recoveryFunction = recoveryFunction orElse f 
-    this
-  }
 
  /**
   * set failure limit.
@@ -225,20 +204,10 @@ trait Transputer
    onResume();
  }
 
- private[gopher] def beforeRestart(prev: Transputer) 
- {
-   if (!(prev eq null)) {
-      recoveryStatistics = prev.recoveryStatistics
-      recoveryLimits = prev.recoveryLimits
-      recoveryFunction = prev.recoveryFunction
-      parent = prev.parent
-   }
-   onRestart(prev)
- }
+ private[gopher] def beforeRestart(prev: Transputer)  = ???
 
  private[gopher] var recoveryStatistics = Transputer.RecoveryStatistics( )
  private[gopher] var recoveryLimits = Transputer.RecoveryLimits( )
- private[gopher] var recoveryFunction: PartialFunction[Throwable, SupervisorStrategy.Directive] = PartialFunction.empty 
  private[gopher] var parent: Option[Transputer] = None
  private[gopher] var flowTermination: PromiseFlowTermination[Unit] = createFlowTermination()
  private[gopher] var replicaNumber = 1
@@ -260,16 +229,8 @@ trait Transputer
 
  }
 
- /**
-  * return replica number of current instance, if
-  * transponder run replicated.
-  **/
  protected def replica = replicaNumber
 
- import akka.event.LogSource
- implicit def logSource: LogSource[Transputer] = new LogSource[Transputer] {
-    def genString(t: Transputer) = t.getClass.getName+"/"+t.replica
- }
 
 }
 
@@ -280,7 +241,6 @@ trait TransputerLogging
 {
   this: Transputer =>
 
-  val log = akka.event.Logging(api.actorSystem, this)
 }
 
 object Transputer
@@ -332,22 +292,6 @@ object Transputer
  {
    addSuppressed(t.recoveryStatistics.lastFailure.get) 
  }
-
- object RecoveryPolicy {
-     import scala.util.control._
-
-     val AlwaysRestart: PartialFunction[Throwable,SupervisorStrategy.Directive] =
-              { case x: TooManyFailures => SupervisorStrategy.Escalate
-                case NonFatal(ex) => SupervisorStrategy.Restart 
-              }
-
-     val AlwaysEscalate: PartialFunction[Throwable,SupervisorStrategy.Directive] =
-              { case ex => SupervisorStrategy.Escalate }
-              
- }
-
-
-
 
 }
 

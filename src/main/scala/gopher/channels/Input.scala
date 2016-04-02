@@ -67,33 +67,7 @@ trait Input[A]
    */
   def  ? : A = macro InputMacro.read[A]
 
-  /**
-   * return feature which contains sequence from first `n` elements.
-   */
-  def atake(n:Int):Future[IndexedSeq[A]] =
-  {
-    if (n==0) {
-      Future successful IndexedSeq()
-    } else {
-       val ft = PromiseFlowTermination[IndexedSeq[A]]
-       @volatile var i = 0;
-       @volatile var r: IndexedSeq[A] = IndexedSeq()
-       def takeFun(cont:ContRead[A,IndexedSeq[A]]):Option[ContRead.In[A]=>Future[Continuated[IndexedSeq[A]]]] =
-       Some{ 
-             ContRead.liftIn(cont) { a =>
-               i += 1
-               r = r :+ a
-               if (i<n) {
-                  Future successful ContRead(takeFun,this,ft)
-               } else {
-                  Future successful Done(r,ft)
-               }
-             }
-       }
-       api.continuatedProcessorRef ! ContRead(takeFun, this, ft)
-       ft.future
-    }
-  }
+  def atake(n:Int):Future[IndexedSeq[A]] = ???
 
   /**
    * run <code> f </code> each time when new object is arrived. Ended when input closes.
@@ -205,41 +179,7 @@ trait Input[A]
 
   }
 
-  def prepend(a:A):Input[A] = new Input[A] {
 
-        val aReaded = new AtomicBoolean(false)
-
-        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         f(ContRead(f,this,ft)) map { f1 => 
-           if (aReaded.compareAndSet(false,true)) {
-               f1(ContRead.Value(a))
-           } else {
-               api.continuatedProcessorRef ! ContRead(f,thisInput,ft)      
-               f1(ContRead.Skip)
-           }
-         }
-        }
-
-        def api = thisInput.api
-
-  }
-
-
-  /**
-   * return pair of inputs `(ready, timeouts)`, such that when you read from `ready` you receive element from `this`
-   * and if during reading you wait more than specified `timeout`, than timeout message is appear in `timeouts`
-   *
-   *```
-   * val (inReady, inTimeouts) = in withInputTimeouts (10 seconds)
-   * select.forever {
-   *   case x: inReady.read => Console.println(s"received value \${value}")
-   *   case x: inTimeouts.read => Console.println(s"timeout occured")
-   * }
-   *```
-   **/
-  def withInputTimeouts(timeout: FiniteDuration): (Input[A],Input[FiniteDuration]) =
-                                               new InputWithTimeouts(this,timeout).pair
 
   /**
    * duplicate input 

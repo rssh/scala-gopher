@@ -1,8 +1,6 @@
 package gopher.channels
 
 import gopher._
-import akka.actor._
-import akka.pattern._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -31,21 +29,9 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    idleWaiters add makeLocked(Skip(f,this))
   }
 
-  def run:Future[A] =
-  {
-    sendWaits()
-    api.idleDetector put this
-    future
-  }
+  def run:Future[A] = ???
 
-  private[channels]  def startIdles: Unit =
-  {
-    if (idleWaiters.isEmpty) {
-       api.idleDetector.remove(this)
-    } else {
-       sendWaits(idleWaiters) 
-    }
-  }
+  private[channels]  def startIdles: Unit = ???
 
   private[this] def makeLocked(block: Continuated[A]): Continuated[A] =
   {
@@ -156,34 +142,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
     } else true
   }
 
-  private[this] def sendWaits(waiters: ConcurrentLinkedQueue[Continuated[A]] = waiters): Unit =
-  {
-   // concurrent structure fpr priority queue
-   var skips = List[Continuated[A]]()
-   var nSend = 0
-   while(!waiters.isEmpty && !lockFlag.get()) {
-      val c = waiters.poll
-      if (!(c eq null)) {
-          nSend = nSend + 1
-          c match {
-             case sk@Skip(_,_) => 
-             skips = c.asInstanceOf[Continuated[A]]::skips
-          case _ =>
-             processor ! c
-          }
-      }
-   }
-   if (!lockFlag.get) {
-       //planIdle
-       //TODO: plan instead direct send.
-       for(c <- skips) {
-             (processor.ask(c)(10 seconds)).foreach(x =>
-                        waiters.add(x.asInstanceOf[Continuated[A]])
-             )
-       }
-     }
-   }
-
+  private[this] def sendWaits(waiters: ConcurrentLinkedQueue[Continuated[A]] = waiters): Unit = ???
  
 
   // false when unlocked, true otherwise.
@@ -195,8 +154,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
   private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
-
-  private[this] val processor = api.continuatedProcessorRef
 
   private[this] implicit val executionContext: ExecutionContext = api.executionContext
   

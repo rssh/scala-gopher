@@ -98,23 +98,7 @@ trait Output[A]
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
 
   
-  /**
-   *provide pair from Output and Input `(ready, timeouts)` such that writing to `ready` 
-   * will case writing to `output` and if it was not completed during ``timeout` than
-   * appropriative duration will be availabe in `timeouts` input.
-   *
-   *```
-   *val (chReady, chTimeouts) = ch withOutputTimeouts (5 seconds)
-   *select.forever {
-   *  case x: chReady.write if (x==somethingToWrite) =>
-   *                    Console.println(s" \${x} send")
-   *  case t: chTimeouts.read  =>
-   *                    Console.println(s"timeout during writing")
-   *}
-   *```
-   **/
-  def withOutputTimeouts(timeout: FiniteDuration): (Output[A],Input[FiniteDuration]) =
-        new OutputWithTimeouts(this, timeout).pair
+  def withOutputTimeouts(timeout: FiniteDuration): (Output[A],Input[FiniteDuration]) = ???
 
 }
 
