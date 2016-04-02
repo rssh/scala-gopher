@@ -1,3 +1,0 @@
-
--  fixed using of non-local return in goScope block
--  implemented or-inputs `x = read(Q1 | Q2)`
