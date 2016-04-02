@@ -28,8 +28,6 @@ trait Output[A]
                   ], 
                   ft: FlowTermination[B]): Unit
 
-  def api: GopherAPI
- 
   /**
    * asynchroniously write A and return Future with writed value
    */

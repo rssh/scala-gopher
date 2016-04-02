@@ -9,24 +9,12 @@ import scala.concurrent._
 import scala.annotation.unchecked._
 
 
-/**
- * Factory for select instantiation.
- * Can be obtained via gopherAPI
- *
- * {{{
- *   val selector = gopherApi.select.forever
- *   for(s <- selector) ...
- * }}}
- */
-class SelectFactory(val api: GopherAPI)
+class SelectFactory()
 {
  
   selectFactory =>
 
   trait SelectFactoryApi
-  {
-    def api = selectFactory.api
-  }
 
   /**
    * forever builder. 

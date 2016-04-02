@@ -47,7 +47,6 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
  **/
 class FoldSelect[T](sf:SelectFactory) extends FoldSelectorBuilder[T]
 {
-   override def api = sf.api
 }
 
 class FoldSelectorBuilderImpl(val c:Context)

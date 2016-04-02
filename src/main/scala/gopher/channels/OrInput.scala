@@ -53,8 +53,6 @@ class OrInput[A](x:Input[A],y:Input[A]) extends Input[A]
     y.cbread(cf, flwt)
   }
 
-  // | is left-associative, so (x|y|z|v).api better be v.api,  
-  def api = y.api
 
   override def toString() = s"(${x}|${y})"
 

@@ -11,8 +11,6 @@ import scala.annotation.unchecked._
 trait SelectorBuilder[A]
 {
 
-   def api: GopherAPI
-
    def onRead[E](ch:Input[E])(arg: ReadSelectorArgument[E,A]): this.type =
    {
      selector.addReader(ch,arg.normalizedFun)
@@ -58,13 +56,10 @@ trait SelectorBuilder[A]
    // for call from SelectorTransforment wich have another 'go'
    def selectorRun: Future[A] = selector.run
 
-   implicit def ec: ExecutionContext = api.executionContext
+   implicit def ec: ExecutionContext = ???
 
-   private[gopher] var selector=new Selector[A](api)
+   private[gopher] var selector=new Selector[A]()
 
-   // used for reading from future
-   @inline
-   def futureInput[A](f:Future[A]):FutureInput[A]=api.futureInput(f)
 
 }
 

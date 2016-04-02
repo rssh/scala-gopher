@@ -52,10 +52,6 @@ trait Input[A]
     ft.future
   }
 
-  /**
-   * instance of gopher API
-   */
-  def api: GopherAPI
 
   /**
    * read object from channel. Must be situated inside async/go/action block.
@@ -78,24 +74,11 @@ trait Input[A]
 
   def aforeach(f: A=>Unit): Future[Unit] = macro InputMacro.aforeachImpl[A]
 
-  def filter(p: A=>Boolean): Input[A] =
-       new Input[A] {
-
-          def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-           thisInput.cbread[B]( 
-                               (cont) => f(cont) map {
-                                            f1 => { case v@ContRead.Value(a) =>
-                                                              if (p(a)) f1(v) else Future successful cont
-                                                    case v@_ => f1(v)
-                                                  } }, ft)  
-
-           def api = thisInput.api
-
-       }
+  def filter(p: A=>Boolean): Input[A] = ???
 
   def withFilter(p: A=>Boolean): Input[A] = filter(p)
 
-  def map[B](g: A=>B): Input[B] =
+  def map[B](g: A=>B): Input[B] = 
      new Input[B] {
 
         def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
@@ -111,32 +94,14 @@ trait Input[A]
          thisInput.cbread(mf,ft)
         }
 
-        def api = thisInput.api
-
      }
 
 
-  def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
+  def zip[B](x: Iterable[B]): Input[(A,B)] = ???
 
-  def zip[B](x: Input[B]): Input[(A,B)] = new ZippedInput(api,this,x)
+  def zip[B](x: Input[B]): Input[(A,B)] = ???
 
-  def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = new Input[B] {
-
-      def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-      {
-       def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-       { val contA = ContRead(f,this,cont.flowTermination)
-           f(contA) map { f1 => {
-              case v@ContRead.Value(a) => Future successful ContRead(f,op(g(a),this),cont.flowTermination)
-              case ContRead.Skip => Future successful cont
-              case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
-              case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-       }}}
-       thisInput.cbread(mf,ft)
-      }
-
-      def api = thisInput.api
-  }
+  def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = ???
 
   def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ or _)
 
@@ -158,47 +123,15 @@ trait Input[A]
   /**
    * when the first channel is exhaused, read from second.
    **/
-  def append(other:Input[A]):Input[A] = new Input[A] {
-
-        def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-         {  val contA = ContRead(f,this,cont.flowTermination)
-            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
-                                  case ContRead.Skip => f1(ContRead.Skip) 
-                                                       Future successful cont
-                                  case ContRead.ChannelClosed => f1(ContRead.Skip) 
-                                                       Future successful ContRead(f,other,cont.flowTermination)
-                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-                         })
-         }
-         thisInput.cbread(mf,ft)
-        }
-
-        def api = thisInput.api
-
-  }
+  def append(other:Input[A]):Input[A] = ???
 
 
 
   /**
    * duplicate input 
    */
-  def dup(): (Input[A],Input[A]) = 
-        (new DuppedInput(this)).pair
+  def dup(): (Input[A],Input[A]) =  ???
 
-  def async = new {
-  
-     def foreach(f: A=> Unit):Future[Unit] = macro InputMacro.aforeachImpl[A]
-
-     @inline
-     def foreachSync(f: A=>Unit): Future[Unit] =  thisInput.foreachSync(f)
-           
-     @inline
-     def foreachAsync(f: A=>Future[Unit])(implicit ec:ExecutionContext): Future[Unit] =
-                                                  thisInput.foreachAsync(f)(ec)
-
-  }
 
   def foreachSync(f: A=>Unit): Future[Unit] =
   {
@@ -230,34 +163,8 @@ trait Input[A]
     ft.future
   }
 
-  def flatFold(fun:(Input[A],A)=>Input[A]):Input[A] = new Input[A] {
+  def flatFold(fun:(Input[A],A)=>Input[A]):Input[A] = ???
          
-      val current = new AtomicReference[Input[A]](thisInput)
-
-      def  cbread[C](f: ContRead[A,C] => Option[ContRead.In[A]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-      {
-        def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-          f(ContRead(f,this,ft)) map { next =>
-            { case ContRead.Value(a) => 
-                           var changed = false
-                           while(!changed) {
-                             var prev = current.get
-                             var next = fun(prev,a)
-                             changed = current.compareAndSet(prev,next) 
-                           } 
-                           next(ContRead.Value(a))
-                         //  fp-version.
-                         // next(ContRead.Skip)
-                         //ContRead(f, one(a) append (fun(this,a) flatFold fun),ft)
-              case v@_ => next(v)
-          }   }
-        current.get.cbread(mf,ft)
-      }
-
-      def api = thisInput.api
-     
-  }
-
   /**
    * async incarnation of fold. Fold return future, which successed when channel is closed.
    *Operations withing fold applyed on result on each other, starting with s0.
@@ -321,49 +228,6 @@ trait Input[A]
 
 }
 
-object Input
-{
-   def asInput[A](iterable:Iterable[A], api: GopherAPI): Input[A] = new IterableInput(iterable.iterator, api)
-
-   class IterableInput[A](it: Iterator[A], override val api: GopherAPI) extends Input[A]
-   {
-
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => { val next = this.synchronized {
-                                                       if (it.hasNext) 
-                                                         ContRead.Value(it.next)
-                                                       else 
-                                                         ContRead.ChannelClosed
-                                                     }
-                                          api.continue(f1(next),ft)
-                                        }
-                              )
-   }
-
-   def closed[A](implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
-
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => f1(ContRead.ChannelClosed))
-
-     def api = gopherApi
-   }
-
-   def one[A](a:A)(implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
-
-     val readed: AtomicBoolean = new AtomicBoolean(false)
-
-     def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => f1(
-                                    if (readed.compareAndSet(false,true)) {
-                                        ContRead.Value(a) 
-                                    }else{
-                                        ContRead.ChannelClosed
-                                    }))
-
-     def api = gopherApi
-   }
-
-}
 
 
 

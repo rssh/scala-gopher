@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentLinkedQueue
 
 
-class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
+class Selector[A]() extends PromiseFlowTermination[A]
 {
 
   thisSelector =>
@@ -155,7 +155,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
   private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
-  private[this] implicit val executionContext: ExecutionContext = api.executionContext
+  private[this] implicit val executionContext: ExecutionContext = ???
   
 
 
