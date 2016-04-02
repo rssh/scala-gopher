@@ -5,6 +5,8 @@ import scala.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
 import gopher._
 
+trait Input[A] 
+
 /**
  * represent continuated computation from A to B.
  */
@@ -51,34 +53,9 @@ object ContRead
     def skip = ContRead.Skip
   }
 
-   @inline
-   def liftInValue[A,B](prev: ContRead[A,B])(f: Value[A] => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] =
-      {
-        case v@Value(a) => f(v)
-        case Skip => Future successful prev
-        case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Never.future
-        case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Never.future
-      }
-
-   @inline
-   def liftIn[A,B](prev: ContRead[A,B])(f: A => Future[Continuated[B]] ): In[A] => Future[Continuated[B]] =
-    {
-      //    liftInValue(prev)(f(_.a)) 
-      // we do ilining by hands instead.
-      case Value(a) => f(a)
-      case Skip => Future successful prev
-      case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
-                              Never.future
-      case Failure(ex) => prev.flowTermination.doThrow(ex)
-                              Never.future
-    }
-
 
    def chainIn[A,B](prev: ContRead[A,B])(fn: (In[A], In[A] => Future[Continuated[B]]) => Future[Continuated[B]] ): 
-                                            Option[In[A] => Future[Continuated[B]]] =
-         prev.function(prev) map (f1 => liftInValue(prev) { v => fn(v,f1) } )
+                                            Option[In[A] => Future[Continuated[B]]] = ???
 
 }
 
