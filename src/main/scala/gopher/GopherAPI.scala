@@ -1,7 +1,6 @@
 package gopher
 
 import gopher.channels._
-import gopher.transputers._
 import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.language.experimental.macros
