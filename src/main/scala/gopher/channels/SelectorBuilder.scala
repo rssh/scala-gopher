@@ -379,7 +379,7 @@ object SelectorBuilder
                                                 }
                                         }
                                         q"${builderName}.reading(${channel})(${param} => ${body} )"
-                               case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                               case q"scala.async.Async.await[${t}](${ch}.awriteu($expression)):${t1}" =>
                                         q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
                                case x@_ =>
                                   c.abort(tp.pos, "can't parse match guard: "+x);
