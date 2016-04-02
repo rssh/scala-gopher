@@ -103,22 +103,11 @@ trait Input[A]
 
   def flatMapOp[B](g: A=>Input[B])(op:(Input[B],Input[B])=>Input[B]):Input[B] = ???
 
-  def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ or _)
+  def flatMap[B](g: A=>Input[B]):Input[B] = ???
 
   def seq = new {
     def flatMap[B](g: A=>Input[B]):Input[B] = flatMapOp(g)( _ append _ )
   }
-
-  /**
-   * return input merged with 'other'.
-   * (i.e. non-determenistics choice)
-   **/
-  def |(other:Input[A]):Input[A] = new OrInput(this,other)
-
-  /**
-   * synonim for non-deteremenistics choice.
-   **/
-  def or(other:Input[A]):Input[A] = new OrInput(this,other)
 
   /**
    * when the first channel is exhaused, read from second.
