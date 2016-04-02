@@ -31,28 +31,12 @@ trait Output[A]
   /**
    * asynchroniously write A and return Future with writed value
    */
-  def  awrite(a:A):Future[A] =
-  {
-   val ft = PromiseFlowTermination[A]()
-   cbwrite[A]( cont => {
-            Some((a,Future.successful(Done(a,ft))))
-          }, 
-          ft
-         )
-   ft.future
-  }
+  def  awrite(a:A):Future[A] = ???
   
   /**
    * asynchroniously write A and return Future with unit
    */
-  def  awriteu(a:A):Future[Unit] =
-  {
-   val ft = PromiseFlowTermination[Unit]()
-   cbwrite[Unit]( cont => {
-            Some((a,Future.successful(Done((),ft))))
-   },ft)
-   ft.future
-  }
+  def  awriteu(a:A):Future[Unit] = ???
 
   /**
    * 'blocking' write of 'a' to channel.
@@ -72,26 +56,7 @@ trait Output[A]
   def !(a:A):Unit = macro Output.writeImpl[A]
 
 
-  def awriteAll[C <: Iterable[A]](c:C):Future[Unit] =
-  {
-    if (c.isEmpty) {
-      Future successful (())
-    } else {
-      val ft = PromiseFlowTermination[Unit]
-      val it = c.iterator
-      def f(cont:ContWrite[A,Unit]):Option[(A,Future[Continuated[Unit]])]=
-      {
-          val n = it.next()
-          if (it.hasNext) {
-            Some((n,Future successful ContWrite(f,this,ft)))
-          } else {
-            Some((n, Future successful Done((), ft) ))
-          }
-      }         
-      cbwrite(f,ft)
-      ft.future
-    }
-  }
+  def awriteAll[C <: Iterable[A]](c:C):Future[Unit] = ???
 
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
 
