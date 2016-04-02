@@ -29,7 +29,10 @@ trait Output[A]
                   ft: FlowTermination[B]): Unit
 
   def api: GopherAPI
-
+ 
+  /**
+   * asynchroniously write A and return Future with writed value
+   */
   def  awrite(a:A):Future[A] =
   {
    val ft = PromiseFlowTermination[A]()
@@ -42,11 +45,23 @@ trait Output[A]
   }
   
   /**
+   * asynchroniously write A and return Future with unit
+   */
+  def  awriteu(a:A):Future[Unit] =
+  {
+   val ft = PromiseFlowTermination[Unit]()
+   cbwrite[Unit]( cont => {
+            Some((a,Future.successful(Done((),ft))))
+   },ft)
+   ft.future
+  }
+
+  /**
    * 'blocking' write of 'a' to channel.
    * Note, that this method can be called only inside
    * 'go' or 'async' blocks.
    **/
-  def write(a:A):A = macro Output.writeImpl[A]
+  def write(a:A):Unit = macro Output.writeImpl[A]
 
   /**
    * shortcut for blocking write.
@@ -106,10 +121,10 @@ trait Output[A]
 object Output
 {
 
-  def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[A] =
+  def writeImpl[A](c:Context)(a:c.Expr[A]):c.Expr[Unit] =
   {
    import c.universe._
-   c.Expr[A](q"scala.async.Async.await(${c.prefix}.awrite(${a}))")
+   c.Expr[Unit](q"scala.async.Async.await(${c.prefix}.awriteu(${a}))")
   }
 
   def writeAllImpl[A,C](c:Context)(it:c.Expr[C]):c.Expr[Unit] =
@@ -125,7 +140,7 @@ object Output
    val retval = c.Expr[Output[A]](
      q"""{
           val prefix = ${c.prefix}
-          scala.async.Async.await{prefix.awrite(${a});{}}
+          scala.async.Async.await{prefix.awriteu(${a})}
           prefix 
          }
       """
