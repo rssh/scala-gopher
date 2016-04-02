@@ -236,23 +236,7 @@ object InputMacro
   }
 
 
-  def aforeachImpl[A](c:Context)(f:c.Expr[A=>Unit]): c.Expr[Future[Unit]] =
-  {
-   import c.universe._
-   f.tree match {
-     case Function(valdefs,body) =>
-            if (MacroUtil.hasAwait(c)(body)) {
-               // TODO: add support for flow-termination (?)
-               val nbody = q"scala.async.Async.async(${body})"
-               val nfunction = atPos(f.tree.pos)(Function(valdefs,nbody))
-               val ntree = q"${c.prefix}.foreachAsync(${nfunction})"
-               c.Expr[Future[Unit]](c.untypecheck(ntree))
-            } else {
-               c.Expr[Future[Unit]](q"${c.prefix}.foreachSync(${f.tree})")
-            }
-     case _ => c.abort(c.enclosingPosition,"function expected")
-   }
-  }
+  def aforeachImpl[A](c:Context)(f:c.Expr[A=>Unit]): c.Expr[Future[Unit]] = ???
 
   def foldImpl[A,S](c:Context)(s0:c.Expr[S])(f:c.Expr[(S,A)=>S]): c.Expr[S] =
   {
@@ -260,21 +244,7 @@ object InputMacro
    c.Expr[S](q"scala.async.Async.await(${afoldImpl(c)(s0)(f)})")
   }
 
-  def afoldImpl[A,S](c:Context)(s0:c.Expr[S])(f:c.Expr[(S,A)=>S]): c.Expr[Future[S]] =
-  {
-   import c.universe._
-   f.tree match {
-     case Function(valdefs,body) =>
-            if (MacroUtil.hasAwait(c)(body)) {
-               val nbody = atPos(body.pos)(q"scala.async.Async.async(${body})")
-               val nfunction = atPos(f.tree.pos)(Function(valdefs,nbody))
-               val ntree = q"${c.prefix}.afoldAsync(${s0.tree})(${nfunction})"
-               c.Expr[Future[S]](c.untypecheck(ntree))
-            } else {
-               c.Expr[Future[S]](q"${c.prefix}.afoldSync(${s0.tree})(${f.tree})")
-            }
-   }
-  }
+  def afoldImpl[A,S](c:Context)(s0:c.Expr[S])(f:c.Expr[(S,A)=>S]): c.Expr[Future[S]] = ???
 
 
 }
