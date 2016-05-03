@@ -65,6 +65,8 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
    def foreach(f:Any=>Unit):Unit = 
         macro SelectorBuilder.foreachImpl[Unit]
 
+   
+
    /**
     * provide syntax for running select loop as async operation.
     *
@@ -76,6 +78,25 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
     */
    def apply(f: PartialFunction[Any,Unit]): Future[Unit] =
         macro SelectorBuilder.applyImpl[Unit]
+
+
+   def inputBuilder[B]() = new InputSelectorBuilder[B](api) 
+
+   /**
+    * provide syntax for creating output channels.
+    *{{{
+    *
+    *  val multiplexed = for(s <- gopherApi.select.forever) yield 
+    *       s match {
+    *          case x: channelA => s"A:${x}"
+    *          case x: channelB => s"B:${x}"
+    *       }
+    *
+    *}}}
+    **/
+    def map[B](f:Any=>B):Input[B] = macro SelectorBuilder.mapImpl[B]
+ 
+    def input[B](f:PartialFunction[Any,B]):Input[B] = ???
 
 }
 
