@@ -14,7 +14,6 @@ import scala.reflect.api._
 trait Channel[A] extends InputOutput[A]
 {
 
-
    def close(): Unit
 
 }

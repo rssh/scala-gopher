@@ -5,6 +5,7 @@ import org.scalatest._
 import scala.concurrent._
 import scala.concurrent.duration._
 import gopher._
+import scala.language.postfixOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -59,9 +60,7 @@ class FlowTerminationSuite extends FunSuite
      var sum = 0
      val f = select.forever{
         case x: channel.read => sum += x
-                CurrentFlowTermination.exit(())
-                //TODO: implement syntax
-                //select.shutdown()
+                select.shutdown()
      }
      val f2 = channel.awrite(1) 
      Await.result(f, 1 second)
