@@ -8,5 +8,6 @@
 - akka 2.4.2, scala-2.11.8
 - channels by defaults now unbuffered. (as in Go)
 - implemented fold over input
+- implemented map/amap over selector
 
 

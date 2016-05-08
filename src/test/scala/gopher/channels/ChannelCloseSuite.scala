@@ -11,7 +11,7 @@ import gopher.tags._
 import scala.async.Async._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CloseSuite extends FunSuite 
+class ChannelCloseSuite extends FunSuite 
 {
 
  

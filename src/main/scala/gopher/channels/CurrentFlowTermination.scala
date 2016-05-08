@@ -36,5 +36,11 @@ object CurrentFlowTermination
     c.Expr[Unit](q"implicitly[FlowTermination[Any]].doThrow(${e})")
    }
 
+   def shutdownImpl(c:Context)(): c.Expr[Unit] =
+   {
+    import c.universe._
+    exitImpl[Unit](c)(c.Expr[Unit](q"()"))
+   }
+
 
 }

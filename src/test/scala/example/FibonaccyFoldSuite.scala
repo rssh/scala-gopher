@@ -17,27 +17,27 @@ import gopher.tags._
 object FibonaccyFold {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import CommonTestObjects.gopherApi._
   
   def fibonacci(c: Output[Long], quit: Input[Int]): Future[(Long,Long)] = 
-     gopherApi.select.afold((0L,1L)) { case ((x,y),s) =>
+     select.afold((0L,1L)) { case ((x,y),s) =>
       s match {
         case x: c.write =>  (y, x+y)
         case q: quit.read =>
-                 implicitly[FlowTermination[(Long,Long)]].doExit((x,y))
+                   select.exit((x,y))
       }
      }
   
   def run(n:Int, acceptor: Long => Unit ): Future[(Long,Long)] =
   {
-    val c = gopherApi.makeChannel[Long](1);
-    val quit = gopherApi.makeChannel[Int](1);
+    val c = makeChannel[Long](1);
+    val quit = makeChannel[Int](1);
     val r = c.map{ x =>
             //Console.println(s"${x} ")
             acceptor(x)}.atake(n) flatMap ( _ => (quit awrite 0) )
     fibonacci(c,quit)
   }
   
-  def gopherApi = CommonTestObjects.gopherApi 
   
 }
 
