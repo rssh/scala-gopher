@@ -202,7 +202,7 @@ go{
 ~~~
     
  
-  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop.
+  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop. `select.exit` and `selecet.shutdown` macroses can be used as shortcats.
   
   Example: 
 
@@ -216,7 +216,7 @@ val consumer = gopherApi.select.forever{
         case i: channerl.read  =>
                   sum = sum + i
                   if (i==1000)  {
-                    implictily[FlowTermination[Unit]].doExit(())
+                    select.shutdown()
                   }
 }
      
@@ -231,7 +231,7 @@ val consumer = gopherApi.select.afold(0) { (state, selector) =>
         case i: channel.read  =>
                           val nstate = state + i
                           if (i==1000) {
-                            implictily[FlowTermination[Int]].doExit(nstate)
+                            select.exit(nstate)
                           }
                           nstate
    }
@@ -245,7 +245,7 @@ val consumer = gopherApi.select.afold(0) { (state, selector) =>
 val fib = select.afold((0,1)) { case ((x,y), s) =>
     s match {
       case x:channel.write => (y,y+x)
-      case q:quit.read => CurrentFlowTermination.exit((x,y))
+      case q:quit.read => select.exit((x,y))
     }
 }
 ~~~
@@ -286,7 +286,7 @@ go {
   val sum = select.fold(0) { (n,s) =>
              s match {
                case x: channelA.read => n+x
-               case q: quit.read => CurrentFlowTermination.exit(n)
+               case q: quit.read => select.exit(n)
              }
             }
 }
