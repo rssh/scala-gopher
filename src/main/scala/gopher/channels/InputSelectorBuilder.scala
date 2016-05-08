@@ -67,6 +67,18 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
             ],
             ft: FlowTermination[B]): Unit = proxy.cbread(f,ft)
   
+   def started: InputSelectorBuilder[T] = { go; this }
+  
+   // 
+   override val selector = new Selector[T](api) {
+          override def doExit(a: T): T =
+          {
+            proxy.awrite(a) onComplete {
+              _ => proxy.close()
+            }
+            super.doExit(a)
+          }
+   }
 
 }
 

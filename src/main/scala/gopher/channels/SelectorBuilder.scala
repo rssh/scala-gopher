@@ -60,7 +60,7 @@ trait SelectorBuilder[A]
 
    implicit def ec: ExecutionContext = api.executionContext
 
-   private[gopher] var selector=new Selector[A](api)
+   private[gopher] val selector=new Selector[A](api)
 
    // used for reading from future
    @inline
@@ -423,38 +423,38 @@ object SelectorBuilder
     q"${builderName}.idle(${caseDef.body})"
    }
 
-   def mapImpl[T](c:Context)(f:c.Expr[Any=>T]):c.Expr[Input[T]] =
+   def mapImpl[T:c.WeakTypeTag](c:Context)(f:c.Expr[Any=>T]):c.Expr[Input[T]] =
    {
      import c.universe._
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) => 
-                                foreachBuildMatch(c)(cases)
+                                mapBuildMatch[T](c)(cases)
        case Function(a,b) =>
             c.abort(f.tree.pos, "match expected in gopher select map, have: ${MacroUtil.shortString(b)} ");
        case _ =>
             c.abort(f.tree.pos, "match expected in gopher select map, have: ${MacroUtil.shortString(f.tree)}");
 
      }
-     c.Expr[Input[T]](c.untypecheck(builder))
+     c.Expr[Input[T]](c.untypecheck(q"${builder}.started"))
    }
 
-   def mapBuildMatch(c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
+   def mapBuildMatch[T:c.WeakTypeTag](c:Context)(cases:List[c.universe.CaseDef]):c.Tree =
    {
      import c.universe._
      val bn = TermName(c.freshName)
      val calls = transformSelectMatch(c)(bn,cases)
-     q"""..${q"val ${bn} = ${c.prefix}.inputBuilder()" :: calls}"""
+     q"""..${q"val ${bn} = ${c.prefix}.inputBuilder[${weakTypeOf[T]}]()" :: calls}"""
    }
 
-   def inputImpl[T](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Input[T]] = 
+   def inputImpl[T:c.WeakTypeTag](c:Context)(f:c.Expr[PartialFunction[Any,T]]):c.Expr[Input[T]] = 
    {
      import c.universe._
      val builder = f.tree match {
         case q"{case ..$cases}" =>
-                         mapBuildMatch(c)(cases)
+                         mapBuildMatch[T](c)(cases)
         case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
      }
-     c.Expr[Input[T]](c.untypecheck(builder))
+     c.Expr[Input[T]](c.untypecheck(q"${builder}.started"))
    }
 
 }

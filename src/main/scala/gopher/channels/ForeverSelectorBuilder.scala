@@ -96,7 +96,8 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
     **/
     def map[B](f:Any=>B):Input[B] = macro SelectorBuilder.mapImpl[B]
  
-    def input[B](f:PartialFunction[Any,B]):Input[B] = ???
+    def input[B](f:PartialFunction[Any,B]):Input[B] = 
+                                    macro SelectorBuilder.inputImpl[B]
 
 }
 

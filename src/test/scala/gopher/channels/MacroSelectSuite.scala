@@ -260,6 +260,31 @@ class MacroSelectSuite extends FunSuite
      assert(n2i>3)
    }
 
+   test("amap over selector")  {
+     import gopherApi._
+     val ch1 = makeChannel[Int](10)
+     val ch2 = makeChannel[Int](10)
+     val quit = Promise[Boolean]()
+     val out = select.amap {
+         case x:ch1.read => x*2
+         case x:ch2.read => 
+                         //System.err.println(s"received:${x}")
+                         x*3
+         case q:Boolean if (q==quit.future.read) => 
+                         //System.err.println("received quit")
+                         CurrentFlowTermination.exit(1)
+     }
+     ch1.awriteAll(1 to 10)
+     ch2.awriteAll(100 to 110)
+     val f = out.afold(0){ 
+               case (s,x) => //System.err.println(s"in afold ${x}")
+                             s+x }
+     Thread.sleep(1000)
+     quit success true
+     val x = Await.result(f, 10 seconds)
+     assert(x > 3000)
+   }
+
    test("generic channel make")  {
      val ch1 = gopherApi.make[Channel[Int]]()
      val ch2 = gopherApi.make[Channel[Int]](1)
@@ -270,6 +295,35 @@ class MacroSelectSuite extends FunSuite
      val x = Await.result(ch1.aread, 10 seconds)
      assert(x==1)
    }
+
+   test("input afold") {
+     import gopherApi._
+     val ch1 = makeChannel[Int]()
+     ch1.awriteAll(1 to 10) map { _ => ch1.close() }
+     val f = ch1.afold(0){ case (s,x) => s+x }
+     val x = Await.result(f, 10 seconds)
+     assert(x==55)
+   }
+
+   test("map over selector")  {
+     import gopherApi._
+     val ch1 = gopherApi.make[Channel[Int]]()
+     val ch2 = gopherApi.make[Channel[Int]](1)
+     val f1 = ch1.awrite(1)
+     val f2 = ch2.awrite(2)
+     val chs = for(s <- select) yield {
+                s match {
+                  case x:ch1.read => x*3
+                  case x:ch2.read => x*5
+                }
+              }
+     val fs1 = chs.aread
+     val fs2 = chs.aread
+     val s1 = Await.result(fs1, 1 second)
+     val s2 = Await.result(fs2, 1 second)
+     assert(s1==3 || s1==10)
+   }
+
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    

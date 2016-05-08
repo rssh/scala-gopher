@@ -39,6 +39,8 @@ class SelectFactory(val api: GopherAPI)
    */
   def once[T]: OnceSelectorBuilder[T] = new OnceSelectorBuilder[T] with SelectFactoryApi {}
 
+  def inputBuilder[T]() = new InputSelectorBuilder[T](api)
+
   /**
    * generic selector builder
    */
@@ -47,6 +49,14 @@ class SelectFactory(val api: GopherAPI)
   def afold[S](s:S)(op:(S,Any)=>S):Future[S] = macro FoldSelectorBuilderImpl.afold[S]
   
   def fold[S](s:S)(op:(S,Any)=>S):S = macro FoldSelectorBuilderImpl.fold[S]
+
+  def map[B](f:Any=>B):Input[B] = macro SelectorBuilder.mapImpl[B]
+
+  def input[B](f:PartialFunction[Any,B]):Input[B] =
+                                    macro SelectorBuilder.inputImpl[B]
+
+  def amap[B](f:PartialFunction[Any,B]):Input[B] =
+                                    macro SelectorBuilder.inputImpl[B]
 
 
 }

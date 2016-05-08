@@ -205,7 +205,7 @@ trait Transputer
 
 
  /**
-  * called when transducer is choose resume durign recovery.
+  * called when transducer is choose to resume durign recovery.
   */
  protected def onResume() { }
 
@@ -391,7 +391,7 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
  private[gopher] override def beforeResume() : Unit =
  {
    super.beforeResume()
-   selector = new Selector[Unit](api)
+   //selector.clear()
    selectorInit()
  }
 
