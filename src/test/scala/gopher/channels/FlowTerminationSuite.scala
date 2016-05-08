@@ -52,6 +52,25 @@ class FlowTerminationSuite extends FunSuite
      
    }
     
+   test("not propagate signals after exit") {
+      
+     import gopherApi._
+     val channel = makeChannel[Int](100)
+     var sum = 0
+     val f = select.forever{
+        case x: channel.read => sum += x
+                CurrentFlowTermination.exit(())
+                //TODO: implement syntax
+                //select.shutdown()
+     }
+     val f2 = channel.awrite(1) 
+     Await.result(f, 1 second)
+     assert(sum == 1)
+     val f3 = channel.awrite(2)
+     Thread.sleep(1000)
+     assert(sum == 1)
+
+   }
   
   val gopherApi = CommonTestObjects.gopherApi
    
