@@ -62,7 +62,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -75,7 +75,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -418,8 +418,25 @@
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Represent Scala collection as channel, where all values can be readed in order of iteration.</p><div class="fullcomment"><div class="comment cmt"><p>Represent Scala collection as channel, where all values can be readed in order of iteration.
+      <p class="shortcomment cmt">Represent Scala iterable as channel, where all values can be readed in order of iteration.</p><div class="fullcomment"><div class="comment cmt"><p>Represent Scala iterable as channel, where all values can be readed in order of iteration.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
+    </li><li name="gopher.GopherAPI#make" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="make[T](args:Any*):T"></a>
+      <a id="make[T](Any*):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Any">Any</span>*</span>)</span><span class="result">: <span class="extype" name="gopher.GopherAPI.make.T">T</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.GopherImpl@make[T](args:Any*):T" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
     </li><li name="gopher.GopherAPI#makeChannel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="makeChannel[A](capacity:Int):gopher.channels.Channel[A]"></a>
       <a id="makeChannel[A](Int):Channel[A]"></a>
@@ -429,7 +446,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">makeChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.GopherAPI.makeChannel.A">A</span>]</span>
+        <span class="name">makeChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="result">: <a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.GopherAPI.makeChannel.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.GopherImpl@makeChannel[A](capacity:Int):gopher.channels.Channel[A]" title="Permalink" target="_top">
@@ -437,7 +454,61 @@
       </a>
     </span>
       <p class="shortcomment cmt">obtain channel</p><div class="fullcomment"><div class="comment cmt"><p>obtain channel</p><pre><span class="kw">val</span> channel = gopherApi.makeChannel[<span class="std">Int</span>]()
-channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
+channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="gopher.GopherAPI#makeEffectedChannel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="makeEffectedChannel[A](ch:gopher.channels.Channel[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedChannel[A]"></a>
+      <a id="makeEffectedChannel[A](Channel[A],ThreadingPolicy):EffectedChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeEffectedChannel</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="ch">ch: <a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedChannel.A">A</span>]</span>, <span name="threadingPolicy">threadingPolicy: <a href="ThreadingPolicy.html" class="extype" name="gopher.ThreadingPolicy">ThreadingPolicy</a> = <span class="symbol"><span class="name"><a href="ThreadingPolicy$.html">ThreadingPolicy.Single</a></span></span></span>)</span><span class="result">: <a href="channels/EffectedChannel.html" class="extype" name="gopher.channels.EffectedChannel">EffectedChannel</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.GopherImpl@makeEffectedChannel[A](ch:gopher.channels.Channel[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedChannel[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
+    </li><li name="gopher.GopherAPI#makeEffectedInput" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="makeEffectedInput[A](in:gopher.channels.Input[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedInput[A]"></a>
+      <a id="makeEffectedInput[A](Input[A],ThreadingPolicy):EffectedInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeEffectedInput</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="in">in: <a href="channels/Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedInput.A">A</span>]</span>, <span name="threadingPolicy">threadingPolicy: <a href="ThreadingPolicy.html" class="extype" name="gopher.ThreadingPolicy">ThreadingPolicy</a> = <span class="symbol"><span class="name"><a href="ThreadingPolicy$.html">ThreadingPolicy.Single</a></span></span></span>)</span><span class="result">: <a href="channels/EffectedInput.html" class="extype" name="gopher.channels.EffectedInput">EffectedInput</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedInput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.GopherImpl@makeEffectedInput[A](in:gopher.channels.Input[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedInput[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
+    </li><li name="gopher.GopherAPI#makeEffectedOutput" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="makeEffectedOutput[A](out:gopher.channels.Output[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedOutput[A]"></a>
+      <a id="makeEffectedOutput[A](Output[A],ThreadingPolicy):EffectedOutput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeEffectedOutput</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="out">out: <a href="channels/Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedOutput.A">A</span>]</span>, <span name="threadingPolicy">threadingPolicy: <a href="ThreadingPolicy.html" class="extype" name="gopher.ThreadingPolicy">ThreadingPolicy</a> = <span class="symbol"><span class="name"><a href="ThreadingPolicy$.html">ThreadingPolicy.Single</a></span></span></span>)</span><span class="result">: <a href="channels/EffectedOutput.html" class="extype" name="gopher.channels.EffectedOutput">EffectedOutput</a>[<span class="extype" name="gopher.GopherAPI.makeEffectedOutput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.GopherImpl@makeEffectedOutput[A](out:gopher.channels.Output[A],threadingPolicy:gopher.ThreadingPolicy):gopher.channels.EffectedOutput[A]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
     </li><li name="gopher.GopherAPI#makeTransputer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="makeTransputer[T&lt;:gopher.Transputer]:T"></a>
       <a id="makeTransputer[T&lt;:Transputer]:T"></a>
@@ -471,7 +542,7 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
+      <p class="shortcomment cmt">create and start instance of transputer with given recovery policy.</p><div class="fullcomment"><div class="comment cmt"><p>create and start instance of transputer with given recovery policy.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd><dt>See also</dt><dd><span class="cmt"><p>gopher.Transputer</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -539,8 +610,8 @@ channel.awrite(<span class="num">1</span> to <span class="num">100</span>)</pre>
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">create transputet which contains <code>n</code> instances of <code>X</code>
-where ports are connected to the appropriate ports of each instance in paraller.</code></code></p><div class="fullcomment"><div class="comment cmt"><p>create transputet which contains <code>n</code> instances of <code>X</code>
+      <p class="shortcomment cmt">create transputer which contains <code>n</code> instances of <code>X</code>
+where ports are connected to the appropriate ports of each instance in paraller.</code></code></p><div class="fullcomment"><div class="comment cmt"><p>create transputer which contains <code>n</code> instances of <code>X</code>
 where ports are connected to the appropriate ports of each instance in paraller.</p><pre><span class="kw">val</span> persistStep = replicate[PersistTransputer](nDBConnections)</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></dd></dl></div>
     </li><li name="gopher.GopherAPI#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="select:gopher.channels.SelectFactory"></a>

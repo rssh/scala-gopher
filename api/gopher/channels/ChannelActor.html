@@ -41,7 +41,7 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -53,7 +53,10 @@
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="akka.actor.Actor">Actor</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="BufferedChannelActor.html" class="extype" name="gopher.channels.BufferedChannelActor">BufferedChannelActor</a>, <a href="UnbufferedChannelActor.html" class="extype" name="gopher.channels.UnbufferedChannelActor">UnbufferedChannelActor</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -63,7 +66,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -76,7 +79,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -90,7 +93,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="gopher.channels.ChannelActor#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(id:Long,capacity:Int,api:gopher.GopherAPI):gopher.channels.ChannelActor[A]"></a>
+      <a id="&lt;init&gt;(id:Long,api:gopher.GopherAPI):gopher.channels.ChannelActor[A]"></a>
       <a id="&lt;init&gt;:ChannelActor[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -98,10 +101,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelActor</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Long">Long</span></span>, <span name="capacity">capacity: <span class="extype" name="scala.Int">Int</span></span>, <span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
+        <span class="name">ChannelActor</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Long">Long</span></span>, <span name="api">api: <a href="../GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@&lt;init&gt;(id:Long,capacity:Int,api:gopher.GopherAPI):gopher.channels.ChannelActor[A]" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ChannelActor@&lt;init&gt;(id:Long,api:gopher.GopherAPI):gopher.channels.ChannelActor[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -131,10 +134,81 @@
     </li></ol>
             </div>
 
-        
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="gopher.channels.ChannelActor#getNElements" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="getNElements():Int"></a>
+      <a id="getNElements():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getNElements</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@getNElements():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="gopher.channels.ChannelActor#onContRead" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="onContRead(cr:gopher.channels.ContRead[A,_]):Unit"></a>
+      <a id="onContRead(ContRead[A,_]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onContRead</span><span class="params">(<span name="cr">cr: <a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ChannelActor.A">A</span>, _]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@onContRead(cr:gopher.channels.ContRead[A,_]):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="gopher.channels.ChannelActor#onContWrite" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="onContWrite(cw:gopher.channels.ContWrite[A,_]):Unit"></a>
+      <a id="onContWrite(ContWrite[A,_]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onContWrite</span><span class="params">(<span name="cw">cw: <a href="ContWrite.html" class="extype" name="gopher.channels.ContWrite">ContWrite</a>[<span class="extype" name="gopher.channels.ChannelActor.A">A</span>, _]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@onContWrite(cw:gopher.channels.ContWrite[A,_]):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="gopher.channels.ChannelActor#stopIfEmpty" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="stopIfEmpty:Boolean"></a>
+      <a id="stopIfEmpty:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopIfEmpty</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@stopIfEmpty:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -288,40 +362,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="gopher.channels.ChannelActor#buffer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="buffer:Array[AnyRef]"></a>
-      <a id="buffer:Array[AnyRef]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">buffer</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@buffer:Array[AnyRef]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="gopher.channels.ChannelActor#checkWriters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="checkWriters:Boolean"></a>
-      <a id="checkWriters:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">checkWriters</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@checkWriters:Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -345,7 +385,7 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.channels.ChannelActor#closed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.channels.ChannelActor#closed" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="closed:Boolean"></a>
       <a id="closed:Boolean"></a>
       <h4 class="signature">
@@ -361,7 +401,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="akka.actor.Actor#context" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="context:akka.actor.ActorContext"></a>
       <a id="context:ActorContext"></a>
@@ -379,6 +419,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Actor</dd></dl></div>
+    </li><li name="gopher.channels.ChannelActor#ec" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ec:scala.concurrent.ExecutionContext"></a>
+      <a id="ec:ExecutionContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ec</span><span class="result">: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@ec:scala.concurrent.ExecutionContext" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -487,23 +544,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="gopher.channels.ChannelActor#nElements" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="nElements:Int"></a>
-      <a id="nElements:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">nElements</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@nElements:Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="gopher.channels.ChannelActor#nRefs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="nRefs:Int"></a>
       <a id="nRefs:Int"></a>
@@ -664,40 +704,23 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.channels.ChannelActor#processReaders" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="processReaders():Boolean"></a>
-      <a id="processReaders():Boolean"></a>
+    </li><li name="gopher.channels.ChannelActor#processReaderClosed" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="processReaderClosed[B](reader:gopher.channels.ContRead[A,B]):Boolean"></a>
+      <a id="processReaderClosed[B](ContRead[A,B]):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">processReaders</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">processReaderClosed</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="reader">reader: <a href="ContRead.html" class="extype" name="gopher.channels.ContRead">ContRead</a>[<span class="extype" name="gopher.channels.ChannelActor.A">A</span>, <span class="extype" name="gopher.channels.ChannelActor.processReaderClosed.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@processReaders():Boolean" title="Permalink" target="_top">
+      <a href="../../index.html#gopher.channels.ChannelActor@processReaderClosed[B](reader:gopher.channels.ContRead[A,B]):Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="gopher.channels.ChannelActor#readIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="readIndex:Int"></a>
-      <a id="readIndex:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readIndex</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@readIndex:Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="gopher.channels.ChannelActor#readers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readers:scala.collection.immutable.Queue[gopher.channels.ContRead[A,_]]"></a>
       <a id="readers:Queue[ContRead[A,_]]"></a>
@@ -783,6 +806,40 @@
       </a>
     </span>
       
+    </li><li name="gopher.channels.ChannelActor#stopReaders" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopReaders():Unit"></a>
+      <a id="stopReaders():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopReaders</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@stopReaders():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="gopher.channels.ChannelActor#stopWriters" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopWriters():Unit"></a>
+      <a id="stopWriters():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopWriters</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ChannelActor@stopWriters():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="akka.actor.Actor#supervisorStrategy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="supervisorStrategy:akka.actor.SupervisorStrategy"></a>
       <a id="supervisorStrategy:SupervisorStrategy"></a>
@@ -920,23 +977,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="gopher.channels.ChannelActor#writeIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="writeIndex:Int"></a>
-      <a id="writeIndex:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">writeIndex</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#gopher.channels.ChannelActor@writeIndex:Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="gopher.channels.ChannelActor#writers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="writers:scala.collection.immutable.Queue[gopher.channels.ContWrite[A,_]]"></a>
       <a id="writers:Queue[ContWrite[A,_]]"></a>

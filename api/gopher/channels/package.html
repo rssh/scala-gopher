@@ -63,7 +63,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -76,7 +76,7 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -91,7 +91,24 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="gopher.channels.AsyncFullReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="gopher.channels.ActorBackedChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ActorBackedChannel[A]extendsChannel[A]"></a>
+      <a id="ActorBackedChannel[A]:ActorBackedChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ActorBackedChannel.html"><span class="name">ActorBackedChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.ActorBackedChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ActorBackedChannel[A]extendsChannel[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.AsyncFullReadSelectorArgument" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="AsyncFullReadSelectorArgument[A,B]extendsReadSelectorArgument[A,B]withProductwithSerializable"></a>
       <a id="AsyncFullReadSelectorArgument[A,B]:AsyncFullReadSelectorArgument[A,B]"></a>
       <h4 class="signature">
@@ -227,13 +244,31 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </a>
     </span>
       
-    </li><li name="gopher.channels.Channel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.channels.BufferedChannelActor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BufferedChannelActor[A]extendsChannelActor[A]"></a>
+      <a id="BufferedChannelActor[A]:BufferedChannelActor[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BufferedChannelActor.html"><span class="name">BufferedChannelActor</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>[<span class="extype" name="gopher.channels.BufferedChannelActor.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@BufferedChannelActor[A]extendsChannelActor[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">ChannelActor - actor, which leave
+</p>
+    </li><li name="gopher.channels.Channel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Channel[A]extendsInputOutput[A]"></a>
       <a id="Channel[A]:Channel[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
         <a href="Channel.html"><span class="name">Channel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>[<span class="extype" name="gopher.channels.Channel.A">A</span>]</span>
@@ -244,12 +279,12 @@ determinate idle selectors and activer appropriative actions.</p></div><div clas
       </a>
     </span>
       
-    </li><li name="gopher.channels.ChannelActor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="gopher.channels.ChannelActor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ChannelActor[A]extendsActor"></a>
       <a id="ChannelActor[A]:ChannelActor[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -458,6 +493,57 @@ within given timeout: think that channel is-dead.
       </a>
     </span>
       
+    </li><li name="gopher.channels.EffectedChannel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EffectedChannel[A]extendsChannel[A]withEffected[gopher.channels.Channel[A]]"></a>
+      <a id="EffectedChannel[A]:EffectedChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedChannel.html"><span class="name">EffectedChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.EffectedChannel.A">A</span>] with <a href="../util/Effected.html" class="extype" name="gopher.util.Effected">Effected</a>[<a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.EffectedChannel.A">A</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedChannel[A]extendsChannel[A]withEffected[gopher.channels.Channel[A]]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.EffectedInput" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EffectedInput[A]extendsInput[A]withEffected[gopher.channels.Input[A]]"></a>
+      <a id="EffectedInput[A]:EffectedInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedInput.html"><span class="name">EffectedInput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.EffectedInput.A">A</span>] with <a href="../util/Effected.html" class="extype" name="gopher.util.Effected">Effected</a>[<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.EffectedInput.A">A</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedInput[A]extendsInput[A]withEffected[gopher.channels.Input[A]]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.EffectedOutput" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EffectedOutput[A]extendsEffected[gopher.channels.Output[A]]withOutput[A]"></a>
+      <a id="EffectedOutput[A]:EffectedOutput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedOutput.html"><span class="name">EffectedOutput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/Effected.html" class="extype" name="gopher.util.Effected">Effected</a>[<a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.EffectedOutput.A">A</span>]] with <a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.EffectedOutput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedOutput[A]extendsEffected[gopher.channels.Output[A]]withOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.FlowContinuated" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="FlowContinuated[A]extendsContinuated[A]"></a>
       <a id="FlowContinuated[A]:FlowContinuated[A]"></a>
@@ -471,6 +557,58 @@ within given timeout: think that channel is-dead.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@FlowContinuated[A]extendsContinuated[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.FoldSelect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FoldSelect[T]extendsFoldSelectorBuilder[T]"></a>
+      <a id="FoldSelect[T]:FoldSelect[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FoldSelect.html"><span class="name">FoldSelect</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="FoldSelectorBuilder.html" class="extype" name="gopher.channels.FoldSelectorBuilder">FoldSelectorBuilder</a>[<span class="extype" name="gopher.channels.FoldSelect.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@FoldSelect[T]extendsFoldSelectorBuilder[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Short name for use in fold signature
+</p>
+    </li><li name="gopher.channels.FoldSelectorBuilder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="FoldSelectorBuilder[T]extendsSelectorBuilder[T]"></a>
+      <a id="FoldSelectorBuilder[T]:FoldSelectorBuilder[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="FoldSelectorBuilder.html"><span class="name">FoldSelectorBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.FoldSelectorBuilder.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@FoldSelectorBuilder[T]extendsSelectorBuilder[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.FoldSelectorBuilderImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FoldSelectorBuilderImplextendsAnyRef"></a>
+      <a id="FoldSelectorBuilderImpl:FoldSelectorBuilderImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FoldSelectorBuilderImpl.html"><span class="name">FoldSelectorBuilderImpl</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@FoldSelectorBuilderImplextendsAnyRef" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -574,6 +712,24 @@ select.forever{
       </a>
     </span>
       
+    </li><li name="gopher.channels.InputSelectorBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InputSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]withInput[T]"></a>
+      <a id="InputSelectorBuilder[T]:InputSelectorBuilder[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InputSelectorBuilder.html"><span class="name">InputSelectorBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">SelectorBuilder</a>[<span class="extype" name="gopher.channels.InputSelectorBuilder.T">T</span>] with <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.InputSelectorBuilder.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@InputSelectorBuilder[T]extendsSelectorBuilder[T@scala.annotation.unchecked.uncheckedVariance]withInput[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builder for 'input' selector.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for 'input' selector. Can be obtained as <code>gopherApi.select.input</code>.
+or map of forever selector.</p></div></div>
     </li><li name="gopher.channels.InputWithTimeouts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="InputWithTimeouts[A]extendsAnyRef"></a>
       <a id="InputWithTimeouts[A]:InputWithTimeouts[A]"></a>
@@ -613,6 +769,57 @@ when reading from wrapped channel take more time than <code>timeout</code> .
       <p class="shortcomment cmt">lazy channel, which created during first input/output operations.</p><div class="fullcomment"><div class="comment cmt"><p>lazy channel, which created during first input/output operations.
 (used in transputers as default value for In/Out Ports)
 </p></div></div>
+    </li><li name="gopher.channels.MultithreadedEffectedChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultithreadedEffectedChannel[A]extendsMultithreadedEffected[gopher.channels.Channel[A]]withEffectedChannel[A]"></a>
+      <a id="MultithreadedEffectedChannel[A]:MultithreadedEffectedChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultithreadedEffectedChannel.html"><span class="name">MultithreadedEffectedChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/MultithreadedEffected.html" class="extype" name="gopher.util.MultithreadedEffected">MultithreadedEffected</a>[<a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedChannel.A">A</span>]] with <a href="EffectedChannel.html" class="extype" name="gopher.channels.EffectedChannel">EffectedChannel</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@MultithreadedEffectedChannel[A]extendsMultithreadedEffected[gopher.channels.Channel[A]]withEffectedChannel[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.MultithreadedEffectedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultithreadedEffectedInput[A]extendsMultithreadedEffected[gopher.channels.Input[A]]withEffectedInput[A]"></a>
+      <a id="MultithreadedEffectedInput[A]:MultithreadedEffectedInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultithreadedEffectedInput.html"><span class="name">MultithreadedEffectedInput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/MultithreadedEffected.html" class="extype" name="gopher.util.MultithreadedEffected">MultithreadedEffected</a>[<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedInput.A">A</span>]] with <a href="EffectedInput.html" class="extype" name="gopher.channels.EffectedInput">EffectedInput</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedInput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@MultithreadedEffectedInput[A]extendsMultithreadedEffected[gopher.channels.Input[A]]withEffectedInput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.MultithreadedEffectedOutput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultithreadedEffectedOutput[A]extendsMultithreadedEffected[gopher.channels.Output[A]]withEffectedOutput[A]"></a>
+      <a id="MultithreadedEffectedOutput[A]:MultithreadedEffectedOutput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultithreadedEffectedOutput.html"><span class="name">MultithreadedEffectedOutput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/MultithreadedEffected.html" class="extype" name="gopher.util.MultithreadedEffected">MultithreadedEffected</a>[<a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedOutput.A">A</span>]] with <a href="EffectedOutput.html" class="extype" name="gopher.channels.EffectedOutput">EffectedOutput</a>[<span class="extype" name="gopher.channels.MultithreadedEffectedOutput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@MultithreadedEffectedOutput[A]extendsMultithreadedEffected[gopher.channels.Output[A]]withEffectedOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.NewChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NewChannelextendsProductwithSerializable"></a>
       <a id="NewChannel:NewChannel"></a>
@@ -786,6 +993,74 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </a>
     </span>
       
+    </li><li name="gopher.channels.SelectorBuilderImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SelectorBuilderImplextendsAnyRef"></a>
+      <a id="SelectorBuilderImpl:SelectorBuilderImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SelectorBuilderImpl.html"><span class="name">SelectorBuilderImpl</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SelectorBuilderImplextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SinglethreadedEffectedChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SinglethreadedEffectedChannel[A]extendsSinglethreadedEffected[gopher.channels.Channel[A]]withEffectedChannel[A]"></a>
+      <a id="SinglethreadedEffectedChannel[A]:SinglethreadedEffectedChannel[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SinglethreadedEffectedChannel.html"><span class="name">SinglethreadedEffectedChannel</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/SinglethreadedEffected.html" class="extype" name="gopher.util.SinglethreadedEffected">SinglethreadedEffected</a>[<a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedChannel.A">A</span>]] with <a href="EffectedChannel.html" class="extype" name="gopher.channels.EffectedChannel">EffectedChannel</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedChannel.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SinglethreadedEffectedChannel[A]extendsSinglethreadedEffected[gopher.channels.Channel[A]]withEffectedChannel[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SinglethreadedEffectedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SinglethreadedEffectedInput[A]extendsSinglethreadedEffected[gopher.channels.Input[A]]withEffectedInput[A]"></a>
+      <a id="SinglethreadedEffectedInput[A]:SinglethreadedEffectedInput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SinglethreadedEffectedInput.html"><span class="name">SinglethreadedEffectedInput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/SinglethreadedEffected.html" class="extype" name="gopher.util.SinglethreadedEffected">SinglethreadedEffected</a>[<a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedInput.A">A</span>]] with <a href="EffectedInput.html" class="extype" name="gopher.channels.EffectedInput">EffectedInput</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedInput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SinglethreadedEffectedInput[A]extendsSinglethreadedEffected[gopher.channels.Input[A]]withEffectedInput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.SinglethreadedEffectedOutput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SinglethreadedEffectedOutput[A]extendsSinglethreadedEffected[gopher.channels.Output[A]]withEffectedOutput[A]"></a>
+      <a id="SinglethreadedEffectedOutput[A]:SinglethreadedEffectedOutput[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SinglethreadedEffectedOutput.html"><span class="name">SinglethreadedEffectedOutput</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../util/SinglethreadedEffected.html" class="extype" name="gopher.util.SinglethreadedEffected">SinglethreadedEffected</a>[<a href="Output.html" class="extype" name="gopher.channels.Output">Output</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedOutput.A">A</span>]] with <a href="EffectedOutput.html" class="extype" name="gopher.channels.EffectedOutput">EffectedOutput</a>[<span class="extype" name="gopher.channels.SinglethreadedEffectedOutput.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@SinglethreadedEffectedOutput[A]extendsSinglethreadedEffected[gopher.channels.Output[A]]withEffectedOutput[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.Skip" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Skip[A]extendsFlowContinuated[A]withProductwithSerializable"></a>
       <a id="Skip[A]:Skip[A]"></a>
@@ -889,6 +1164,24 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
       </a>
     </span>
       
+    </li><li name="gopher.channels.UnbufferedChannelActor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnbufferedChannelActor[A]extendsChannelActor[A]"></a>
+      <a id="UnbufferedChannelActor[A]:UnbufferedChannelActor[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="UnbufferedChannelActor.html"><span class="name">UnbufferedChannelActor</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="ChannelActor.html" class="extype" name="gopher.channels.ChannelActor">ChannelActor</a>[<span class="extype" name="gopher.channels.UnbufferedChannelActor.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@UnbufferedChannelActor[A]extendsChannelActor[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">ChannelActor - actor, which leave
+</p>
     </li><li name="gopher.channels.WriteSelectorArgument" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="WriteSelectorArgument[A,B]extendsAnyRef"></a>
       <a id="WriteSelectorArgument[A,B]:WriteSelectorArgument[A,B]"></a>
@@ -930,7 +1223,24 @@ Can be obtained via gopherAPI</p><pre><span class="kw">val</span> selector = gop
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="gopher.channels.ChannelClose" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="gopher.channels.Channel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Channel"></a>
+      <a id="Channel:Channel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Channel$.html"><span class="name">Channel</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@Channel" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ChannelClose" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ChannelClose"></a>
       <a id="ChannelClose:ChannelClose"></a>
       <h4 class="signature">
@@ -1005,6 +1315,23 @@ reference to channel, backed by this actor.</p>
       </a>
     </span>
       
+    </li><li name="gopher.channels.ContWrite" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ContWrite"></a>
+      <a id="ContWrite:ContWrite"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ContWrite$.html"><span class="name">ContWrite</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@ContWrite" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.CurrentFlowTermination" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CurrentFlowTermination"></a>
       <a id="CurrentFlowTermination:CurrentFlowTermination"></a>
@@ -1018,6 +1345,74 @@ reference to channel, backed by this actor.</p>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#gopher.channels.package@CurrentFlowTermination" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.EffectedChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EffectedChannel"></a>
+      <a id="EffectedChannel:EffectedChannel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedChannel$.html"><span class="name">EffectedChannel</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedChannel" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.EffectedInput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EffectedInput"></a>
+      <a id="EffectedInput:EffectedInput"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedInput$.html"><span class="name">EffectedInput</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedInput" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.EffectedOutput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EffectedOutput"></a>
+      <a id="EffectedOutput:EffectedOutput"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EffectedOutput$.html"><span class="name">EffectedOutput</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@EffectedOutput" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.FoldSelectorBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FoldSelectorBuilder"></a>
+      <a id="FoldSelectorBuilder:FoldSelectorBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="FoldSelectorBuilder$.html"><span class="name">FoldSelectorBuilder</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.package@FoldSelectorBuilder" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

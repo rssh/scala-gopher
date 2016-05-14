@@ -56,7 +56,7 @@
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>, <a href="FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>, <a href="../Transputer$InPort.html" class="extype" name="gopher.Transputer.InPort">InPort</a>, <a href="../transputers/ReplicatedTransputer$InPortWithAdapter.html" class="extype" name="gopher.transputers.ReplicatedTransputer.InPortWithAdapter">InPortWithAdapter</a>, <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>, <a href="Input$$IterableInput.html" class="extype" name="gopher.channels.Input.IterableInput">IterableInput</a>, <a href="LazyChannel.html" class="extype" name="gopher.channels.LazyChannel">LazyChannel</a>, <a href="OrInput.html" class="extype" name="gopher.channels.OrInput">OrInput</a>, <a href="ZippedInput.html" class="extype" name="gopher.channels.ZippedInput">ZippedInput</a></div>
+            <div class="subClasses hiddenContent"><a href="ActorBackedChannel.html" class="extype" name="gopher.channels.ActorBackedChannel">ActorBackedChannel</a>, <a href="Channel.html" class="extype" name="gopher.channels.Channel">Channel</a>, <a href="EffectedChannel.html" class="extype" name="gopher.channels.EffectedChannel">EffectedChannel</a>, <a href="EffectedInput.html" class="extype" name="gopher.channels.EffectedInput">EffectedInput</a>, <a href="FutureInput.html" class="extype" name="gopher.channels.FutureInput">FutureInput</a>, <a href="../Transputer$InPort.html" class="extype" name="gopher.Transputer.InPort">InPort</a>, <a href="../transputers/ReplicatedTransputer$InPortWithAdapter.html" class="extype" name="gopher.transputers.ReplicatedTransputer.InPortWithAdapter">InPortWithAdapter</a>, <a href="InputOutput.html" class="extype" name="gopher.channels.InputOutput">InputOutput</a>, <a href="InputSelectorBuilder.html" class="extype" name="gopher.channels.InputSelectorBuilder">InputSelectorBuilder</a>, <a href="Input$$IterableInput.html" class="extype" name="gopher.channels.Input.IterableInput">IterableInput</a>, <a href="LazyChannel.html" class="extype" name="gopher.channels.LazyChannel">LazyChannel</a>, <a href="MultithreadedEffectedChannel.html" class="extype" name="gopher.channels.MultithreadedEffectedChannel">MultithreadedEffectedChannel</a>, <a href="MultithreadedEffectedInput.html" class="extype" name="gopher.channels.MultithreadedEffectedInput">MultithreadedEffectedInput</a>, <a href="OrInput.html" class="extype" name="gopher.channels.OrInput">OrInput</a>, <a href="SinglethreadedEffectedChannel.html" class="extype" name="gopher.channels.SinglethreadedEffectedChannel">SinglethreadedEffectedChannel</a>, <a href="SinglethreadedEffectedInput.html" class="extype" name="gopher.channels.SinglethreadedEffectedInput">SinglethreadedEffectedInput</a>, <a href="ZippedInput.html" class="extype" name="gopher.channels.ZippedInput">ZippedInput</a></div>
           </div></div>
         
 
@@ -67,7 +67,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -80,7 +80,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -243,6 +243,63 @@
       </a>
     </span>
       <p class="shortcomment cmt">synonym for read.</p>
+    </li><li name="gopher.channels.Input#afold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="afold[S,B](s0:S)(f:(S,A)=&gt;S):scala.concurrent.Future[S]"></a>
+      <a id="afold[S,B](S)((S,A)⇒S):Future[S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">afold</span><span class="tparams">[<span name="S">S</span>, <span name="B">B</span>]</span><span class="params">(<span name="s0">s0: <span class="extype" name="gopher.channels.Input.afold.S">S</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Input.afold.S">S</span>, <span class="extype" name="gopher.channels.Input.A">A</span>) ⇒ <span class="extype" name="gopher.channels.Input.afold.S">S</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Input.afold.S">S</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@afold[S,B](s0:S)(f:(S,A)=&gt;S):scala.concurrent.Future[S]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">async incarnation of fold.</p><div class="fullcomment"><div class="comment cmt"><p>async incarnation of fold. Fold return future, which successed when channel is closed.
+Operations withing fold applyed on result on each other, starting with s0.
+<code><code><code>
+val fsum = ch.afold(0){ (s, n) =&gt; s+n }
+<code><code><code>
+Here in fsum will be future with value: sum of all elements in channel until one has been closed.
+</code></code></code></code></code></code></p></div></div>
+    </li><li name="gopher.channels.Input#afoldAsync" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="afoldAsync[S,B](s0:S)(f:(S,A)=&gt;scala.concurrent.Future[S])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[S]"></a>
+      <a id="afoldAsync[S,B](S)((S,A)⇒Future[S])(ExecutionContext):Future[S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">afoldAsync</span><span class="tparams">[<span name="S">S</span>, <span name="B">B</span>]</span><span class="params">(<span name="s0">s0: <span class="extype" name="gopher.channels.Input.afoldAsync.S">S</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Input.afoldAsync.S">S</span>, <span class="extype" name="gopher.channels.Input.A">A</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Input.afoldAsync.S">S</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Input.afoldAsync.S">S</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@afoldAsync[S,B](s0:S)(f:(S,A)=&gt;scala.concurrent.Future[S])(implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[S]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.Input#afoldSync" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="afoldSync[S,B](s0:S)(f:(S,A)=&gt;S):scala.concurrent.Future[S]"></a>
+      <a id="afoldSync[S,B](S)((S,A)⇒S):Future[S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">afoldSync</span><span class="tparams">[<span name="S">S</span>, <span name="B">B</span>]</span><span class="params">(<span name="s0">s0: <span class="extype" name="gopher.channels.Input.afoldSync.S">S</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Input.afoldSync.S">S</span>, <span class="extype" name="gopher.channels.Input.A">A</span>) ⇒ <span class="extype" name="gopher.channels.Input.afoldSync.S">S</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.channels.Input.afoldSync.S">S</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@afoldSync[S,B](s0:S)(f:(S,A)=&gt;S):scala.concurrent.Future[S]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.channels.Input#aforeach" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="aforeach(f:A=&gt;Unit):scala.concurrent.Future[Unit]"></a>
       <a id="aforeach((A)⇒Unit):Future[Unit]"></a>
@@ -513,6 +570,29 @@ in case of stream is closed.
       </a>
     </span>
       
+    </li><li name="gopher.channels.Input#fold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fold[S,B](s0:S)(f:(S,A)=&gt;S):S"></a>
+      <a id="fold[S,B](S)((S,A)⇒S):S"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fold</span><span class="tparams">[<span name="S">S</span>, <span name="B">B</span>]</span><span class="params">(<span name="s0">s0: <span class="extype" name="gopher.channels.Input.fold.S">S</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="gopher.channels.Input.fold.S">S</span>, <span class="extype" name="gopher.channels.Input.A">A</span>) ⇒ <span class="extype" name="gopher.channels.Input.fold.S">S</span></span>)</span><span class="result">: <span class="extype" name="gopher.channels.Input.fold.S">S</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.Input@fold[S,B](s0:S)(f:(S,A)=&gt;S):S" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">fold opeations, available inside async bloc.</p><div class="fullcomment"><div class="comment cmt"><p>fold opeations, available inside async bloc.
+<code><code><code>
+go {
+  val sum = ch.fold(0){ (s,n) =&gt; s+n }
+}
+<code><code><code>
+</code></code></code></code></code></code></p></div></div>
     </li><li name="gopher.channels.Input#foreach" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foreach(f:A=&gt;Unit):Unit"></a>
       <a id="foreach((A)⇒Unit):Unit"></a>

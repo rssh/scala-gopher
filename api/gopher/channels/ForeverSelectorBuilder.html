@@ -66,7 +66,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -79,7 +79,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -438,6 +438,40 @@ example of usage:</p><pre>go {
                 <span class="name">@inline</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="gopher.channels.ForeverSelectorBuilder#input" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="input[B](f:PartialFunction[Any,B]):gopher.channels.Input[B]"></a>
+      <a id="input[B](PartialFunction[Any,B]):Input[B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">input</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="gopher.channels.ForeverSelectorBuilder.input.B">B</span>]</span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ForeverSelectorBuilder.input.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@input[B](f:PartialFunction[Any,B]):gopher.channels.Input[B]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher.channels.ForeverSelectorBuilder#inputBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inputBuilder[B]():gopher.channels.InputSelectorBuilder[B]"></a>
+      <a id="inputBuilder[B]():InputSelectorBuilder[B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputBuilder</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">()</span><span class="result">: <a href="InputSelectorBuilder.html" class="extype" name="gopher.channels.InputSelectorBuilder">InputSelectorBuilder</a>[<span class="extype" name="gopher.channels.ForeverSelectorBuilder.inputBuilder.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@inputBuilder[B]():gopher.channels.InputSelectorBuilder[B]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -455,6 +489,27 @@ example of usage:</p><pre>go {
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="gopher.channels.ForeverSelectorBuilder#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="map[B](f:Any=&gt;B):gopher.channels.Input[B]"></a>
+      <a id="map[B]((Any)⇒B):Input[B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="scala.Any">Any</span>) ⇒ <span class="extype" name="gopher.channels.ForeverSelectorBuilder.map.B">B</span></span>)</span><span class="result">: <a href="Input.html" class="extype" name="gopher.channels.Input">Input</a>[<span class="extype" name="gopher.channels.ForeverSelectorBuilder.map.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#gopher.channels.ForeverSelectorBuilder@map[B](f:Any=&gt;B):gopher.channels.Input[B]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">provide syntax for creating output channels.</p><div class="fullcomment"><div class="comment cmt"><p>provide syntax for creating output channels.</p><pre><span class="kw">val</span> multiplexed = <span class="kw">for</span>(s <span class="kw">&lt;-</span> gopherApi.select.forever) <span class="kw">yield</span>
+     s <span class="kw">match</span> {
+        <span class="kw">case</span> x: channelA <span class="kw">=&gt;</span> s<span class="lit">"A:${x}"</span>
+        <span class="kw">case</span> x: channelB <span class="kw">=&gt;</span> s<span class="lit">"B:${x}"</span>
+     }</pre></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>

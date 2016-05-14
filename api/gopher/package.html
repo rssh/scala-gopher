@@ -74,7 +74,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
        f.close()
     }
   }
-}</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">channels.Channel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
+}</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="channels/SelectFactory.html" class="extype" name="gopher.channels.SelectFactory">channels.SelectFactory</a></p></span><span class="cmt"><p><a href="channels/SelectorBuilder.html" class="extype" name="gopher.channels.SelectorBuilder">channels.SelectorBuilder</a></p></span><span class="cmt"><p><a href="channels/Output.html" class="extype" name="gopher.channels.Output">channels.Output</a></p></span><span class="cmt"><p><a href="channels/Input.html" class="extype" name="gopher.channels.Input">channels.Input</a></p></span><span class="cmt"><p><a href="channels/Channel.html" class="extype" name="gopher.channels.Channel">channels.Channel</a></p></span><span class="cmt"><p><a href="GopherAPI.html" class="extype" name="gopher.GopherAPI">GopherAPI</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -87,7 +87,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -100,7 +100,7 @@ Await.ready(consumer, <span class="num">10</span> seconds)</pre><p>and defer/rec
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -289,6 +289,23 @@ exiting the loop.</p><pre>select.forever{
       </a>
     </span>
       <p class="shortcomment cmt">Transputer, where dehaviour can be described by selector function</p>
+    </li><li name="gopher.ThreadingPolicy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ThreadingPolicyextendsAnyRef"></a>
+      <a id="ThreadingPolicy:ThreadingPolicy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ThreadingPolicy.html"><span class="name">ThreadingPolicy</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@ThreadingPolicyextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.Transputer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="TransputerextendsAnyRef"></a>
       <a id="Transputer:Transputer"></a>
@@ -403,6 +420,23 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </a>
     </span>
       
+    </li><li name="gopher.ThreadingPolicy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ThreadingPolicy"></a>
+      <a id="ThreadingPolicy:ThreadingPolicy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ThreadingPolicy$.html"><span class="name">ThreadingPolicy</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@ThreadingPolicy" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="gopher.Transputer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transputer"></a>
       <a id="Transputer:Transputer"></a>
@@ -416,6 +450,23 @@ statement and then can be combined into larger structures</p><p>Transputers can 
       </span>
       </h4><span class="permalink">
       <a href="../index.html#gopher.package@Transputer" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gopher#awaitImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="awaitImpl[T](c:scala.reflect.macros.blackbox.Context)(v:c.Expr[scala.concurrent.Future[T]]):c.Expr[T]"></a>
+      <a id="awaitImpl[T](Context)(scala.reflect.macros.blackbox.Context.Expr[Future[T]]):scala.reflect.macros.blackbox.Context.Expr[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">awaitImpl</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>)</span><span class="params">(<span name="v">v: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.blackbox.Context.Expr</span>[<span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="gopher.awaitImpl.T">T</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.macros.Aliases.Expr">scala.reflect.macros.blackbox.Context.Expr</span>[<span class="extype" name="gopher.awaitImpl.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#gopher.package@awaitImpl[T](c:scala.reflect.macros.blackbox.Context)(v:c.Expr[scala.concurrent.Future[T]]):c.Expr[T]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
