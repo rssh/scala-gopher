@@ -18,5 +18,18 @@ CSP for scala: implementation, papers, ect ..
 
 * implementation over hawtdipath: https://github.com/oplohmann/CoSelect.Scala
 
+Related
+
+* PiLib is an implementation of \pi-calculus with scala as a hosted language: http://lampwww.epfl.ch/~cremet/publications/pilib.pdf  
+```
+@INPROCEEDINGS{Cremet03pilib:a,
+    author = {Vincent Cremet and Martin Odersky},
+    title = {PiLib: A hosted language for pi-calculus style concurrency},
+    booktitle = {In Dagstuhl proc.: Domain-Specific Program Generation},
+    year = {2003}
+}
+
+```
+
 ------------------
   part of [scala-gopher](https://github.com/rssh/scala-gopher)

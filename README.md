@@ -136,7 +136,7 @@ Outside we can use asynchronous version:
 * `channel.awrite(x)` will write `x` and return to us `Future[Unit]` which will be executed after x will send
 * `channel.aread` will return future to the value, which will be read.
 
-Also, channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException'. Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception.  
+Also, channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException.' Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception.  
 
 Note, closing channels is not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
 
@@ -166,7 +166,7 @@ Also, note that you can provide own Input and Output implementations by implemen
   'select statement' is somewhat similar to Unix 'select' syscall:
   from a set of blocking operations select one who is ready to input/output and run it.
 
-  The typical pattern of channel processing in go language is to wrap select operation into an endless loop.
+  The usual pattern of channel processing in go language is to wrap select operation into an endless loop.
  
   Gopher provides similar functionality:
 
@@ -202,7 +202,7 @@ go{
 ~~~
     
  
-  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop.
+  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop. `select.exit` and `select.shutdown` macroses can be used as shortcuts.
   
   Example: 
 
@@ -216,22 +216,22 @@ val consumer = gopherApi.select.forever{
         case i: channerl.read  =>
                   sum = sum + i
                   if (i==1000)  {
-                    implictily[FlowTermination[Unit]].doExit(())
+                    select.shutdown()
                   }
 }
      
 Await.ready(consumer, 5.second)
 ~~~
 
-   Combination from variable and select loop better modeled with help 'fold over select':
+   Combination of variable and select loop better modeled with help 'fold over select' construction:
 
 ~~~ scala
-val consumer = gopherApi.select.afold(0) { (state, selector) =>
+val sum = gopherApi.select.afold(0) { (state, selector) =>
    selector match {
         case i: channel.read  =>
                           val nstate = state + i
                           if (i==1000) {
-                            implictily[FlowTermination[Int]].doExit(nstate)
+                            select.exit(nstate)
                           }
                           nstate
    }
@@ -245,9 +245,18 @@ val consumer = gopherApi.select.afold(0) { (state, selector) =>
 val fib = select.afold((0,1)) { case ((x,y), s) =>
     s match {
       case x:channel.write => (y,y+x)
-      case q:quit.read => CurrentFlowTermination.exit((x,y))
+      case q:quit.read => select.exit((x,y))
     }
 }
+~~~
+
+   Also, we can use 'map over select' to represent results of handling of different events as input side of channel:
+
+~~~ scala
+val multiplexed = select amap {
+   case x:ch1.read => (s1,x)
+   case y:ch2.read => (s2,y)
+ } 
 ~~~
 
 
@@ -264,7 +273,6 @@ gopherApi.select.once{
 
    Such form can be called from any environment and will return `Future[String]`.  Inside `go` you can wrap this in await of use 'for' syntax as with `forever`.
     
-
 ~~~ scala
 go {
   .....
@@ -286,11 +294,22 @@ go {
   val sum = select.fold(0) { (n,s) =>
              s match {
                case x: channelA.read => n+x
-               case q: quit.read => CurrentFlowTermination.exit(n)
+               case q: quit.read => select.exit(n)
              }
             }
 }
 ~~~
+
+ amap - map
+
+~~~ scala
+val multiplexed = for(s <- select) yield
+                    s match {
+                      case x:ch1.read => (s1,x)
+                      case y:ch2.read => (s2,y)
+                    }
+~~~
+ 
 
 ## Effected{Input,Output,Channel}
 
@@ -345,7 +364,8 @@ Transformers are build hierarchically with help of 3 operations:
 
 ### Select transputer
 
- Let's look at a simple example: transputer with two input ports and one output. When same number has come from `inA` and `inB`, then
+ Let's look at a simple example: transputer with two input ports and one output. 
+When the same number has come from `inA` and `inB`, then
 transputer prints `Bingo` on console and output this number to `out`:
 
 ~~~ scala
