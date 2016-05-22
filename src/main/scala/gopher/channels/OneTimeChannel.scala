@@ -7,11 +7,16 @@ import java.util.concurrent.atomic._
 /**
  * channel, in which only one message can be written,
  * after which it is automatically closed
+ *
+ * Writer is not waiting for reader to start.   
  */
 class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
 {
-  val p = Promise[T]()
-  val readed = new AtomicBoolean(false)
+  private[this] val p = Promise[T]()
+  private[this] val readed = new AtomicBoolean(false)
+
+  def future = p.future
+  def promise = p
 
   def cbread[B](f: ContRead[T,B] => Option[ContRead.In[T] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = 
   {
@@ -29,11 +34,11 @@ class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
   def cbwrite[B](f: ContWrite[T,B] => Option[(T, Future[Continuated[B]])],ft: FlowTermination[B]): Unit = 
   {
     if (p.isCompleted) {
-       throw new ChannelClosedException()
+       ft.doThrow(new ChannelClosedException())
     } else {
        f(ContWrite(f,this,ft)) foreach { case (a, next) =>
            if (!p.trySuccess(a)) {
-             throw new ChannelClosedException()
+             ft.doThrow(throw new ChannelClosedException())
            }
            api.continue(next,ft)
        }
@@ -43,5 +48,13 @@ class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
 
   def close(): Unit = 
        p failure new ChannelClosedException()
+
+}
+
+object OneTimeChannel
+{
+
+  def apply[A]()(implicit api:GopherAPI): OneTimeChannel[A] =
+    new OneTimeChannel[A](api)
 
 }

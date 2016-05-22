@@ -324,6 +324,16 @@ class MacroSelectSuite extends FunSuite
      assert(s1==3 || s1==10)
    }
 
+   test("one-time channel make")  {
+     import gopherApi._
+     val ch = gopherApi.make[OneTimeChannel[Int]]()
+     val f1 = ch.awrite(1)
+     val f2 = ch.awrite(2)
+     val x = Await.result(ch.aread, 10 seconds)
+     val x2 = Await.result(f2.failed, 10 seconds)
+     assert(x==1)
+     assert(x2.isInstanceOf[ChannelClosedException])
+   }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    
