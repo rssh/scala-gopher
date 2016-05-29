@@ -242,7 +242,7 @@ object SelectorBuilder
      import c.universe._
      cases map { cs =>
         cs.pat match {
-           case Bind(ident, t) => foreachTransformReadWriteCaseDef(c)(bn,cs)
+           case Bind(ident, t) => foreachTransformReadWriteTimeoutCaseDef(c)(bn,cs)
            case Ident(TermName("_")) => foreachTransformIdleCaseDef(c)(bn,cs)
            case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+cs.pat)
         }
@@ -250,7 +250,7 @@ object SelectorBuilder
    }
 
 
-   def foreachTransformReadWriteCaseDef(c:Context)(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
+   def foreachTransformReadWriteTimeoutCaseDef(c:Context)(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
    {
     import c.universe._
 
@@ -346,18 +346,27 @@ object SelectorBuilder
                     tpo match {
                        case Select(ch,TypeName("read")) =>
                                    if (!caseDef.guard.isEmpty) {
-                                     c.abort(caseDef.guard.pos,"guard is not supported in select case")
+                                     c.abort(caseDef.guard.pos,"guard is not supported in read in select case")
                                    }
                                    val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
-                                   reading
+                                   atPos(caseDef.pat.pos)(reading)
                        case Select(ch,TypeName("write")) =>
                                    val expression = if (!caseDef.guard.isEmpty) {
                                                       parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
                                                     } else {
-                                                      Ident(termName)
+                                                      atPos(caseDef.pat.pos)(Ident(termName))
                                                     }
                                    val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-                                   writing
+                                   atPos(caseDef.pat.pos)(writing)
+                       case Select(select,TypeName("timeout")) =>
+                                   val expression = if (!caseDef.guard.isEmpty) {
+                                                      parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
+                                                    } else {
+                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout]")
+                                                    }
+                                   val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
+                                   System.err.println(s"generate timeout statement: ${timeout}")
+                                   atPos(caseDef.pat.pos)(timeout)
                        case _ =>
                          if (caseDef.guard.isEmpty) {
                             c.abort(tp.pos, "row caseDef:"+showRaw(caseDef) );
@@ -396,7 +405,7 @@ object SelectorBuilder
                     }
                     c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
       case _ =>
-            c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read");
+            c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read or x:select.timeout");
     }
     
     retval
