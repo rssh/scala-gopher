@@ -6,6 +6,7 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 
@@ -22,6 +23,8 @@ class SelectFactory(val api: GopherAPI)
 {
  
   selectFactory =>
+
+  type timeout = FiniteDuration
 
   trait SelectFactoryApi
   {

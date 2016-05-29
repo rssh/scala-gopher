@@ -30,9 +30,13 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    *  }
    * }}}
    */
-  def select: SelectFactory =
+  val select: SelectFactory =
     new SelectFactory(this)
 
+  /**
+   * Generic schema for making objects, which requiere gopherAPI for constructions.
+   *
+   **/
   def make[T](args: Any*): T = macro GopherAPI.makeImpl[T]
 
   /**
