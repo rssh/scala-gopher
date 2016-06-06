@@ -31,6 +31,16 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    idleWaiters add makeLocked(Skip(f,this))
   }
 
+  def addTimeoutSkip(f: Skip[A] => Option[Future[Continuated[A]]], timeout: FiniteDuration):Unit =
+  {
+   if (timeoutRecord.isEmpty) {
+     val locked = makeLocked(Skip(f,this))
+     timeoutRecord = Some(new TimeoutRecord(nOperations.get,timeout.toMillis,locked))
+   } else {
+     throw new IllegalStateException("select must have only one timeout entry")
+   }
+  }
+
   def run:Future[A] =
   {
     sendWaits()
@@ -130,6 +140,33 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   }
 
 
+  private[this] def scheduleTimeout():Unit =
+  {
+
+    val scheduler = api.actorSystem.scheduler
+
+    def tickOperation():Unit =
+    {
+     if (!isCompleted) {
+      for(tr <- timeoutRecord) { 
+        val currentNOperations = nOperations.get()
+        if (currentNOperations == tr.lastNOperations) {
+           // fire
+           ???
+        } else {
+           val now = System.currentTimeMillis()
+           val nextTime = lastOperationEnd.get() + tr.timeoutMillis
+           tr.lastNOperations = nOperations.get()
+           scheduler.scheduleOnce((nextTime - now).millis)(tickOperation)
+        }
+      }
+     }
+    }
+
+    tickOperation()
+
+  }
+
   def isLocked: Boolean = lockFlag.get();
 
   private[this] def tryLock(): Boolean = lockFlag.compareAndSet(false,true)
@@ -155,6 +192,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      false
     } else true
   }
+
+  
 
   private[this] def sendWaits(waiters: ConcurrentLinkedQueue[Continuated[A]] = waiters): Unit =
   {
@@ -184,10 +223,13 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      }
    }
 
- 
 
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
+  
+  // when last operation was started
+  private[this] val lastOperationEnd: AtomicLong = new AtomicLong(0L)
+  private[this] var haveTimeout: Boolean = false
 
   // number of operations, increased during each lock/unlock.
   //  used for idle detection.
@@ -195,6 +237,13 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
   private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
+
+  private[this] class TimeoutRecord(
+                        var lastNOperations: Long,
+                        var timeoutMillis: Long,
+                        var waiter: Continuated[A]
+                      ) 
+  private[this] var timeoutRecord: Option[TimeoutRecord] = None
 
   private[this] val processor = api.continuatedProcessorRef
 
