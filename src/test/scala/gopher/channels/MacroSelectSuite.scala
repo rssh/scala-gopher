@@ -335,7 +335,7 @@ class MacroSelectSuite extends FunSuite
      assert(x2.isInstanceOf[ChannelClosedException])
    }
 
-   test("select with constant timeout")  {
+   test("select with constant timeout which not fire")  {
      //pending
      import gopherApi._
      val ch1 = makeChannel[Int](10)
@@ -350,6 +350,21 @@ class MacroSelectSuite extends FunSuite
      val f1 = ch1.awrite(1)
      val x = Await.result(r.aread, 10 seconds)
      assert(x==1)
+   }
+
+   test("select with constant timeout which fire")  {
+     import gopherApi._
+     val ch1 = makeChannel[Int](10)
+     val r = select.amap {
+       case x:ch1.read =>
+                  //System.err.println(s"readed ${x}")
+                  x
+       case x:select.timeout if (x==500.milliseconds) =>
+                 //System.err.println(s"timeout ${x}")
+                 -1
+     }
+     val x = Await.result(r.aread, 10 seconds)
+     assert(x == -1)
    }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
