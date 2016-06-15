@@ -32,7 +32,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    idleWaiters add makeLocked(Skip(f,this))
   }
 
-  def addTimeoutSkip(f: Skip[A] => Option[Future[Continuated[A]]], timeout: FiniteDuration):Unit =
+  def addTimeout(timeout:FiniteDuration, f: Skip[A] => Option[Future[Continuated[A]]]):Unit =
   {
    if (!timeoutRecord.isDefined) {
      timeoutRecord.lastNOperations = nOperations.get
@@ -46,6 +46,9 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   def run:Future[A] =
   {
     sendWaits()
+    if (timeoutRecord.isDefined) {
+       scheduleTimeout()
+    }
     api.idleDetector put this
     future
   }
