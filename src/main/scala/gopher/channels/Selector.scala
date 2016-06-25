@@ -6,6 +6,7 @@ import akka.pattern._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util._
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -31,9 +32,23 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    idleWaiters add makeLocked(Skip(f,this))
   }
 
+  def addTimeout(timeout:FiniteDuration, f: Skip[A] => Option[Future[Continuated[A]]]):Unit =
+  {
+   if (!timeoutRecord.isDefined) {
+     timeoutRecord.lastNOperations = nOperations.get
+     timeoutRecord.timeout = timeout
+     timeoutRecord.waiter = makeLocked(Skip(f,this))
+   } else {
+     throw new IllegalStateException("select must have only one timeout entry")
+   }
+  }
+
   def run:Future[A] =
   {
     sendWaits()
+    if (timeoutRecord.isDefined) {
+       scheduleTimeout()
+    }
     api.idleDetector put this
     future
   }
@@ -113,6 +128,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   private[this] def unlockAfter(f:Future[Continuated[A]], flowTermination: FlowTermination[A], dstr: String): Future[Continuated[A]] =
     f.transform(
          next => { if (mustUnlock(dstr,flowTermination)) {
+                         if (timeoutRecord.isDefined)
+                             scheduleTimeout()
                          makeLocked(next)
                    } else Never 
                  },
@@ -129,6 +146,45 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    }
   }
 
+
+  private[this] def scheduleTimeout():Unit =
+  {
+
+    def tickOperation():Unit =
+    {
+     if (!isCompleted && timeoutRecord.isDefined) {
+        val currentNOperations = nOperations.get()
+        if (currentNOperations == timeoutRecord.lastNOperations) {
+           // fire
+           timeoutRecord.waiter match {
+              // TODO: add timeout field to skip
+             case sk@Skip(f,ft) => f(sk) foreach { futureNext =>
+              futureNext.onComplete {
+                case Success(next) => if (!isCompleted) {
+                                       next match {
+                                        case sk@Skip(f,ft) if (ft eq this) => timeoutRecord.waiter = sk
+                                        case other => 
+                                                   timeoutRecord.waiter = Never
+                                                   api.continuatedProcessorRef ! other
+                                       }
+                                      }
+                case Failure(ex) => if (!isCompleted) ft.doThrow(ex)
+              }
+             }
+             case other => api.continuatedProcessorRef ! other
+           }
+        }
+      }
+    }
+
+    if (timeoutRecord.isDefined) {
+      // TODO: make CAS 
+      timeoutRecord.lastNOperations = nOperations.get()
+      val scheduler = api.actorSystem.scheduler
+      scheduler.scheduleOnce(timeoutRecord.timeout)(tickOperation)
+    }
+
+  }
 
   def isLocked: Boolean = lockFlag.get();
 
@@ -155,6 +211,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      false
     } else true
   }
+
+  
 
   private[this] def sendWaits(waiters: ConcurrentLinkedQueue[Continuated[A]] = waiters): Unit =
   {
@@ -184,23 +242,32 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
      }
    }
 
- 
+  private[this] val log = api.actorSystem.log
 
   // false when unlocked, true otherwise.
   private[this] val lockFlag: AtomicBoolean = new AtomicBoolean(false)
-
+  
   // number of operations, increased during each lock/unlock.
-  //  used for idle detection.
+  //  used for idle and timeout detection 
   private[channels] val nOperations = new AtomicLong();
 
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
   private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
+  private[this] class TimeoutRecord(
+                        var lastNOperations: Long,
+                        var timeout: FiniteDuration,
+                        var waiter: Continuated[A]
+                      )  {
+     def isDefined:Boolean = (waiter != Never)
+  }
+  
+  private[this] val timeoutRecord: TimeoutRecord = new TimeoutRecord(0L,0 milliseconds, Never)
+
   private[this] val processor = api.continuatedProcessorRef
 
   private[this] implicit val executionContext: ExecutionContext = api.executionContext
   
-
 
 }
 

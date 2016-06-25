@@ -6,10 +6,13 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 trait SelectorBuilder[A]
 {
+
+   type timeout = FiniteDuration
 
    def api: GopherAPI
 
@@ -52,6 +55,12 @@ trait SelectorBuilder[A]
      this
    }
      
+   @inline
+   def withTimeout(t:FiniteDuration)(f: Skip[A] => Option[Future[Continuated[A]]]):this.type =
+   {
+     selector.addTimeout(t,f)
+     this
+   }
 
    def go: Future[A] = selector.run
 
@@ -182,6 +191,23 @@ object SelectorBuilder
                        """
                    })
    }
+
+   def timeoutImpl[T:c.WeakTypeTag,S](c:Context)(t:c.Expr[FiniteDuration])(f:c.Expr[FiniteDuration=>T]):c.Expr[S] = 
+   {
+     import c.universe._
+     f.tree match {
+       case Function(valdefs, body) =>
+               SelectorBuilder.buildAsyncCall[T,S](c)(valdefs,body,
+                   { (nvaldefs, nbody) =>
+                      q"""${c.prefix}.timeoutWithFlowTerminationAsync(${t},
+                                    ${Function(nvaldefs,nbody)}
+                          )
+                       """
+                   })
+      case _ => c.abort(c.enclosingPosition,"second argument of timeout must have shape Function(x,y)")
+     }
+   }
+
 
    def foreachImpl[T](c:Context)(f:c.Expr[Any=>T]):c.Expr[T] =
    {
@@ -362,10 +388,9 @@ object SelectorBuilder
                                    val expression = if (!caseDef.guard.isEmpty) {
                                                       parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
                                                     } else {
-                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout]")
+                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
                                                     }
                                    val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
-                                   System.err.println(s"generate timeout statement: ${timeout}")
                                    atPos(caseDef.pat.pos)(timeout)
                        case _ =>
                          if (caseDef.guard.isEmpty) {

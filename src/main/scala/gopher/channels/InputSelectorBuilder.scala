@@ -6,6 +6,7 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 
@@ -53,6 +54,16 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
        withIdle{ sk => Some(f(ec,sk.flowTermination) flatMap(x => 
                             proxy.awrite(x)) map(Function.const(sk)) ) }
+
+   def timeout(t:FiniteDuration)(f: FiniteDuration => T): InputSelectorBuilder[T] =
+        macro SelectorBuilder.timeoutImpl[T,InputSelectorBuilder[T]]
+
+   @inline
+   def timeoutWithFlowTerminationAsync(t:FiniteDuration, 
+                       f: (ExecutionContext, FlowTermination[T], FiniteDuration) => Future[T] ): this.type =
+        withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) flatMap( x =>
+                              proxy.awrite(x)) map(Function.const(sk)) ) }
+
 
    def foreach(f:Any=>T):T = 
         macro SelectorBuilder.foreachImpl[T]
