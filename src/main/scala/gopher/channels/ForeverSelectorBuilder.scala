@@ -1,11 +1,12 @@
 package gopher.channels
 
 import scala.language.experimental.macros
-import scala.reflect.macros.whitebox.Context
+import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 
@@ -35,6 +36,14 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
    @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): ForeverSelectorBuilder =
        withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
+
+   def timeout(t:FiniteDuration)(f: FiniteDuration => Unit): ForeverSelectorBuilder =
+        macro SelectorBuilder.timeoutImpl[Unit,ForeverSelectorBuilder]
+
+ @inline
+   def timeoutWithFlowTerminationAsync(t:FiniteDuration,
+                       f: (ExecutionContext, FlowTermination[Unit], FiniteDuration) => Future[Unit] ): this.type =
+        withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) map Function.const(sk)) }
 
 
    def idle(body:Unit): ForeverSelectorBuilder =

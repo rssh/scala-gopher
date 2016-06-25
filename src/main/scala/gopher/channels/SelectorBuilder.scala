@@ -388,7 +388,7 @@ object SelectorBuilder
                                    val expression = if (!caseDef.guard.isEmpty) {
                                                       parseGuardInSelectorCaseDef(c)(termName,caseDef.guard)
                                                     } else {
-                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout]")
+                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
                                                     }
                                    val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
                                    atPos(caseDef.pat.pos)(timeout)
