@@ -6,6 +6,7 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 
@@ -32,6 +33,17 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
    @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): this.type =
        withWriter[A](ch,   { cw => Some(x,f(ec,cw.flowTermination, x) map Function.const(cw)) } )
+
+   def timeout(t:FiniteDuration)(f: FiniteDuration => T): FoldSelectorBuilder[T] =
+        macro SelectorBuilder.timeoutImpl[T,FoldSelectorBuilder[T]]
+
+   @inline
+   def timeoutWithFlowTerminationAsync(t:FiniteDuration,
+                       f: (ExecutionContext, FlowTermination[T], FiniteDuration) => Future[T] ): this.type =
+        withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) map Function.const(sk)  ) }
+                              
+
+
 
   def idle(body:T): FoldSelectorBuilder[T] =
          macro SelectorBuilder.idleImpl[T,FoldSelectorBuilder[T]]

@@ -197,13 +197,14 @@ object SelectorBuilder
      import c.universe._
      f.tree match {
        case Function(valdefs, body) =>
-               SelectorBuilder.buildAsyncCall[T,S](c)(valdefs,body,
+               val r = SelectorBuilder.buildAsyncCall[T,S](c)(valdefs,body,
                    { (nvaldefs, nbody) =>
                       q"""${c.prefix}.timeoutWithFlowTerminationAsync(${t},
                                     ${Function(nvaldefs,nbody)}
                           )
                        """
                    })
+              r
       case _ => c.abort(c.enclosingPosition,"second argument of timeout must have shape Function(x,y)")
      }
    }

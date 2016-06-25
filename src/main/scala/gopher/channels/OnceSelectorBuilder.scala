@@ -6,6 +6,7 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.annotation.unchecked._
 
 
@@ -34,6 +35,17 @@ trait OnceSelectorBuilder[T] extends SelectorBuilder[T@uncheckedVariance]
    @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): this.type =
         withWriter[A](ch, { cw => Some(x,f(ec,cw.flowTermination,x) map(x => Done(x,cw.flowTermination)) ) } )
+
+   def timeout(t:FiniteDuration)(f: FiniteDuration => T): OnceSelectorBuilder[T] =
+        macro SelectorBuilder.timeoutImpl[T,OnceSelectorBuilder[T]]
+
+
+   @inline
+   def timeoutWithFlowTerminationAsync(t:FiniteDuration,
+             f: (ExecutionContext, FlowTermination[T], FiniteDuration) => Future[T] ): this.type =
+        withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t).map(x => Done(x,sk.flowTermination)) ) }
+
+
 
    def idle(body: T): OnceSelectorBuilder[T] = 
         macro SelectorBuilder.idleImpl[T,OnceSelectorBuilder[T]]
