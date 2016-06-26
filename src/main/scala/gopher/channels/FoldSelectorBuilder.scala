@@ -43,14 +43,9 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
         withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) map Function.const(sk)  ) }
                               
 
-
-
   def idle(body:T): FoldSelectorBuilder[T] =
          macro SelectorBuilder.idleImpl[T,FoldSelectorBuilder[T]]
 
-   @inline
-   def idleWithFlowTerminationAsync[A](f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
-       withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
 }
 

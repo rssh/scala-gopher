@@ -46,13 +46,9 @@ trait OnceSelectorBuilder[T] extends SelectorBuilder[T@uncheckedVariance]
         withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t).map(x => Done(x,sk.flowTermination)) ) }
 
 
-
    def idle(body: T): OnceSelectorBuilder[T] = 
         macro SelectorBuilder.idleImpl[T,OnceSelectorBuilder[T]]
 
-   @inline
-   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
-       withIdle{ sk => Some(f(ec,sk.flowTermination) map(x => Done(x,sk.flowTermination)) ) }
 
    def foreach(f:Any=>T):T = 
         macro SelectorBuilder.foreachImpl[T]

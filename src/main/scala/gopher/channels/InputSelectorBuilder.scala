@@ -47,6 +47,7 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
                                   x=>proxy.awrite(x)
                           } map Function.const(cw)) })
 
+/*
    def idle(body: T): InputSelectorBuilder[T] = 
         macro SelectorBuilder.idleImpl[T,InputSelectorBuilder[T]]
 
@@ -54,6 +55,7 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
    def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T]) => Future[T] ): this.type =
        withIdle{ sk => Some(f(ec,sk.flowTermination) flatMap(x => 
                             proxy.awrite(x)) map(Function.const(sk)) ) }
+*/
 
    def timeout(t:FiniteDuration)(f: FiniteDuration => T): InputSelectorBuilder[T] =
         macro SelectorBuilder.timeoutImpl[T,InputSelectorBuilder[T]]

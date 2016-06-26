@@ -49,9 +49,6 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
    def idle(body:Unit): ForeverSelectorBuilder =
          macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
     
-   @inline
-   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
    /**
     * provide syntax for running select loop inside go (or async) block

@@ -30,9 +30,12 @@ trait SelectorBuilder[A]
 
    def onIdle(arg: SkipSelectorArgument[A]): this.type =
    {
-     selector.addIdleSkip(arg.normalizedFun)
+     withTimeout(api.idleTimeout)(arg.normalizedFun)
      this
    }
+
+   def onTimeout(t:FiniteDuration)(arg: SkipSelectorArgument[A]): this.type =
+     withTimeout(t)(arg.normalizedFun)
 
    @inline
    def withReader[B](ch:Input[B], f: ContRead[B,A] => Option[ContRead.In[B]=>Future[Continuated[A]]]): this.type =
@@ -51,8 +54,7 @@ trait SelectorBuilder[A]
    @inline
    def withIdle(f: Skip[A] => Option[Future[Continuated[A]]]):this.type =
    {
-     selector.addIdleSkip(f)
-     this
+     withTimeout(api.idleTimeout)(f)
    }
      
    @inline
@@ -183,13 +185,7 @@ object SelectorBuilder
    def idleImpl[T:c.WeakTypeTag,S](c:Context)(body:c.Expr[T]):c.Expr[S] =
    {
      import c.universe._
-     SelectorBuilder.buildAsyncCall[T,S](c)(Nil,body.tree,
-                   { (nvaldefs, nbody) =>
-                      q"""${c.prefix}.idleWithFlowTerminationAsync(
-                                    ${Function(nvaldefs,nbody)}
-                          )
-                       """
-                   })
+     c.Expr[S](q"${c.prefix}.timeout(${c.prefix}.api.idleTimeout)(_ => ${body})")
    }
 
    def timeoutImpl[T:c.WeakTypeTag,S](c:Context)(t:c.Expr[FiniteDuration])(f:c.Expr[FiniteDuration=>T]):c.Expr[S] = 
@@ -455,7 +451,7 @@ object SelectorBuilder
     if (!caseDef.guard.isEmpty) {
       c.abort(caseDef.guard.pos,"guard is not supported in select case")
     }
-    q"${builderName}.idle(${caseDef.body})"
+    q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
    }
 
    def mapImpl[T:c.WeakTypeTag](c:Context)(f:c.Expr[Any=>T]):c.Expr[Input[T]] =

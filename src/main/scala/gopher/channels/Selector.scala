@@ -27,11 +27,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    waiters add makeLocked(ContWrite(f,ch,this))
   }
 
-  def addIdleSkip(f: Skip[A] => Option[Future[Continuated[A]]]): Unit =
-  {
-   idleWaiters add makeLocked(Skip(f,this))
-  }
-
   def addTimeout(timeout:FiniteDuration, f: Skip[A] => Option[Future[Continuated[A]]]):Unit =
   {
    if (!timeoutRecord.isDefined) {
@@ -49,17 +44,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
     if (timeoutRecord.isDefined) {
        scheduleTimeout()
     }
-    api.idleDetector put this
     future
-  }
-
-  private[channels]  def startIdles: Unit =
-  {
-    if (idleWaiters.isEmpty) {
-       api.idleDetector.remove(this)
-    } else {
-       sendWaits(idleWaiters) 
-    }
   }
 
   private[this] def makeLocked(block: Continuated[A]): Continuated[A] =
@@ -252,7 +237,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   private[channels] val nOperations = new AtomicLong();
 
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
-  private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
   private[this] class TimeoutRecord(
                         var lastNOperations: Long,
@@ -270,7 +254,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   
 
 }
-
 
 
 
