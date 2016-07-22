@@ -279,7 +279,7 @@ object SelectorBuilder
 
     val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)
 
-    // Loook's like bug in 'untypecheck' : when we split cassDef on few functions, than sometines, symbols
+    //  when we split cassDef on few functions, than sometines, symbols
     // entries in identifier tree are not cleared.  
     //   So, we 'reset' symbols which belong to caseDef which will be erased by macros
     //   //TODO: check, may be will be better to use scala-compiler internal API and changeOwner instead.

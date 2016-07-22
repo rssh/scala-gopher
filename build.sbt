@@ -9,11 +9,12 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" /* , "-Ymacro-debug-lite" ,  "-Ydebug"  , "-Ylog:lambdalift" */ )
+scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" /* ,  "-Ymacro-debug-lite"  ,  "-Ydebug"  ,  "-Ylog:lambdalift"  */ )
 
 libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-RC2"
+//libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-RC2"
+libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
