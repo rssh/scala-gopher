@@ -182,7 +182,6 @@ object GoAsync
          else {
            tree match {
              case q"(scala.async.Async.await[${w}]($r)):${w1}"=>
-                     System.err.println(s"found await: [${w}](${r})")
                      found = true
                      // here we erase 'await' symbols
                      //q"(scala.async.Async.await[${w}]($r)):${w1}"

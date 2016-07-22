@@ -21,7 +21,6 @@ object AsyncApply
     import c.universe._
     val nhof = transformHof[A,B,C](c)(hof.tree)
     val retval = c.Expr[Future[C]](q"${nhof}(${nf})")
-    System.err.println("retval:"+retval)
     retval
   }
 
