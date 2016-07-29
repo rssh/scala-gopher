@@ -107,11 +107,9 @@ class BroadcaseSuite extends FunSuite
        var finish = false;
        while(!finish) {
           val x = await(r.aread)
-          // can't use foreach inside 'go' block.
-          if (!x.isEmpty) {
-             out.write(x.get)
-          } else {
-             finish = true
+          x match {
+            case Some(m) => out.write(m)
+            case None => finish = true
           }
        }
        ();

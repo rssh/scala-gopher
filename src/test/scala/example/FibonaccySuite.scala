@@ -36,13 +36,11 @@ object Fibonaccy {
     val c = gopherApi.makeChannel[Long](1);
     val quit = gopherApi.makeChannel[Int](1);
     val r = go {
-      // for loop in go with async insied yet not supported
-      var i = 1
-      while(i <= n) {
-        val x: Long = (c ?)
-        //Console.println(s"received: ${i}, ${x}")
-        acceptor(x)
-        i += 1
+      // for loop in go with async inside 
+      for( i<- 1 to n) {
+          val x: Long = (c ?)
+          //Console.println(s"received: ${i}, ${x}")
+          acceptor(x)
       }
       quit <~ 0
     }

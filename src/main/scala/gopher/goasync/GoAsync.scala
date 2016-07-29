@@ -134,36 +134,19 @@ object GoAsync
             if (found) {
                 // this can be implicit parameters of inline apply.
                 // whe can distinguish first from second by looking at f1 shape.
-                // for now will assume
-                System.err.println(s"inline-await + implicit, a2=${a2}")
-                System.err.println(s"inline-await ,tree=${tree}")
-                System.err.println(s"inline-await ,tree.tpe=${tree.tpe}")
-                val isImplicit = f1 match {
-                  case TypeApply(Select(x,m),w) =>
-                                   System.err.println(s"typed select, x=$x, m=$m, w=$w")
-                                   System.err.println(s"x.tpe=${x.tpe}")
-                                   System.err.println(s"x.symbol=${x.symbol}")
-                                   System.err.println(s"tree.symbol=${tree.symbol}")
-                                   if (! (x.tpe eq null) ) {
-                                     val sym = x.tpe.member(m) 
-                                     System.err.println("sym=$sym")
-                                   } else {
-                                      true
-                                   }
-                  case q"$x.$m[$w]" => 
-                                   System.err.println(s"typed select, x=$x, m=$m, w=$w")
-                  case q"$x.$m" =>
-                                   System.err.println(s"select, x=$x, m=$m")
-                                      true
-                  case q"($x.$m)[$w]" => 
-                                   System.err.println(s"typed select-1, x=$x, m=$m, w=$w")
-                                      true
-                  case _ =>
-                                   System.err.println(s"other: ${f1}")
-                                   System.err.println(s"raw: ${showRaw(f1)}")
-                                      true
+                val isTwoParams = if (!(tree.symbol eq null)) {
+                                    if (tree.symbol.isMethod) {
+                                       tree.symbol.asMethod.paramLists.size == 2
+                                    } else if (tree.symbol eq NoSymbol) {
+                                        // untyped, hope for the best
+                                       true
+                                    } else false
+                                  } else true
+                if (isTwoParams) {
+                  transformInlineHofCall1(c)(f1,a,b,a2) 
+                } else {
+                  super.transform(tree)
                 }
-                transformInlineHofCall1(c)(f1,a,b,a2) 
             }else{
                 super.transform(tree)
             }
