@@ -124,41 +124,53 @@ object GoAsync
    def transformAsyncBody[T:c.WeakTypeTag](c:Context)(body:c.Tree):c.Tree = 
    {
     import c.universe._
+    var found = false
     val transformer = new Transformer {
       override def transform(tree:Tree):Tree =
        tree match {
-         case q"${f1}(${a}=>${b})" =>
-            val found = findAwait(c)(b)
+         case q"${f1}(${a}=>${b})(..$a2)" =>
+           // TODO: cache in tree.
+            found = findAwait(c)(b)
             if (found) {
-                //System.err.println(s"found hof entry ${f1} ${a}=>${b}")
-                val btype = b.tpe
-                // untypechack is necessory, because async-transform later will corrupt
-                //  symbols owners inside b
-                // [scala-2.11.8]
-                val nb = c.untypecheck(b)
-                val anb = atPos(b.pos){
-                              // typecheck here is needed to prevent incorrect liftingUp of
-                              // internal variables in ${b}
-                              //[scala-2.11.8]
-                              //c.typecheck(q"(${a})=>go[${btype}](${nb})")
-                              val nnb = transformAsyncBody(c)(nb)
-                              //c.typecheck(q"(${a})=>scala.async.Async.async[${btype}](${nnb})")
-                              q"(${a})=>scala.async.Async.async[${btype}](${nnb})"
-                          }
-                val ar = atPos(tree.pos){
-                          // typecheck is necessory
-                          //  1. to prevent runnint analysis of async over internal awaits in anb as on 
-                          //    enclosing async instead those applied from asyncApply
-                          //  2. to expand macroses here, to prevent error during expanding macroses
-                          //    in next typecheck
-                          c.typecheck(q"gopher.asyncApply1(${f1})(${anb})")
-                          //q"gopher.asyncApply1(${f1})(${anb})"
-                        }
-                //typecheck with macros disabled is needed for compiler,
-                //to set symbol 'await', because async macro discovered
-                //awaits by looking at symbole
-                val r = c.typecheck(q"scala.async.Async.await[${btype}](${ar})",withMacrosDisabled=true)
-                r
+                // this can be implicit parameters of inline apply.
+                // whe can distinguish first from second by looking at f1 shape.
+                // for now will assume
+                System.err.println(s"inline-await + implicit, a2=${a2}")
+                System.err.println(s"inline-await ,tree=${tree}")
+                System.err.println(s"inline-await ,tree.tpe=${tree.tpe}")
+                val isImplicit = f1 match {
+                  case TypeApply(Select(x,m),w) =>
+                                   System.err.println(s"typed select, x=$x, m=$m, w=$w")
+                                   System.err.println(s"x.tpe=${x.tpe}")
+                                   System.err.println(s"x.symbol=${x.symbol}")
+                                   System.err.println(s"tree.symbol=${tree.symbol}")
+                                   if (! (x.tpe eq null) ) {
+                                     val sym = x.tpe.member(m) 
+                                     System.err.println("sym=$sym")
+                                   } else {
+                                      true
+                                   }
+                  case q"$x.$m[$w]" => 
+                                   System.err.println(s"typed select, x=$x, m=$m, w=$w")
+                  case q"$x.$m" =>
+                                   System.err.println(s"select, x=$x, m=$m")
+                                      true
+                  case q"($x.$m)[$w]" => 
+                                   System.err.println(s"typed select-1, x=$x, m=$m, w=$w")
+                                      true
+                  case _ =>
+                                   System.err.println(s"other: ${f1}")
+                                   System.err.println(s"raw: ${showRaw(f1)}")
+                                      true
+                }
+                transformInlineHofCall1(c)(f1,a,b,a2) 
+            }else{
+                super.transform(tree)
+            }
+         case q"${f1}(${a}=>${b})" =>
+            found = findAwait(c)(b)
+            if (found) {
+                transformInlineHofCall1(c)(f1,a,b,List()) 
             } else {
                 super.transform(tree)
             }
@@ -166,9 +178,50 @@ object GoAsync
                 super.transform(tree)
        }
     }
-    transformer.transform(body)
+    val r = transformer.transform(body)
+    r
    }
    
+   // handle things like:
+   //   q"${fun}(${param}=>${body})($implicitParams)" =>
+   def transformInlineHofCall1(c:Context)(fun:c.Tree,param:c.Tree,body:c.Tree,implicitParams:List[c.Tree]):c.Tree =
+   {
+    import c.universe._
+    val btype = body.tpe
+    // untypechack is necessory, because async-transform later will corrupt
+    //  symbols owners inside body
+    // [scala-2.11.8]
+    val nb = c.untypecheck(body)
+    val anb = atPos(body.pos){
+       val nnb = transformAsyncBody(c)(nb)
+       val ec = c.inferImplicitValue(c.weakTypeOf[ExecutionContext])
+       q"(${param})=>scala.async.Async.async[${btype}](${nnb})($ec)"
+    }
+    val ar = atPos(fun.pos) {
+       val uar = if (implicitParams.isEmpty) {
+          q"gopher.asyncApply1(${fun})(${anb})"
+       } else {
+          //we can't call macros here, becouse we don't know types of implicitParams
+          //val a = param.tpe
+          //val b = body.tpe
+          //AsyncApply.impl1i(c)(fun)(anb,implicitParams)(a,b)
+          q"gopher.goasync.AsyncApply.apply1i(${fun})(${anb},${implicitParams})"
+          //q"gopher.asyncApply1i(${fun})(${anb})(..$implicitParams)"
+       }
+       // typecheck is necessory
+       //  1. to prevent runnint analysis of async over internal awaits in anb as on 
+       //    enclosing async instead those applied from asyncApply
+       //  2. to expand macroses here, to prevent error during expanding macroses
+       //    in next typecheck
+       c.typecheck(uar)
+    }
+    //typecheck with macros disabled is needed for compiler,
+    //to set symbol 'await', because async macro discovered
+    //awaits by looking at symbols
+    val r = c.typecheck(q"scala.async.Async.await(${ar})",withMacrosDisabled=true)
+    r
+   }
+
    def findAwait(c:Context)(body:c.Tree): Boolean = 
    {
     import c.universe._
@@ -183,8 +236,12 @@ object GoAsync
            tree match {
              case q"(scala.async.Async.await[${w}]($r)):${w1}"=>
                      found = true
-                     // here we erase 'await' symbols
-                     //q"(scala.async.Async.await[${w}]($r)):${w1}"
+                     tree
+             case q"scala.async.Async.await[${w}]($r)"=>
+                     found = true
+                     tree
+             case q"(scala.async.Async.async[${w}]($r)):${w1}"=>
+                     //TODO: add test to test-case
                      tree
              case q"(${a}=>${b})" =>
                      // don't touch nested functions
@@ -200,6 +257,10 @@ object GoAsync
     found
    }
 
+   private def numberOfParamLists(c:Context)(obj:c.Tree,m:c.Name):Int =
+   {
+    ???
+   }
 
 }
 

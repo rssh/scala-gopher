@@ -186,7 +186,11 @@ package object gopher {
  def asyncApply1[A,B,C](hof:(A=>B)=>C)(nf:A=>Future[B]):Future[C] =
                           macro gopher.goasync.AsyncApply.impl1[A,B,C]
 
- implicit def toAsyncIterable[T](x:Iterable[T]):AsyncIterable[T] = new AsyncIterable[T](x)
+ import scala.collection.generic._
+ implicit def toAsyncIterable[T](x:Iterable[T]): AsyncIterable[T] = new AsyncIterable[T](x)
+ implicit def toAsyncOption[T](x:Option[T]): AsyncOption[T] = new AsyncOption[T](x)
+
+
 
 }
 

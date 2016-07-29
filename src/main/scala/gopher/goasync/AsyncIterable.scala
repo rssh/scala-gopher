@@ -8,6 +8,7 @@ import scala.collection.generic._
 class AsyncIterable[T](val x:Iterable[T]) //extends AnyVal [implementation restriction, [scala-2.11.8]
 {
 
+
    def foreachAsync[U](f: T => Future[U])(implicit ec:ExecutionContext): Future[Unit] =
    async{
      val it = x.iterator
@@ -15,9 +16,9 @@ class AsyncIterable[T](val x:Iterable[T]) //extends AnyVal [implementation restr
         await(f(it.next))
      }
    }
+ 
 
-   def mapAsync[U,That](f: T => Future[U])(implicit bf: CanBuildFrom[Iterable[T],U,That], ec: ExecutionContext): Future[That] =
-   {
+   def mapAsync[U,Z](f: T => Future[U])(implicit bf: CanBuildFrom[_,U,Z], ec:ExecutionContext): Future[Z] =
      async {
       val builder = bf.apply()
       val it = x.iterator
@@ -26,7 +27,7 @@ class AsyncIterable[T](val x:Iterable[T]) //extends AnyVal [implementation restr
       }
       builder.result()
      }
-   }
 
 }
+
 

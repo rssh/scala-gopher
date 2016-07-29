@@ -47,7 +47,32 @@ class HofAsyncSuite extends FunSuite
    }
 
    
+   test("test async operations inside map")  {
+     val channel = gopherApi.makeChannel[Int](100)
+     channel.awriteAll(1 to 100)
+     val fresult = go{
+       for(i <- 1 to 100) yield channel.read
+     }
+     val result = Await.result(fresult, 5.second)
+     assert(result(0)==1)
+     assert(result(1)==2)
+     assert(result(99)==100)
+   }
 
+
+   test("write to channel in options.foreach")  {
+     val channel = gopherApi.makeChannel[Int](100)
+     val optChannel = Some(channel)
+     val f1 = go {
+       optChannel.foreach{ _.write(1) }
+     }
+     val f2 = go {
+       optChannel.map{ _.read }
+     }
+     val r2 = Await.result(f2, 5.second)
+     assert(r2.isDefined)
+     assert(r2 === Some(1) )
+   }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
    
