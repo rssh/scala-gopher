@@ -42,6 +42,7 @@ object GoAsync
    def goImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[Future[T]] =
    {
      import c.universe._
+     val ttype = c.weakTypeOf[T]
      val nbody = GoAsync.transformAsyncBody[T](c)(body.tree)
      val r = if (containsDefer(c)(body)) {
        val defers = TermName(c.freshName)
@@ -49,10 +50,10 @@ object GoAsync
        // asyn transform wantstyped tree on entry, so we must substitute 'defers' to untyped 
        // values after it, no before.
                          q"""
-                             gopher.goasync.GoAsync.transformDeferMacro[${c.weakTypeOf[T]}](
+                             gopher.goasync.GoAsync.transformDeferMacro[${ttype}](
                                {implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
                                 val ${promise} = Promise[${c.weakTypeOf[T]}]()
-                                scala.async.Async.async(${nbody})(${ec}).onComplete( x =>
+                                scala.async.Async.async[${ttype}](${nbody})(${ec}).onComplete( x =>
                                      ${promise}.complete(${defers}.tryProcess(x))
                                 )(${ec})
                                 ${promise}.future
@@ -60,7 +61,7 @@ object GoAsync
                              )
                           """
      } else {
-       q"scala.async.Async.async(${nbody})(${ec})"
+       q"scala.async.Async.async[${ttype}](${nbody})(${ec})"
      }
      c.Expr[Future[T]](r)
    }
@@ -125,8 +126,26 @@ object GoAsync
    {
     import c.universe._
     var found = false
+    var transformed = false
     val transformer = new Transformer {
       override def transform(tree:Tree):Tree =
+      {
+
+      // if subtree was transformed, try to transform again origin tree,
+      // because await can be lifted-up from previous level.
+      def transformAgainIfNested(tree: Tree):Tree =
+      {
+        val prevTransformed = transformed
+        transformed = false
+        val nested = super.transform(tree)
+        if (transformed) {
+           transform(nested)
+        }else{
+           transformed = prevTransformed
+           nested
+        }
+      }
+
        tree match {
          case q"${f1}(${a}=>${b})(..$a2)" =>
            // TODO: cache in tree.
@@ -143,25 +162,33 @@ object GoAsync
                                     } else false
                                   } else true
                 if (isTwoParams) {
+                  transformed = true
                   transformInlineHofCall1(c)(f1,a,b,a2) 
                 } else {
                   super.transform(tree)
                 }
             }else{
-                super.transform(tree)
+                // TODO: think, may-be try to transform first b instead nested [?]
+                transformAgainIfNested(tree)
             }
          case q"${f1}(${a}=>${b})" =>
             found = findAwait(c)(b)
             if (found) {
+                transformed = true
                 transformInlineHofCall1(c)(f1,a,b,List()) 
             } else {
-                super.transform(tree)
+                // TODO: think, may-be try to transform first b instead nested [?]
+                transformAgainIfNested(tree)
             }
          case _ =>
                 super.transform(tree)
        }
+      }
+
     }
-    val r = transformer.transform(body)
+    
+    var r = transformer.transform(body)
+    
     r
    }
    
@@ -178,18 +205,13 @@ object GoAsync
     val anb = atPos(body.pos){
        val nnb = transformAsyncBody(c)(nb)
        val ec = c.inferImplicitValue(c.weakTypeOf[ExecutionContext])
-       q"(${param})=>scala.async.Async.async[${btype}](${nnb})($ec)"
+       q"(${param})=>scala.async.Async.async[$btype](${nnb})($ec)"
     }
     val ar = atPos(fun.pos) {
        val uar = if (implicitParams.isEmpty) {
           q"gopher.asyncApply1(${fun})(${anb})"
        } else {
-          //we can't call macros here, becouse we don't know types of implicitParams
-          //val a = param.tpe
-          //val b = body.tpe
-          //AsyncApply.impl1i(c)(fun)(anb,implicitParams)(a,b)
           q"gopher.goasync.AsyncApply.apply1i(${fun})(${anb},${implicitParams})"
-          //q"gopher.asyncApply1i(${fun})(${anb})(..$implicitParams)"
        }
        // typecheck is necessory
        //  1. to prevent runnint analysis of async over internal awaits in anb as on 
@@ -229,6 +251,7 @@ object GoAsync
              case q"(${a}=>${b})" =>
                      // don't touch nested functions
                      tree
+                     //super.transform(tree)
              case _ => 
                   super.transform(tree)
             }
@@ -240,10 +263,6 @@ object GoAsync
     found
    }
 
-   private def numberOfParamLists(c:Context)(obj:c.Tree,m:c.Name):Int =
-   {
-    ???
-   }
 
 }
 
