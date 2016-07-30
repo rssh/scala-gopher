@@ -74,7 +74,7 @@ class HofAsyncSuite extends FunSuite
      assert(r2 === Some(1) )
    }
 
-   test("nested foreach")  {
+   test("nested option foreach")  {
      val a:Option[Int] = Some(1)
      val b:Option[Int] = Some(3)
      val channel = gopherApi.makeChannel[Int](10)
@@ -85,6 +85,32 @@ class HofAsyncSuite extends FunSuite
      val fout = channel.aread
      val r = Await.result(fout, 5.second)
      assert(r == 4)
+   }
+
+   test("option flatMap")  {
+     val channel = gopherApi.makeChannel[Int](10)
+     val map = Map(1->Map(2->channel))
+     val fout = go {
+       for (x <- map.get(1);
+            ch <- x.get(2)) yield ch.read
+     }
+     val fin = channel.awrite(1)
+     val r = Await.result(fout, 5.second)
+     assert(r == Some(1))
+   }
+
+   test("channels foreach ") {
+      val channels = gopherApi.makeChannel[Channel[Int]](10)
+      val fin = go {
+        for(ch <- channels) {
+           ch.awrite(1)
+        }
+      }
+      val ch = gopherApi.makeChannel[Int](10)
+      channels.awrite(ch)
+      val fout = ch.aread
+      val r = Await.result(fout, 5.second)
+      assert(r == 1)
    }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
