@@ -113,6 +113,33 @@ class HofAsyncSuite extends FunSuite
       assert(r == 1)
    }
 
+   test("lift inside select") {
+     import gopherApi._
+     val ch1 = makeChannel[Int](10)
+     val ch2 = makeChannel[Int](10)
+     val quit = makeChannel[Boolean]()
+     val fin = go{
+       for(s <- select.forever) 
+         s match {
+           case x: ch1.read =>
+                     //System.err.println(s"received $x")
+                     for(i <- 1 to x) {
+                        //System.err.println(s"writing ${i*x}")
+                        ch2.write(i*x)
+                     }
+           case y: select.timeout if (y==(500.milliseconds)) =>
+                     System.err.println(s"timeout $y")
+           case z: quit.read =>
+                     select.exit(())
+         }
+     }
+     val fout = ch1.awrite(2)
+     val x1 = ch2.aread
+     val rx1 = Await.result(x1, 1 minute)
+     quit.awrite(true)
+     assert(rx1 == 2)
+   }
+
    lazy val gopherApi = CommonTestObjects.gopherApi
    
 }

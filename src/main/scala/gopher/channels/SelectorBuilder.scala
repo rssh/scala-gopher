@@ -5,6 +5,7 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
 import gopher.util._
+import gopher.goasync._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.annotation.unchecked._
@@ -171,10 +172,11 @@ object SelectorBuilder
      val ftParam = ValDef(Modifiers(Flag.PARAM),ft,tq"gopher.FlowTermination[${weakTypeOf[T]}]",EmptyTree)
      val ecParam = ValDef(Modifiers(Flag.PARAM),ec,tq"scala.concurrent.ExecutionContext",EmptyTree)
      val nvaldefs = ecParam::ftParam::valdefs
+     val asyncBody = GoAsync.transformAsyncBody[T](c)(body)
      val nbody = q"""{
                       implicit val ${ft1} = ${ft}
                       implicit val ${ec1} = ${ec}
-                      scala.async.Async.async(${transformDelayedMacroses[T](c)(body)})(${ec})
+                      scala.async.Async.async(${transformDelayedMacroses[T](c)(asyncBody)})(${ec})
                      }
                   """
      val newTree = lastFun(nvaldefs,nbody)
