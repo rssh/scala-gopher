@@ -28,6 +28,8 @@ trait Input[A]
   type <~ = A
   type read = A
 
+  case class Read(value:A)
+
   // TODO: use closed in selector.
 
   /**

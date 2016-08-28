@@ -48,6 +48,16 @@ class AsyncOption[T](val x:Option[T]) extends AnyVal
      }
    }
 
+   def filterNotAsync(f: T=>Future[Boolean])(implicit ec:ExecutionContext): Future[Option[T]] =
+   {
+     if (x.isDefined) {
+       f(x.get) map { r => if (r) None else x }
+     } else {
+        Future successful None
+     }
+   }
+
+
 }
 
 

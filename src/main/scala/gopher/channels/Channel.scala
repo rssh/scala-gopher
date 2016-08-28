@@ -14,7 +14,33 @@ import scala.reflect.api._
 trait Channel[A] extends InputOutput[A]
 {
 
+   thisChannel =>
+
    def close(): Unit
+
+   // override some operations
+   
+   override def filter(p:A=>Boolean): Channel[A] =
+   {
+    val filteredInput = super.filter(p)
+    new Channel[A] {
+         def cbread[B](f:
+              ContRead[A,B]=>Option[
+                    ContRead.In[A]=>Future[Continuated[B]]
+            ],
+            ft: FlowTermination[B]): Unit = filteredInput.cbread(f,ft)
+
+         def  cbwrite[B](f: ContWrite[A,B] => Option[
+                   (A,Future[Continuated[B]])
+                  ],
+                  ft: FlowTermination[B]): Unit =
+            thisChannel.cbwrite(f,ft)  // TODO: optimize by filteredOutput.cbwrite() ?
+
+        def api = thisChannel.api
+
+        def close() = thisChannel.close()
+    }
+   }
 
 }
 

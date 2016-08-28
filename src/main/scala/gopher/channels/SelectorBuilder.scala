@@ -285,6 +285,7 @@ object SelectorBuilder
     // entries in identifier tree are not cleared.  
     //   So, we 'reset' symbols which belong to caseDef which will be erased by macros
     //   //TODO: check, may be will be better to use scala-compiler internal API and changeOwner instead.
+    //           yet one alternative - untypedef 'up' term
     def clearCaseDefOwner(oldName:c.Name, newName: c.TermName, tree:Tree):Tree =
     {
       val oldTermName = oldName.toTermName
@@ -303,6 +304,10 @@ object SelectorBuilder
             {
               tree match {
                case Typed(ident@Ident(`oldTermName`),_) => if (ident.symbol!=null && ownerWillBeErased(ident.symbol))   
+                                                               atPos(tree.pos)(Ident(newName))
+                                                           else
+                                                               super.transform(tree)
+               case ident@Ident(`oldTermName`) => if (ident.symbol!=null && ownerWillBeErased(ident.symbol))   
                                                                atPos(tree.pos)(Ident(newName))
                                                            else
                                                                super.transform(tree)
@@ -338,10 +343,12 @@ object SelectorBuilder
                         (true, atPos(tree.pos)(Bind(changeName(name),transform(body))) )
                   case ValDef(mods,name,tpt,rhs) => 
                         (true, atPos(tree.pos)(ValDef(mods,changeName(name),transform(tpt),transform(rhs))))
+                  case Select(Ident(name:TermName),proj) => 
+                        (true, atPos(tree.pos)(Select(Ident(changeName(name)),proj)) )
                   case _   => 
-                        (false, tree)
-                    //c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
-                    //                   please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
+                       // (false, tree)
+                    c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
+                                       please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
               }
             }
 
@@ -350,6 +357,11 @@ object SelectorBuilder
       transformer.transform(tree)
     }
 
+    def retrieveOriginal(tp:Tree):Tree =
+     tp match {
+       case tpt: TypeTree => if (tpt.original.isEmpty) tpt else tpt.original
+       case _   => tp
+     }
 
     def unUnapplyPattern(x:Tree):Tree =
       x match {
@@ -358,13 +370,13 @@ object SelectorBuilder
       }
 
     val retval = unUnapplyPattern(caseDef.pat) match {
-      case Bind(name,Typed(_,tp:c.universe.TypeTree)) =>
+      case Bind(name,Typed(_,tp)) =>
                     val termName = name.toTermName 
                     // when debug problems on later compilation steps, you can create freshName and see visually:
                     // is oldName steel leaked to later compilation phases.
                     //val newName = c.freshName(termName)
                     val newName = termName
-                    val tpoa = clearCaseDefOwner(name, newName, if (tp.original.isEmpty) tp else tp.original)
+                    val tpoa = clearCaseDefOwner(name, newName, retrieveOriginal(tp))
                     val tpo = MacroUtil.skipAnnotation(c)( tpoa )
                     val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa ,EmptyTree)
                     val body = clearCaseDefOwner(name,newName,caseDef.body)

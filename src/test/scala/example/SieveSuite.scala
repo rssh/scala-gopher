@@ -11,6 +11,8 @@ import scala.language.postfixOps
 
 import org.scalatest._
 
+import gopher.tags._
+
 /**
  * this is direct translation from appropriative go example.
  **/
@@ -53,6 +55,19 @@ object Sieve
     filtered
   }
 
+  def filter1(in:Channel[Int]):Input[Int] =
+  {
+   val q = makeChannel[Int]()
+   val filtered = makeChannel[Int]()
+   select.afold(in){ (chFind, s) => 
+     s match {
+       case prime: chFind.read => 
+                         filtered.write(prime)
+                         chFind.filter(_ % prime != 0)
+     }
+   }
+   filtered
+  }
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
     filter(generate(n,quit))
@@ -62,7 +77,7 @@ object Sieve
 class SieveSuite extends FunSuite
 {
 
- test("last prime before 1000") {
+ test("last prime before 1000", Now) {
 
    val quit = Promise[Boolean]()
    val quitInput = futureInput(quit.future)

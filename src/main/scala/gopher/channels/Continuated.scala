@@ -80,6 +80,10 @@ object ContRead
                                             Option[In[A] => Future[Continuated[B]]] =
          prev.function(prev) map (f1 => liftInValue(prev) { v => fn(v,f1) } )
 
+   type Aux[A,B] = ContRead[A,B]{ type El=A
+                    type S=B
+                    type F = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
+                   }
 }
 
 
