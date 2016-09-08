@@ -32,6 +32,7 @@ case class ContRead[A,B](
    override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
+  type F = ContRead[A,B]=>Option[ContRead.In[A] => Future[Continuated[B]]]
 }
 
 object ContRead
@@ -43,6 +44,7 @@ object ContRead
   case object ChannelClosed extends In[Nothing]
   case class Failure(ex:Throwable) extends In[Nothing]
   
+
   object In
   {
     def value[A](a:A) = ContRead.Value(a)
@@ -84,6 +86,8 @@ object ContRead
                     type S=B
                     type F = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
                    }
+
+   type AuxF[A,B] = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
 }
 
 

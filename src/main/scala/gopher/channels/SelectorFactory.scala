@@ -64,13 +64,13 @@ class SelectFactory(val api: GopherAPI)
   
   def fold[S](s:S)(op:(S,Any)=>S):S = macro FoldSelectorBuilderImpl.fold[S]
 
-  def map[B](f:Any=>B):Input[B] = macro SelectorBuilder.mapImpl[B]
+  def map[B](f:Any=>B):Input[B] = macro SelectorBuilderImpl.map[B]
 
   def input[B](f:PartialFunction[Any,B]):Input[B] =
-                                    macro SelectorBuilder.inputImpl[B]
+                                    macro SelectorBuilderImpl.input[B]
 
   def amap[B](f:PartialFunction[Any,B]):Input[B] =
-                                    macro SelectorBuilder.inputImpl[B]
+                                    macro SelectorBuilderImpl.input[B]
 
   //
 

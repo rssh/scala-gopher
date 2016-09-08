@@ -8,7 +8,8 @@ import gopher.util._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.annotation.unchecked._
-
+import java.util.{WeakHashMap=>JWeakHashMap}
+import java.util.function.{BiConsumer=>JBiConsumer}
 
 
 trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
@@ -68,17 +69,53 @@ class FoldSelect[T](sf:SelectFactory) extends FoldSelectorBuilder[T]
 class FoldSelectorEffectedInput[A](s:()=>Input[A],val api: GopherAPI) extends Input[A]
 {
 
+  thisInput =>
+
   def current = s()
-  
+  val activeReaders = new JWeakHashMap[Reader[_],JWeakHashMap[Input[A],Boolean]]
+
+  class Reader[B](val svInput: Input[A], 
+                  val function: ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]],
+                  val flowTermination: FlowTermination[B], var disabled: Boolean=false) 
+      extends (ContRead[A,B]=>Option[ContRead.In[A] => Future[Continuated[B]]]) {
+    def apply(cr:ContRead[A,B]):Option[ContRead.In[A]=>Future[Continuated[B]]] =
+     if (disabled || !(svInput eq s())) None else function(cr.copy(channel=thisInput))
+
+
+    def cbread(ch:Input[A]):Unit =
+      ch.cbread(this,flowTermination)
+  }
+
   def cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = {
-     val sv = s()
-     sv.cbread[B](cr=>if (sv eq s()) f(cr.copy(channel=this)) else None ,ft)
+        val r = new Reader[B](current,f,ft,false)
+        val s = current
+        val jwhashMap = new JWeakHashMap[Input[A],Boolean]
+        jwhashMap.put(current,true)
+        activeReaders.put(r,jwhashMap)
+        current.cbread(r,ft)
+  }
+
+  def refresh():Unit =
+  {
+   activeReaders forEach refreshBiConsumer
+  }
+
+  val refreshBiConsumer = new JBiConsumer[Reader[_],JWeakHashMap[Input[A],Boolean]] {
+       override def accept(r:Reader[_], sources:JWeakHashMap[Input[A],Boolean]):Unit =
+       {
+        val s = current
+        val alreadyRegistered = sources.containsKey(s)
+        if (!alreadyRegistered) {
+           sources.put(s,true)
+           r.cbread(s)
+        }
+       }
   }
 
 
 }
 
-class FoldSelectorBuilderImpl(val c:Context)
+class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImpl(c)
 {
   import c.universe._
 
@@ -162,9 +199,6 @@ class FoldSelectorBuilderImpl(val c:Context)
           )
     c.Expr[Future[S]](tree)
    }
-
-   def transformSelectMatch(bn:TermName,cases: List[CaseDef]):List[Tree]=
-     SelectorBuilder.transformSelectMatch(c)(bn,cases)
 
    def fold[S:c.WeakTypeTag](s:c.Expr[S])(op:c.Expr[(S,FoldSelect[S])=>S]):c.Expr[S] =
      c.Expr[S](q"scala.async.Async.await(${afold(s)(op).tree})")
@@ -340,7 +374,7 @@ class FoldSelectorBuilderImpl(val c:Context)
                                               guard,
                                               Match(Ident(choice1),cases1)) =>
                                    if (sel == choice1) {
-                                      val selectSymbols = retrieveSelectChannels(cases)
+                                      val selectSymbols = retrieveSelectChannels(cases1)
                                       FoldParse(
                                          stateVal = x,
                                          stateUsedInSelect = selectSymbols.contains(x.symbol),
@@ -386,8 +420,50 @@ class FoldSelectorBuilderImpl(val c:Context)
 
    private def retrieveSelectChannels(cases:List[CaseDef]): Set[c.Symbol] =
    {
-    //TODO: implement
-    Set()
+    val s0=Set[c.Symbol]()
+    cases.foldLeft(s0){ (s,e) =>
+      def addSymbol(in:Tree) = s+e.symbol
+      acceptSelectCaseDefPattern(e, addSymbol, addSymbol, addSymbol, _ => s)
+    }
+   }
+
+   //TODO: generalize and merge with parsing in SelectorBuilderImpl
+   def acceptSelectCaseDefPattern[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
+                                     onSelectTimeout: Tree => A, onIdle: Tree => A):A =
+   {
+     caseDef.pat match {
+       case Bind(name,t) => 
+         val termName = name.toTermName
+         t match {
+           case Typed(_,tp:TypeTree) =>
+                val tpoa = if (tp.original.isEmpty) tp else tp.original
+                val tpo = MacroUtil.skipAnnotation(c)(tpoa)
+                tpo match {
+                    case Select(ch,TypeName("read")) => onRead(ch)
+                    case Select(ch,TypeName("write")) => onWrite(ch)
+                    case Select(select,TypeName("timeout")) => onSelectTimeout(select)
+                    case _ =>
+                         if (caseDef.guard.isEmpty) {
+                            c.abort(tp.pos, "row caseDef:"+showRaw(caseDef) );
+                            c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
+                         } else {
+                          parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
+                               case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                                        onRead(readed)
+                               case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                                        onWrite(ch)
+                               case x@_ =>
+                                  c.abort(tp.pos, "can't parse match guard: "+x);
+                            }
+                     }
+                }
+           case _ =>
+                c.abort(caseDef.pat.pos,"x:channel.read or x:channel.write form is required")
+         }
+       case Ident(TermName("_")) => onIdle(caseDef.pat)
+       case _ =>      
+            c.abort(caseDef.pat.pos,"bind in pattern is expected")
+     }
    }
 
 }

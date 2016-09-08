@@ -51,10 +51,10 @@ trait OnceSelectorBuilder[T] extends SelectorBuilder[T@uncheckedVariance]
 
 
    def foreach(f:Any=>T):T = 
-        macro SelectorBuilder.foreachImpl[T]
+        macro SelectorBuilderImpl.foreach[T]
 
    def apply(f: PartialFunction[Any,T]): Future[T] =
-        macro SelectorBuilder.applyImpl[T]
+        macro SelectorBuilderImpl.apply[T]
 
 }
 
