@@ -18,6 +18,20 @@ sealed trait FlowContinuated[A] extends Continuated[A]
   def flowTermination: FlowTermination[A]
 }
 
+sealed trait ReadyTestResult[+A]
+
+object ReadyTestResult
+{
+  sealed trait NotReady[+A] extends ReadyTestResult[A]
+  case object WillBeCheckedLater extends NotReady[Nothing]
+  case class CheckOther[A,B](other:A=>ReadyTestResult[B]) extends NotReady[B]
+
+  case class Ready[A](value:A) extends ReadyTestResult[A]
+
+}
+
+
+
 case class Done[A](result:A, override val flowTermination: FlowTermination[A]) extends FlowContinuated[A]
 
 /**
@@ -37,6 +51,7 @@ case class ContRead[A,B](
 
 object ContRead
 {
+
 
   sealed trait In[+A]
   case class Value[+A](a:A) extends In[A]

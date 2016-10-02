@@ -19,28 +19,17 @@ trait Channel[A] extends InputOutput[A]
    def close(): Unit
 
    // override some operations
-   
-   override def filter(p:A=>Boolean): Channel[A] =
+
+   class Filtered(p:A=>Boolean) extends super.Filtered(p)
+                                    with Channel[A]
    {
-    val filteredInput = super.filter(p)
-    new Channel[A] {
-         def cbread[B](f:
-              ContRead[A,B]=>Option[
-                    ContRead.In[A]=>Future[Continuated[B]]
-            ],
-            ft: FlowTermination[B]): Unit = filteredInput.cbread(f,ft)
+     def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])],ft: FlowTermination[B]):Unit =
+       thisChannel.cbwrite(f,ft)
 
-         def  cbwrite[B](f: ContWrite[A,B] => Option[
-                   (A,Future[Continuated[B]])
-                  ],
-                  ft: FlowTermination[B]): Unit =
-            thisChannel.cbwrite(f,ft)  // TODO: optimize by filteredOutput.cbwrite() ?
-
-        def api = thisChannel.api
-
-        def close() = thisChannel.close()
-    }
+     def close() = thisChannel.close()
    }
+   
+   override def filter(p:A=>Boolean): Channel[A] = new Filtered(p)
 
 }
 

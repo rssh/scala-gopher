@@ -22,9 +22,17 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
                        f: (ExecutionContext, FlowTermination[T], A) => Future[T]):this.type =
    {
      def normalized(_cont: ContRead[A,T]):Option[ContRead.In[A]=>Future[Continuated[T]]] =
-            Some(ContRead.liftIn(_cont){ a=>
-                    f(ec,selector,a) map (x=>ContRead(normalized,ch,selector))
+     {
+             Some(ContRead.liftIn(_cont){ a=>
+                    System.err.println("FoldSelectorBuilder.readerWithFlowTerminationAsync.normalized.in: _cont="+_cont)
+                    f(ec,selector,a) map { x =>
+                         val next = _cont
+                         //val next = ContRead(normalized,ch,selector)
+                         System.err.println("FoldSelectorBuilder.readerWithFlowTerminationAsync.cont, sending next  cont "+ next )
+                         next
+                    }
                 })
+     }
      withReader[A](ch, normalized) 
    }
 
@@ -38,7 +46,7 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
        withWriter[A](ch, { cw => Some(x,f(ec,cw.flowTermination, x) map ( _ => cw )) } )
 
    def timeout(t:FiniteDuration)(f: FiniteDuration => T): FoldSelectorBuilder[T] =
-        macro SelectorBuilder.timeoutImpl[T,FoldSelectorBuilder[T]]
+       macro SelectorBuilder.timeoutImpl[T,FoldSelectorBuilder[T]]
 
    @inline
    def timeoutWithFlowTerminationAsync(t:FiniteDuration,
@@ -62,62 +70,10 @@ class FoldSelect[T](sf:SelectFactory) extends FoldSelectorBuilder[T]
 }
 
 
-/**
- * effected input inside fold. We know, that exists only one call of
- * FoldSelectorInput, generated in our fold statement
- */
-class FoldSelectorEffectedInput[A](s:()=>Input[A],val api: GopherAPI) extends Input[A]
-{
-
-  thisInput =>
-
-  def current = s()
-  val activeReaders = new JWeakHashMap[Reader[_],JWeakHashMap[Input[A],Boolean]]
-
-  class Reader[B](val svInput: Input[A], 
-                  val function: ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]],
-                  val flowTermination: FlowTermination[B], var disabled: Boolean=false) 
-      extends (ContRead[A,B]=>Option[ContRead.In[A] => Future[Continuated[B]]]) {
-    def apply(cr:ContRead[A,B]):Option[ContRead.In[A]=>Future[Continuated[B]]] =
-     if (disabled || !(svInput eq s())) None else function(cr.copy(channel=thisInput))
-
-
-    def cbread(ch:Input[A]):Unit =
-      ch.cbread(this,flowTermination)
-  }
-
-  def cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]],ft: FlowTermination[B]): Unit = {
-        val r = new Reader[B](current,f,ft,false)
-        val s = current
-        val jwhashMap = new JWeakHashMap[Input[A],Boolean]
-        jwhashMap.put(current,true)
-        activeReaders.put(r,jwhashMap)
-        current.cbread(r,ft)
-  }
-
-  def refresh():Unit =
-  {
-   activeReaders forEach refreshBiConsumer
-  }
-
-  val refreshBiConsumer = new JBiConsumer[Reader[_],JWeakHashMap[Input[A],Boolean]] {
-       override def accept(r:Reader[_], sources:JWeakHashMap[Input[A],Boolean]):Unit =
-       {
-        val s = current
-        val alreadyRegistered = sources.containsKey(s)
-        if (!alreadyRegistered) {
-           sources.put(s,true)
-           r.cbread(s)
-        }
-       }
-  }
-
-
-}
-
 class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImpl(c)
 {
   import c.universe._
+
 
    /**
     *```
@@ -178,13 +134,15 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     *{{{
     * var s = ch
     * val bn = new FoldSelector
-    * val ef = new FoldEffectedInput(()=>s)
+    * val ef = new FoldSelectorEffectedInput(()=>s)
     * bn.reading(ef)(x => async{ generated.write(x)
     *                            s.filter(_ % x == 0)})
     *}}}
     **/
    def afold[S:c.WeakTypeTag](s:c.Expr[S])(op:c.Expr[(S,FoldSelect[S])=>S]):c.Expr[Future[S]] =
    {
+    System.err.println(s"FoldSelectorBuilder: in s = ${s}")
+    System.err.println(s"FoldSelectorBuilder: in op = ${op}")
     val foldParse = parseFold(op)
     val sName = foldParse.stateVal.name
     val sNameStable = TermName(c.freshName("s"))
@@ -194,14 +152,16 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
            atPos(s.tree.pos)(q"var $sName = ${s}") ::
                             (q"val $sNameStable = $sName") ::
            q"val ${bn} = new FoldSelect[${weakTypeOf[S]}](${c.prefix})"::
-           transformSelectMatch(bn,ncases),
+           wrapInEffected(foldParse,transformSelectMatch(bn,ncases)),
            q"${bn}.go"
           )
+    System.err.println("FoldSelectorBuilder: out tree = "+tree)
     c.Expr[Future[S]](tree)
    }
 
    def fold[S:c.WeakTypeTag](s:c.Expr[S])(op:c.Expr[(S,FoldSelect[S])=>S]):c.Expr[S] =
      c.Expr[S](q"scala.async.Async.await(${afold(s)(op).tree})")
+
 
    case class FoldParseProjection(
       sym: c.Symbol,
@@ -214,7 +174,12 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
      projections:  List[FoldParseProjection],
      selectValName: c.TermName,
      selectCases: List[CaseDef]
-   )
+   ) {
+     lazy val projectionsBySym: Map[c.Symbol,(FoldParseProjection,Int)] =
+        projections.zipWithIndex.foldLeft(Map[c.Symbol,(FoldParseProjection,Int)]()) { (s,e) =>
+           s.updated(e._1.sym,e)
+        }
+   }
 
    def withProjAssignments(fp:FoldParse, patSymbol: Symbol, body:c.Tree):c.Tree =
    {
@@ -225,23 +190,38 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
         q"val ${sym.name.toTermName} = $stateName.$pf"  
      }
      val projectedSymbols = fp.projections.map(_.sym).toSet
-     val nbody = cleanIdents(body,projectedSymbols + fp.stateVal.symbol + patSymbol)
+     val nbody = cleanIdentsSubstEffected(fp,body,projectedSymbols + fp.stateVal.symbol + patSymbol)
      if (projAssignments.isEmpty)
        nbody
      else {
-       Block(projAssignments,cleanIdents(nbody,projectedSymbols))
+       Block(projAssignments,cleanIdentsSubstEffected(fp,nbody,projectedSymbols))
      }
    }
 
-   private def cleanIdents(tree:c.Tree,symbols:Set[Symbol]):Tree =
+   private def cleanIdentsSubstEffected(fp: FoldParse,tree:c.Tree,symbols:Set[Symbol]):Tree =
    {
     val tr = new Transformer {
       override def transform(tree:c.Tree):c.Tree =
         tree match {
           case Ident(s) => if (symbols.contains(tree.symbol)) {
-                             // create new tree without associated symbol.
-                             //(typer wil reassociate one).
-                             atPos(tree.pos)(Ident(s))
+                             val sym = tree.symbol
+                             if ((sym eq fp.stateVal.symbol) && fp.stateUsedInSelect) {
+                                atPos(tree.pos)(q"${makeEffectedName(sym)}.current")
+                             }else{
+                                fp.projectionsBySym.get(sym) match {
+                                  case Some(projInd) =>
+                                       val (proj, ind) = projInd
+                                       if (proj.usedInSelect) {
+                                         atPos(tree.pos)(q"${makeEffectedName(sym)}.current")
+                                       } else {
+                                          atPos(tree.pos)(Ident(s))
+                                       }
+                                  case None =>
+                                    // create new tree without associated symbol.
+                                    //(typer wil reassociate one).
+                                     atPos(tree.pos)(Ident(s))
+                                }
+                             }
                            } else {
                              super.transform(tree)
                            }
@@ -257,13 +237,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     tr.transform(tree)
    }
 
-   def substProj(fp:FoldParse, newName: c.TermName, body:c.Tree, debug: Boolean):c.Tree =
-        substProj(fp.projections, fp.stateVal.symbol, newName, body, debug)
-
-   def substProj(projections: List[FoldParseProjection], 
-                 stateSymbol: c.Symbol, newName: c.TermName,
-                 body:c.Tree, debug: Boolean):c.Tree =
+   def substProj(foldParse:FoldParse, newName: c.TermName, body:c.Tree, substEffected: Boolean, debug: Boolean):c.Tree =
    {
+     val projections = foldParse.projections
+     val stateSymbol = foldParse.stateVal.symbol
      val pi = projections.map(_.sym).zipWithIndex.toMap
      //val sName = stateSymbol.name.toTermName
      val sName = newName
@@ -271,11 +248,22 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
        override def transform(tree:Tree):Tree =
          tree match {
            case Ident(name) => pi.get(tree.symbol) match {
-                                  case Some(n) => val proj = TermName("_"+(n+1).toString)
-                                                  atPos(tree.pos)(q"${sName}.${proj}")
+                                  case Some(n) => 
+                                        if (substEffected && projections(n).usedInSelect) {
+                                          val proj = makeEffectedName(projections(n).sym)
+                                          atPos(tree.pos)(q"${proj}")
+                                        } else {
+                                          val proj = TermName("_"+(n+1).toString)
+                                          atPos(tree.pos)(q"${sName}.${proj}")
+                                        }
                                   case None => 
                                        if (tree.symbol eq stateSymbol) {
-                                         atPos(tree.pos)(Ident(sName))
+                                         if (substEffected && foldParse.stateUsedInSelect) {
+                                           val en = makeEffectedName(stateSymbol)
+                                           atPos(tree.pos)(Ident(en))
+                                         }else{
+                                           atPos(tree.pos)(Ident(sName))
+                                         }
                                        } else {
                                          super.transform(tree)
                                        }
@@ -307,11 +295,31 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    {
      val sName = fp.stateVal.name
      val tmpName = TermName(c.freshName("tmp"))
-     q"""
-         val $tmpName = ${withProjAssignments(fp,patSymbol,body)}
-         $sName = $tmpName
-         $sName
-     """
+     val refresh = refreshEffected(fp)
+     val statements = List(
+           q"val $tmpName = ${withProjAssignments(fp,patSymbol,body)}",
+           q"$sName = $tmpName"
+          ) ++ 
+            refresh ++ List(
+            q"$sName"
+          )
+     q"{..$statements}"
+   }
+
+   def refreshEffected(fp:FoldParse):List[c.Tree] =
+   {
+    if (fp.stateUsedInSelect) {
+       q"${makeEffectedName(fp.stateVal.symbol)}.refresh()" :: Nil
+    }else{
+       fp.projections.filter(_.usedInSelect).map{ proj =>
+         q"${makeEffectedName(proj.sym)}.refresh()" 
+       }
+    }
+   }
+
+   def makeEffectedName(sym:Symbol):TermName =
+   {
+     TermName(sym.name+"$eff")
    }
 
    def preTransformCaseDef(fp:FoldParse,cd:CaseDef,stableName:TermName):CaseDef =
@@ -354,10 +362,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
                      case Ident(TermName("_")) => (cd.pat, cd.guard)
                      case _ => c.abort(cd.pat.pos,"expected Bind or Default in pattern, have:"+cd.pat)
      }
-     val spat = substProj(fp,stableName,pat,true)
+     //val spat = substProj(fp,stableName,pat,true)
      val symName = fp.stateVal.symbol.name.toTermName
-     atPos(cd.pos)(CaseDef(substProj(fp,stableName,pat,false),
-                           substProj(fp,symName,guard,false),
+     atPos(cd.pos)(CaseDef(substProj(fp,stableName,pat,true,false),
+                           substProj(fp,symName,guard,false,false),
                            preTransformCaseDefBody(fp,patSymbol,cd.body)))
    }
 
@@ -422,7 +430,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    {
     val s0=Set[c.Symbol]()
     cases.foldLeft(s0){ (s,e) =>
-      def addSymbol(in:Tree) = s+e.symbol
+      def addSymbol(in:Tree) = s+in.symbol
       acceptSelectCaseDefPattern(e, addSymbol, addSymbol, addSymbol, _ => s)
     }
    }
@@ -464,6 +472,36 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
        case _ =>      
             c.abort(caseDef.pat.pos,"bind in pattern is expected")
      }
+   }
+
+   private def wrapInEffected(foldParse:FoldParse,wrapped:List[c.Tree]):List[c.Tree] =
+   {
+    val stateValName = foldParse.stateVal.name
+    if (foldParse.stateUsedInSelect) {
+      genEffectedDef(foldParse.stateVal.symbol, q"()=>${stateValName}")::wrapped
+    } else if (foldParse.projections.nonEmpty && foldParse.projections.exists(_.usedInSelect)) {
+      foldParse.projections.zipWithIndex.filter(_._1.usedInSelect).map{
+         case (p,i) => val funName = TermName("_"+(i+1))
+                       genEffectedDef(p.sym,q"()=>${stateValName}.${funName}")
+      } ++ wrapped
+    } else 
+      wrapped
+   }
+
+   private def genEffectedDef(sym:Symbol,expr:c.Tree):c.Tree = 
+   {
+    val constructorName = if (sym.typeSignature <:< c.weakTypeOf[Channel[_]]) {
+                             "FoldSelectorEffectedChannel"
+                          } else if (sym.typeSignature <:< c.weakTypeOf[Input[_]]) {
+                             "FoldSelectorEffectedInput"
+                          } else if (sym.typeSignature <:< c.weakTypeOf[Output[_]]) {
+                             "FoldSelectorEffectedOutput"
+                          } else {
+                             c.abort(sym.pos,s"$sym expected type must be Channel or Input or Output")
+                          }
+    val constructor=TermName(constructorName)
+    val effectedName = makeEffectedName(sym)
+    q"val $effectedName = gopher.channels.${constructor}(${expr})"
    }
 
 }

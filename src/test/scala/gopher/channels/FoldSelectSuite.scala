@@ -22,30 +22,48 @@ class FoldSelectSuite extends FunSuite
 
  test("fold-over-selector with changed read") {
    
-    val in = makeChannel[Int]()
-    val out = makeChannel[Int]()
+    val in = makeChannel[Int](10)
+    val out = makeChannel[Int](10)
     val generator = go {
       select.fold(in){ (ch,s) =>
         s match {
-          case p:ch.read => out.write(p)
-                            ch.filter(_ % p == 0)
+          case p:ch.read => 
+                            System.err.println(s"inFold.1, read ${p}, writing one to output")
+                            out.write(p)
+                            System.err.println(s"inFold.2, after write")
+                            //ch.filter(_ % p != 0)
+                            val x = ch.filter{ x =>
+                                val r = (x%p != 0)
+                                System.err.println(s"eratosphen: filtered ${x} by ${p}, r=${r}")
+                                r
+                            }
+                            System.err.println(s"inFold.3 created channel ${x}")
+                            x
         }
       }
     }
-    in.awriteAll(1 to 100)
+    generator.onFailure{
+      case ex: Throwable => ex.printStackTrace()
+    }
+    //in.awriteAll(2 to 100)
+    in.awriteAllDebug(2 to 100)
     val read = go {
       for(i <- 1 to 10) yield {
+         System.err.println(s"in read loop: before out.read, step=${i}:")
          val p = out.read
-         System.err.println(s"received:${p}")
+         System.err.println(s"in read loop: received:${p}")
          p
       }
     }
+    Thread.sleep(1000)
+
     val r = Await.result(read,1 second)
     System.err.println(r)
     pending
  }
 
  test("fold-over-selector with swap read") {
+    pending
 
     val in1 = makeChannel[Int]()
     val in2 = makeChannel[Int]()

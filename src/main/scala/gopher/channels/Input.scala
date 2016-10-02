@@ -20,7 +20,7 @@ import java.util.concurrent.atomic._
  *
  *
  */
-trait Input[A]
+trait Input[A] extends GopherAPIProvider
 {
 
   thisInput =>
@@ -106,20 +106,21 @@ trait Input[A]
 
   def aforeach(f: A=>Unit): Future[Unit] = macro InputMacro.aforeachImpl[A]
 
-  def filter(p: A=>Boolean): Input[A] =
-       new Input[A] {
+  class Filtered(p: A=>Boolean) extends Input[A] {
 
-          def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-           thisInput.cbread[B]( 
-                               (cont) => f(cont) map {
-                                            f1 => { case v@ContRead.Value(a) =>
-                                                              if (p(a)) f1(v) else Future successful cont
-                                                    case v@_ => f1(v)
-                                                  } }, ft)  
+       def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+           thisInput.cbread[B]({ cont =>
+                    f(cont.copy(channel=this)) map { // todo - eliminate copy
+                         f1 => { case v@ContRead.Value(a) =>
+                                             if (p(a)) f1(v) else Future successful cont
+                                 case v@_ => f1(v)
+                         } } }, ft)  
+     
+        def api = thisInput.api
 
-           def api = thisInput.api
+  }
 
-       }
+  def filter(p: A=>Boolean): Input[A] = new Filtered(p)
 
   def withFilter(p: A=>Boolean): Input[A] = filter(p)
 

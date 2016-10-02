@@ -41,7 +41,7 @@ class SinglethreadedEffectedChannel[A](ch:Channel[A]) extends SinglethreadedEffe
 
   def api: GopherAPI = v.api
 
-  override def filter(p:A=>Boolean):Channel[A] = new SinglethreadedEffectedChannel(v.filter(p))
+  //override def filter(p:A=>Boolean):Channel[A] = new SinglethreadedEffectedChannel(v.filter(p))
 
 }
 

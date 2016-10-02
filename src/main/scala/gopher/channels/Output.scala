@@ -12,7 +12,7 @@ import gopher._
  * Entity, where we can write objects of type A.
  *
  */
-trait Output[A]
+trait Output[A] extends GopherAPIProvider
 {
 
   type ~> = A
@@ -72,6 +72,30 @@ trait Output[A]
           if (it.hasNext) {
             Some((n,Future successful ContWrite(f,this,ft)))
           } else {
+            Some((n, Future successful Done((), ft) ))
+          }
+      }         
+      cbwrite(f,ft)
+      ft.future
+    }
+  }
+
+  def awriteAllDebug[C <: Iterable[A]](c:C):Future[Unit] =
+  {
+    if (c.isEmpty) {
+      System.err.println("awriteAllDebug: empty")
+      Future successful (())
+    } else {
+      val ft = PromiseFlowTermination[Unit]
+      val it = c.iterator
+      def f(cont:ContWrite[A,Unit]):Option[(A,Future[Continuated[Unit]])]=
+      {
+          val n = it.next()
+          if (it.hasNext) {
+            System.err.println(s"awriteAllDebug: n=${n}, hasNext")
+            Some((n,Future successful ContWrite(f,this,ft)))
+          } else {
+            System.err.println(s"awriteAllDebug: n=${n}, last")
             Some((n, Future successful Done((), ft) ))
           }
       }         

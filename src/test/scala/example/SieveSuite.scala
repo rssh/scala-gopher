@@ -59,11 +59,11 @@ object Sieve
   {
    val q = makeChannel[Int]()
    val filtered = makeChannel[Int]()
-   select.afold(in){ (chFind, s) => 
+   select.afold(in){ (ch, s) => 
      s match {
-       case prime: chFind.read => 
+       case prime: ch.read => 
                          filtered.write(prime)
-                         chFind.filter(_ % prime != 0)
+                         ch.filter(_ % prime != 0)
      }
    }
    filtered
