@@ -80,30 +80,6 @@ trait Output[A] extends GopherAPIProvider
     }
   }
 
-  def awriteAllDebug[C <: Iterable[A]](c:C):Future[Unit] =
-  {
-    if (c.isEmpty) {
-      System.err.println("awriteAllDebug: empty")
-      Future successful (())
-    } else {
-      val ft = PromiseFlowTermination[Unit]
-      val it = c.iterator
-      def f(cont:ContWrite[A,Unit]):Option[(A,Future[Continuated[Unit]])]=
-      {
-          val n = it.next()
-          if (it.hasNext) {
-            System.err.println(s"awriteAllDebug: n=${n}, hasNext")
-            Some((n,Future successful ContWrite(f,this,ft)))
-          } else {
-            System.err.println(s"awriteAllDebug: n=${n}, last")
-            Some((n, Future successful Done((), ft) ))
-          }
-      }         
-      cbwrite(f,ft)
-      ft.future
-    }
-  }
-
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
 
   

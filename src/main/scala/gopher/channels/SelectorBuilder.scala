@@ -160,16 +160,23 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                                                            else
                                                                super.transform(tree)
                case _ =>
-                if (tree.symbol != null) {
+                if (tree.symbol != null && tree.symbol != NoSymbol) {
                     if (ownerWillBeErased(tree.symbol)) {
                           var prevMustBeErased = insideMustBeErased
                           insideMustBeErased = true
-                          val (done, rtree) = doClear(tree)
-                          insideMustBeErased = prevMustBeErased
-                          if (done) {
-                            rtree
-                          } else {
-                            super.transform(tree)
+                          try {
+                            val (done, rtree) = doClear(tree)
+                            insideMustBeErased = prevMustBeErased
+                            if (done) {
+                              rtree
+                            } else {
+                              super.transform(tree)
+                            }
+                          }catch{
+                            case ex: Exception =>
+                              System.err.println(s"ex, tree.symbol=${tree.symbol}")
+                              ex.printStackTrace()
+                              throw ex
                           }
                     } else super.transform(tree)
                 } else {
@@ -195,6 +202,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                         (true, atPos(tree.pos)(Select(Ident(changeName(name)),proj)) )
                   case _   => 
                        // (false, tree)
+                    throw new IllegalStateException("unexpected shapr")
                     c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
                                        please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
               }

@@ -5,15 +5,11 @@ import scala.concurrent.duration._
 import scala.language.experimental.macros
 import scala.language.reflectiveCalls
 import scala.reflect.macros.blackbox.Context
-import scala.reflect.api._
-import scala.util._
-import java.util.concurrent.ConcurrentLinkedQueue
-
 import gopher._
 import gopher.util._
-
-
 import java.util.concurrent.atomic._
+
+import gopher.channels.ContRead.In
 
 /**
  * Entity, from which we can read objects of type A.
@@ -112,7 +108,10 @@ trait Input[A] extends GopherAPIProvider
            thisInput.cbread[B]({ cont =>
                     f(cont.copy(channel=this)) map { // todo - eliminate copy
                          f1 => { case v@ContRead.Value(a) =>
-                                             if (p(a)) f1(v) else Future successful cont
+                                             if (p(a)) f1(v) else {
+                                                f1(ContRead.Skip)
+                                                Future successful cont
+                                             }
                                  case v@_ => f1(v)
                          } } }, ft)  
      
@@ -132,7 +131,8 @@ trait Input[A] extends GopherAPIProvider
          def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
          {  val contA = ContRead(f,this,cont.flowTermination)
             f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
-                                  case ContRead.Skip => Future successful cont
+                                  case ContRead.Skip => f1(ContRead.Skip)
+                                                        Future successful cont
                                   case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
                                   case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
                                 } )
@@ -157,7 +157,8 @@ trait Input[A] extends GopherAPIProvider
        { val contA = ContRead(f,this,cont.flowTermination)
            f(contA) map { f1 => {
               case v@ContRead.Value(a) => Future successful ContRead(f,op(g(a),this),cont.flowTermination)
-              case ContRead.Skip => Future successful cont
+              case ContRead.Skip => f1(ContRead.Skip)
+                                    Future successful cont
               case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
               case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
        }}}
@@ -424,6 +425,20 @@ object Input
                                     }))
 
      def api = gopherApi
+   }
+
+
+   def zero[A](implicit gopherAPI: GopherAPI):Input[A] = new Input[A] {
+
+     /**
+       * will eat f without a trace (i.e. f will be never called)
+       */
+     override def cbread[B](f: (ContRead[A, B]) => Option[(In[A]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit = {}
+
+     /**
+       * instance of gopher API
+       */
+     override def api: GopherAPI = gopherAPI
    }
 
 }

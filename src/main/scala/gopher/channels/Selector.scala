@@ -54,7 +54,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
       block match {
            case cr@ContRead(f,ch, ft) => 
                def f1(cont:ContRead[cr.El,cr.R]): Option[ContRead.In[cr.El]=>Future[Continuated[cr.R]]]  = { 
-                     System.err.println(s"Selector.makeLocked.f1 - before tryLocked, fClass=${f.getClass} isLocked=${isLocked}")
                      tryLocked(f(ContRead(f,ch,ft)),cont,"read") map { q =>
                                    (in => unlockAfter(
                                                  try { 
@@ -91,7 +90,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   @inline
   private[this] def tryLocked[X](body: => Option[X], cont: FlowContinuated[A], dstr: String):Option[X] =
        if (tryLock()) {
-           System.err.println(s"lock set for selector ${this}")
            try {
              body match {
                case None => mustUnlock(dstr,cont.flowTermination)
@@ -108,7 +106,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                      None
            }
         } else {
-           System.err.println(s"TryLockedFailed, send $cont to waiters")
            toWaiters(cont)
            None
         }
@@ -183,7 +180,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   private[this] def unlock(debugFrom: String): Boolean =
   {
-     System.err.println(s"unlock selector ${this}")
      val retval = lockFlag.compareAndSet(true,false)
      //if (retval) {
         sendWaits()

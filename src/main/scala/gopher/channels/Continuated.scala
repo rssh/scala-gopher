@@ -116,7 +116,8 @@ case class ContWrite[A,B](function: ContWrite[A,B] => Option[(A,Future[Continuat
 
 object ContWrite
 {
-   
+  type Aux[A,B] = ContWrite[A,B]
+  type AuxF[A,B] = ContWrite[A,B]=>Option[(A,Future[Continuated[B]])]
 }
 
 /**
