@@ -8,3 +8,4 @@ ie in simplicified explanation:
 ```
  1.to(n).foreachAsync { async(s += await(aread(x))) }  
 ```
+- added support for select.fold construct
