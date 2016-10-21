@@ -82,6 +82,13 @@ trait Output[A] extends GopherAPIProvider
 
   def writeAll[C <: Iterable[A]](it:C):Unit = macro Output.writeAllImpl[A,C]
 
+  def unfold[S](s:S)(f:S=>(S,A)):Unit =
+  {
+   var ca=f(s)
+   val fs = api.select.forever
+   fs.writingWithFlowTerminationAsync[A](this,ca._2,(ec,ft,a) => Future successful {ca=f(ca._1)} )
+   fs.go
+  }
   
   /**
    *provide pair from Output and Input `(ready, timeouts)` such that writing to `ready` 
