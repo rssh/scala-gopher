@@ -23,7 +23,7 @@ class SchedulerStartupTest extends FunSuite {
                                          ){
                                            if (!p.isCompleted) p success 0
                                           }(ExecutionContext.Implicits.global)
-       val x = Await.result(p.future, 1000 milliseconds)
+       val x = Await.result(p.future, 3000 milliseconds)
        assert(x==0)
 
     }
