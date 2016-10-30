@@ -41,7 +41,7 @@ In such way, communication via channel implicitly provides flow control function
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
     go {
-      for(i <- 1 to Int.MaxValue) out.write(i)
+      for(i <- 1 to Int.MaxValue) in.write(i)
     }
     go {
       select.fold(in){ (ch,s) =>
