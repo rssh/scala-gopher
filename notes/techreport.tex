@@ -31,10 +31,10 @@
 
  Scala-gopher is a library-level implementation of process algebra [Communication Sequential Processes, see \cite{Hoare85communicatingsequential} as ususally enriched by $\pi$-calculus \cite{Milner:1992:CMP:162037.162038} naming primitives] in scala. In addition to support of a 'limbo/go-like' \cite{Inferno:Limbo}  \cite{golang} channels/goroutine programming style scala-gopher provides a set of operations following typical idiomatic scala. 
 
-    At first, let's remind the fundamentals of a CSP model. The primary entities of this model are channels, coroutines and selectors. Coroutines are lightweight threads of execution, that can communicate with each other by passing messages between channels. Channels can be viewed as blocked multiproducer/multiconsumer queues. Sending message to unbuffered channel suspends producing coroutines until the moment when this message will have been read by some consumer. Buffered channels transfer control flow between sinks not on each message, but when internal channel buffer is full.  
+    First, let's review the fundamentals of a CSP model. The primary entities of this model are channels, coroutines and selectors. Coroutines are lightweight threads of execution, that can communicate with each other by passing messages between channels. Channels can be viewed as blocked multiproducer/multiconsumer queues. Sending message to unbuffered channel suspends producing coroutines until the moment when this message will have been read by some consumer. Buffered channels transfer control flow between sinks not on each message, but when internal channel buffer is full.  
 In such way, communication via channel implicitly provides flow control functionality.  At last, a selector statement is a way of coordination of several communication activities: like Unix select(2) system call, select statement suspends current coroutines until one of the actions (reading/writing to one of the channels in selector) will be possible.
 
-   Let's look at the one simple example:
+   Let's look at the simple example:
 \begin{Verbatim}[fontsize=\small]
  def nPrimes(n:Int):Future[List[Int]]=
  {
