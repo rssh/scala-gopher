@@ -31,7 +31,7 @@
 
  Scala-gopher is a library-level implementation of process algebra [Communication Sequential Processes, see \cite{Hoare85communicatingsequential} as ususally enriched by $\pi$-calculus \cite{Milner:1992:CMP:162037.162038} naming primitives] in scala. In addition to support of a 'limbo/go-like' \cite{Inferno:Limbo}  \cite{golang} channels/goroutine programming style scala-gopher provides a set of operations following typical idiomatic scala. 
 
-    At first, let's remind the fundamentals of a CSP model. The primary entities of this model are channels, coroutines and selectors. Coroutines are lightweight threads of execution, which can communicate with each other by passing messages between channels. Channels can be viewed as blocked multiproducer/multiconsumer queues. Sending message to unbuffered channel suspends producing coroutines until the moment when this message will have been read by some consumer. Buffered channels transfer control flow between sinks not on each message, but when internal channel buffer is full.  
+    At first, let's remind the fundamentals of a CSP model. The primary entities of this model are channels, coroutines and selectors. Coroutines are lightweight threads of execution, that can communicate with each other by passing messages between channels. Channels can be viewed as blocked multiproducer/multiconsumer queues. Sending message to unbuffered channel suspends producing coroutines until the moment when this message will have been read by some consumer. Buffered channels transfer control flow between sinks not on each message, but when internal channel buffer is full.  
 In such way, communication via channel implicitly provides flow control functionality.  At last, a selector statement is a way of coordination of several communication activities: like Unix select(2) system call, select statement suspends current coroutines until one of the actions (reading/writing to one of the channels in selector) will be possible.
 
    Let's look at the one simple example:
@@ -56,7 +56,7 @@ In such way, communication via channel implicitly provides flow control function
     }
  }
 \end{Verbatim}
-  Here two channels and three goroutines are created.  The first coroutine just generates consecutive numbers and sends one to channel \verb|in|, second - accepts this sequence as the initial state and for each number which has been read from state channel, writes one to \verb|out| and produces next step by filtering previous. The result of the fold is the \verb|in| channel whith applied filters for each prime. The third coroutine just maps range to values to receive a list of first \verb|n| primes in Future.
+  Here two channels and three goroutines are created.  The first coroutine just generates consecutive numbers and sends one to channel \verb|in|, second - accepts this sequence as the initial state and for each number that has been read from state channel, writes one to \verb|out| and produces next step by filtering previous. The result of the fold is the \verb|in| channel whith applied filters for each prime. The third coroutine just maps range to values to receive a list of first \verb|n| primes in Future.
 
   If we look at the sequence of steps during code evaluation, we will see at first generation of
 number, then checks in filters and then if a given number was prime - final output.  Note, that goroutine is different from JVM thread of execution: sequential code chunks are executed in configurable executor service; switching between chunks does not use blocking operations.
@@ -66,18 +66,18 @@ number, then checks in filters and then if a given number was prime - final outp
 
 \subsection{Go: Translations of hight-order functions to asynchronous form.}
 
- The main entity of CSP is a 'process' which can be viewed as a block of code which handles specific events.  In Go CSP processes are represented as goroutines (aka coroutines). 
+ The main entity of CSP is a 'process' which can be viewed as a block of code that handles specific events.  In Go CSP processes are represented as goroutines (aka coroutines). 
 
- \verb|go[X](x:X):Future[X]| is a thin wrapper arround  SIP-22 async/await which does some preprocessing before async transformation:
+ \verb|go[X](x:X):Future[X]| is a thin wrapper arround  SIP-22 async/await that does some preprocessing before async transformation:
 \begin{itemize}
  \item do transformation of hight-order function in async form.
 
 
-  Let $f(A \To B)\To C$ is a hight-order function, which accepts other function 
+  Let $f(A \To B)\To C$ is a hight-order function, that accepts other function 
    $g:A \To B$ as parameter. 
-  Let's say that $g$ in $f$ is {\i invocation-only } if $f$ does not store $g$ in memory outside of $f$ scope and doesn't return $g$ as part of return value. Only one action which $f$ can do with $g$ is invocation or passing as a parameter to other invocation-only function. If we look at Scala collection API, we will see, that near all hight-order functions there are invocation-only.
+  Let's say that $g$ in $f$ is {\i invocation-only } if $f$ does not store $g$ in memory outside of $f$ scope and doesn't return $g$ as part of return value. The only two things that $f$ can do with $g$ is an invocation or passing it as a parameter to other invocation-only function. If we look at Scala collection API, we will see, that near all hight-order functions there are invocation-only.
 
-  Now, if we have $g$ which is invocation-only in $f$, and if we have function $g' : (A \To Future[B])$ let build function $f':(A\To Future[B])\to Future[C]$ that if $await(g')==await(g)$ then $await(f'(g'))==f(g))$ in next way
+  Now, if we have $g$ which is invocation-only in $f$, and if we have a function $g' : (A \To Future[B])$ let's build function $f':(A\To Future[B])\to Future[C]$ that if $await(g')==await(g)$ then $await(f'(g'))==f(g))$ in the following way
   \begin{itemize}
     \item $f'$ translated to $await(\makebox{transformed-body}(f))$
     \item $g(x)$ inside $f$ translated to $await(g'(x))$
@@ -100,7 +100,7 @@ number, then checks in filters and then if a given number was prime - final outp
  } }
 \end{Verbatim}
 
-  which after simplification step become
+  that after simplification step becomes
 
 \begin{Verbatim}[fontsize=\small]
    (1 to n).mapAsync(i => out.aread)
@@ -133,7 +133,7 @@ trait Input[A]
   Here we can read argument type as protocol where each arrow is a step: 
     $f$ is called on opportunity to read and
       $ContRead[A,B] \To Option[ContRead.In[A] \To Future[B]]$ means that when reading is 
-   possible, we can ignore this opportunity (i.e. return None) or return handler which will
+   possible, we can ignore this opportunity (i.e. return None) or return handler that will
    consume value (or \verb|end-of-input| or few other special cases) and return future to the next 
    computation state.
 
@@ -180,7 +180,7 @@ go {
 
   Appropriative expression in CSP syntax: $*[(c_{1} ? x \to P)\square(c_{2} ! y \to Q)]$
 
- Scala-gopher provides \verb|select| pseudo-object which provides set of high-order pseudo-functions over
+ Scala-gopher provides \verb|select| pseudo-object that provides a set of higher-order pseudo-functions over
 channels, which accept syntax of partial function over channel events:
 
 \begin{Verbatim}[fontsize=\small]
@@ -192,7 +192,7 @@ go {
 }
 \end{Verbatim}
    
-  or version which must not be wrapped by \verb|go| stamenet:
+  or version that must not be wrapped by \verb|go| stamenet:
 
 \begin{Verbatim}[fontsize=\small]
   select.aforever {
@@ -225,11 +225,11 @@ go {
 
   Here we see the special syntax for tuple state. Also note, that \verb|afold| macro assumes that \verb|s match| must be the first statement in the argument pseudo-function. \verb|select.exit| is used for returning result from the flow.
  
-  Events which we can check in select match statement are reading and writing of channels and select timeouts. In future we will think about extending the set of notifications - i.e. adding channel closing and overflow notifications, which are needed in some rare scenarios.
+  Events that we can check in select match statement are reading and writing of channels and select timeouts. In future we will think about extending the set of notifications - i.e. adding channel closing and overflow notifications, which are needed in some rare scenarios.
 
-\subsection{Transputer: an entity which encapsulates processing node. }
+\subsection{Transputer: an entity that encapsulates processing node. }
 
- The idea is to have an actor-like object, which encapsulates processing node: i.e., reads input data 
+ The idea is to have an actor-like object, that encapsulates processing node: i.e., reads input data 
 from the set of input ports; writes a result to the set of output ports and maintaines a local 
 mutable state inside.
 
@@ -310,7 +310,7 @@ class Zipper[T] extends SelectTransputer
 
 \item{ Channel-based API where client supply channel where to pass reply }
 
- Let we want provide API which must on request return some value to the caller. Instead of providing a method which will return a result on the stack we can provide endpoint channel, which will accept method arguments and channel where to return a result. 
+ Let we want provide API that must on request return some value to the caller. Instead of providing a method that will return a result on the stack we can provide endpoint channel, that will accept method arguments and channel where to return a result. 
 
  Next example illustrates this idea:
 
@@ -355,7 +355,7 @@ class BroadcastImpl[T] extends Broadcast[T]
 
 To register listener channel for receiving notification client sends this channel to newListener
   
- The internal state contains message bus represented by a channel which is replaced during each new input message. Each listener spawns the process which reads messages from the current message bus.
+ The internal state contains message bus represented by a channel which is replaced during each new input message. Each listener spawns the process that reads messages from the current message bus.
 
 
 \end{itemize}
@@ -368,13 +368,13 @@ spectrum, we have clear streaming models like akka-streams\cite{akka-streams} wi
 of composable operations and clear high-level functionality but lack of flexibility,
 at the other side - very flexible but low-level models like actors.
 
- Scala-gopher provides uniform API which allows build systems from different parts of spectrum:
+ Scala-gopher provides uniform API that allows build systems from different parts of spectrum:
 it is possible to build dataflow graph in a declarative manner and connect one with a dynamic part.
 
  The reactive isolates model\cite{Prokopec:2015:ICE:2814228.2814245} is close to scala-gopher model with dynamically-grown channel buffer (except that reactive isolates support distributed case).
- Isolate here corresponds to Transputer, Channel to Output and Events to gopher Input. Channels in reactive isolates are more limited: only one isolate which owns the channel can write to it when in the scala-gopher concept of channel ownership is absent. 
+ Isolate here corresponds to Transputer, Channel to Output and Events to gopher Input. Channels in reactive isolates are more limited: only one isolate that owns the channel can write to it when in the scala-gopher concept of channel ownership is absent. 
 
- Communicating Scala Objects\cite{CSO} is a direct implementation of CSP model in Scala which allows
+ Communicating Scala Objects\cite{CSO} is a direct implementation of CSP model in Scala that allows
 building expressions in internal Scala DSL, closed to original Hoar notation with some extensions, like extended rendezvous for mapping input streams.  Processes in CSO are not lightweight: each process requires Java thread which limits the scalability of this library until lightweight threading will be implemented on JVM level.
 
  Subscript\cite{vanDelft:2013:DCL:2489837.2489849} is a Scala extension which adds to language new constructions for building process algebra expressions. Although extending language can afford fine-grained interconnection of process-algebra and imperative language notation in far perspective, now it makes CPA constructs a second-class citizen because we have no direct representation of process and event types in Scala type system.
@@ -382,12 +382,12 @@ building expressions in internal Scala DSL, closed to original Hoar notation wit
   
 \section{ Conclusion and future directions }
   
-  Scala-gopher is a relatively new library which has not yet reached 1.0 state, but we have the early experience
+  Scala-gopher is a relatively new library that has not yet reached 1.0 state, but we have the early experience
  reports from using the library for building some helper components in an industrial software project. 
 
  In general, feedback is positive: developers enjoy a relatively simple mental model and ability to freely use asynchronous operations inside higher-order functions.  So, we can recommend to made conversion of invocation-only functions into async form to be available into the async library itself. 
 
- The area which needs more work: error handling in \verb|go| statements:  now \verb|go| returns 
+ The area that needs more work is an error handling in \verb|go| statements:  now \verb|go| returns 
 \verb|Future| which can hold a result of the evaluation or an exception. If we ignore statement result then we miss handling of exception; from another side, it unlikely handle errors there, because we must allow a developer to implement own error processing. The workaround is to use different method name for calling statement in the context with ignored return value, but it is easy to mix-up this two names.
  We think, that right solution can be built on language level: we can bind handling of ignored value to type by providing appropriative implicit conversion or use special syntax for functions which needs 
  
