@@ -69,6 +69,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
     closed=true
   }
 
+
   override protected def finalize(): Unit =
   {
    // allow channel actor be grabage collected
