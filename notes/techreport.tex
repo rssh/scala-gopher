@@ -84,7 +84,7 @@ number, then checks in filters and then if a given number was prime - final outp
     \item $h(g)$ translated to $await(h'(g'))$ if $g$ is invocation-only in $h$.
   \end{itemize}
 
-  Scala-gopher contains asynchronious variants of predefined functions from Scala collection API, so it is possible to use asynchronious expressions inside a loop. For example, next code:
+  Scala-gopher contains asynchronous variants of predefined functions from Scala collection API, so it is possible to use asynchronous expressions inside a loop. For example, next code:
 
 \begin{Verbatim}[fontsize=\small]
   go { 
@@ -106,7 +106,7 @@ number, then checks in filters and then if a given number was prime - final outp
    (1 to n).mapAsync(i => out.aread)
 \end{Verbatim}
 
- Using this approach allows overcoming the inconvenience of async/await by allowing programmers to use hight-order functions API inside asynchronous expression. Also, it is theoretically possible to generate asynchronous variants of API methods by transforming TASTY\cite{TASTY} representation of AST of synchronous versions. A similar technique is implemented in Nim \cite{Nim} programming language, where we can generate both synchronious and asynchronious variants of a function from one definition.
+ Using this approach allows overcoming the inconvenience of async/await by allowing programmers to use hight-order functions API inside asynchronous expression. Also, it is theoretically possible to generate asynchronous variants of API methods by transforming TASTY\cite{TASTY} representation of AST of synchronous versions. A similar technique is implemented in Nim \cite{Nim} programming language, where we can generate both synchronous and asynchronous variants of a function from one definition.
   
  \item do transformation of defer statement. This is just an implementation of error handling mechanism.
 
@@ -137,7 +137,7 @@ trait Input[A]
    consume value (or \verb|end-of-input| or few other special cases) and return future to the next 
    computation state.
 
-  Traditional synchronious API  (i.e. method $read:\To A$) can be used inside \verb|go| and \verb|async| statements; from 'normal' code we can use asynchronious variant: $aread: \To Future[A]$.
+  Traditional synchronous API  (i.e. method $read:\To A$) can be used inside \verb|go| and \verb|async| statements; from 'normal' code we can use asynchronous variant: $aread: \To Future[A]$.
 
   Output interface is similar:
 \begin{Verbatim}[fontsize=\small]
