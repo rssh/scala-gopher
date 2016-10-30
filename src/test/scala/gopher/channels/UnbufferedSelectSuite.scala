@@ -52,7 +52,7 @@ class UnbufferedSelectSuite extends FunSuite with AsyncAssertions
                }
              }
      ch.awriteAll(1 to 10) onComplete { _ => quit success true }
-     val sum = Await.result(r, 1 second)
+     val sum = Await.result(r, 3 second)
      assert(sum==(1 to 10).sum)
     }
    }

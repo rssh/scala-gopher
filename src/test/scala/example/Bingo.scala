@@ -35,8 +35,8 @@ trait Acceptor extends SelectTransputer
 
   val inA = InPort[Boolean]()
 
-  @volatile var nBingos = 0
-  @volatile var nPairs = 0
+  var nBingos = 0
+  var nPairs = 0
 
   loop {
           case x: inA.read =>

@@ -112,6 +112,7 @@ object ContRead
 case class ContWrite[A,B](function: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], channel: Output[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
+  type F = ContWrite[A,B]=>Option[(A,Future[Continuated[B]])]
 }
 
 object ContWrite
