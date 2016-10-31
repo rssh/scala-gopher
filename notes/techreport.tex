@@ -341,6 +341,7 @@ class BroadcastImpl[T] extends Broadcast[T]
                      s match {
                        case msg:current.read =>
                                ch.awrite(msg.value) 
+                               current.awrite(msg)
                                msg.next
                      }
                    } 
