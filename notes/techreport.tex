@@ -330,10 +330,10 @@ class BroadcastImpl[T] extends Broadcast[T]
    // private part
    case class Message(next:Channel[Message],value:T)
 
-   select.afold(makeChannel[Message]) { (bus, s) =>
+   select.afold(makeChannel[Message](1)) { (bus, s) =>
       s match {
          case v: message.read =>
-                   val newBus = makeChannel[Message]
+                   val newBus = makeChannel[Message](1)
                    current.write(Message(newBus,v))
                    newBus
          case ch: listener.read =>          
@@ -341,7 +341,7 @@ class BroadcastImpl[T] extends Broadcast[T]
                      s match {
                        case msg:current.read =>
                                ch.awrite(msg.value) 
-                               current.awrite(msg)
+                               current.write(msg)
                                msg.next
                      }
                    } 
