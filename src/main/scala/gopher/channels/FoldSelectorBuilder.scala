@@ -540,9 +540,13 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
                             c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
                          } else {
                           parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
-                               case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                            case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
                                         onRead(readed)
-                               case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                            case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
+                                        onRead(readed)
+                            case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                                        onWrite(ch)
+                            case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
                                         onWrite(ch)
                                case x@_ =>
                                   c.abort(tp.pos, "can't parse match guard: "+x);

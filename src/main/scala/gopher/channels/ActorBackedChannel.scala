@@ -5,11 +5,12 @@ import akka.actor._
 import akka.pattern._
 import scala.concurrent._
 import scala.concurrent.duration._
-import gopher._
+import scala.util._
 import scala.language.experimental.macros
 import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
+import gopher._
 
 class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Channel[A]
 {
@@ -26,18 +27,21 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
                                }
                       }
    }
+   implicit val ec = api.executionContext
    if (closed) {
      if (closedEmpty) {
        applyClosed();
      } else {
          // TODO: ask timeput on closed channel set in config.
          futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(5 seconds)
-                                     f.onFailure{
-                                          case e: AskTimeoutException => applyClosed()
-                                     }
-                                     f.onSuccess{
-                                          case ChannelCloseProcessed(0) =>
-                                                                  closedEmpty = true
+                                     f.onComplete{
+                                         case Failure(e) =>
+                                               if (e.isInstanceOf[AskTimeoutException]) {
+                                                 applyClosed()
+                                               }
+                                         case Success(ChannelCloseProcessed(0)) =>
+                                               closedEmpty = true
+                                         case _ =>  // do nothing
                                      }
                                  }
      }
@@ -47,25 +51,25 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   }
 
   private def  contRead[B](x:ContRead[A,B]): Unit =
-     futureChannelRef.foreach( _ ! x )
+     futureChannelRef.foreach( _ ! x )(api.executionContext)
 
   def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = 
     if (closed) {
       flwt.doThrow(new ChannelClosedException())
     } else {
-     futureChannelRef.foreach( _ ! ContWrite(f,this, flwt) )
+     futureChannelRef.foreach( _ ! ContWrite(f,this, flwt) )(api.executionContext)
     }
 
   private def contWrite[B](x:ContWrite[A,B]): Unit =
-    futureChannelRef.foreach( _ ! x )
+    futureChannelRef.foreach( _ ! x )(api.executionContext)
 
-  private[this] implicit val ec = api.executionContext
+  //private[this] implicit val ec = api.executionContext
 
   def isClosed: Boolean = closed
 
   def close(): Unit =
   {
-    futureChannelRef.foreach( _ ! ChannelClose )
+    futureChannelRef.foreach( _ ! ChannelClose )(api.executionContext)
     closed=true
   }
 
@@ -73,7 +77,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   override protected def finalize(): Unit =
   {
    // allow channel actor be grabage collected
-   futureChannelRef.foreach( _ ! ChannelRefDecrement )
+   futureChannelRef.foreach( _ ! ChannelRefDecrement )(api.executionContext)
   }
 
   private var closed = false

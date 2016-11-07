@@ -198,14 +198,16 @@ object GoAsync
    {
     import c.universe._
     val btype = body.tpe
-    // untypechack is necessory, because async-transform later will corrupt
-    //  symbols owners inside body
-    // [scala-2.11.8]
-    val nb = c.untypecheck(body)
+    val nb = body 
     val anb = atPos(body.pos){
        val nnb = transformAsyncBody(c)(nb)
        val ec = c.inferImplicitValue(c.weakTypeOf[ExecutionContext])
-       q"(${param})=>scala.async.Async.async[$btype](${nnb})($ec)"
+       // untypechack is necessory, because async-transform corrupt
+       //  symbols owners inside body and we change scope of param
+       // [scala-2.11.8]
+       MacroUtil.cleanUntypecheck(c)(
+          q"(${param})=>scala.async.Async.async[$btype](${nnb})($ec)"
+       )
     }
     val ar = atPos(fun.pos) {
        val uar = if (implicitParams.isEmpty) {
@@ -213,12 +215,25 @@ object GoAsync
        } else {
           q"gopher.goasync.AsyncApply.apply1i(${fun})(${anb},${implicitParams})"
        }
-       // typecheck is necessory
-       //  1. to prevent runnint analysis of async over internal awaits in anb as on 
-       //    enclosing async instead those applied from asyncApply
-       //  2. to expand macroses here, to prevent error during expanding macroses
-       //    in next typecheck
-       c.typecheck(uar)
+       if (true) {
+         // typecheck is necessory
+         //  1. to prevent runnint analysis of async over internal awaits in anb as on 
+         //    enclosing async instead those applied from asyncApply
+         //  2. to expand macroses here, to prevent error during expanding macroses
+         //    in next typecheck
+         try {
+          c.typecheck(uar)
+         }catch{
+          case ex: Exception =>
+            System.err.println(s"failed to typecheck uar: ${ex}")
+            System.err.println(s"uar=${uar}")
+            System.err.println(s"nb=${nb}")
+            //System.err.println(s"raw=${showRaw(uar)}")
+            throw ex
+         }
+       } else {
+         uar
+       }
     }
     //typecheck with macros disabled is needed for compiler,
     //to set symbol 'await', because async macro discovered

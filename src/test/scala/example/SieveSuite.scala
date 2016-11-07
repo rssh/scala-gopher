@@ -77,7 +77,7 @@ object Sieve
 class SieveSuite extends FunSuite
 {
 
- test("last prime before 1000", Now) {
+ test("last prime before 1000") {
 
    val quit = Promise[Boolean]()
    val quitInput = futureInput(quit.future)

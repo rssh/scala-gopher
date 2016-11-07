@@ -1,5 +1,6 @@
 package gopher.util
 
+import scala.annotation._
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import scala.language.reflectiveCalls
@@ -53,6 +54,63 @@ object MacroUtil
    findAwait.found
   }
 
+  /**
+   * bug in async/scala-2.12.x
+   * async/types generate in state-machine next chunk of code:
+   *```
+   *    val result: scala.concurrent.Promise[Int] = Promise.apply[Int]();
+   *    <stable> <accessor> def result: scala.concurrent.Promise[Int] = stateMachine$macro$1041.this.result;
+   *    val execContext: scala.concurrent.ExecutionContext = ..
+   *    <stable> <accessor> def execContext: scala.concurrent.Promise[Int] = stateMachine$macro$1041.this.execContext;
+   *```
+   *  when we attempt untype/type code again, it is not compiled.
+   *So, we need to remove result and execContext DefDefs
+   **/
+  def removeAsyncStateMachineResultDefDef(c:Context)(tree: c.Tree):c.Tree =
+  {
+   import c.universe._
+
+   val outsideStm  = new Transformer {
+
+      override def transform(tree:Tree):Tree =
+         tree match {
+           case ClassDef(mods,name,tparams,impl) 
+                   if (name.toString.startsWith("stateMachine$")) =>
+                      impl match {
+                        case Template(parents,self,body) =>
+                               ClassDef(mods,name,tparams,
+                                           Template(parents,self,removeResultDefDef(body,Nil)))
+                        //case _ => // impossible, throw
+                      }
+           case _ => super.transform(tree)
+         }
+
+      @tailrec
+      def removeResultDefDef(body:List[Tree],acc:List[Tree]):List[Tree] =
+      {
+        body match {
+          case Nil => acc.reverse
+          case head::tail =>
+                  val (rest,nacc) = head match {
+                    case DefDef(mods,name,tparams,vparamss,tpt,rsh) 
+                                          if (name.toString == "result" ||
+                                              name.toString == "execContext" ) => (tail,acc)
+                    case _ => (tail, transform(head)::acc)
+                  }
+                  removeResultDefDef(rest,nacc)
+        }
+      }
+
+   }
+
+   val retval = outsideStm.transform(tree)
+   retval
+  }
+
+  def cleanUntypecheck(c:Context)(tree:c.Tree):c.Tree =
+  {
+    removeAsyncStateMachineResultDefDef(c)(c.untypecheck(tree))
+  }
 
 
   final val SHORT_LEN = 80

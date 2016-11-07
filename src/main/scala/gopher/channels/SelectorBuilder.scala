@@ -101,7 +101,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
             c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(f.tree)}");
        }
     }
-    c.Expr[T](c.untypecheck(q"scala.async.Async.await(${builder}.go)"))
+    System.err.println(s"builder=${builder}")
+    //val tc = c.typecheck(builder)
+    //System.err.println(s"tc=${tc}")
+    c.Expr[T](MacroUtil.cleanUntypecheck(c)(q"gopher.goasync.AsyncWrapper.await(${builder}.go)"))
    }
 
    def foreachBuildMatch(cases:List[c.universe.CaseDef]):c.Tree =
@@ -330,7 +333,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
             c.abort(f.tree.pos, "match expected in gopher select map, have: ${MacroUtil.shortString(f.tree)}");
 
      }
-     c.Expr[Input[T]](c.untypecheck(q"${builder}.started"))
+     c.Expr[Input[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
    }
 
    def builder[T](f:c.Expr[PartialFunction[Any,T]]):c.Tree =
@@ -364,7 +367,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                          mapBuildMatch[T](cases)
         case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
      }
-     c.Expr[Input[T]](c.untypecheck(q"${builder}.started"))
+     c.Expr[Input[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
    }
 
 }
@@ -455,16 +458,16 @@ object SelectorBuilder
      val ftParam = ValDef(Modifiers(Flag.PARAM),ft,tq"gopher.FlowTermination[${weakTypeOf[T]}]",EmptyTree)
      val ecParam = ValDef(Modifiers(Flag.PARAM),ec,tq"scala.concurrent.ExecutionContext",EmptyTree)
      val nvaldefs = ecParam::ftParam::valdefs
-     val asyncBody = GoAsync.transformAsyncBody[T](c)(body)
+     val asyncBody =  GoAsync.transformAsyncBody[T](c)(body)
      val nbody = q"""{
                       implicit val ${ft1} = ${ft}
                       implicit val ${ec1} = ${ec}
-                      scala.async.Async.async(${transformDelayedMacroses[T](c)(asyncBody)})(${ec})
+                      gopher.goasync.AsyncWrapper.async(${transformDelayedMacroses[T](c)(asyncBody)})(${ec})
                      }
                   """
      val newTree = lastFun(nvaldefs,nbody)
      // untypecheck is necessory: otherwise exception in async internals
-     c.Expr[S](c.untypecheck(newTree))
+     c.Expr[S](MacroUtil.cleanUntypecheck(c)(newTree))
    }
 
    def idleImpl[T:c.WeakTypeTag,S](c:Context)(body:c.Expr[T]):c.Expr[S] =

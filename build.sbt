@@ -3,22 +3,26 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.11.8"
+//scalaVersion := "2.12.0"
+scalaVersion := "2.12.1-SNAPSHOT"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" /* ,  "-Ymacro-debug-lite"  ,  "-Ydebug"  ,  "-Ylog:lambdalift"  */ )
+scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" 
+                         /* ,  "-Ymacro-debug-lite"  */
+                         /* ,   "-Ydebug"  ,  "-Ylog:lambdalift"  */ 
+                     )
 
 libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-RC2"
+libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.7-SNAPSHOT-p1"
 //libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-SNAPSHOT"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.12"
 
 //TODO: enable after 1.0
 //libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
