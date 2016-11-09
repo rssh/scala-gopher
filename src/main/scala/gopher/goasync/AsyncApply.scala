@@ -73,11 +73,6 @@ object AsyncApply
              ex.printStackTrace()
              throw ex
          }
-      case q"{ $stats }"  =>
-             //System.err.println(s"catched, stats.length==${stats.length}")
-             System.err.println(s"stats = ${stats}")
-             System.err.println(s"raw = ${showRaw(stats)}")
-             throw new RuntimeException("qqq")
       case _ => c.abort(hof.pos,"hof match failed:"+hof+"\n raw:"+showRaw(hof))
     }
   }

@@ -101,9 +101,6 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
             c.abort(f.tree.pos, "match expected in gopher select loop, have: ${MacroUtil.shortString(f.tree)}");
        }
     }
-    System.err.println(s"builder=${builder}")
-    //val tc = c.typecheck(builder)
-    //System.err.println(s"tc=${tc}")
     c.Expr[T](MacroUtil.cleanUntypecheck(c)(q"gopher.goasync.AsyncWrapper.await(${builder}.go)"))
    }
 

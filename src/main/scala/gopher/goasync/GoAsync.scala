@@ -221,16 +221,7 @@ object GoAsync
          //    enclosing async instead those applied from asyncApply
          //  2. to expand macroses here, to prevent error during expanding macroses
          //    in next typecheck
-         try {
           c.typecheck(uar)
-         }catch{
-          case ex: Exception =>
-            System.err.println(s"failed to typecheck uar: ${ex}")
-            System.err.println(s"uar=${uar}")
-            System.err.println(s"nb=${nb}")
-            //System.err.println(s"raw=${showRaw(uar)}")
-            throw ex
-         }
        } else {
          uar
        }
