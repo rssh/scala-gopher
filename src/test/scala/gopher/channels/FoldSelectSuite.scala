@@ -33,9 +33,7 @@ class FoldSelectSuite extends FunSuite
         }
       }
     }
-    generator.onFailure{
-      case ex: Throwable => ex.printStackTrace()
-    }
+    generator.failed.foreach{ _.printStackTrace() }
     in.awriteAll(2 to 100)
     //in.awriteAllDebug(2 to 100)
     val read = go {

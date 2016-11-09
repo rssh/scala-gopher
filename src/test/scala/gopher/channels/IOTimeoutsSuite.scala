@@ -16,7 +16,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
+class IOTimeoutsSuite extends FunSuite with Waiters {
 
   
   test("messsaged from timeouts must be appear during reading attempt from empty channel") {
