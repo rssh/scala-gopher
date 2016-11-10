@@ -11,7 +11,7 @@ object ReflectUtil
    {
      val r1 = ownerType.members.filter(_.isTerm).map(_.asTerm).filter(x => x.isVal)
      val signatures = r1.map(_.typeSignature)
-     val ut = u.weakTypeOf[T]
+     val ut = u.typeOf[T]
      val checkResults = signatures.map( _ <:< u.typeOf[T])
      val retval = ownerType.members.filter(_.isTerm).map(_.asTerm).filter{ x =>
                          if (x.isVal) {
