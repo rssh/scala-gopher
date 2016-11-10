@@ -16,11 +16,11 @@ object ReflectUtil
      val retval = ownerType.members.filter(_.isTerm).map(_.asTerm).filter{ x =>
                          if (x.isVal) {
                             // in scala 2.12 getter method type, scala 2.11 - type
-                            val r = x.typeSignature match {
-                              case u.NullaryMethodType(rt) => rt <:< u.typeOf[T] // for scala-2.12
-                              case _ => (x.typeSignature <:< u.typeOf[T])   // for scala-2.11
-                            }
-                            r
+                              val r = x.typeSignature match {
+                                case u.NullaryMethodType(rt) => rt <:< u.typeOf[T] // for scala-2.12
+                                case _ => (x.typeSignature <:< u.typeOf[T])   // for scala-2.11
+                              }
+                              r
                          } else false
      }.toList
      retval

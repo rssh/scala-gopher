@@ -109,9 +109,14 @@ object MacroUtil
 
   def cleanUntypecheck(c:Context)(tree:c.Tree):c.Tree =
   {
-    removeAsyncStateMachineResultDefDef(c)(c.untypecheck(tree))
+    if (isScala2_11) {
+      c.untypecheck(tree)
+    } else {
+      removeAsyncStateMachineResultDefDef(c)(c.untypecheck(tree))
+    }
   }
 
+  val isScala2_11 = util.Properties.versionNumberString.startsWith("2.11.")
 
   final val SHORT_LEN = 80
 }
