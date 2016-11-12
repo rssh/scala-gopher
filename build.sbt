@@ -3,8 +3,7 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.12.0"
-crossScalaVersions := Seq("2.11.8", "2.12.0")
+scalaVersion := "2.11.8"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
