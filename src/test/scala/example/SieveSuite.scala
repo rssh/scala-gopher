@@ -11,6 +11,8 @@ import scala.language.postfixOps
 
 import org.scalatest._
 
+import gopher.tags._
+
 /**
  * this is direct translation from appropriative go example.
  **/
@@ -53,6 +55,19 @@ object Sieve
     filtered
   }
 
+  def filter1(in:Channel[Int]):Input[Int] =
+  {
+   val q = makeChannel[Int]()
+   val filtered = makeChannel[Int]()
+   select.afold(in){ (ch, s) => 
+     s match {
+       case prime: ch.read => 
+                         filtered.write(prime)
+                         ch.filter(_ % prime != 0)
+     }
+   }
+   filtered
+  }
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
     filter(generate(n,quit))

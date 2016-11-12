@@ -5,6 +5,19 @@ import gopher.util._
 import scala.concurrent._
 
 trait EffectedOutput[A] extends Effected[Output[A]] with Output[A]
+{
+
+  def  cbwrite[B](f: ContWrite[A,B] => Option[
+                   (A,Future[Continuated[B]])
+                  ],
+                  ft: FlowTermination[B]): Unit = {
+    val sv = current
+    sv.cbwrite[B](cw => if (current eq sv) f(cw.copy(channel=this)) else None,ft)
+  }
+
+  def api: GopherAPI = current.api
+
+}
 
 object EffectedOutput
 {
@@ -17,31 +30,9 @@ object EffectedOutput
 
 class SinglethreadedEffectedOutput[A](out:Output[A]) extends SinglethreadedEffected[Output[A]](out)
                                                               with EffectedOutput[A]
-{
-
-  def  cbwrite[B](f: ContWrite[A,B] => Option[
-                   (A,Future[Continuated[B]])
-                  ],
-                  ft: FlowTermination[B]): Unit = v.cbwrite(f,ft)
-
-
-  def api: GopherAPI = v.api
-
-}
 
 class MultithreadedEffectedOutput[A](out:Output[A]) extends MultithreadedEffected[Output[A]](out)
                                                               with EffectedOutput[A]
-{
-
-  def  cbwrite[B](f: ContWrite[A,B] => Option[
-                   (A,Future[Continuated[B]])
-                  ],
-                  ft: FlowTermination[B]): Unit = v.get().cbwrite(f,ft)
-
-
-  def api: GopherAPI = v.get().api
-
-}
 
 
 

@@ -13,7 +13,7 @@ import org.scalatest.concurrent._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DuppedChannelsSuite extends FunSuite with AsyncAssertions {
+class DuppedChannelsSuite extends FunSuite with Waiters {
 
   
   test("duped input must show two") {
@@ -60,7 +60,7 @@ class DuppedChannelsSuite extends FunSuite with AsyncAssertions {
       in1.aread map { x =>  w(assert(x==1)); w.dismiss() } onComplete {
                            case Failure(ex) => w( throw ex )
                            case Success(_) =>
-                                     in1.aread onFailure{  case ex => w(assert(ex.isInstanceOf[ChannelClosedException]));
+                                     in1.aread.failed.foreach{ ex => w(assert(ex.isInstanceOf[ChannelClosedException]));
                                                            w.dismiss() 
                                  }
       }

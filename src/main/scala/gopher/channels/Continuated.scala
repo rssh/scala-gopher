@@ -18,6 +18,20 @@ sealed trait FlowContinuated[A] extends Continuated[A]
   def flowTermination: FlowTermination[A]
 }
 
+sealed trait ReadyTestResult[+A]
+
+object ReadyTestResult
+{
+  sealed trait NotReady[+A] extends ReadyTestResult[A]
+  case object WillBeCheckedLater extends NotReady[Nothing]
+  case class CheckOther[A,B](other:A=>ReadyTestResult[B]) extends NotReady[B]
+
+  case class Ready[A](value:A) extends ReadyTestResult[A]
+
+}
+
+
+
 case class Done[A](result:A, override val flowTermination: FlowTermination[A]) extends FlowContinuated[A]
 
 /**
@@ -32,10 +46,12 @@ case class ContRead[A,B](
    override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
+  type F = ContRead[A,B]=>Option[ContRead.In[A] => Future[Continuated[B]]]
 }
 
 object ContRead
 {
+
 
   sealed trait In[+A]
   case class Value[+A](a:A) extends In[A]
@@ -43,6 +59,7 @@ object ContRead
   case object ChannelClosed extends In[Nothing]
   case class Failure(ex:Throwable) extends In[Nothing]
   
+
   object In
   {
     def value[A](a:A) = ContRead.Value(a)
@@ -80,6 +97,12 @@ object ContRead
                                             Option[In[A] => Future[Continuated[B]]] =
          prev.function(prev) map (f1 => liftInValue(prev) { v => fn(v,f1) } )
 
+   type Aux[A,B] = ContRead[A,B]{ type El=A
+                    type S=B
+                    type F = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
+                   }
+
+   type AuxF[A,B] = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
 }
 
 
@@ -89,11 +112,13 @@ object ContRead
 case class ContWrite[A,B](function: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], channel: Output[A], override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
+  type F = ContWrite[A,B]=>Option[(A,Future[Continuated[B]])]
 }
 
 object ContWrite
 {
-   
+  type Aux[A,B] = ContWrite[A,B]
+  type AuxF[A,B] = ContWrite[A,B]=>Option[(A,Future[Continuated[B]])]
 }
 
 /**

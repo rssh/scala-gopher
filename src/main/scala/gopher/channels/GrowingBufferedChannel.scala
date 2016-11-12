@@ -6,11 +6,12 @@ import scala.concurrent._
 import scala.collection.immutable._
 import gopher._
 
+class ChannelOverflowException extends RuntimeException
 
 /**
  * ChannelActor - actor, which leave
  */
-class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends BaseBufferedChannelActor[A](id,api)
+class GrowingBufferedChannelActor[A](id:Long, limit:Int, api: GopherAPI) extends BaseBufferedChannelActor[A](id,api)
 {
 
 
@@ -19,14 +20,10 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
             if (closed) {
                cwa.flowTermination.throwIfNotCompleted(new ChannelClosedException())
             } else {
-              if (nElements==capacity) {
-               writers = writers :+ cwa
-              } else {
                val prevNElements = nElements
                if (processWriter(cwa) && prevNElements==0) {
                  processReaders()
                }
-              }
             }
   }
 
@@ -43,8 +40,6 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
                if (processReader(cra)) {
                  if (closed) {
                     stopIfEmpty
-                 } else if (prevNElements==capacity) {
-                    checkWriters
                  }
                }
             }
@@ -54,10 +49,9 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
   protected[this] def processReader[B](reader:ContRead[A,B]): Boolean =
    reader.function(reader) match {
        case Some(f1) => 
-              val readedElement = elementAt(readIndex)
+              val readedElement = buffer.head.asInstanceOf[A]
+              buffer = buffer.tail
               nElements-=1
-              readIndex+=1
-              readIndex%=capacity
               Future{
                 val cont = f1(ContRead.In value readedElement )
                 api.continue(cont, reader.flowTermination)
@@ -68,25 +62,11 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
    }
 
 
-  def checkWriters: Boolean =
-  {
-    var retval = false
-    while(!writers.isEmpty && nElements < capacity) {
-      val current = writers.head
-      writers = writers.tail
-      val processed = processWriter(current)
-      retval ||= processed
-    }
-    retval
-  }
-
   private[this] def processWriter[B](writer:ContWrite[A,B]): Boolean =
    writer.function(writer) match {
        case Some((a,cont)) =>
                 nElements+=1
-                setElementAt(writeIndex,a)
-                writeIndex+=1
-                writeIndex%=capacity
+                buffer = buffer :+ a
                 api.continue(cont, writer.flowTermination)
                 true
        case None => 
@@ -94,18 +74,6 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
    }
 
 
-  @inline
-  private[this] def elementAt(i:Int): A =
-    buffer(i).asInstanceOf[A]
-
-  @inline
-  private[this] def setElementAt(i:Int, a:A): Unit =
-    buffer(i) = a.asInstanceOf[AnyRef]
-
-
-  // boxed representation of type.
-  val buffer= new Array[AnyRef](capacity+1)
-  var readIndex=0
-  var writeIndex=0
+  var buffer= Queue[Any]()
 
 }

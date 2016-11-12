@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 import org.scalatest._
 import org.scalatest.concurrent._
 
-class UnbufferedSelectSuite extends FunSuite with AsyncAssertions
+class UnbufferedSelectSuite extends FunSuite with Waiters
 {
 
    import scala.concurrent.ExecutionContext.Implicits.global

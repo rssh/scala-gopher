@@ -363,7 +363,7 @@ trait SelectTransputer extends ForeverSelectorBuilder with Transputer
  /**
   * configure loop in selector
   */
- def loop(f: PartialFunction[Any,Unit]): Unit = macro SelectorBuilder.loopImpl[Unit]
+ def loop(f: PartialFunction[Any,Unit]): Unit = macro SelectorBuilderImpl.loop[Unit]
 
 
  def stop():Unit = stopFlowTermination() 

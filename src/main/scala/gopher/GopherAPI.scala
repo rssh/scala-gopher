@@ -51,6 +51,9 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def makeChannel[A](capacity: Int = 0): Channel[A] =
       Channel[A](capacity)(this)
 
+  /**
+   * create effected input with given thread-policy
+   */
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single): EffectedInput[A] =
      EffectedInput(in,threadingPolicy)
 
@@ -104,9 +107,18 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    **/
   def config: Config = as.settings.config.atKey("gopher")
 
+  lazy val idleTimeout: FiniteDuration = {
+    val m = try {
+              config.getInt("idle-detection-tick")
+            } catch {
+              case ex: ConfigException.Missing => 100
+            }
+    m.milliseconds
+  }
+
   def currentFlow = CurrentFlowTermination
 
-  private[gopher] val idleDetector = new IdleDetector(this)
+  //private[gopher] val idleDetector = new IdleDetector(this)
 
   private[gopher] val continuatedProcessorRef: ActorRef = {
     val props = Props(classOf[ChannelProcessor], this)

@@ -49,9 +49,6 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
    def idle(body:Unit): ForeverSelectorBuilder =
          macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
     
-   @inline
-   def idleWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit]) => Future[Unit] ): ForeverSelectorBuilder =
-      withIdle{ st => Some(f(ec,st.flowTermination) map Function.const(st)) }
 
    /**
     * provide syntax for running select loop inside go (or async) block
@@ -72,7 +69,7 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
     * Note, that you can use implicit instance of [FlowTermination[Unit]] to stop loop.
     **/
    def foreach(f:Any=>Unit):Unit = 
-        macro SelectorBuilder.foreachImpl[Unit]
+        macro SelectorBuilderImpl.foreach[Unit]
 
    
 
@@ -86,7 +83,7 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
     *}}}
     */
    def apply(f: PartialFunction[Any,Unit]): Future[Unit] =
-        macro SelectorBuilder.applyImpl[Unit]
+        macro SelectorBuilderImpl.apply[Unit]
 
 
    def inputBuilder[B]() = new InputSelectorBuilder[B](api) 
@@ -103,10 +100,10 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
     *
     *}}}
     **/
-    def map[B](f:Any=>B):Input[B] = macro SelectorBuilder.mapImpl[B]
+    def map[B](f:Any=>B):Input[B] = macro SelectorBuilderImpl.map[B]
  
     def input[B](f:PartialFunction[Any,B]):Input[B] = 
-                                    macro SelectorBuilder.inputImpl[B]
+                                    macro SelectorBuilderImpl.input[B]
 
 }
 

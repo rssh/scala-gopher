@@ -10,7 +10,7 @@ import gopher._
 /**
  * ChannelActor - actor, which leave
  */
-class UnbufferedChannelActor[A](id:Long, api: GopherAPI) extends ChannelActor[A](id,api)
+class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends ChannelActor[A](id,api)
 {
 
   protected[this] def onContWrite(cw:ContWrite[A,_]):Unit =

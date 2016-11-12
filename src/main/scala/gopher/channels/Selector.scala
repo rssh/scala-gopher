@@ -27,11 +27,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
    waiters add makeLocked(ContWrite(f,ch,this))
   }
 
-  def addIdleSkip(f: Skip[A] => Option[Future[Continuated[A]]]): Unit =
-  {
-   idleWaiters add makeLocked(Skip(f,this))
-  }
-
   def addTimeout(timeout:FiniteDuration, f: Skip[A] => Option[Future[Continuated[A]]]):Unit =
   {
    if (!timeoutRecord.isDefined) {
@@ -49,25 +44,17 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
     if (timeoutRecord.isDefined) {
        scheduleTimeout()
     }
-    api.idleDetector put this
     future
   }
 
-  private[channels]  def startIdles: Unit =
-  {
-    if (idleWaiters.isEmpty) {
-       api.idleDetector.remove(this)
-    } else {
-       sendWaits(idleWaiters) 
-    }
-  }
+
 
   private[this] def makeLocked(block: Continuated[A]): Continuated[A] =
   {
       block match {
            case cr@ContRead(f,ch, ft) => 
                def f1(cont:ContRead[cr.El,cr.R]): Option[ContRead.In[cr.El]=>Future[Continuated[cr.R]]]  = { 
-                               tryLocked(f(ContRead(f,ch,ft)),cont,"read") map { q =>
+                     tryLocked(f(ContRead(f,ch,ft)),cont,"read") map { q =>
                                    (in => unlockAfter(
                                                  try { 
                                                    q(in) 
@@ -76,7 +63,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
                                                                         Future successful Never
                                                  },
                                                  ft,"read"))
-                               }
+                     }
                }
                ContRead(f1,ch,ft)
            case cw@ContWrite(f,ch, ft) => 
@@ -105,18 +92,18 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
        if (tryLock()) {
            try {
              body match {
-               case None => if (mustUnlock(dstr,cont.flowTermination)) {
-                               waiters add cont
-                            }
+               case None => mustUnlock(dstr,cont.flowTermination)
+                            waiters add cont
                             None
-               case sx@Some(x) => {
+               case sx@Some(x) =>
                             nOperations.incrementAndGet()
                             sx
-                            }
              }
            }catch{
-             case ex: Throwable => cont.flowTermination.doThrow(ex)
-             None
+             case ex: Throwable => 
+                     unlock(dstr)
+                     cont.flowTermination.doThrow(ex)
+                     None
            }
         } else {
            toWaiters(cont)
@@ -127,7 +114,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   @inline
   private[this] def unlockAfter(f:Future[Continuated[A]], flowTermination: FlowTermination[A], dstr: String): Future[Continuated[A]] =
     f.transform(
-         next => { if (mustUnlock(dstr,flowTermination)) {
+         next => { 
+                   if (mustUnlock(dstr,flowTermination)) {
                          if (timeoutRecord.isDefined)
                              scheduleTimeout()
                          makeLocked(next)
@@ -186,16 +174,16 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
 
   }
 
-  def isLocked: Boolean = lockFlag.get();
+  def isLocked: Boolean = lockFlag.get()
 
   private[this] def tryLock(): Boolean = lockFlag.compareAndSet(false,true)
 
   private[this] def unlock(debugFrom: String): Boolean =
   {
      val retval = lockFlag.compareAndSet(true,false)
-     if (retval) {
+     //if (retval) {
         sendWaits()
-     }
+     //}
      retval
   }
 
@@ -203,10 +191,11 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   {
     if (!unlock(debugFrom)) {
      try {
-       throw new IllegalStateException("other fiber occypied select 'lock'");
+       throw new IllegalStateException("other fiber occypied select 'lock'")
      }catch{
        //!!!
        case ex: Exception => ft.doThrow(ex)
+                ex.printStackTrace()
      }
      false
     } else true
@@ -252,7 +241,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   private[channels] val nOperations = new AtomicLong();
 
   private[this] val waiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
-  private[this] val idleWaiters: ConcurrentLinkedQueue[Continuated[A]] = new ConcurrentLinkedQueue()
 
   private[this] class TimeoutRecord(
                         var lastNOperations: Long,
@@ -270,7 +258,6 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A]
   
 
 }
-
 
 
 

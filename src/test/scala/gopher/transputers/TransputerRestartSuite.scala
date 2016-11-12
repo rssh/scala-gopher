@@ -40,7 +40,7 @@ trait BingoWithRecover extends SelectTransputer with TransputerLogging
   loop {
        case x: inX.read =>
                val y = inY.read
-               //log.info(s"Bingo checker, received ${x}, ${y} ")
+               //Console.println(s"Bingo checker, received ${x}, ${y} ")
                out.write(x==y)
                if (x==2) {
                  throw new MyException()
@@ -60,12 +60,12 @@ trait Acceptor1 extends SelectTransputer
 
   val inA = InPort[Boolean]()
 
-  @volatile var nBingos = 0
-  @volatile var nPairs = 0
+  var nBingos = 0
+  var nPairs = 0
 
   loop {
           case x: inA.read =>
-             // Console.println(s"acceptor: ${nPairs} ${nBingos} ${x}")
+              //Console.println(s"acceptor: ${nPairs} ${nBingos} ${x}")
               if (x) {
                  nBingos += 1
               }
@@ -77,7 +77,7 @@ trait Acceptor1 extends SelectTransputer
 class TransputerRestartSuite extends FunSuite
 {
 
-  test("bingo restore with the same connectons") {
+  test("bingo restore with the same connectons", Now) {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRecover]

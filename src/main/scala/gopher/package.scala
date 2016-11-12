@@ -2,6 +2,10 @@
 import scala.language.experimental.macros
 import scala.language.implicitConversions
 
+import scala.concurrent._
+import gopher.channels._
+import gopher.goasync._
+
 /**
  * Provides scala API for 'go-like' CSP channels.
  * 
@@ -66,9 +70,6 @@ import scala.language.implicitConversions
 package object gopher {
 
 
-import scala.concurrent._
-import gopher.channels._
-import gopher.goasync._
 
  //
  // magnetic arguments for selector-builder unsugared API
@@ -172,7 +173,7 @@ import gopher.goasync._
    def aread: Future[T] = f
  }
 
- //import scala.language.experimental.macros
+ import scala.language.experimental.macros
  import scala.reflect.macros.blackbox.Context
  import scala.reflect.api._
  def awaitImpl[T](c:Context)(v:c.Expr[Future[T]]):c.Expr[T] =
@@ -180,6 +181,16 @@ import gopher.goasync._
    import c.universe._
    c.Expr[T](q"scala.async.Async.await($v)")
  }
+
+
+ def asyncApply1[A,B,C](hof:(A=>B)=>C)(nf:A=>Future[B]):Future[C] =
+                          macro gopher.goasync.AsyncApply.impl1[A,B,C]
+
+ import scala.collection.generic._
+ implicit def toAsyncIterable[T](x:Iterable[T]): AsyncIterable[T] = new AsyncIterable[T](x)
+ implicit def toAsyncOption[T](x:Option[T]): AsyncOption[T] = new AsyncOption[T](x)
+
+
 
 }
 

@@ -13,7 +13,26 @@ import scala.annotation.unchecked._
 /**
  * async arround go. 
  *
- * Basicly go is wrapped inside SIP-22 async with defer
+ * Basicly go is 
+ *   1. translate await-like exressions inside inline functions to calls of appropriative async functions.
+ *      (or show error if not found).
+ *```
+ *      x.foreach{ x => p; await(x); .. }
+ *```
+ *  become
+ *```
+ *      await( transform-defer( x.foreachAsync{ x => async(p; await(x); ..) }) )
+ *```
+ *    (note, that channel.read macroses are expanded to await-s on this point)
+ *
+ *   2. transform defer calls if defer statement is found inside go:
+ *```
+ *   asnyc{ p .. defer(x) ..  }
+ *```
+ *   become (reallity is a little complext, here is just idea)
+ *```
+ *   { val d = new Defers(); async{  p .. d.defer(x) ..  }.onComplete(d.tryProcess) }
+ *```
  */
 object GoAsync
 {
@@ -23,26 +42,28 @@ object GoAsync
    def goImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[T])(ec:c.Expr[ExecutionContext]):c.Expr[Future[T]] =
    {
      import c.universe._
-     if (containsDefer(c)(body)) {
+     val ttype = c.weakTypeOf[T]
+     val nbody = GoAsync.transformAsyncBody[T](c)(body.tree)
+     val r = if (containsDefer(c)(body)) {
        val defers = TermName(c.freshName)
        val promise = TermName(c.freshName)
        // asyn transform wantstyped tree on entry, so we must substitute 'defers' to untyped 
        // values after it, no before.
-       c.Expr[Future[T]](
                          q"""
-                             gopher.goasync.GoAsync.transformDeferMacro[${c.weakTypeOf[T]}](
+                             gopher.goasync.GoAsync.transformDeferMacro[${ttype}](
                                {implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
                                 val ${promise} = Promise[${c.weakTypeOf[T]}]()
-                                scala.async.Async.async(${body})(${ec}).onComplete( x =>
+                                scala.async.Async.async[${ttype}](${nbody})(${ec}).onComplete( x =>
                                      ${promise}.complete(${defers}.tryProcess(x))
                                 )(${ec})
                                 ${promise}.future
                                }
                              )
-                          """)
+                          """
      } else {
-       c.Expr[Future[T]](q"scala.async.Async.async(${body})(${ec})")
+       q"scala.async.Async.async[${ttype}](${nbody})(${ec})"
      }
+     c.Expr[Future[T]](r)
    }
 
    def goScopeImpl[T:c.WeakTypeTag](c:Context)(body:c.Expr[T]):c.Expr[T] =
@@ -101,6 +122,153 @@ object GoAsync
     transformer.transform(body)
    }
 
+   def transformAsyncBody[T:c.WeakTypeTag](c:Context)(body:c.Tree):c.Tree = 
+   {
+    import c.universe._
+    var found = false
+    var transformed = false
+    val transformer = new Transformer {
+      override def transform(tree:Tree):Tree =
+      {
+
+      // if subtree was transformed, try to transform again origin tree,
+      // because await can be lifted-up from previous level.
+      def transformAgainIfNested(tree: Tree):Tree =
+      {
+        val prevTransformed = transformed
+        transformed = false
+        val nested = super.transform(tree)
+        if (transformed) {
+           transform(nested)
+        }else{
+           transformed = prevTransformed
+           nested
+        }
+      }
+
+       tree match {
+         case q"${f1}(${a}=>${b})(..$a2)" =>
+           // TODO: cache in tree.
+            found = findAwait(c)(b)
+            if (found) {
+                // this can be implicit parameters of inline apply.
+                // whe can distinguish first from second by looking at f1 shape.
+                val isTwoParams = if (!(tree.symbol eq null)) {
+                                    if (tree.symbol.isMethod) {
+                                       tree.symbol.asMethod.paramLists.size == 2
+                                    } else if (tree.symbol eq NoSymbol) {
+                                        // untyped, hope for the best
+                                       true
+                                    } else false
+                                  } else true
+                if (isTwoParams) {
+                  transformed = true
+                  transformInlineHofCall1(c)(f1,a,b,a2) 
+                } else {
+                  super.transform(tree)
+                }
+            }else{
+                // TODO: think, may-be try to transform first b instead nested [?]
+                transformAgainIfNested(tree)
+            }
+         case q"${f1}(${a}=>${b})" =>
+            found = findAwait(c)(b)
+            if (found) {
+                transformed = true
+                transformInlineHofCall1(c)(f1,a,b,List()) 
+            } else {
+                // TODO: think, may-be try to transform first b instead nested [?]
+                transformAgainIfNested(tree)
+            }
+         case _ =>
+                super.transform(tree)
+       }
+      }
+
+    }
+    
+    var r = transformer.transform(body)
+    
+    r
+   }
    
+   // handle things like:
+   //   q"${fun}(${param}=>${body})($implicitParams)" =>
+   def transformInlineHofCall1(c:Context)(fun:c.Tree,param:c.Tree,body:c.Tree,implicitParams:List[c.Tree]):c.Tree =
+   {
+    import c.universe._
+    val btype = body.tpe
+    val nb = body 
+    val anb = atPos(body.pos){
+       val nnb = transformAsyncBody(c)(nb)
+       val ec = c.inferImplicitValue(c.weakTypeOf[ExecutionContext])
+       // untypechack is necessory, because async-transform corrupt
+       //  symbols owners inside body and we change scope of param
+       // [scala-2.11.8]
+       MacroUtil.cleanUntypecheck(c)(
+          q"(${param})=>scala.async.Async.async[$btype](${nnb})($ec)"
+       )
+    }
+    val ar = atPos(fun.pos) {
+       val uar = if (implicitParams.isEmpty) {
+          q"gopher.asyncApply1(${fun})(${anb})"
+       } else {
+          q"gopher.goasync.AsyncApply.apply1i(${fun})(${anb},${implicitParams})"
+       }
+       if (true) {
+         // typecheck is necessory
+         //  1. to prevent runnint analysis of async over internal awaits in anb as on 
+         //    enclosing async instead those applied from asyncApply
+         //  2. to expand macroses here, to prevent error during expanding macroses
+         //    in next typecheck
+          c.typecheck(uar)
+       } else {
+         uar
+       }
+    }
+    //typecheck with macros disabled is needed for compiler,
+    //to set symbol 'await', because async macro discovered
+    //awaits by looking at symbols
+    val r = c.typecheck(q"scala.async.Async.await(${ar})",withMacrosDisabled=true)
+    r
+   }
+
+   def findAwait(c:Context)(body:c.Tree): Boolean = 
+   {
+    import c.universe._
+    var found: Boolean = false
+    val transformer = new Transformer {
+
+      override def transform(tree:Tree):Tree =
+      {
+         if (found) 
+          tree
+         else {
+           tree match {
+             case q"(scala.async.Async.await[${w}]($r)):${w1}"=>
+                     found = true
+                     tree
+             case q"scala.async.Async.await[${w}]($r)"=>
+                     found = true
+                     tree
+             case q"(scala.async.Async.async[${w}]($r)):${w1}"=>
+                     //TODO: add test to test-case
+                     tree
+             case q"(${a}=>${b})" =>
+                     // don't touch nested functions
+                     tree
+                     //super.transform(tree)
+             case _ => 
+                  super.transform(tree)
+            }
+         }
+      }
+
+    }
+    transformer.transform(body)
+    found
+   }
+
+
 }
 

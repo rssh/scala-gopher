@@ -28,7 +28,7 @@ class DuppedInput[A](origin:Input[A])
         await(f2)
         ();
     }(ec) )
-  selector.go.onFailure{
+  selector.go.failed.foreach{
     case ex: ChannelClosedException =>
                    sink1.close()
                    sink2.close()

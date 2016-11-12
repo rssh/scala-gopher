@@ -13,7 +13,7 @@ import org.scalatest.concurrent._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class InputOpsSuite extends FunSuite with AsyncAssertions {
+class InputOpsSuite extends FunSuite with Waiters {
 
   
   test("map operation for input") {
