@@ -99,7 +99,7 @@ class IOTimeoutsSuite extends FunSuite with AsyncAssertions {
                 case t: chTimeout.read =>
                             implicitly[FlowTermination[Unit]].doExit(count)
               }
-      Await.ready(f, 1 second)
+      Await.ready(f, 3 second)
       assert(count==2)
   }
 
