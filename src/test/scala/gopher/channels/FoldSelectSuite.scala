@@ -35,7 +35,7 @@ class FoldSelectSuite extends FunSuite
       }
     }
     generator.failed.foreach{ _.printStackTrace() }
-    in.awriteAll(2 to 100)
+    in.awriteAll(2 to Int.MaxValue)
     //in.awriteAllDebug(2 to 100)
     val read = go {
       for(i <- 1 to 10) yield out.read
