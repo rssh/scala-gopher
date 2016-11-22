@@ -21,6 +21,7 @@ class FoldSelectSuite extends FunSuite
  import scala.concurrent.ExecutionContext.Implicits.global
 
  test("fold-over-selector with changed read") {
+  for(i <- 1 to 100) {
     //pending // we debug next now
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
@@ -43,6 +44,7 @@ class FoldSelectSuite extends FunSuite
 
     val r = Await.result(read,1 second)
     assert(r.last === 29)
+  }
  }
 
  test("fold-over-selector with swap read") {
