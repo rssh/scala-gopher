@@ -106,14 +106,17 @@ trait Input[A] extends GopherAPIProvider
 
        def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
            thisInput.cbread[B]({ cont =>
-                    f(cont.copy(channel=this)) map { // todo - eliminate copy
-                         f1 => { case v@ContRead.Value(a) =>
-                                             if (p(a)) f1(v) else {
+                    f(cont) map { f1 =>
+                          { case v@ContRead.Value(a) =>
+                                             if (p(a)) {
+                                                f1(v) 
+                                             } else {
                                                 f1(ContRead.Skip)
                                                 Future successful cont
                                              }
-                                 case v@_ => f1(v)
-                         } } }, ft)  
+                             case v@_ => f1(v)
+                         }
+                    } }, ft)
      
         def api = thisInput.api
 

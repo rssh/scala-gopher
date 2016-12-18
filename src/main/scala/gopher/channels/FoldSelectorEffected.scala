@@ -18,7 +18,10 @@ import scala.ref.WeakReference
 
 /**
  * effected input inside fold. We know, that exists only one call of
- * FoldSelectorInput, generated in our fold statement
+ * reading(FoldSelectorInput), generated in our fold statement. Than
+  *
+  * TODO: eliminate this class, instead refactoer SelectedReaderImpl to customize
+  * generation of reader statement.
  */
 trait FoldSelectorEffectedInput[A,B] extends Input[A]
 {
@@ -28,32 +31,8 @@ trait FoldSelectorEffectedInput[A,B] extends Input[A]
 
 
   def cbread[C](f: ContRead[A,C] => Option[ContRead.In[A] => Future[Continuated[C]]],ft: FlowTermination[C]): Unit = {
-    // ignore f, because cbread called only from match in select fold, since this input is not visible to programmer
-    cbreadIfNotActive()
-  }
-
-
-  def refreshReader():Unit = {
-    foldSelector.inputIndices.put(current,index)
-    cbreadIfNotActive()
-  }
-
-  /**
-    * Call cbread on current channel with dispath function if current channels is not active
-    * (i.e. if we not in wait of other cbread call)
-    */
-  private def cbreadIfNotActive(): Unit =
-  {
-    val s = current
-    val notSet = foldSelector.activeReaders.get(s).isEmpty
-    if (notSet) {
-      foldSelector.activeReaders.put(s, true)
-      val ft = foldSelector.selector
-      s.cbread((cont: ContRead[A, B]) => {
-        foldSelector.activeReaders.remove(s)
-        foldSelector.dispathReader[A, B](s, ft)
-      }, ft)
-    }
+    //currently will be never called,
+    current.cbread(f,ft)
   }
 
 }
@@ -77,32 +56,9 @@ trait FoldSelectorEffectedOutput[A,B] extends Output[A]
   def foldSelector: FoldSelect[B]
   def index: Int
 
-
   override def cbwrite[C](f: (ContWrite[A, C]) => Option[(A, Future[Continuated[C]])], ft: FlowTermination[C]): Unit =
   {
-    cbwriterIfNotActive()
-  }
-
-
-  def refreshWriter():Unit =
-  {
-    foldSelector.outputIndices.put(current,index)
-    cbwriterIfNotActive()
-  }
-
-  private def cbwriterIfNotActive(): Unit =
-  {
-    val s = current
-    val notSet = foldSelector.activeWriters.get(s).isEmpty
-    if (notSet) {
-      foldSelector.activeWriters.put(s,true)
-      val ft = foldSelector.selector
-      s.cbwrite((cw:ContWrite[A,B]) => {
-        foldSelector.activeWriters.remove(s)
-        foldSelector.dispathWriter(s, ft)
-      }, ft)
-    }
-
+    current.cbwrite(f,ft)
   }
 
 }

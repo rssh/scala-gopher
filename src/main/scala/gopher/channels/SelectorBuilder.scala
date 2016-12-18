@@ -65,7 +65,7 @@ trait SelectorBuilder[A]
      this
    }
 
-   def go: Future[A] = selector.run
+   final def go: Future[A] = selectorRun
 
    // for call from SelectorTransforment wich have another 'go'
    def selectorRun: Future[A] = selector.run
@@ -124,7 +124,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      }
    }
 
-   def foreachTransformReadWriteTimeoutCaseDef(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
+   def foreachTransformReadWriteTimeoutCaseDef(builderName:c.TermName,
+                                               caseDef: c.universe.CaseDef):c.Tree=
    {
 
     val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)

@@ -8,5 +8,6 @@ ie in simplicified explanation:
 ```
  1.to(n).foreachAsync { async(s += await(aread(x))) }  
 ```
+details can be found in techreport: https://arxiv.org/abs/1611.00602
 - added support for select.fold construct
 - scala 2.12

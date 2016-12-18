@@ -77,7 +77,7 @@ trait Acceptor1 extends SelectTransputer
 class TransputerRestartSuite extends FunSuite
 {
 
-  test("bingo restore with the same connectons", Now) {
+  test("bingo restore with the same connectons") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRecover]

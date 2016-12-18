@@ -126,6 +126,11 @@ object ContWrite
  */
 case class Skip[A](function: Skip[A] => Option[Future[Continuated[A]]], override val flowTermination: FlowTermination[A]) extends FlowContinuated[A]
 
+object Skip
+{
+  type AuxF[A] = Skip[A]=>Option[Future[Continuated[A]]]
+}
+
 /**
  * never means the end of conversation
  */

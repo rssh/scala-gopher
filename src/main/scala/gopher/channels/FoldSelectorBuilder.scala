@@ -1,5 +1,7 @@
 package gopher.channels
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
@@ -15,31 +17,36 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
+abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
 {
 
    type R = T
 
+   type HandleFunction[A] = (ExecutionContext, FlowTermination[T],A) => Future[T]
+
+
    def reading[A](ch: Input[A])(f: A=>T): FoldSelectorBuilder[T] =
         macro SelectorBuilder.readingImpl[A,T,FoldSelectorBuilder[T]]
 
-   def readingWithFlowTerminationAsync[A](ch: Input[A], 
+
+   def readingWithFlowTerminationAsync[A](ch: Input[A],
                        f: (ExecutionContext, FlowTermination[T], A) => Future[T]):this.type =
    {
-     lazy val cont = ContRead[A,T](normalized,ch,this.selector)
-     def normalized(_cont: ContRead[A,T]):Option[ContRead.In[A]=>Future[Continuated[T]]] =
-     {
-             Some(ContRead.liftIn(_cont){ a=> f(ec,selector,a) map {
-               x => cont
-             }})
-     }
      if (ch.isInstanceOf[FoldSelectorEffectedInput[_,_]]) {
-       val ech = ch.asInstanceOf[FoldSelectorEffectedInput[_,_]]
+       // this can be generate before reading call instead.
+       // (todo: pass read generator)
+       val ech = ch.asInstanceOf[FoldSelectorEffectedInput[A,T]]
        val i = ech.index
-       setReadFunction(i,normalized )
-       inputIndices.put(ech.current,i)
+       handleFunctions(i)=f
+       inputIndices.put(i,ech.current)
+       effectedInputs(i)=ech
+       //val dispatchRead = createReadDispatcher(ech)
+       //withReader[A](ech,normalizedEffectedReader1)
+       selector.addReader[A](ech.current,normalizedDispatchReader[A])
+       this
+     }else{
+       withReader[A](ch, normalizedPlainReader(f,ch))
      }
-     withReader[A](ch, normalized) 
    }
 
    def writing[A](ch: Output[A],x:A)(f: A=>T): FoldSelectorBuilder[T] =
@@ -47,19 +54,21 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
 
 
    @inline
-   def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A, 
+   def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A,
                  f: (ExecutionContext, FlowTermination[T], A) => Future[T]): this.type = {
-     def normalized(_cont:ContWrite[A,T]):Option[(A,Future[Continuated[T]])]=
-     {
-       Some(x,f(ec,_cont.flowTermination,x) map (_ => ContWrite(normalized,ch,this.selector)))
-     }
      if (ch.isInstanceOf[FoldSelectorEffectedOutput[_,_]]) {
-        val ech = ch.asInstanceOf[FoldSelectorEffectedOutput[_,_]]
+        val ech = ch.asInstanceOf[FoldSelectorEffectedOutput[A,T]]
         val i = ech.index
-        setWriteFunction(i,normalized)
-        outputIndices.put(ech.current,i)
+        handleFunctions(i)=f
+        handleOutputVars(i) = (()=>x)
+        outputIndices.put(i,ech.current)
+        effectedOutputs(i)=ech
+        val dispathWrite = normalizedDispatchWriter[A]
+        selector.addWriter(ech.current,dispathWrite)
+        this
+     }else {
+        withWriter[A](ch, normalizedWriter(f,x,ch))
      }
-     withWriter[A](ch, normalized)
    }
 
    def timeout(t:FiniteDuration)(f: FiniteDuration => T): FoldSelectorBuilder[T] =
@@ -70,65 +79,139 @@ trait FoldSelectorBuilder[T] extends SelectorBuilder[T]
                        f: (ExecutionContext, FlowTermination[T], FiniteDuration) => Future[T]
                        ): this.type =
         withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) map Function.const(sk)  ) }
-                              
+
 
   def idle(body:T): FoldSelectorBuilder[T] =
          macro SelectorBuilder.idleImpl[T,FoldSelectorBuilder[T]]
 
-  val inputIndices: mutable.WeakHashMap[Input[_],Int] = mutable.WeakHashMap()
-  val outputIndices: mutable.WeakHashMap[Output[_],Int] = mutable.WeakHashMap()
-  var readFunctions: ArrayBuffer[ContRead.AuxF[_,T]] = ArrayBuffer()
-  var writeFunctions: ArrayBuffer[ContWrite.AuxF[_,T ]] = ArrayBuffer()
-  val activeReaders: mutable.WeakHashMap[Input[_],Boolean] = mutable.WeakHashMap()
-  val activeWriters: mutable.WeakHashMap[Output[_],Boolean] = mutable.WeakHashMap()
 
-  def dispathReader[A,B](ch:Input[A], ft:FlowTermination[B]):Option[ContRead.In[A]=>Future[Continuated[B]]] =
+  val inputIndices: IntIndexedCounterReverse[Input[_]] = new IntIndexedCounterReverse(nCases)
+  val outputIndices: IntIndexedCounterReverse[Output[_]] = new IntIndexedCounterReverse(nCases)
+  val handleFunctions: Array[HandleFunction[_]] = new Array(nCases)
+  val handleOutputVars: Array[ () => _ ] = new Array(nCases)
+  val effectedInputs: Array[FoldSelectorEffectedInput[_,T]] = new Array(nCases)
+  val effectedOutputs: Array[FoldSelectorEffectedOutput[_,T]] = new Array(nCases)
+
+  def reregisterInputIndices(): Unit =
   {
-    inputIndices.get(ch) flatMap { i=>
-      val f = readFunctions(i).asInstanceOf[ContRead.AuxF[A,B]]
-      f(ContRead(f,ch,ft))
+    inputIndices.foreachIndex{(i,cr) =>
+      if (cr.counter <= 0) {
+        cr.counter += 1
+        val input = inputIndices.get(i).get.value
+        val typedInput: Input[input.read] = input.asInstanceOf[Input[input.read]]
+        val reader = normalizedDispatchReader[input.read]
+        val fun = selector.lockedRead(reader,typedInput,selector)
+        typedInput.cbread(fun,selector)
+      }
     }
   }
 
-  def dispathWriter[A,B](ch:Output[A], ft: FlowTermination[B]):Option[(A,Future[Continuated[B]])] =
+  def reregisterOutputIndices():Unit =
   {
-    outputIndices.get(ch) flatMap {
-      i => val f = writeFunctions(i).asInstanceOf[ContWrite.AuxF[A,B]]
-      f(ContWrite(f,ch,ft))
+    outputIndices.foreachIndex{(i,cw) =>
+      if (cw.counter <= 0) {
+        cw.counter += 1
+        val output = outputIndices.get(i).get.value
+        val typedOutput:Output[output.write] = output.asInstanceOf[Output[output.write]]
+        val writer = normalizedDispatchWriter[output.write]
+        val fun = selector.lockedWrite(writer,typedOutput,selector)
+        typedOutput.cbwrite(fun,selector)
+      }
     }
   }
+
+  def reregisterIndices():Unit =
+  {
+    reregisterInputIndices()
+    reregisterOutputIndices()
+  }
+
+  def normalizedPlainReader[A](f:HandleFunction[A], ch:Input[A]):ContRead.AuxF[A,T]=
+  {
+    def nf(prev:ContRead[A,T]):Option[ContRead.In[A]=>Future[Continuated[T]]] = Some{
+      case ContRead.Value(a) =>  f(ec,selector,a) map { _ =>  ContRead[A,T](nf,ch,selector) }
+      case ContRead.Skip => { Future successful ContRead[A,T](nf,ch,selector) }
+      case ContRead.ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+        Never.future
+      case ContRead.Failure(ex) => prev.flowTermination.throwIfNotCompleted(ex)
+        Never.future
+    }
+    nf
+  }
+
+  def normalizedDispatchReader[A]:ContRead.AuxF[A,T]= {
+    // return never, becouse next step is generated via reregisterInputIndi
+    def nf(prev: ContRead[A, T]): Option[ContRead.In[A] => Future[Continuated[T]]] = {
+      val ch = prev.channel match {
+                  case fe: FoldSelectorEffectedInput[_,_] =>
+                      System.err.println(s"normalizedEffectedReader:fromEffected ${fe.current} ${fe.index} fe=${fe}  locked=${selector.isLocked}")
+                       fe.current
+                  case _ => prev.channel
+      }
+      val i = inputIndices.refIndexOf(ch)
+      //System.err.println(s"normalizedEffectedReader ch=$ch i=$i locked=${selector.isLocked}")
+      if (i == -1)
+        None
+      else {
+        inputIndices.values(i).counter -= 1
+        val ff = handleFunctions(i).asInstanceOf[HandleFunction[A]]
+        Some {
+          case ContRead.Value(a) => ff(ec, selector, a) map { _ => reregisterIndices(); Never }
+          case ContRead.Skip => {
+            reregisterIndices()
+            Future successful Never
+          }
+          case ContRead.ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
+            Never.future
+          case ContRead.Failure(ex) => prev.flowTermination.throwIfNotCompleted(ex)
+            Never.future
+        }
+      }
+    }
+    nf
+  }
+
+
+
+
+  def normalizedDispatchWriter[A]:ContWrite.AuxF[A,T] =
+  {
+    prev => {
+      val i = outputIndices.refIndexOf(prev.channel)
+      if (i == -1)
+        None
+      else {
+        outputIndices.values(i).counter -= 1
+        val ff = handleFunctions(i).asInstanceOf[HandleFunction[A]]
+        val xn = handleOutputVars(i).asInstanceOf[()=>A].apply()
+        Some((xn,ff(ec,prev.flowTermination,xn) map { _ => reregisterIndices(); Never } ))
+      }
+    }
+  }
+
+  def normalizedWriter[A](f:HandleFunction[A],x: =>A, ch:Output[A]):ContWrite.AuxF[A,T]= {
+    def nf(prev: ContWrite[A, T]): Option[(A, Future[Continuated[T]])] = {
+      val xn = x
+      Some(xn, f(ec, prev.flowTermination, xn) map (_ => ContWrite(nf, ch, this.selector)))
+    }
+    nf
+  }
+
 
   def beforeRefresh(): Unit =
   {
-    inputIndices.clear()
-    outputIndices.clear()
+  //  inputIndices.clear()
+  //  outputIndices.clear()
   }
 
-  private def setReadFunction[A](i:Int,f: ContRead.AuxF[A,T]):Unit =
-  {
-    if (readFunctions.length <= i) {
-      readFunctions.sizeHint(i+1)
-      while(readFunctions.length <= i) {
-        readFunctions.append(null)
-      }
-    }
-    readFunctions(i)=f.asInstanceOf[ContRead.AuxF[_,T]]
-  }
 
-  private def setWriteFunction[A](i:Int, f: ContWrite.AuxF[A,T]):Unit =
-  {
-    while (writeFunctions.length <= i) {
-      writeFunctions.append(null)
-    }
-    writeFunctions(i)=f
-  }
 
 }
 
 /**
  * Short name for use in fold signature 
  **/
-class FoldSelect[T](sf:SelectFactory) extends FoldSelectorBuilder[T]
+class FoldSelect[T](sf:SelectFactory, nCases: Int) extends FoldSelectorBuilder[T](nCases)
 {
    override def api = sf.api
 }
@@ -153,9 +236,9 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     * will be transformed to
     *{{{
     * var s = s0
-    * val bn = new FoldSelector
-    * bn.reading(in1)(x1 => f1 map {s=_; s; writeBarrier})
-    * bn.reading(in2)(x2 => f2 map {s=_; s; writeBarrier})
+    * val bn = new FoldSelector(3)
+    * bn.reading(in1)(x1 => f1 map {s=_; s })
+    * bn.reading(in2)(x2 => f2 map {s=_; s })
     * bn.writing(out3,v)(x2 => f2 map {s=_; s})
     * bn.idle(f4 map {s=_; s})
     *}}}
@@ -174,7 +257,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     * will be transformed to:
     *{{{
     * var s = s0
-    * val bn = new FoldSelector
+    * val bn = new FoldSelector(3)
     * bn.reading(in1)(x1 => async{ val x = s._1;
     *                              val y = s._2;
     *                              s = f1; writeBarrier; s} })
@@ -198,8 +281,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     *{{{
     * var s = ch
     * val bn = new FoldSelector
-    * val ef = new FoldSelectorEffectedInput(()=>s)
-    * bn.reading(ef)(x => async{ generated.write(x)
+    * //val ef = new FoldSelectorEffectedInput(()=>s)
+    * bn.readingEffected(0)(x => async{ generated.write(x)
     *                            s.filter(_ % x == 0)})
     *}}}
     **/
@@ -213,7 +296,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     val tree = Block(
            atPos(s.tree.pos)(q"var $sName = ${s}") ::
                             (q"val $sNameStable = $sName") ::
-           q"val ${bn} = new FoldSelect[${weakTypeOf[S]}](${c.prefix})"::
+           q"val ${bn} = new FoldSelect[${weakTypeOf[S]}](${c.prefix},${ncases.length})"::
            wrapInEffected(foldParse,bn,transformSelectMatch(bn,ncases)),
            q"${bn}.go"
           )
@@ -226,26 +309,32 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    sealed trait SelectRole
    {
      def active: Boolean
-     def generateRefresh(name:TermName): Option[c.Tree]
+     def generateRefresh(selector:TermName, state:TermName, i:Int): Option[c.Tree]
    }
 
    object SelectRole {
 
+
+
      case object NoParticipate extends SelectRole {
        def active = false
-       def generateRefresh(name: TermName) = None
+       def generateRefresh(selector:TermName, state: TermName,i:Int) = None
      }
 
      case object Read extends SelectRole {
        def active = true
-       def generateRefresh(name: TermName) = Some(q"$name.refreshReader()")
+       def generateRefresh(selector:TermName, state: TermName,i:Int) =
+           Some(q"$selector.inputIndices.put(${if (i<0) 0 else i},${genProj(state,i)})")
      }
 
      case object Write extends SelectRole
      {
        def active = true
-       def generateRefresh(name: TermName) = Some(q"${name}.refreshWriter()")
+       def generateRefresh(selector:TermName, state: TermName,i:Int) =
+         Some(q"$selector.outputIndices.put(${if (i<0) 0 else i},${genProj(state,i)})")
      }
+
+     def genProj(state:TermName, i:Int) = if (i == -1) q"$state" else q"""$state.${TermName("_"+(i+1))}"""
 
    }
 
@@ -386,10 +475,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    {
     if (fp.stateSelectRole.active) {
        beforeRefresh(foldSelect)::
-         fp.stateSelectRole.generateRefresh(makeEffectedName(fp.stateVal.symbol)).get::Nil
+         fp.stateSelectRole.generateRefresh(foldSelect, fp.stateVal.name,-1).get::Nil
     }else{
-       val r = fp.projections.filter(_.selectRole.active).flatMap{ proj =>
-         proj.selectRole.generateRefresh(makeEffectedName(proj.sym))
+       val r = fp.projections.zipWithIndex.filter(_._1.selectRole.active).flatMap{ case (proj,i) =>
+         proj.selectRole.generateRefresh(foldSelect,fp.stateVal.name,i)
        }
        if (r.nonEmpty) {
          beforeRefresh(foldSelect)::r

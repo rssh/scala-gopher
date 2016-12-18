@@ -26,7 +26,7 @@ class ChannelProcessor(api: GopherAPI) extends Actor
                               }
                              }
       case cr@ContRead(f,ch, ft) =>  
-                                     if (!ft.isCompleted) {
+                                    if (!ft.isCompleted) {
                                        ch.cbread[cr.R](f,ft)
                                     }
       case cw@ContWrite(f,ch, ft) =>  
