@@ -509,7 +509,7 @@ r.inA.duplicate()
      * Odessa Java/Scala Labs; Kiev Scala Meetup: Oct. 2014: http://www.slideshare.net/rssh1/scala-gopher2014  
      * Wix R&D meetup. Mart 2016: http://www.slideshare.net/rssh1/csp-scala-wixmeetup2016
      * Scala Symposium. Oct. 2016. Amsterdam.  http://http://www.slideshare.net/rssh1/scalagopher-cspstyle-programming-techniques-with-idiomatic-scala
-* techreport: http://www.slideshare.net/rssh1/scalagopher-cspstyle-programming-techniques-with-idiomatic-scala
+* techreport: https://arxiv.org/abs/1611.00602
 
 
   Some related links:
