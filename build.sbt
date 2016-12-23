@@ -15,7 +15,7 @@ scalacOptions ++= Seq("-unchecked","-deprecation", "-feature"
                          /* ,   "-Ydebug"  ,  "-Ylog:lambdalift"  */ 
                      )
 
-libraryDependencies <+= scalaVersion( "org.scala-lang" % "scala-reflect" % _ )
+libraryDependencies += scalaVersion( "org.scala-lang" % "scala-reflect" % _ ).value
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6"
 //libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-SNAPSHOT"
@@ -31,19 +31,19 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.14"
 //fork in Test := true
 //javaOptions in Test += s"""-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_2.11/0.3/jars/trackedfuture_2.11-assembly.jar"""
 
-version:="0.99.8"
+version:="0.99.9-SNAPSHOT"
 
 
 
 publishMavenStyle := true
 
-publishTo <<= version { (v: String) =>
+publishTo := version { (v: String) =>
   val nexus = "https://oss.sonatype.org/"
   if (v.trim.endsWith("SNAPSHOT")) 
     Some("snapshots" at nexus + "content/repositories/snapshots") 
   else
     Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+} .value
 
 
 publishArtifact in Test := false
