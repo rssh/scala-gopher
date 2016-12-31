@@ -29,6 +29,17 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         macro SelectorBuilder.readingImpl[A,T,FoldSelectorBuilder[T]]
 
 
+   def readingFoldEffectedWithFlowTerminationAsync[A](ech:FoldSelectorEffectedInput[A,T],
+                     f: (ExecutionContext, FlowTermination[T], A) => Future[T], i: Int
+                    ): this.type =
+   {
+     handleFunctions(i)=f
+     inputIndices.put(i,ech.current)
+     effectedInputs(i)=ech
+     selector.addReader[A](ech.current,normalizedDispatchReader[A])
+     this
+   }
+
    def readingWithFlowTerminationAsync[A](ch: Input[A],
                        f: (ExecutionContext, FlowTermination[T], A) => Future[T]):this.type =
    {
@@ -37,13 +48,7 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
        // (todo: pass read generator)
        val ech = ch.asInstanceOf[FoldSelectorEffectedInput[A,T]]
        val i = ech.index
-       handleFunctions(i)=f
-       inputIndices.put(i,ech.current)
-       effectedInputs(i)=ech
-       //val dispatchRead = createReadDispatcher(ech)
-       //withReader[A](ech,normalizedEffectedReader1)
-       selector.addReader[A](ech.current,normalizedDispatchReader[A])
-       this
+       readingFoldEffectedWithFlowTerminationAsync[A](ech,f,i)
      }else{
        withReader[A](ch, normalizedPlainReader(f,ch))
      }
