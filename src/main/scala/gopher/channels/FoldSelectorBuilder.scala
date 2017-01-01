@@ -29,14 +29,13 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         macro SelectorBuilder.readingImpl[A,T,FoldSelectorBuilder[T]]
 
 
-   def readingFoldEffectedWithFlowTerminationAsync[A](ech:FoldSelectorEffectedInput[A,T],
+   def readingFoldEffectedWithFlowTerminationAsync[A](ch:Input[A],
                      f: (ExecutionContext, FlowTermination[T], A) => Future[T], i: Int
                     ): this.type =
    {
      handleFunctions(i)=f
-     inputIndices.put(i,ech.current)
-     effectedInputs(i)=ech
-     selector.addReader[A](ech.current,normalizedDispatchReader[A])
+     inputIndices.put(i,ch)
+     selector.addReader[A](ch,normalizedDispatchReader[A])
      this
    }
 
@@ -48,7 +47,7 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
        // (todo: pass read generator)
        val ech = ch.asInstanceOf[FoldSelectorEffectedInput[A,T]]
        val i = ech.index
-       readingFoldEffectedWithFlowTerminationAsync[A](ech,f,i)
+       readingFoldEffectedWithFlowTerminationAsync[A](ech.current,f,i)
      }else{
        withReader[A](ch, normalizedPlainReader(f,ch))
      }
@@ -67,7 +66,7 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         handleFunctions(i)=f
         handleOutputVars(i) = (()=>x)
         outputIndices.put(i,ech.current)
-        effectedOutputs(i)=ech
+        //effectedOutputs(i)=ech
         val dispathWrite = normalizedDispatchWriter[A]
         selector.addWriter(ech.current,dispathWrite)
         this
@@ -94,8 +93,6 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
   val outputIndices: IntIndexedCounterReverse[Output[_]] = new IntIndexedCounterReverse(nCases)
   val handleFunctions: Array[HandleFunction[_]] = new Array(nCases)
   val handleOutputVars: Array[ () => _ ] = new Array(nCases)
-  val effectedInputs: Array[FoldSelectorEffectedInput[_,T]] = new Array(nCases)
-  val effectedOutputs: Array[FoldSelectorEffectedOutput[_,T]] = new Array(nCases)
 
   def reregisterInputIndices(): Unit =
   {
