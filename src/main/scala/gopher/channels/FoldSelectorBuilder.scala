@@ -57,19 +57,27 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         macro SelectorBuilder.writingImpl[A,T,FoldSelectorBuilder[T]]
 
 
-   @inline
+  @inline
+  def writingFoldEffectedWithFlowTerminationAsync[A](ch:Output[A], x: =>A,
+                                                     f: (ExecutionContext, FlowTermination[T], A) => Future[T],
+                                                     i:Int): this.type = {
+      handleFunctions(i)=f
+      handleOutputVars(i) = (()=>x)
+      outputIndices.put(i,ch)
+      val dispathWrite = normalizedDispatchWriter[A]
+      selector.addWriter(ch,dispathWrite)
+      this
+
+  }
+
+
+  @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A,
                  f: (ExecutionContext, FlowTermination[T], A) => Future[T]): this.type = {
      if (ch.isInstanceOf[FoldSelectorEffectedOutput[_,_]]) {
         val ech = ch.asInstanceOf[FoldSelectorEffectedOutput[A,T]]
         val i = ech.index
-        handleFunctions(i)=f
-        handleOutputVars(i) = (()=>x)
-        outputIndices.put(i,ech.current)
-        //effectedOutputs(i)=ech
-        val dispathWrite = normalizedDispatchWriter[A]
-        selector.addWriter(ech.current,dispathWrite)
-        this
+        writingFoldEffectedWithFlowTerminationAsync(ech.current, x, f, i)
      }else {
         withWriter[A](ch, normalizedWriter(f,x,ch))
      }
