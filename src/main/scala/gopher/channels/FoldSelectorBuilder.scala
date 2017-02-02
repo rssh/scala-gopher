@@ -25,7 +25,7 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
    type HandleFunction[A] = (ExecutionContext, FlowTermination[T],A) => Future[T]
 
 
-   def reading[A](ch: Input[A])(f: A=>T): FoldSelectorBuilder[T] =
+   def reading[A](ch: Input[A], i:Int)(f: A=>T): FoldSelectorBuilder[T] =
         macro SelectorBuilder.readingImpl[A,T,FoldSelectorBuilder[T]]
 
 

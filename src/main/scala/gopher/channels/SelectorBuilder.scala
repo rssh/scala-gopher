@@ -125,7 +125,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    }
 
    def foreachTransformReadWriteTimeoutCaseDef(builderName:c.TermName,
-                                               caseDef: c.universe.CaseDef):c.Tree=
+                                               caseDef: c.universe.CaseDef,
+                                               readerGenerator: ):c.Tree=
    {
 
     val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)
@@ -373,6 +374,11 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 object SelectorBuilder
 {
 
+   
+   /**
+    *@param  ch - channel from read
+    *@param  i  - index of read from this channel in select statement
+    **/
    def readingImpl[A,B:c.WeakTypeTag,S](c:Context)(ch:c.Expr[Input[A]])(f:c.Expr[A=>B]):c.Expr[S] =
    {
       import c.universe._
