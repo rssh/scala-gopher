@@ -376,18 +376,16 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       def active = true
 
       def generateRefresh(selector: TermName, state: TermName, i: Int) =
-        Some(q"$selector.inputIndices.put(${if (i < 0) 0 else i},${genProj(state, i)})")
+        Some(q"$selector.inputIndices.put(${if (i < 0) 0 else i},${makeProj(state, i)})")
     }
 
     case object Write extends SelectRole {
       def active = true
 
       def generateRefresh(selector: TermName, state: TermName, i: Int) =
-        Some(q"$selector.outputIndices.put(${if (i < 0) 0 else i},${genProj(state, i)})")
+        Some(q"$selector.outputIndices.put(${if (i < 0) 0 else i},${makeProj(state, i)})")
     }
-
-    def genProj(state: TermName, i: Int) = if (i == -1) q"$state" else q"""$state.${TermName("_" + (i + 1))}"""
-
+    
   }
 
 
@@ -504,8 +502,12 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
 
   def makeProj(name: TermName, n: Int): c.Tree =
   {
-    val proj = TermName("_" + (n + 1).toString)
-    (q"${name}.${proj}")
+    if (n == -1) {
+      q"${name}"
+    }else {
+      val proj = TermName("_" + (n + 1).toString)
+      (q"${name}.${proj}")
+    }
   }
 
    def preTransformCaseDefBody(fp:FoldParse, foldSelect: TermName, patSymbol: Symbol, body:c.Tree):c.Tree =
