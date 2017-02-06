@@ -44,15 +44,7 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
    def readingWithFlowTerminationAsync[A](ch: Input[A],
                        f: (ExecutionContext, FlowTermination[T], A) => Future[T]):this.type =
    {
-     if (ch.isInstanceOf[FoldSelectorEffectedInput[_,_]]) {
-       // this can be generate before reading call instead.
-       // (todo: pass read generator)
-       val ech = ch.asInstanceOf[FoldSelectorEffectedInput[A,T]]
-       val i = ech.index
-       readingFoldEffectedWithFlowTerminationAsync[A](ech.current,i,f)
-     }else{
        withReader[A](ch, normalizedPlainReader(f,ch))
-     }
    }
 
    def writing[A](ch: Output[A],x:A)(f: A=>T): FoldSelectorBuilder[T] =
@@ -72,20 +64,13 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
       val dispathWrite = normalizedDispatchWriter[A]
       selector.addWriter(ch,dispathWrite)
       this
-
   }
 
 
   @inline
    def writingWithFlowTerminationAsync[A](ch:Output[A], x: =>A,
                  f: (ExecutionContext, FlowTermination[T], A) => Future[T]): this.type = {
-     if (ch.isInstanceOf[FoldSelectorEffectedOutput[_,_]]) {
-        val ech = ch.asInstanceOf[FoldSelectorEffectedOutput[A,T]]
-        val i = ech.index
-        writingFoldEffectedWithFlowTerminationAsync(ech.current, x, i, f)
-     }else {
         withWriter[A](ch, normalizedWriter(f,x,ch))
-     }
    }
 
    def timeout(t:FiniteDuration)(f: FiniteDuration => T): FoldSelectorBuilder[T] =
@@ -157,12 +142,12 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
   def normalizedDispatchReader[A]:ContRead.AuxF[A,T]= {
     // return never, becouse next step is generated via reregisterInputIndi
     def nf(prev: ContRead[A, T]): Option[ContRead.In[A] => Future[Continuated[T]]] = {
-      val ch = prev.channel match {
-                  case fe: FoldSelectorEffectedInput[_,_] =>
-                      System.err.println(s"normalizedEffectedReader:fromEffected ${fe.current} ${fe.index} fe=${fe}  locked=${selector.isLocked}")
-                       fe.current
-                  case _ => prev.channel
-      }
+      val ch = prev.channel //match {
+                  //case fe: FoldSelectorEffectedInput[_,_] =>
+                  //    System.err.println(s"normalizedEffectedReader:fromEffected ${fe.current} ${fe.index} fe=${fe}  locked=${selector.isLocked}")
+                  //     fe.current
+                  //case _ => prev.channel
+      //}
       val i = inputIndices.refIndexOf(ch)
       //System.err.println(s"normalizedEffectedReader ch=$ch i=$i locked=${selector.isLocked}")
       if (i == -1)
@@ -252,7 +237,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
           defaultActionGenerator.genReading(builder, channel, param, body)
         }
       } else {
-        System.err.println(s"genReader, projections = ${fp.projectionsBySym.keys} channel.sym=${channel.symbol} channel=${channel}")
         fp.projectionsBySym.get(channel.symbol) match {
           case None => defaultActionGenerator.genReading(builder, channel, param, body)
           case Some(proj) =>
@@ -265,7 +249,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     override def genWriting(builder: TermName, channel: Tree, expr: Tree, param: ValDef, body: Tree): c.universe.Tree = {
       if (fp.stateSelectRole.active) {
         if (channel.symbol == fp.stateVal.symbol) {
-          q"${builder}.writingFoldEffected($channel, 0, $expr){$param => $body}"
+          val clearedChannel = Ident(fp.stateVal.name)
+          q"${builder}.writingFoldEffected($clearedChannel, 0, $expr){$param => $body}"
         } else {
           defaultActionGenerator.genWriting(builder, channel, expr, param, body)
         }
@@ -273,10 +258,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
         fp.projectionsBySym.get(channel.symbol) match {
           case None => defaultActionGenerator.genWriting(builder, channel, expr, param, body)
           case Some(proj) =>
-            val projIndex = proj._2
-            //val projChannel = makeProj(fp.stateVal.name, projIndex)
-            val effName = makeEffectedName(proj._1.sym)
-            q"${builder}.writingFoldEffected($effName.current, $projIndex, $expr){$param => $body}"
+            val (ch, index) = genProjChannelIndex(fp,proj)
+            q"${builder}.writingFoldEffected($ch, $index, $expr){$param => $body}"
         }
       }
     }
@@ -364,8 +347,9 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       atPos(s.tree.pos)(q"var $sName = ${s}") ::
         (q"val $sNameStable = $sName") ::
         q"val ${bn} = new FoldSelect[${weakTypeOf[S]}](${c.prefix},${ncases.length})" ::
-        wrapInEffected(foldParse, bn, transformSelectMatch(bn, ncases, new FoldActionGenerator(foldParse))),
-      q"${bn}.go"
+        //wrapInEffected(foldParse, bn, transformSelectMatch(bn, ncases, new FoldActionGenerator(foldParse))),
+        transformSelectMatch(bn, ncases, new FoldActionGenerator(foldParse)),
+        q"${bn}.go"
     )
     c.Expr[Future[S]](tree)
   }
@@ -560,10 +544,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     }
    }
 
-   def makeEffectedName(sym:Symbol):TermName =
-   {
-     TermName(sym.name+"$eff")
-   }
 
    def preTransformCaseDef(fp:FoldParse, foldSelect: TermName, cd:CaseDef,stableName:TermName):CaseDef =
    {
@@ -723,35 +703,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
      }
    }
 
-   private def wrapInEffected(foldParse:FoldParse, foldSelect: TermName,  wrapped:List[c.Tree]):List[c.Tree] =
-   {
-    val stateValName = foldParse.stateVal.name
-    if (foldParse.stateSelectRole.active) {
-      genEffectedDef(foldParse.stateVal.symbol, foldSelect, 0 , q"()=>${stateValName}")::wrapped
-    } else if (foldParse.projections.nonEmpty && foldParse.projections.exists(_.selectRole.active)) {
-      foldParse.projections.zipWithIndex.filter(_._1.selectRole.active).map{
-         case (p,i) => val funName = TermName("_"+(i+1))
-                       genEffectedDef(p.sym,foldSelect, i, q"()=>${stateValName}.${funName}")
-      } ++ wrapped
-    } else 
-      wrapped
-   }
-
-   private def genEffectedDef(sym:Symbol, foldSelect: TermName, index: Int, expr:c.Tree):c.Tree =
-   {
-    val constructorName = if (sym.typeSignature <:< c.weakTypeOf[Channel[_]]) {
-                             "FoldSelectorEffectedChannel"
-                          } else if (sym.typeSignature <:< c.weakTypeOf[Input[_]]) {
-                             "FoldSelectorEffectedInput"
-                          } else if (sym.typeSignature <:< c.weakTypeOf[Output[_]]) {
-                             "FoldSelectorEffectedOutput"
-                          } else {
-                             c.abort(sym.pos,s"$sym expected type must be Channel or Input or Output")
-                          }
-    val constructor=TermName(constructorName)
-    val effectedName = makeEffectedName(sym)
-    q"val $effectedName = gopher.channels.${constructor}(${foldSelect},${index},${expr})"
-   }
 
 
   def readingFoldEffected[A,B:c.WeakTypeTag,S](ch:c.Expr[Input[A]], projIndex :c.Expr[Int])(f:c.Expr[A=>B]):c.Expr[S] =
@@ -780,10 +731,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     import c.universe._
     f.tree match {
       case Function(valdefs, body) =>
-        //val effectedName = ch.tree match {
-        //  case Ident(name) => makeEffectedName(ch.tree.symbol)
-        //  case _ => c.abort(f.tree.pos, s"Identifier expected, we have ${ch}")
-        //}
         val retval = SelectorBuilder.buildAsyncCall[T,S](c)(valdefs,body,
           { (nvaldefs, nbody) =>
             q"""${c.prefix}.writingFoldEffectedWithFlowTerminationAsync(${ch},${x}, ${projIndex},
