@@ -6,9 +6,11 @@ import scala.reflect.api._
 import gopher._
 import gopher.util._
 import gopher.goasync._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.annotation.unchecked._
+import scala.reflect.macros.blackbox
 
 trait SelectorBuilder[A]
 {
@@ -86,7 +88,29 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
   import c.universe._
 
-   def foreach[T](f:c.Expr[Any=>T]):c.Expr[T] =
+  trait ActionGenerator {
+
+    def genReading(builder: TermName, channel:Tree, param: ValDef, body: Tree): Tree
+
+    def genWriting(builder: TermName, channel:Tree, expr: Tree, param: ValDef, body: Tree): Tree
+
+  }
+
+  class DefaultActionGenerator extends ActionGenerator {
+
+    override def genReading(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree =
+      q"${builder}.reading(${channel}){ ${param} => ${body} }"
+
+    override def genWriting(builder: TermName, channel: Tree, expr: Tree, param: ValDef, body: Tree): Tree =
+    q"${builder}.writing(${channel},${expr})(${param} => ${body} )"
+
+
+  }
+
+  val defaultActionGenerator = new DefaultActionGenerator()
+
+
+  def foreach[T](f:c.Expr[Any=>T]):c.Expr[T] =
    {
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) =>
@@ -108,25 +132,29 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    {
      import c.universe._
      val bn = TermName(c.freshName)
-     val calls = transformSelectMatch(bn,cases)
+     val calls = transformSelectMatch(bn,cases, defaultActionGenerator)
      q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
    }
 
-   def transformSelectMatch(bn: c.universe.TermName, cases:List[c.universe.CaseDef]):List[c.Tree] =
+   def transformSelectMatch(bn: c.universe.TermName, cases:List[c.universe.CaseDef], actionGenerator: ActionGenerator):List[c.Tree] =
    {
      import c.universe._
-     cases map { cs =>
+     cases.zipWithIndex map { case (cs, i) =>
         cs.pat match {
-           case Bind(ident, t) => foreachTransformReadWriteTimeoutCaseDef(bn,cs)
+           case Bind(ident, t) => foreachTransformReadWriteTimeoutCaseDef(bn,cs, i, actionGenerator)
            case Ident(TermName("_")) => foreachTransformIdleCaseDef(bn,cs)
            case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+cs.pat)
         }
      }
    }
 
+
+
+
    def foreachTransformReadWriteTimeoutCaseDef(builderName:c.TermName,
                                                caseDef: c.universe.CaseDef,
-                                               readerGenerator: ):c.Tree=
+                                               caseDefIndex: Int,
+                                               actionGenerator: ActionGenerator):c.Tree =
    {
 
     val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)
@@ -243,7 +271,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                                    if (!caseDef.guard.isEmpty) {
                                      c.abort(caseDef.guard.pos,"guard is not supported in read in select case")
                                    }
-                                   val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
+                                   //val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
+                                   val reading = actionGenerator.genReading(builderName,ch,param,body)
                                    atPos(caseDef.pat.pos)(reading)
                        case Select(ch,TypeName("write")) =>
                                    val expression = if (!caseDef.guard.isEmpty) {
@@ -251,7 +280,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                                                     } else {
                                                       atPos(caseDef.pat.pos)(Ident(termName))
                                                     }
-                                   val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                                   //val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                                   val writing = actionGenerator.genWriting(builderName,ch,expression,param,body)
                                    atPos(caseDef.pat.pos)(writing)
                        case Select(select,TypeName("timeout")) =>
                                    val expression = if (!caseDef.guard.isEmpty) {
@@ -281,9 +311,11 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                                                    c.abort(readed.pos,"reading in select pattern guide must be channel or future, we have:"+readed.tpe)
                                                 }
                                         }
-                                        q"${builderName}.reading(${channel})(${param} => ${body} )"
+                                       // q"${builderName}.reading(${channel})(${param} => ${body} )"
+                                       actionGenerator.genReading(builderName,channel,param,body)
                                case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                                        q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                                        //q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                                       actionGenerator.genWriting(builderName,ch,expression,param,body)
                                case x@_ =>
                                   c.abort(tp.pos, "can't parse match guard: "+x);
                             }
@@ -314,10 +346,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
     q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
    }
 
-   def mapBuildMatch[T:c.WeakTypeTag](cases:List[c.universe.CaseDef]):c.Tree =
+   def mapBuildMatch[T:c.WeakTypeTag](cases:List[c.universe.CaseDef], actionGenerator: ActionGenerator):c.Tree =
    {
      val bn = TermName(c.freshName)
-     val calls = transformSelectMatch(bn,cases)
+     val calls = transformSelectMatch(bn,cases,actionGenerator)
      q"""..${q"val ${bn} = ${c.prefix}.inputBuilder[${weakTypeOf[T]}]()" :: calls}"""
    }
 
@@ -325,7 +357,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    {
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) => 
-                                mapBuildMatch[T](cases)
+                                mapBuildMatch[T](cases,defaultActionGenerator)
        case Function(a,b) =>
             c.abort(f.tree.pos, "match expected in gopher select map, have: ${MacroUtil.shortString(b)} ");
        case _ =>
@@ -363,7 +395,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    {
      val builder = f.tree match {
         case q"{case ..$cases}" =>
-                         mapBuildMatch[T](cases)
+                         mapBuildMatch[T](cases,defaultActionGenerator)
         case _ => c.abort(f.tree.pos,"expected partial function with syntax case ... =>, have ${MacroUtil.shortString(f.tree)}");
      }
      c.Expr[Input[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
@@ -374,11 +406,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 object SelectorBuilder
 {
 
-   
-   /**
-    *@param  ch - channel from read
-    *@param  i  - index of read from this channel in select statement
-    **/
+
    def readingImpl[A,B:c.WeakTypeTag,S](c:Context)(ch:c.Expr[Input[A]])(f:c.Expr[A=>B]):c.Expr[S] =
    {
       import c.universe._

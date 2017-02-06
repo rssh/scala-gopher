@@ -17,7 +17,7 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
 {
 
          
-   def reading[A](ch: Input[A], i:Int)(f: A=>Unit): ForeverSelectorBuilder =
+   def reading[A](ch: Input[A])(f: A=>Unit): ForeverSelectorBuilder =
         macro SelectorBuilder.readingImpl[A,Unit,ForeverSelectorBuilder] 
                     // internal error in compiler when using this.type as S
       
