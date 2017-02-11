@@ -23,7 +23,8 @@ class AsyncIterable[T](val x:Iterable[T]) //extends AnyVal [implementation restr
       val builder = bf.apply()
       val it = x.iterator
       while(it.hasNext) {
-         builder += await(f(it.next))
+         val v = it.next
+         builder += await(f(v))
       }
       builder.result()
      }

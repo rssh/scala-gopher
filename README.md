@@ -4,15 +4,15 @@
 
 ### Dependences:    
  
- * scala 2.11.7 +
- * akka 2.4.2 +
- * scala-async 0.9.5
+ * scala 2.12.1 or 2.11.8
+ * akka 2.4.14 +
+ * scala-async 0.9.6
 
 #### Download: 
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.7"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.8"
 
-(or `0.99.8-SNAPSHOT` for development version).
+(or `0.99.9-SNAPSHOT` for development version).
 
 Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
 
@@ -105,7 +105,7 @@ val s = goScope{
 
   `go[T](body: =>T)(implicit ex:ExecutionContext):Future[T]` starts asynchronous execution of `body` in provided execution context. Inside go we can use `defer`/`recover` clauses and blocked read/write channel operations.  
   
-  Go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.   
+  Go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.  In addition to async/await transfoirm `go` provide lifting up asynchronous expressions inside some well-known hight-order functions (i.e. it is possible to use async operations inside for loops).  Details are available in the tech report: https://arxiv.org/abs/1611.00602 .
 
 ## Channels
 
@@ -223,7 +223,7 @@ val consumer = gopherApi.select.forever{
 Await.ready(consumer, 5.second)
 ~~~
 
-   Combination of variable and select loop better modeled with help 'fold over select' construction:
+   A combination of variable and select loop better modeled with help 'fold over select' construction:
 
 ~~~ scala
 val sum = gopherApi.select.afold(0) { (state, selector) =>
@@ -508,6 +508,8 @@ r.inA.duplicate()
 * presentations: 
      * Odessa Java/Scala Labs; Kiev Scala Meetup: Oct. 2014: http://www.slideshare.net/rssh1/scala-gopher2014  
      * Wix R&D meetup. Mart 2016: http://www.slideshare.net/rssh1/csp-scala-wixmeetup2016
+     * Scala Symposium. Oct. 2016. Amsterdam.  http://http://www.slideshare.net/rssh1/scalagopher-cspstyle-programming-techniques-with-idiomatic-scala
+* techreport: https://arxiv.org/abs/1611.00602
 
 
   Some related links:

@@ -1,12 +1,9 @@
-- added support for select.timeout construct
+- added support for select.timeout construct.
 - added support for lifting-up await in hight-order functions.
-ie in simplicified explanation:
-```
- for(x <- 1 to n) { s += read(x) }  
-```
- is translated to 
-```
- 1.to(n).foreachAsync { async(s += await(aread(x))) }  
-```
-- added support for select.fold construct
+ ie in simplicified explanation:
+     for(x <- 1 to n) { s += read(x) }
+ is translated to `(1 to n).foreachAsync { async(s += await(aread(x))) }`
+   Details can be found in techreport: [https://arxiv.org/abs/1611.00602](https://arxiv.org/abs/1611.00602)
+
+- added support for select.fold construct.
 - scala 2.12

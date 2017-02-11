@@ -20,29 +20,52 @@ class FoldSelectSuite extends FunSuite
 
  import scala.concurrent.ExecutionContext.Implicits.global
 
- test("fold-over-selector with changed read") {
+ test("fold-over-selector with changed read",Now) {
+  //for(i <- 1 to 10000) {
     //pending // we debug next now
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
+    var r0 = IndexedSeq[Int]()
     val generator = go {
       select.fold(in){ (ch,s) =>
         s match {
           case p:ch.read =>
+                            r0 = r0 :+ p
                             out.write(p)
-                            ch.filter(_ % p != 0)
+                            ch.filter{ _ % p != 0 }
         }
       }
     }
     generator.failed.foreach{ _.printStackTrace() }
-    in.awriteAll(2 to 100)
-    //in.awriteAllDebug(2 to 100)
-    val read = go {
-      for(i <- 1 to 10) yield out.read
+    //in.awriteAll(2 to Int.MaxValue)
+    go {
+      for(i <- 2 to Int.MaxValue) {
+         in.write(i)
+      }
     }
-    //Thread.sleep(1000)
 
-    val r = Await.result(read,1 second)
-    assert(r.last === 29)
+    val read = go {
+      for(i <- 1 to 100) yield {
+        val x = out.read
+        x
+      }
+    }
+
+   //val read = scala.async.Async.async(scala.async.Async.await((1 to 100).mapAsync(i=>out.aread)))
+   //val read = (1 to 100).mapAsync(i=>out.aread)
+
+    //val r = Await.result(read,1 second)
+    val r = Await.result(read,2 seconds)
+    if (r.last != 541 || r(18)!=67 ) {
+      System.err.println(s"r0=$r0")
+      System.err.println(s"r1=$r")
+    }
+    //assert(r.last === 29)
+    //assert(r(0) === 2)
+    //assert(r(2) === 3)
+    assert(r(18) === 67)
+    assert(r.last === 541)
+  //}
  }
 
  test("fold-over-selector with swap read") {
@@ -58,8 +81,9 @@ class FoldSelectSuite extends FunSuite
           case x:in1.read =>
                           if (x >= 100) {
                             select.exit((in1, in2, n))
-                          } else
-                            (in2,in1,n+x)
+                          } else {
+                            (in2, in1, n + x)
+                          }
           case x:in2.read =>
                           (in2,in1,n-x)
         }

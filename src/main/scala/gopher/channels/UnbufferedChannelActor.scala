@@ -1,32 +1,39 @@
 package gopher.channels
 
 import akka.actor._
+
 import scala.language._
 import scala.concurrent._
 import scala.collection.immutable._
 import gopher._
 
+import scala.util.control.NonFatal
+
 
 /**
- * ChannelActor - actor, which leave
+ * Actor backend for channel
  */
 class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends ChannelActor[A](id,api)
 {
 
   protected[this] def onContWrite(cw:ContWrite[A,_]):Unit =
+  {
          if (closed) {
                cw.flowTermination.throwIfNotCompleted(new ChannelClosedException())
          } else if (!processReaders(cw))  {
                writers = writers :+ cw
          }
+  }
          
 
   protected[this] def onContRead(cr:ContRead[A,_]):Unit =
+  {
             if (closed) {
                processReaderClosed(cr)
             } else if (!processWriters(cr)) {
                readers = readers :+ cr;         
-            }
+           }
+  }
 
   protected[this] def getNElements():Int = 0
 
@@ -67,7 +74,13 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
     if (writers.isEmpty) {
       false
     } else {
-      reader.function(reader) match {
+      val r = try {
+        reader.function(reader)
+      } catch {
+        case NonFatal(ex) => ex.printStackTrace()
+        throw ex
+      }
+      r match {
          case Some(f1) =>
             var done = false
             while(!writers.isEmpty && !done) {
@@ -79,7 +92,8 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
               f1(ContRead.Skip)
             }
             done
-         case None => true
+         case None =>
+           false
       }
     }
   }

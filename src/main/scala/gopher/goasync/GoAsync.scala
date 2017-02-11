@@ -44,6 +44,7 @@ object GoAsync
      import c.universe._
      val ttype = c.weakTypeOf[T]
      val nbody = GoAsync.transformAsyncBody[T](c)(body.tree)
+     val asyncNBody = applyAsync[T](c)(nbody)(ec)
      val r = if (containsDefer(c)(body)) {
        val defers = TermName(c.freshName)
        val promise = TermName(c.freshName)
@@ -53,7 +54,7 @@ object GoAsync
                              gopher.goasync.GoAsync.transformDeferMacro[${ttype}](
                                {implicit val ${defers} = new Defers[${c.weakTypeOf[T]}]()
                                 val ${promise} = Promise[${c.weakTypeOf[T]}]()
-                                scala.async.Async.async[${ttype}](${nbody})(${ec}).onComplete( x =>
+                                ${asyncNBody}.onComplete( x =>
                                      ${promise}.complete(${defers}.tryProcess(x))
                                 )(${ec})
                                 ${promise}.future
@@ -61,7 +62,7 @@ object GoAsync
                              )
                           """
      } else {
-       q"scala.async.Async.async[${ttype}](${nbody})(${ec})"
+       q"${asyncNBody}"
      }
      c.Expr[Future[T]](r)
    }
@@ -269,6 +270,16 @@ object GoAsync
     found
    }
 
+
+   def applyAsync[T:c.WeakTypeTag](c:Context)(nbody:c.Tree)(ec:c.Expr[ExecutionContext]):c.Tree =
+   {
+     import c.universe._
+     nbody match {
+       case q"scala.async.Async.await[$t](..${x})" => q"${x.head}"
+       case _             =>  q"scala.async.Async.async($nbody)($ec)"
+     }
+
+   }
 
 }
 

@@ -74,7 +74,7 @@ class HofAsyncSuite extends FunSuite
      assert(r2 === Some(1) )
    }
 
-   test("nested option foreach", Now)  {
+   test("nested option foreach")  {
      val a:Option[Int] = Some(1)
      val b:Option[Int] = Some(3)
      val channel = gopherApi.makeChannel[Int](10)

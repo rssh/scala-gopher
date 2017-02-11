@@ -111,12 +111,17 @@ object MacroUtil
   {
     if (isScala2_11) {
       c.untypecheck(tree)
-    } else {
+    } else if (isScala2_12_0) {
       removeAsyncStateMachineResultDefDef(c)(c.untypecheck(tree))
+    } else {
+      c.untypecheck(tree)
     }
   }
 
   val isScala2_11 = util.Properties.versionNumberString.startsWith("2.11.")
+
+  val isScala2_12_0 = util.Properties.versionNumberString.startsWith("2.12.0")
+
 
   final val SHORT_LEN = 80
 }
