@@ -1,1 +1,2 @@
 - akka 2.14.16
+- FoldSelected reimplemented without synthetic runtime channels.

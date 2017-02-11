@@ -12,7 +12,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 scalacOptions ++= Seq("-unchecked","-deprecation", "-feature" 
                          /* ,  "-Ymacro-debug-lite"  */
-                         /* ,   "-Ydebug"  ,  "-Ylog:lambdalift"  */ 
+                         /*  ,   "-Ydebug"  ,  "-Ylog:lambdalift"  */ 
                      )
 
 libraryDependencies += scalaVersion( "org.scala-lang" % "scala-reflect" % _ ).value
