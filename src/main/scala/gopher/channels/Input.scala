@@ -124,26 +124,28 @@ trait Input[A] extends GopherAPIProvider
 
   def withFilter(p: A=>Boolean): Input[A] = filter(p)
 
-  def map[B](g: A=>B): Input[B] =
-     new Input[B] {
+  class Mapped[B](g: A=>B) extends Input[B]
+  {
 
-        def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
-        {
-         def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
-         {  val contA = ContRead(f,this,cont.flowTermination)
-            f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
-                                  case ContRead.Skip => f1(ContRead.Skip)
-                                                        Future successful cont
-                                  case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
-                                  case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
-                                } )
-         }
-         thisInput.cbread(mf,ft)
-        }
+    def  cbread[C](f: ContRead[B,C] => Option[ContRead.In[B]=>Future[Continuated[C]]], ft: FlowTermination[C] ): Unit =
+    {
+      def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+      {  val contA = ContRead(f,this,cont.flowTermination)
+        f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
+        case ContRead.Skip => f1(ContRead.Skip)
+          Future successful cont
+        case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
+        case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
+        } )
+      }
+      thisInput.cbread(mf,ft)
+    }
 
-        def api = thisInput.api
+    def api = thisInput.api
 
-     }
+  }
+
+  def map[B](g: A=>B): Input[B] = new Mapped(g)
 
 
   def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
@@ -441,6 +443,22 @@ object Input
        */
      override def api: GopherAPI = gopherAPI
    }
+
+  def always[A](a:A)(implicit gopherApi: GopherAPI):Input[A] = new Input[A] {
+
+     override def api = gopherApi
+
+    /**
+      * apply f, when input will be ready and send result to API processor
+      */
+    override def cbread[B](f: (ContRead[A, B]) => Option[(In[A]) => Future[Continuated[B]]], ft: FlowTermination[B]) =
+      Future{
+        f(ContRead(f,this,ft)) foreach {
+          g => g(ContRead.In.value(a))
+        }
+      }(api.executionContext)
+
+  }
 
 }
 

@@ -7,6 +7,7 @@ import scala.concurrent._
 import scala.collection.mutable.{HashSet => MutableHashSet}
 import java.util.concurrent.{ConcurrentHashMap=>JavaConcurrentHashMap}
 
+/*
 trait EffectedInput[A] extends Input[A] with Effected[Input[A]]
 {
 
@@ -34,3 +35,5 @@ class SinglethreadedEffectedInput[A](in:Input[A]) extends SinglethreadedEffected
 
 class MultithreadedEffectedInput[A](in:Input[A]) extends MultithreadedEffected[Input[A]](in) 
                                                          with EffectedInput[A]
+
+*/

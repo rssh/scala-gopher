@@ -51,9 +51,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   def makeChannel[A](capacity: Int = 0): Channel[A] =
       Channel[A](capacity)(this)
 
-  /**
-   * create effected input with given thread-policy
-   */
+  /*
   def makeEffectedInput[A](in: Input[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single): EffectedInput[A] =
      EffectedInput(in,threadingPolicy)
 
@@ -62,6 +60,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   def makeEffectedChannel[A](ch: Channel[A], threadingPolicy: ThreadingPolicy = ThreadingPolicy.Single) =
      EffectedChannel(ch,threadingPolicy)
+  */
 
   /**
    * Represent Scala future as channel from which we can read one value.

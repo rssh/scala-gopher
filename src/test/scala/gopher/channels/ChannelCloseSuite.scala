@@ -64,8 +64,21 @@ class ChannelCloseSuite extends FunSuite
             val a = channel.read
             q = 2
      }
-     Await.ready(afterClose, 10.second)
+     Await.ready(afterClose, 5.second)
      assert(q != 2)
+   }
+
+
+   test("close signal must be send", Now)  {
+     val channel = gopherApi.makeChannel[Int](100)
+     channel.close
+     @volatile var q = 0
+     val fp = async {
+       val done = channel.done.read
+       q = 1
+     }
+     Await.ready(fp, 5.second)
+     assert(q == 1)
    }
 
 

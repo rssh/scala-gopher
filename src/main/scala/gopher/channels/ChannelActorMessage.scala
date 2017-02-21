@@ -1,5 +1,9 @@
 package gopher.channels
 
+import gopher.FlowTermination
+import gopher.channels.ContRead.In
+
+import scala.concurrent.Future
 import scala.language.existentials
 
 sealed trait ChannelActorMessage
@@ -34,6 +38,11 @@ case object ChannelRefIncrement extends ChannelActorMessage
  * left to read
  */
 case class ChannelCloseProcessed(nElements: Int) extends ChannelActorMessage
+
+/**
+  * add <code>f</code> to list of callbacks, called on channel close.
+  */
+case class ChannelCloseCallback[B](cr: ContRead[Unit,B])
 
 /**
  * When we decide to stop channel, do it via special message,

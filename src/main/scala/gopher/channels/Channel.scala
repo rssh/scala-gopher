@@ -11,7 +11,7 @@ import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 
-trait Channel[A] extends InputOutput[A]
+trait Channel[A] extends InputOutput[A] with CloseableInput[A]
 {
 
    thisChannel =>
@@ -22,6 +22,7 @@ trait Channel[A] extends InputOutput[A]
 
    class Filtered(p:A=>Boolean) extends super.Filtered(p)
                                     with Channel[A]
+                                    with DoneSignalDelegate[A]
    {
      def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])],ft: FlowTermination[B]):Unit =
        thisChannel.cbwrite(f,ft)

@@ -4,6 +4,8 @@ import scala.concurrent._
 import gopher._
 import java.util.concurrent.atomic._
 
+import gopher.channels.ContRead.In
+
 /**
  * channel, in which only one message can be written,
  * after which it is automatically closed
@@ -12,6 +14,9 @@ import java.util.concurrent.atomic._
  */
 class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
 {
+
+  thisOneTimeChannel =>
+
   private[this] val p = Promise[T]()
   private[this] val readed = new AtomicBoolean(false)
 
@@ -48,6 +53,17 @@ class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
 
   def close(): Unit = 
        p failure new ChannelClosedException()
+
+  val done = new Input[Unit] {
+
+    override def cbread[B](f: (ContRead[Unit, B]) => Option[(In[Unit]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+    {
+      val cr = ContRead[Unit,B](f,this,ft)
+      p.future.onComplete{ _ => applyDone(cr) }(api.executionContext)
+    }
+
+    override def api: GopherAPI = thisOneTimeChannel.api
+  }
 
 }
 

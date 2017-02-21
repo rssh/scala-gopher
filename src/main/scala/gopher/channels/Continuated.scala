@@ -118,10 +118,6 @@ object Skip
   type AuxF[A] = Skip[A]=>Option[Future[Continuated[A]]]
 }
 
-//TODO: think -
-case class ContClose[A](function: ContClose[A] => Option[Future[Continuated[A]]], 
-                        source: CloseAcceptor,
-                        override val flowTermination: FlowTermination[A]) extends FlowContinuated[A]
 
 /**
  * never means the end of conversation
