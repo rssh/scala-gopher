@@ -17,7 +17,7 @@ import scala.annotation.unchecked._
  * 
  */
 class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuilder[T@uncheckedVariance]
-                                                 with Input[T]
+                                                 with CloseableInput[T]
 {
 
    val proxy = api.makeChannel[T]()
@@ -79,7 +79,9 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
                     ContRead.In[T]=>Future[Continuated[B]]
             ],
             ft: FlowTermination[B]): Unit = proxy.cbread(f,ft)
-  
+
+   val  done: Input[Unit] = proxy.done
+
    def started: InputSelectorBuilder[T] = { go; this }
   
    // 

@@ -92,7 +92,9 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
     def genReading(builder: TermName, channel:Tree, param: ValDef, body: Tree): Tree
 
-    def genWriting(builder: TermName, channel:Tree, expr: Tree, param: ValDef, body: Tree): Tree
+    def genWriting(builder: TermName, channel:Tree, expr: Tree, param: ValDef, body: Tree):Tree
+
+    def genDone(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree
 
   }
 
@@ -104,6 +106,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
     override def genWriting(builder: TermName, channel: Tree, expr: Tree, param: ValDef, body: Tree): Tree =
     q"${builder}.writing(${channel},${expr})(${param} => ${body} )"
 
+    override def genDone(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree =
+      q"${builder}.onDone(${channel})(${param} => ${body} )"
 
   }
 
@@ -141,9 +145,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      import c.universe._
      cases.zipWithIndex map { case (cs, i) =>
         cs.pat match {
-           case Bind(ident, t) => foreachTransformReadWriteTimeoutCaseDef(bn,cs, i, actionGenerator)
+           case Bind(ident, t) => foreachTransformSelectNonIdleCaseDef(bn,cs, i, actionGenerator)
            case Ident(TermName("_")) => foreachTransformIdleCaseDef(bn,cs)
-           case _ => c.abort(cs.pat.pos,"expected Bind or Default in pattern, have:"+cs.pat)
+           case Typed(x,t) => foreachTransformSelectNonIdleCaseDef(bn,cs, i, actionGenerator)
+           case _ => c.abort(cs.pat.pos,"transformSelectMatch: expected Bind or Default in pattern, have:"+cs.pat)
         }
      }
    }
@@ -151,10 +156,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
 
 
-   def foreachTransformReadWriteTimeoutCaseDef(builderName:c.TermName,
-                                               caseDef: c.universe.CaseDef,
-                                               caseDefIndex: Int,
-                                               actionGenerator: ActionGenerator):c.Tree =
+   def foreachTransformSelectNonIdleCaseDef(builderName:c.TermName,
+                                            caseDef: c.universe.CaseDef,
+                                            caseDefIndex: Int,
+                                            actionGenerator: ActionGenerator):c.Tree =
    {
 
     val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)
@@ -291,10 +296,16 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                                                     }
                                    val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
                                    atPos(caseDef.pat.pos)(timeout)
+                       case Select(ch,TypeName("done")) =>
+                                   val done = actionGenerator.genDone(builderName,ch,param,body)
+                                   atPos(caseDef.pat.pos)(done)
                        case _ =>
                          if (caseDef.guard.isEmpty) {
-                            c.abort(tp.pos, "row caseDef:"+showRaw(caseDef) );
-                            c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
+                            val message = """
+                                match pattern in select without guard must be in form x:channel.write or x:channel.read
+                                |row caseDef:
+                              """.stripMargin
+                            c.abort(tp.pos, message+showRaw(caseDef) );
                          } else {
                             parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
                                case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
@@ -329,7 +340,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                       case _ =>
                                      MacroUtil.shortString(c)(x)
                     }
-                    c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}");
+                    c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}")
       case _ =>
             c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read or x:select.timeout");
     }
