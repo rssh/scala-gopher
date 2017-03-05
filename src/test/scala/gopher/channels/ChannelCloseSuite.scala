@@ -69,7 +69,7 @@ class ChannelCloseSuite extends FunSuite
    }
 
 
-   test("close signal must be send", Now)  {
+   test("close signal must be send")  {
      val channel = gopherApi.makeChannel[Int](100)
      channel.close
      @volatile var q = 0

@@ -156,13 +156,16 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
 
 
+
    def foreachTransformSelectNonIdleCaseDef(builderName:c.TermName,
                                             caseDef: c.universe.CaseDef,
                                             caseDefIndex: Int,
                                             actionGenerator: ActionGenerator):c.Tree =
    {
 
-    val symbolsToErase = Set(caseDef.pat.symbol, caseDef.pat.symbol.owner)
+    val symbolsToErase:Set[Symbol] = Option(caseDef.pat.symbol).toSet.flatMap{ (sym: Symbol) =>
+      Set(sym) ++ Option(sym.owner).toSet
+    }
 
     //  when we split cassDef on few functions, than sometines, symbols
     // entries in identifier tree are not cleared.  
