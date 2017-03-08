@@ -684,34 +684,37 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     }
    }
 
-   private def retrieveSelectChannels(cases:List[CaseDef]): Map[c.Symbol,SelectRole] =
+   private def retrieveSelectChannels(cases:List[CaseDef]): Map[Symbol,SelectRole] =
    {
-    val s0=Map[c.Symbol,SelectRole]()
+    val s0=Map[Symbol,SelectRole]()
+    val acceptor = new SelectCaseDefAcceptor[Map[Symbol,SelectRole],Map[Symbol,SelectRole]] {
+      override def onRead(s: Map[Symbol, SelectRole], v: TermName, ch: Tree, body:Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Read)
+
+      override def onWrite(s: Map[c.Symbol, SelectRole], ch: c.Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Write)
+
+      override def onSelectTimeout(s: Map[Symbol, SelectRole], select: Tree): Map[Symbol, SelectRole] = s
+
+      override def onIdle(s: Map[Symbol, SelectRole]): Map[Symbol, SelectRole] = s
+
+      override def onDone(s: Map[Symbol, SelectRole], ch: c.Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Done)
+    }
     cases.foldLeft(s0){ (s,e) =>
-      acceptSelectCaseDefPattern(e,
-        onRead = { in => s.updated(in.symbol,SelectRole.Read) },
-        onWrite = { out => s.updated(out.symbol,SelectRole.Write) },
-        onSelectTimeout => s, onIdle => s,
-        onDone = { d => s.updated(d.symbol,SelectRole.Done) }
-      )
+      acceptSelectCaseDefPattern1(e,s,acceptor)
     }
    }
 
-  //TODO: move to macroUtil
-  private def unwrapOriginUnannotatedType(tp:TypeTree):Tree =
-  {
-    val tpoa = if (tp.original.isEmpty) tp else tp.original
-    MacroUtil.skipAnnotation(c)(tpoa)
-  }
 
    //TODO: generalize and merge with parsing in SelectorBuilderImpl
-   def acceptSelectCaseDefPattern[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
+   def acceptSelectCaseDefPattern2[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
                                      onSelectTimeout: Tree => A, onIdle: Tree => A,
                                      onDone: Tree => A):A =
    {
 
      def acceptTypeTree(tp:TypeTree, optVarName:Option[TermName]): A = {
-       unwrapOriginUnannotatedType(tp) match {
+       MacroUtil.unwrapOriginUnannotatedType(c)(tp) match {
          case Select(ch,TypeName("read")) => onRead(ch)
          case Select(ch,TypeName("write")) => onWrite(ch)
          case Select(select,TypeName("timeout")) => onSelectTimeout(select)
@@ -743,8 +746,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
            }
        }
      }
-
-
      caseDef.pat match {
        case Bind(name,t) => 
          val termName = name.toTermName

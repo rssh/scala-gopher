@@ -415,6 +415,67 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      c.Expr[Input[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
    }
 
+  trait SelectCaseDefAcceptor[A,B] {
+    def onRead(s:A, v: TermName, ch:Tree, body: Tree):B
+    def onWrite(s:A,ch:Tree):B
+    def onSelectTimeout(s:A,select:Tree):B
+    def onIdle(s:A):B
+    def onDone(s:A,ch:Tree):B
+  }
+
+  //TODO: generalize and merge with parsing in SelectorBuilderImpl
+  def acceptSelectCaseDefPattern1[A,B](caseDef:CaseDef,
+                                       a: A,
+                                       acceptor: SelectCaseDefAcceptor[A,B]):B =
+  {
+
+    def acceptTypeTree(tp:TypeTree, termName:TermName): B = {
+      MacroUtil.unwrapOriginUnannotatedType(c)(tp) match {
+        case Select(ch,TypeName("read")) => acceptor.onRead(a,termName,ch,caseDef.body)
+        case Select(ch,TypeName("write")) => acceptor.onWrite(a,ch)
+        case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,select)
+        case Select(ch,TypeName("done")) => acceptor.onDone(a,ch)
+        case _ =>
+          if (caseDef.guard.isEmpty) {
+            c.abort(tp.pos,
+              """match pattern in select without guard must be in form x:channel.write or x:channel.read
+                |our raw caseDef:
+              """.stripMargin + showRaw(caseDef))
+          } else {
+                //TODO: add 'adone'
+                parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
+                  case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                    acceptor.onRead(a,termName,readed,caseDef.body)
+                  case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
+                    acceptor.onRead(a,termName,readed,caseDef.body)
+                  case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                    acceptor.onWrite(a,ch)
+                  case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                    acceptor.onWrite(a,ch)
+                  case x@_ =>
+                    c.abort(tp.pos, "can't parse match guard: "+x);
+                }
+          }
+      }
+    }
+    caseDef.pat match {
+      case Bind(name,t) =>
+        val termName = name.toTermName
+        t match {
+          case Typed(_,tp:TypeTree) =>
+            acceptTypeTree(tp,termName)
+          case _ =>
+            c.abort(caseDef.pat.pos,"x:channel.read or x:channel.write form is required")
+        }
+      case Ident(n@TermName("_")) => acceptor.onIdle(a) // was - caseDef.pat
+      case Typed(Ident(name),tp:TypeTree) =>  acceptTypeTree(tp,name.toTermName)
+      case Typed(_,tp:TypeTree) => c.abort(caseDef.pat.pos,s"name in typed expression is expected, we have ${showRaw(caseDef.pat)}")
+      case _ =>
+        c.abort(caseDef.pat.pos,s"bind in pattern is expected, we have ${showRaw(caseDef.pat)}")
+    }
+  }
+
+
 }
 
 object SelectorBuilder
