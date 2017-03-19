@@ -691,7 +691,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       override def onRead(s: Map[Symbol, SelectRole], v: TermName, ch: Tree, tp:Tree, body:Tree): Map[Symbol, SelectRole] =
         s.updated(ch.symbol,SelectRole.Read)
 
-      override def onWrite(s: Map[c.Symbol, SelectRole], ch: c.Tree): Map[Symbol, SelectRole] =
+      override def onWrite(s: Map[c.Symbol, SelectRole], v: TermName, expr :c.Tree, ch: c.Tree, tp: Tree): Map[Symbol, SelectRole] =
         s.updated(ch.symbol,SelectRole.Write)
 
       override def onSelectTimeout(s: Map[Symbol, SelectRole], select: Tree): Map[Symbol, SelectRole] = s
