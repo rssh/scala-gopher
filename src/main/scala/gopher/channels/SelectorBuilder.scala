@@ -100,8 +100,21 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
   class DefaultActionGenerator extends ActionGenerator {
 
-    override def genReading(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree =
+    override def genReading(builder: TermName, readed: Tree, param: ValDef, body: Tree): Tree = {
+      val channel = readed match {
+        case q"gopher.`package`.FutureWithRead[${t2}](${future})" =>
+          q"${builder}.futureInput(${future})"
+        case _ =>
+          if (readed.tpe <:< typeOf[gopher.channels.Input[_]]) {
+            readed
+          } else if (readed.tpe <:< typeOf[gopher.`package`.FutureWithRead[_]]) {
+            q"${builder}.futureInput(${readed}.aread)"
+          } else {
+            c.abort(readed.pos, "reading in select pattern guide must be channel or future, we have:" + readed.tpe)
+          }
+      }
       q"${builder}.reading(${channel}){ ${param} => ${body} }"
+    }
 
     override def genWriting(builder: TermName, channel: Tree, expr: Tree, param: ValDef, body: Tree): Tree =
     q"${builder}.writing(${channel},${expr})(${param} => ${body} )"
@@ -160,193 +173,227 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    def foreachTransformSelectNonIdleCaseDef(builderName:c.TermName,
                                             caseDef: c.universe.CaseDef,
                                             caseDefIndex: Int,
-                                            actionGenerator: ActionGenerator):c.Tree =
-   {
+                                            actionGenerator: ActionGenerator):c.Tree = {
 
-    val symbolsToErase:Set[Symbol] = Option(caseDef.pat.symbol).toSet.flatMap{ (sym: Symbol) =>
-      Set(sym) ++ Option(sym.owner).toSet
-    }
-
-    //  when we split cassDef on few functions, than sometines, symbols
-    // entries in identifier tree are not cleared.  
-    //   So, we 'reset' symbols which belong to caseDef which will be erased by macros
-    //   //TODO: check, may be will be better to use scala-compiler internal API and changeOwner instead.
-    //           yet one alternative - untypedef 'up' term
-    def clearCaseDefOwner(oldName:c.Name, newName: c.TermName, tree:Tree):Tree =
-    {
-      val oldTermName = oldName.toTermName
-
-      def changeName(name: c.TermName):c.TermName =
-        if (name==oldTermName) newName else name
-
-      def ownerWillBeErased(sym:Symbol):Boolean =
-           symbolsToErase.contains(sym)
-
-      class ClearTransformer extends Transformer {
-
-            var insideMustBeErased: Boolean = false
-
-            override def transform(tree:Tree): Tree =
-            {
-              tree match {
-               case Typed(ident@Ident(`oldTermName`),_) => if (ident.symbol!=null && ownerWillBeErased(ident.symbol))   
-                                                               atPos(tree.pos)(Ident(newName))
-                                                           else
-                                                               super.transform(tree)
-               case ident@Ident(`oldTermName`) => if (ident.symbol!=null && ownerWillBeErased(ident.symbol))   
-                                                               atPos(tree.pos)(Ident(newName))
-                                                           else
-                                                               super.transform(tree)
-               case _ =>
-                if (tree.symbol != null && tree.symbol != NoSymbol) {
-                    if (ownerWillBeErased(tree.symbol)) {
-                          var prevMustBeErased = insideMustBeErased
-                          insideMustBeErased = true
-                          try {
-                            val (done, rtree) = doClear(tree)
-                            insideMustBeErased = prevMustBeErased
-                            if (done) {
-                              rtree
-                            } else {
-                              super.transform(tree)
-                            }
-                          }catch{
-                            case ex: Exception =>
-                              System.err.println(s"ex, tree.symbol=${tree.symbol}")
-                              ex.printStackTrace()
-                              throw ex
-                          }
-                    } else super.transform(tree)
-                } else {
-                   if (false && insideMustBeErased) {
-                       val (done, rtree) = doClear(tree)
-                       if (done) rtree else super.transform(rtree)
-                   } else 
-                       super.transform(tree)
-                }
-              }
-            }
-
-            def doClear(tree: c.Tree):(Boolean, c.Tree) =
-            {
-              tree match {
-                  case Ident(name:TermName) => 
-                        (true, atPos(tree.pos)(Ident(changeName(name))))
-                  case Bind(name:TermName,body) => 
-                        (true, atPos(tree.pos)(Bind(changeName(name),transform(body))) )
-                  case ValDef(mods,name,tpt,rhs) => 
-                        (true, atPos(tree.pos)(ValDef(mods,changeName(name),transform(tpt),transform(rhs))))
-                  case Select(Ident(name:TermName),proj) => 
-                        (true, atPos(tree.pos)(Select(Ident(changeName(name)),proj)) )
-                  case _   => 
-                       // (false, tree)
-                    throw new IllegalStateException("unexpected shapr")
-                    c.abort(tree.pos,"""Unexpected shape for tree with caseDef owner, which erased by macro,
-                                       please, fire bug-report to scala-gopher, raw="""+showRaw(tree))
-              }
-            }
-
-      }
-      val transformer = new ClearTransformer()
-      transformer.transform(tree)
-    }
-
-    def retrieveOriginal(tp:Tree):Tree =
-     tp match {
-       case tpt: TypeTree => if (tpt.original.isEmpty) tpt else tpt.original
-       case _   => tp
+     val symbolsToErase: Set[Symbol] = Option(caseDef.pat.symbol).toSet.flatMap { (sym: Symbol) =>
+       Set(sym) ++ Option(sym.owner).toSet
      }
 
-    def unUnapplyPattern(x:Tree):Tree =
-      x match {
-         case Bind(name, UnApply(_,List(t@Typed(_,_))) ) => Bind(name,t)
-         case _ => x
-      }
+     //  when we split cassDef on few functions, than sometines, symbols
+     // entries in identifier tree are not cleared.
+     //   So, we 'reset' symbols which belong to caseDef which will be erased by macros
+     //   //TODO: check, may be will be better to use scala-compiler internal API and changeOwner instead.
+     //           yet one alternative - untypedef 'up' term
+     def clearCaseDefOwner(oldName: c.Name, newName: c.TermName, tree: Tree): Tree = {
+       val oldTermName = oldName.toTermName
 
-    val retval = unUnapplyPattern(caseDef.pat) match {
-      case Bind(name,Typed(_,tp)) =>
-                    val termName = name.toTermName 
-                    // when debug problems on later compilation steps, you can create freshName and see visually:
-                    // is oldName steel leaked to later compilation phases.
-                    //val newName = c.freshName(termName)
-                    val newName = termName
-                    val tpoa = clearCaseDefOwner(name, newName, retrieveOriginal(tp))
-                    val tpo = MacroUtil.skipAnnotation(c)( tpoa )
-                    val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa ,EmptyTree)
-                    val body = clearCaseDefOwner(name,newName,caseDef.body)
-                    tpo match {
-                       case Select(ch,TypeName("read")) =>
-                                   if (!caseDef.guard.isEmpty) {
-                                     c.abort(caseDef.guard.pos,"guard is not supported in read in select case")
-                                   }
-                                   //val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
-                                   val reading = actionGenerator.genReading(builderName,ch,param,body)
-                                   atPos(caseDef.pat.pos)(reading)
-                       case Select(ch,TypeName("write")) =>
-                                   val expression = if (!caseDef.guard.isEmpty) {
-                                                      parseGuardInSelectorCaseDef(termName,caseDef.guard)
-                                                    } else {
-                                                      atPos(caseDef.pat.pos)(Ident(termName))
-                                                    }
-                                   //val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-                                   val writing = actionGenerator.genWriting(builderName,ch,expression,param,body)
-                                   atPos(caseDef.pat.pos)(writing)
-                       case Select(select,TypeName("timeout")) =>
-                                   val expression = if (!caseDef.guard.isEmpty) {
-                                                      parseGuardInSelectorCaseDef(termName,caseDef.guard)
-                                                    } else {
-                                                      atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
-                                                    }
-                                   val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
-                                   atPos(caseDef.pat.pos)(timeout)
-                       case Select(ch,TypeName("done")) =>
-                                   val done = actionGenerator.genDone(builderName,ch,param,body)
-                                   atPos(caseDef.pat.pos)(done)
-                       case _ =>
-                         if (caseDef.guard.isEmpty) {
-                            val message = """
+       def changeName(name: c.TermName): c.TermName =
+         if (name == oldTermName) newName else name
+
+       def ownerWillBeErased(sym: Symbol): Boolean =
+         symbolsToErase.contains(sym)
+
+       class ClearTransformer extends Transformer {
+
+         var insideMustBeErased: Boolean = false
+
+         override def transform(tree: Tree): Tree = {
+           tree match {
+             case Typed(ident@Ident(`oldTermName`), _) => if (ident.symbol != null && ownerWillBeErased(ident.symbol))
+               atPos(tree.pos)(Ident(newName))
+             else
+               super.transform(tree)
+             case ident@Ident(`oldTermName`) => if (ident.symbol != null && ownerWillBeErased(ident.symbol))
+               atPos(tree.pos)(Ident(newName))
+             else
+               super.transform(tree)
+             case _ =>
+               if (tree.symbol != null && tree.symbol != NoSymbol) {
+                 if (ownerWillBeErased(tree.symbol)) {
+                   var prevMustBeErased = insideMustBeErased
+                   insideMustBeErased = true
+                   try {
+                     val (done, rtree) = doClear(tree)
+                     insideMustBeErased = prevMustBeErased
+                     if (done) {
+                       rtree
+                     } else {
+                       super.transform(tree)
+                     }
+                   } catch {
+                     case ex: Exception =>
+                       System.err.println(s"ex, tree.symbol=${tree.symbol}")
+                       ex.printStackTrace()
+                       throw ex
+                   }
+                 } else super.transform(tree)
+               } else {
+                 if (false && insideMustBeErased) {
+                   val (done, rtree) = doClear(tree)
+                   if (done) rtree else super.transform(rtree)
+                 } else
+                   super.transform(tree)
+               }
+           }
+         }
+
+         def doClear(tree: c.Tree): (Boolean, c.Tree) = {
+           tree match {
+             case Ident(name: TermName) =>
+               (true, atPos(tree.pos)(Ident(changeName(name))))
+             case Bind(name: TermName, body) =>
+               (true, atPos(tree.pos)(Bind(changeName(name), transform(body))))
+             case ValDef(mods, name, tpt, rhs) =>
+               (true, atPos(tree.pos)(ValDef(mods, changeName(name), transform(tpt), transform(rhs))))
+             case Select(Ident(name: TermName), proj) =>
+               (true, atPos(tree.pos)(Select(Ident(changeName(name)), proj)))
+             case _ =>
+               // (false, tree)
+               throw new IllegalStateException("unexpected shapr")
+               c.abort(tree.pos,
+                 """Unexpected shape for tree with caseDef owner, which erased by macro,
+                                       please, fire bug-report to scala-gopher, raw=""" + showRaw(tree))
+           }
+         }
+
+       }
+       val transformer = new ClearTransformer()
+       transformer.transform(tree)
+     }
+
+     def retrieveOriginal(tp: Tree): Tree =
+       tp match {
+         case tpt: TypeTree => if (tpt.original.isEmpty) tpt else tpt.original
+         case _ => tp
+       }
+
+     def unUnapplyPattern(x: Tree): Tree =
+       x match {
+         case Bind(name, UnApply(_, List(t@Typed(_, _)))) => Bind(name, t)
+         case _ => x
+       }
+
+
+
+     val acceptor = new SelectCaseDefAcceptor[TermName, (Tree, Boolean)] {
+
+       override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree, body: Tree): (Tree, Boolean) = {
+         val newName = v
+         val tpoa = clearCaseDefOwner(v, newName, tp)
+         val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
+         val body = clearCaseDefOwner(v, newName, caseDef.body)
+         val reading = actionGenerator.genReading(builderName, ch, param, body)
+           //TODO: made true.
+         (atPos(caseDef.pat.pos)(reading), true)
+       }
+
+       override def onWrite(bn: TermName, ch: Tree): (Tree, Boolean) = {
+         (EmptyTree, false)
+       }
+
+       override def onSelectTimeout(bn: TermName, select: Tree): (Tree, Boolean) = {
+         (EmptyTree, false)
+       }
+
+       override def onIdle(bn: TermName): (Tree, Boolean) = {
+         (EmptyTree, false)
+       }
+
+       override def onDone(bn: TermName, ch: Tree): (Tree, Boolean) = {
+         (EmptyTree, false)
+       }
+     }
+
+     val (r0, processed) = acceptSelectCaseDefPattern(caseDef, builderName, acceptor)
+
+     val retval = if (processed) r0 else {
+       unUnapplyPattern(caseDef.pat) match {
+         case Bind(name, Typed(_, tp)) =>
+           val termName = name.toTermName
+           // when debug problems on later compilation steps, you can create freshName and see visually:
+           // is oldName steel leaked to later compilation phases.
+           //val newName = c.freshName(termName)
+           val newName = termName
+           val tpoa = clearCaseDefOwner(name, newName, retrieveOriginal(tp))
+           val tpo = MacroUtil.skipAnnotation(c)(tpoa)
+           val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
+           val body = clearCaseDefOwner(name, newName, caseDef.body)
+           tpo match {
+             case Select(ch, TypeName("read")) =>
+               if (!caseDef.guard.isEmpty) {
+                 c.abort(caseDef.guard.pos, "guard is not supported in read in select case")
+               }
+               //val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
+               val reading = actionGenerator.genReading(builderName, ch, param, body)
+               atPos(caseDef.pat.pos)(reading)
+             case Select(ch, TypeName("write")) =>
+               val expression = if (!caseDef.guard.isEmpty) {
+                 parseGuardInSelectorCaseDef(termName, caseDef.guard)
+               } else {
+                 atPos(caseDef.pat.pos)(Ident(termName))
+               }
+               //val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+               val writing = actionGenerator.genWriting(builderName, ch, expression, param, body)
+               atPos(caseDef.pat.pos)(writing)
+             case Select(select, TypeName("timeout")) =>
+               val expression = if (!caseDef.guard.isEmpty) {
+                 parseGuardInSelectorCaseDef(termName, caseDef.guard)
+               } else {
+                 atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
+               }
+               val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
+               atPos(caseDef.pat.pos)(timeout)
+             case Select(ch, TypeName("done")) =>
+               val done = actionGenerator.genDone(builderName, ch, param, body)
+               atPos(caseDef.pat.pos)(done)
+             case _ =>
+               if (caseDef.guard.isEmpty) {
+                 val message =
+                   """
                                 match pattern in select without guard must be in form x:channel.write or x:channel.read
                                 |row caseDef:
                               """.stripMargin
-                            c.abort(tp.pos, message+showRaw(caseDef) );
+                 c.abort(tp.pos, message + showRaw(caseDef));
+               } else {
+                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
+                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                     // here is 'reverse' of out read macros
+                     val channel = readed match {
+                       case q"gopher.`package`.FutureWithRead[${t2}](${future})" =>
+                         q"${builderName}.futureInput(${future})"
+                       case _ =>
+                         if (readed.tpe <:< typeOf[gopher.channels.Input[_]]) {
+                           readed
+                         } else if (readed.tpe <:< typeOf[gopher.`package`.FutureWithRead[_]]) {
+                           q"${builderName}.futureInput(${readed}.aread)"
                          } else {
-                            parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
-                               case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
-                                        // here is 'reverse' of out read macros
-                                        val channel = readed match {
-                                           case q"gopher.`package`.FutureWithRead[${t2}](${future})" =>
-                                                q"${builderName}.futureInput(${future})"
-                                           case _ =>
-                                                if (readed.tpe <:< typeOf[gopher.channels.Input[_]]) {
-                                                   readed
-                                                } else if (readed.tpe <:< typeOf[gopher.`package`.FutureWithRead[_]]) {
-                                                  q"${builderName}.futureInput(${readed}.aread)"
-                                                } else {
-                                                   c.abort(readed.pos,"reading in select pattern guide must be channel or future, we have:"+readed.tpe)
-                                                }
-                                        }
-                                       // q"${builderName}.reading(${channel})(${param} => ${body} )"
-                                       actionGenerator.genReading(builderName,channel,param,body)
-                               case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                                        //q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-                                       actionGenerator.genWriting(builderName,ch,expression,param,body)
-                               case x@_ =>
-                                  c.abort(tp.pos, "can't parse match guard: "+x);
-                            }
-                          
+                           c.abort(readed.pos, "reading in select pattern guide must be channel or future, we have:" + readed.tpe)
                          }
-                    }
-      case Bind(name,x) =>
-                    val rawToShow = x match {
-                      case Typed(_,tp) =>
-                                     MacroUtil.shortString(c)(tp)
-                      case _ =>
-                                     MacroUtil.shortString(c)(x)
-                    }
-                    c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}")
-      case _ =>
-            c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read or x:select.timeout");
-    }
+                     }
+                     // q"${builderName}.reading(${channel})(${param} => ${body} )"
+                     actionGenerator.genReading(builderName, channel, param, body)
+                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                     //q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
+                     actionGenerator.genWriting(builderName, ch, expression, param, body)
+                   case x@_ =>
+                     c.abort(tp.pos, "can't parse match guard: " + x);
+                 }
+
+               }
+           }
+         case Bind(name, x) =>
+           val rawToShow = x match {
+             case Typed(_, tp) =>
+               MacroUtil.shortString(c)(tp)
+             case _ =>
+               MacroUtil.shortString(c)(x)
+           }
+           c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}")
+         case _ =>
+           c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read or x:select.timeout");
+       }
+     }
+
     
     retval
 
@@ -416,7 +463,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    }
 
   trait SelectCaseDefAcceptor[A,B] {
-    def onRead(s:A, v: TermName, ch:Tree, body: Tree):B
+    def onRead(s:A, v: TermName, ch:Tree, tp: Tree, body: Tree):B
     def onWrite(s:A,ch:Tree):B
     def onSelectTimeout(s:A,select:Tree):B
     def onIdle(s:A):B
@@ -424,14 +471,15 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
   }
 
   //TODO: generalize and merge with parsing in SelectorBuilderImpl
-  def acceptSelectCaseDefPattern1[A,B](caseDef:CaseDef,
+  def acceptSelectCaseDefPattern[A,B](caseDef:CaseDef,
                                        a: A,
                                        acceptor: SelectCaseDefAcceptor[A,B]):B =
   {
 
-    def acceptTypeTree(tp:TypeTree, termName:TermName): B = {
-      MacroUtil.unwrapOriginUnannotatedType(c)(tp) match {
-        case Select(ch,TypeName("read")) => acceptor.onRead(a,termName,ch,caseDef.body)
+    def acceptTypeTree(tp:Tree, termName:TermName): B = {
+      val unwrappedType = MacroUtil.unwrapOriginUnannotatedType(c)(tp)
+      unwrappedType match {
+        case Select(ch,TypeName("read")) => acceptor.onRead(a,termName,ch,unwrappedType,caseDef.body)
         case Select(ch,TypeName("write")) => acceptor.onWrite(a,ch)
         case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,select)
         case Select(ch,TypeName("done")) => acceptor.onDone(a,ch)
@@ -442,12 +490,12 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                 |our raw caseDef:
               """.stripMargin + showRaw(caseDef))
           } else {
-                //TODO: add 'adone'
                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
-                    acceptor.onRead(a,termName,readed,caseDef.body)
+                    // here is 'reverse' of out read macros
+                    acceptor.onRead(a,termName,readed,unwrappedType,caseDef.body)
                   case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
-                    acceptor.onRead(a,termName,readed,caseDef.body)
+                    acceptor.onRead(a,termName,readed,unwrappedType,caseDef.body)
                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
                     acceptor.onWrite(a,ch)
                   case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
@@ -462,10 +510,12 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
       case Bind(name,t) =>
         val termName = name.toTermName
         t match {
-          case Typed(_,tp:TypeTree) =>
+          case Typed(_,tp) =>
             acceptTypeTree(tp,termName)
+          //case Typed(_,tp) =>
+          //  c.abort(caseDef.pat.pos,s"x:channel.read or x:channel.write , tp must-br TypeTree, our tp=${showRaw(tp)}")
           case _ =>
-            c.abort(caseDef.pat.pos,"x:channel.read or x:channel.write form is required")
+            c.abort(caseDef.pat.pos,s"x:channel.read or x:channel.write form is required, we have ${showRaw(caseDef.pat)}")
         }
       case Ident(n@TermName("_")) => acceptor.onIdle(a) // was - caseDef.pat
       case Typed(Ident(name),tp:TypeTree) =>  acceptTypeTree(tp,name.toTermName)

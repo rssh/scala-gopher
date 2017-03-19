@@ -55,9 +55,12 @@ object MacroUtil
   }
 
 
-  def unwrapOriginUnannotatedType(c:Context)(tp:c.universe.TypeTree):c.Tree =
+  def unwrapOriginUnannotatedType(c:Context)(tp:c.Tree):c.Tree =
   {
-    val tpoa = if (tp.original.isEmpty) tp else tp.original
+    val tpoa = if (tp.isInstanceOf[c.universe.TypeTree]) {
+          val ttp = tp.asInstanceOf[c.universe.TypeTree]
+          if (ttp.original.isEmpty) ttp else ttp.original
+    } else tp
     MacroUtil.skipAnnotation(c)(tpoa)
   }
 
