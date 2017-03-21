@@ -295,20 +295,22 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
          val tpoa = clearCaseDefOwner(v, newName, retrieveOriginal(tp))
          val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
          val body = clearCaseDefOwner(v, newName, caseDef.body)
-
-      //   val expression = if (!caseDef.guard.isEmpty) {
-      //     parseGuardInSelectorCaseDef(v, caseDef.guard)
-      //   } else {
-      //     atPos(caseDef.pat.pos)(Ident(v))
-      //   }
-      //   System.err.println(s"onWrite: expression = ${expression}")
-         //val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
          val writing = actionGenerator.genWriting(builderName, ch, expr, param, body)
          (atPos(caseDef.pat.pos)(writing), true)
        }
 
-       override def onSelectTimeout(bn: TermName, select: Tree): (Tree, Boolean) = {
-         (EmptyTree, false)
+       override def onSelectTimeout(bn: TermName, v:TermName, select: Tree, tp: Tree): (Tree, Boolean) = {
+         val newName = v
+         val tpoa = clearCaseDefOwner(v, newName, tp)
+         val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
+         val body = clearCaseDefOwner(v, newName, caseDef.body)
+         val expression = if (!caseDef.guard.isEmpty) {
+           parseGuardInSelectorCaseDef(v, caseDef.guard)
+         } else {
+           atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
+         }
+         val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
+         (atPos(caseDef.pat.pos)(timeout), true)
        }
 
        override def onIdle(bn: TermName): (Tree, Boolean) = {
@@ -344,6 +346,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                val reading = actionGenerator.genReading(builderName, ch, param, body)
                atPos(caseDef.pat.pos)(reading)
              case Select(ch, TypeName("write")) =>
+               c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
                val expression = if (!caseDef.guard.isEmpty) {
                  parseGuardInSelectorCaseDef(termName, caseDef.guard)
                } else {
@@ -353,6 +356,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                val writing = actionGenerator.genWriting(builderName, ch, expression, param, body)
                atPos(caseDef.pat.pos)(writing)
              case Select(select, TypeName("timeout")) =>
+               c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
                val expression = if (!caseDef.guard.isEmpty) {
                  parseGuardInSelectorCaseDef(termName, caseDef.guard)
                } else {
@@ -391,6 +395,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                      // q"${builderName}.reading(${channel})(${param} => ${body} )"
                      actionGenerator.genReading(builderName, channel, param, body)
                    case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                     c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern:4")
                      //q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
                      actionGenerator.genWriting(builderName, ch, expression, param, body)
                    case x@_ =>
@@ -483,7 +488,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
   trait SelectCaseDefAcceptor[A,B] {
     def onRead(s:A, v: TermName, ch:Tree, tp: Tree, body: Tree):B
     def onWrite(s:A, v:TermName, expression: Tree, ch:Tree, tp: Tree ):B
-    def onSelectTimeout(s:A,select:Tree):B
+    def onSelectTimeout(s:A, v: TermName, select:Tree, tp: Tree):B
     def onIdle(s:A):B
     def onDone(s:A,ch:Tree):B
   }
@@ -505,7 +510,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                atPos(caseDef.pat.pos)(Ident(termName))
           }
         acceptor.onWrite(a,termName, expression, ch, unwrappedType)
-        case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,select)
+        case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,termName,select, tp)
         case Select(ch,TypeName("done")) => acceptor.onDone(a,ch)
         case _ =>
           if (caseDef.guard.isEmpty) {
