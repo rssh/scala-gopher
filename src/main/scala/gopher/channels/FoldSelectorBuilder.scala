@@ -366,7 +366,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     val tree = Block(
       atPos(s.tree.pos)(q"var $sName = ${s}") ::
         (q"val $sNameStable = $sName") ::
-        q"val ${bn} = new FoldSelect[${weakTypeOf[S]}](${c.prefix},${ncases.length})" ::
+        q"val ${bn} = new gopher.channels.FoldSelect[${weakTypeOf[S]}](${c.prefix},${ncases.length})" ::
         //wrapInEffected(foldParse, bn, transformSelectMatch(bn, ncases, new FoldActionGenerator(foldParse))),
         transformSelectMatch(bn, ncases, new FoldActionGenerator(foldParse)),
         q"${bn}.go"
@@ -580,47 +580,55 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    {
      val patSymbol = cd.pat.symbol
 
-     val (pat, guard) =   cd.pat match {
-                     case Bind(name,t) => 
-                       fp.projections.indexWhere(_.sym.name == name) match {
-                          case -1 => (cd.pat, cd.guard)
-                          case idx => 
-                            // TODO: move parsing of rw-select to ASTUtil and
-                            // eliminate code duplication with SelectorBuilder
-                            t match {
-                              case Typed(_,tp:TypeTree) =>
-                                  val tpoa = if (tp.original.isEmpty) tp else tp.original
-                                  val tpo = MacroUtil.skipAnnotation(c)(tpoa)
-                                  tpo match {
-                                     case Select(ch,TypeName("read")) =>
-                                               //TODO (low priority): implement shadowing instead abort
-                                               c.abort(cd.pat.pos,"Symbol in pattern shadow symbol in state")
-                                     case Select(ch,TypeName("done")) =>
-                                               c.abort(cd.pat.pos,"Symbol in x:done pattern shadow symbol in state")
-                                     case Select(ch,TypeName("write")) =>
-                                               val newName = TermName(c.freshName("wrt"))
-                                               val newPat = atPos(cd.pat.pos)(Bind(newName,t))
-                                               if (!cd.guard.isEmpty) {
-                                                  c.abort(cd.pos,"guard must be empty");
-                                               }
-                                               val sName = fp.stateVal.name.toTermName
-                                               val proj = TermName("_"+(idx+1))
-                                               val newGuard = q"${newName} == $sName.$proj" 
-                                               (newPat,newGuard)
-                                     case _ => 
-                                               //TODO: implement read/write syntax
-                                               c.abort(cd.pat.pos,"read/write is required we have "+
-                                                                         MacroUtil.shortString(c)(t))
-                                  }
-                               case _ =>
-                                     c.abort(cd.pat.pos,"x:channel.read or x:channel.write form is required")
-                            }
-                       }
-                     case Typed(_,tp:TypeTree) => (cd.pat, cd.guard)  // have no bind => can't shadow
-                     case Ident(TermName("_")) => (cd.pat, cd.guard)
-                     case _ => c.abort(cd.pat.pos,"expected Bind or Default in pattern, have:"+cd.pat)
+     val acceptor = new SelectCaseDefAcceptor[FoldParse,(Tree, Tree)] {
+
+
+       override def onRead(s: FoldParse, v: TermName, ch: Tree, tp: Tree): (Tree, Tree) = {
+         // TODO: parse something like ch.done.read
+         if (fp.projections.indexWhere(_.sym.name == v) != -1) {
+           //low-priority: implement shadowing instead abort
+           c.abort(cd.pat.pos,"read variable shadow fold state")
+         }
+         (cd.pat,cd.guard)
+       }
+
+       override def onWrite(s: FoldParse, v: TermName, expression: Tree, ch: Tree, tp: Tree): (Tree, Tree) = {
+         val idx = fp.projections.indexWhere(_.sym.name == v)
+         if (idx != -1) {
+           val newName = TermName(c.freshName("wrt"))
+           val newPat = atPos(cd.pat.pos)(Bind(newName, Typed(Ident(v),tp)))
+           if (!cd.guard.isEmpty) {
+             c.abort(cd.pos, "guard must be empty");
+           }
+           val sName = fp.stateVal.name.toTermName
+           val proj = TermName("_" + (idx + 1))
+           val newGuard = q"${newName} == $sName.$proj"
+           (newPat, newGuard)
+         }else {
+           (cd.pat, cd.guard)
+         }
+       }
+
+       override def onSelectTimeout(s: FoldParse, v: TermName, select: Tree, tp: Tree): (Tree, Tree)       =
+       {
+  (cd.pat, cd.guard)
+       }
+
+       override def onIdle(s: FoldParse): (Tree, Tree) = {
+         (cd.pat, cd.guard)
+       }
+
+       override def onDone(s: FoldParse, v: TermName, ch: Tree, tp: Tree): (Tree, Tree) = {
+         if (fp.projections.indexWhere(_.sym.name == v) != -1) {
+           c.abort(cd.pat.pos,"done variable shadow fold state")
+         }
+         (cd.pat, cd.guard)
+       }
+
      }
-     //val spat = substProj(fp,stableName,pat,true)
+
+     val (pat, guard) = acceptSelectCaseDefPattern(cd, fp, acceptor)
+
      val symName = fp.stateVal.symbol.name.toTermName
      atPos(cd.pos)(CaseDef(substProj(fp,stableName,pat,true,false),
                            substProj(fp,symName,guard,false,false),
@@ -705,64 +713,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       acceptSelectCaseDefPattern(e,s,acceptor)
     }
    }
-
-
-   //TODO: generalize and merge with parsing in SelectorBuilderImpl
-   def acceptSelectCaseDefPattern2[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
-                                     onSelectTimeout: Tree => A, onIdle: Tree => A,
-                                     onDone: Tree => A):A =
-   {
-
-     def acceptTypeTree(tp:TypeTree, optVarName:Option[TermName]): A = {
-       MacroUtil.unwrapOriginUnannotatedType(c)(tp) match {
-         case Select(ch,TypeName("read")) => onRead(ch)
-         case Select(ch,TypeName("write")) => onWrite(ch)
-         case Select(select,TypeName("timeout")) => onSelectTimeout(select)
-         case Select(ch,TypeName("done")) => onDone(ch)
-         case _ =>
-           if (caseDef.guard.isEmpty) {
-             c.abort(tp.pos,
-               """match pattern in select without guard must be in form x:channel.write or x:channel.read
-                  |our raw caseDef:
-                """.stripMargin + showRaw(caseDef))
-           } else {
-             optVarName match {
-               case Some(termName) =>
-                 //TODO: add 'adone'
-                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
-                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
-                     onRead(readed)
-                   case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
-                     onRead(readed)
-                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                     onWrite(ch)
-                   case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                     onWrite(ch)
-                   case x@_ =>
-                     c.abort(tp.pos, "can't parse match guard: "+x);
-                 }
-               case None => c.abort(tp.pos,"caseDef guard without var must be empty")
-             }
-           }
-       }
-     }
-     caseDef.pat match {
-       case Bind(name,t) => 
-         val termName = name.toTermName
-         t match {
-           case Typed(_,tp:TypeTree) =>
-                acceptTypeTree(tp,Some(termName))
-           case _ =>
-                c.abort(caseDef.pat.pos,"x:channel.read or x:channel.write form is required")
-         }
-       case Ident(TermName("_")) => onIdle(caseDef.pat)
-       case Typed(_,tp:TypeTree) =>  acceptTypeTree(tp,None)
-       case _ =>      
-            c.abort(caseDef.pat.pos,s"bind in pattern is expected, we have ${showRaw(caseDef.pat)}")
-     }
-   }
-
-
 
 
 
