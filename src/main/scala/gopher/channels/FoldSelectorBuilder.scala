@@ -407,13 +407,6 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
 
     }
 
-    case object Done extends SelectRole {
-      def active = true
-
-      def generateRefresh(selector: TermName, state: TermName, i: Int) =
-        Some(q"$selector.doneIndices.put(${if (i < 0) 0 else i},${makeProj(state, i)})")
-
-    }
 
   }
 
@@ -706,8 +699,11 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
 
       override def onIdle(s: Map[Symbol, SelectRole]): Map[Symbol, SelectRole] = s
 
-      override def onDone(s: Map[Symbol, SelectRole], v:TermName, ch: Tree, tp: Tree): Map[Symbol, SelectRole] =
-        s.updated(ch.symbol,SelectRole.Done)
+      override def onDone(s: Map[Symbol, SelectRole], v:TermName, ch: Tree, tp: Tree): Map[Symbol, SelectRole] = {
+        val doneChannel = c.typecheck(q"${ch}.done")
+        s.updated(doneChannel.symbol, SelectRole.Read)
+      }
+
     }
     cases.foldLeft(s0){ (s,e) =>
       acceptSelectCaseDefPattern(e,s,acceptor)

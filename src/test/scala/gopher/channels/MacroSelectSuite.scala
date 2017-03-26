@@ -337,8 +337,6 @@ class MacroSelectSuite extends FunSuite
 
    test("check for done signal from one-time channel")  {
      import gopherApi._
-     pending
-     /*
      val ch = gopherApi.make[OneTimeChannel[Int]]()
      val sf = select.afold((0)){ (x,s) =>
         s match {
@@ -349,12 +347,10 @@ class MacroSelectSuite extends FunSuite
      val f1 = ch.awrite(1)
      val r = Await.result(sf,1 second)
      assert(r==1)
-     */
    }
 
    test("check for done signal from channel")  {
-     pending
-     /*
+     //pending
      import gopherApi._
      val ch = gopherApi.make[Channel[Int]]()
      val sf = select.afold((0)){ (x,s) =>
@@ -366,7 +362,6 @@ class MacroSelectSuite extends FunSuite
      val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
      val r = Await.result(sf,1 second)
      assert(r==15)
-     */
    }
 
    test("check for done signal from channel with dummy var")  {
