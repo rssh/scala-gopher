@@ -60,25 +60,26 @@ object Broadcaster {
 
   class Receiver[A](initChannel: Channel[Message[A]])
   {
-     val current = makeEffectedChannel(initChannel)
 
-     /**
-      * return Some(a) when broadcaster is not closed; None when closed.
-      * (this is logic from original Go example, where 
-      * 'T' in Go is equilend to Option[T] in Scala [Go nil ~ Scala None])
-      * In real life, interface will be better.
-      **/
-     def aread():Future[Option[A]] = go {
-       val b = current.read
-       current.write(b)
-       b match {
-          case ValueMessage(ch,v) =>
-                 current := ch
-                 Some(v)
-          case EndMessage =>
-                 None
-       }
-     }
+      val out = makeChannel[Option[A]]()
+
+      select.afold(initChannel){ (ch,s) =>
+         s match {
+           case b: ch.read =>
+              ch.awrite(b)
+              b match {
+                case ValueMessage(nextChannel,v) =>
+                         out.write(Some(v))
+                         nextChannel
+                case EndMessage =>
+                         out.write(None)
+                         //out.close()
+                         select.exit(ch)
+              }
+         }
+      }
+
+     def aread():Future[Option[A]] = out.aread
 
      def read():Option[A] = macro Receiver.readImpl[A]
   
@@ -103,7 +104,7 @@ object Broadcaster {
 class BroadcaseSuite extends FunSuite
 {
 
-  def listen[A](r: Broadcaster.Receiver[A],out:Output[A]): Future[Unit] = go {
+  def listen[A](r: Broadcaster.Receiver[A], out:Output[A]): Future[Unit] = go {
        var finish = false;
        while(!finish) {
           val x = await(r.aread)
@@ -139,7 +140,7 @@ class BroadcaseSuite extends FunSuite
 
   test("broadcast") {
      val channel = makeChannel[Int]()
-     doBroadcast(channel);
+     doBroadcast(channel)
      val fsum = channel.afold(0){ (s,n) => s+n }
      val sum = Await.result(fsum,10 seconds)
      assert(sum==8)

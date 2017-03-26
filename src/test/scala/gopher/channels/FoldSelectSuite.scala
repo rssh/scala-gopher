@@ -22,7 +22,6 @@ class FoldSelectSuite extends FunSuite
 
  test("fold-over-selector with changed read",Now) {
   //for(i <- 1 to 10000) {
-    //pending // we debug next now
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
     var r0 = IndexedSeq[Int]()
@@ -69,7 +68,6 @@ class FoldSelectSuite extends FunSuite
  }
 
  test("fold-over-selector with swap read") {
-    //pending
 
     val in1 = makeChannel[Int]()
     val in2 = makeChannel[Int]()

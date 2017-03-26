@@ -3,6 +3,7 @@ package gopher.channels
 
 import akka.actor._
 import akka.pattern._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util._
@@ -11,9 +12,12 @@ import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
+import gopher.channels.ContRead.In
 
 class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Channel[A]
 {
+
+  thisActorBackedChannel =>
 
   def  cbread[B](f: ContRead[A,B] => Option[ContRead.In[A] => Future[Continuated[B]]], flwt: FlowTermination[B] ): Unit = 
   {
@@ -71,6 +75,26 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   {
     futureChannelRef.foreach( _ ! ChannelClose )(api.executionContext)
     closed=true
+  }
+
+  val done = new Input[Unit] {
+    /**
+      * apply f, when input will be ready and send result to API processor
+      */
+    override def cbread[B](f: (ContRead[Unit, B]) => Option[(In[Unit]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+      {
+        val cr = ContRead(f,this,ft)
+        if (isClosed) {
+          applyDone(cr)
+        } else {
+          futureChannelRef.foreach( _ ! ChannelCloseCallback(cr) )(api.executionContext)
+        }
+      }
+
+    /**
+      * instance of gopher API
+      */
+    override def api: GopherAPI = thisActorBackedChannel.api
   }
 
 

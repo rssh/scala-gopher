@@ -44,6 +44,7 @@ object Sieve
   }
 
   // use effected input
+  /*
   def filter(in:Channel[Int]):Input[Int] =
   {
     val filtered = makeChannel[Int]()
@@ -54,6 +55,7 @@ object Sieve
     }
     filtered
   }
+  */
 
   def filter1(in:Channel[Int]):Input[Int] =
   {
@@ -70,7 +72,7 @@ object Sieve
   }
 
   def primes(n:Int, quit: Promise[Boolean]):Input[Int] =
-    filter(generate(n,quit))
+    filter1(generate(n,quit))
 
 }
 

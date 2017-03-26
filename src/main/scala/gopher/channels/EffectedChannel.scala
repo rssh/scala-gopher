@@ -2,13 +2,27 @@ package gopher.channels
 
 
 import gopher._
+import gopher.channels.ContRead.In
 import gopher.util._
+
 import scala.concurrent._
 
+/*
 trait EffectedChannel[A] extends Channel[A] with Effected[Channel[A]]
 {
+   thisEffectedChannel =>
+
    def asInput(): EffectedInput[A]
    def asOutput(): EffectedOutput[A]
+
+   override val doneSignal: Input[Unit] = new Input[Unit] {
+      override def api: GopherAPI = thisEffectedChannel.api
+
+      override def cbread[B](f: (ContRead[Unit, B]) => Option[(In[Unit]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
+
+
+   }
+
 }
 
 
@@ -67,4 +81,4 @@ class MultithreadedEffectedChannel[A](ch:Channel[A]) extends MultithreadedEffect
 
 }
 
-
+*/

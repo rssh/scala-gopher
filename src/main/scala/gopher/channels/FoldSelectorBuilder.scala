@@ -264,6 +264,25 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       }
     }
 
+    override def genDone(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree =
+    {
+      if (fp.stateSelectRole.active) {
+        if (channel.symbol == fp.stateVal.symbol) {
+          val clearedChannel = Ident(fp.stateVal.name)
+          q"${builder}.onDoneFoldEffected($clearedChannel, 0){$param => $body}"
+        } else {
+          defaultActionGenerator.genDone(builder,channel,param,body)
+        }
+      } else {
+        fp.projectionsBySym.get(channel.symbol) match {
+          case None => defaultActionGenerator.genDone(builder, channel, param, body)
+          case Some(proj) =>
+            val (ch, index) = genProjChannelIndex(fp,proj)
+            q"${builder}.onDoneFoldEffected($ch, $index){$param => $body}"
+        }
+      }
+    }
+
     def genProjChannelIndex(fp:FoldParse, proj: (FoldParseProjection, Int)): (Tree,Int) =
     {
       val i = proj._2
@@ -280,6 +299,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     * case x1: in1.read => f1
     * case x2: in2.read => f2
     * case x3: out3.write if (x3==v) => f3
+    * case _ : in,d
     * case _  => f4
     * }
     * }
@@ -384,8 +404,17 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
 
       def generateRefresh(selector: TermName, state: TermName, i: Int) =
         Some(q"$selector.outputIndices.put(${if (i < 0) 0 else i},${makeProj(state, i)})")
+
     }
-    
+
+    case object Done extends SelectRole {
+      def active = true
+
+      def generateRefresh(selector: TermName, state: TermName, i: Int) =
+        Some(q"$selector.doneIndices.put(${if (i < 0) 0 else i},${makeProj(state, i)})")
+
+    }
+
   }
 
 
@@ -550,6 +579,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    def preTransformCaseDef(fp:FoldParse, foldSelect: TermName, cd:CaseDef,stableName:TermName):CaseDef =
    {
      val patSymbol = cd.pat.symbol
+
      val (pat, guard) =   cd.pat match {
                      case Bind(name,t) => 
                        fp.projections.indexWhere(_.sym.name == name) match {
@@ -565,6 +595,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
                                      case Select(ch,TypeName("read")) =>
                                                //TODO (low priority): implement shadowing instead abort
                                                c.abort(cd.pat.pos,"Symbol in pattern shadow symbol in state")
+                                     case Select(ch,TypeName("done")) =>
+                                               c.abort(cd.pat.pos,"Symbol in x:done pattern shadow symbol in state")
                                      case Select(ch,TypeName("write")) =>
                                                val newName = TermName(c.freshName("wrt"))
                                                val newPat = atPos(cd.pat.pos)(Bind(newName,t))
@@ -584,6 +616,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
                                      c.abort(cd.pat.pos,"x:channel.read or x:channel.write form is required")
                             }
                        }
+                     case Typed(_,tp:TypeTree) => (cd.pat, cd.guard)  // have no bind => can't shadow
                      case Ident(TermName("_")) => (cd.pat, cd.guard)
                      case _ => c.abort(cd.pat.pos,"expected Bind or Default in pattern, have:"+cd.pat)
      }
@@ -651,59 +684,86 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
     }
    }
 
-   private def retrieveSelectChannels(cases:List[CaseDef]): Map[c.Symbol,SelectRole] =
+   private def retrieveSelectChannels(cases:List[CaseDef]): Map[Symbol,SelectRole] =
    {
-    val s0=Map[c.Symbol,SelectRole]()
+    val s0=Map[Symbol,SelectRole]()
+    val acceptor = new SelectCaseDefAcceptor[Map[Symbol,SelectRole],Map[Symbol,SelectRole]] {
+      override def onRead(s: Map[Symbol, SelectRole], v: TermName, ch: Tree, tp:Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Read)
+
+      override def onWrite(s: Map[c.Symbol, SelectRole], v: TermName, expr :c.Tree, ch: c.Tree, tp: Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Write)
+
+      override def onSelectTimeout(s: Map[Symbol, SelectRole], v: TermName, select: Tree, tp: Tree): Map[Symbol, SelectRole] = s
+
+      override def onIdle(s: Map[Symbol, SelectRole]): Map[Symbol, SelectRole] = s
+
+      override def onDone(s: Map[Symbol, SelectRole], v:TermName, ch: Tree, tp: Tree): Map[Symbol, SelectRole] =
+        s.updated(ch.symbol,SelectRole.Done)
+    }
     cases.foldLeft(s0){ (s,e) =>
-      acceptSelectCaseDefPattern(e,
-        onRead = { in => s.updated(in.symbol,SelectRole.Read) },
-        onWrite = { out => s.updated(out.symbol,SelectRole.Write) },
-        onSelectTimeout => s, onIdle => s)
+      acceptSelectCaseDefPattern(e,s,acceptor)
     }
    }
 
+
    //TODO: generalize and merge with parsing in SelectorBuilderImpl
-   def acceptSelectCaseDefPattern[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
-                                     onSelectTimeout: Tree => A, onIdle: Tree => A):A =
+   def acceptSelectCaseDefPattern2[A](caseDef:CaseDef,onRead: Tree => A, onWrite: Tree => A,
+                                     onSelectTimeout: Tree => A, onIdle: Tree => A,
+                                     onDone: Tree => A):A =
    {
+
+     def acceptTypeTree(tp:TypeTree, optVarName:Option[TermName]): A = {
+       MacroUtil.unwrapOriginUnannotatedType(c)(tp) match {
+         case Select(ch,TypeName("read")) => onRead(ch)
+         case Select(ch,TypeName("write")) => onWrite(ch)
+         case Select(select,TypeName("timeout")) => onSelectTimeout(select)
+         case Select(ch,TypeName("done")) => onDone(ch)
+         case _ =>
+           if (caseDef.guard.isEmpty) {
+             c.abort(tp.pos,
+               """match pattern in select without guard must be in form x:channel.write or x:channel.read
+                  |our raw caseDef:
+                """.stripMargin + showRaw(caseDef))
+           } else {
+             optVarName match {
+               case Some(termName) =>
+                 //TODO: add 'adone'
+                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
+                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
+                     onRead(readed)
+                   case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
+                     onRead(readed)
+                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                     onWrite(ch)
+                   case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
+                     onWrite(ch)
+                   case x@_ =>
+                     c.abort(tp.pos, "can't parse match guard: "+x);
+                 }
+               case None => c.abort(tp.pos,"caseDef guard without var must be empty")
+             }
+           }
+       }
+     }
      caseDef.pat match {
        case Bind(name,t) => 
          val termName = name.toTermName
          t match {
            case Typed(_,tp:TypeTree) =>
-                val tpoa = if (tp.original.isEmpty) tp else tp.original
-                val tpo = MacroUtil.skipAnnotation(c)(tpoa)
-                tpo match {
-                    case Select(ch,TypeName("read")) => onRead(ch)
-                    case Select(ch,TypeName("write")) => onWrite(ch)
-                    case Select(select,TypeName("timeout")) => onSelectTimeout(select)
-                    case _ =>
-                         if (caseDef.guard.isEmpty) {
-                            c.abort(tp.pos, "row caseDef:"+showRaw(caseDef) );
-                            c.abort(tp.pos, "match pattern in select without guard must be in form x:channel.write or x:channel.read");
-                         } else {
-                          parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
-                            case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
-                                        onRead(readed)
-                            case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
-                                        onRead(readed)
-                            case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                                        onWrite(ch)
-                            case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                                        onWrite(ch)
-                               case x@_ =>
-                                  c.abort(tp.pos, "can't parse match guard: "+x);
-                            }
-                     }
-                }
+                acceptTypeTree(tp,Some(termName))
            case _ =>
                 c.abort(caseDef.pat.pos,"x:channel.read or x:channel.write form is required")
          }
        case Ident(TermName("_")) => onIdle(caseDef.pat)
+       case Typed(_,tp:TypeTree) =>  acceptTypeTree(tp,None)
        case _ =>      
-            c.abort(caseDef.pat.pos,"bind in pattern is expected")
+            c.abort(caseDef.pat.pos,s"bind in pattern is expected, we have ${showRaw(caseDef.pat)}")
      }
    }
+
+
+
 
 
 

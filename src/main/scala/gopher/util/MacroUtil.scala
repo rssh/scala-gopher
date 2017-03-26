@@ -54,6 +54,17 @@ object MacroUtil
    findAwait.found
   }
 
+
+  def unwrapOriginUnannotatedType(c:Context)(tp:c.Tree):c.Tree =
+  {
+    val tpoa = if (tp.isInstanceOf[c.universe.TypeTree]) {
+          val ttp = tp.asInstanceOf[c.universe.TypeTree]
+          if (ttp.original.isEmpty) ttp else ttp.original
+    } else tp
+    MacroUtil.skipAnnotation(c)(tpoa)
+  }
+
+
   /**
    * bug in async/scala-2.12.x
    * async/types generate in state-machine next chunk of code:
