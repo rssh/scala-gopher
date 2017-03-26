@@ -273,7 +273,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
 
 
-     val acceptor = new SelectCaseDefAcceptor[TermName, (Tree, Boolean)] {
+     val acceptor = new SelectCaseDefAcceptor[TermName, Tree] {
 
 
        private def paramWithTransformedBody(v:c.universe.TermName, tp:c.universe.Tree):(ValDef,Tree) =
@@ -285,19 +285,19 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
          (param,body)
        }
 
-       override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree): (Tree, Boolean) = {
+       override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree): Tree = {
          val (param,body) = paramWithTransformedBody(v,tp)
          val reading = actionGenerator.genReading(builderName, ch, param, body)
-         (atPos(caseDef.pat.pos)(reading), true)
+         atPos(caseDef.pat.pos)(reading)
        }
 
-       override def onWrite(bn: TermName, v:TermName, expr: Tree, ch: Tree, tp:Tree): (Tree, Boolean) = {
+       override def onWrite(bn: TermName, v:TermName, expr: Tree, ch: Tree, tp:Tree): Tree = {
          val (param,body) = paramWithTransformedBody(v,tp)
          val writing = actionGenerator.genWriting(builderName, ch, expr, param, body)
-         (atPos(caseDef.pat.pos)(writing), true)
+         atPos(caseDef.pat.pos)(writing)
        }
 
-       override def onSelectTimeout(bn: TermName, v:TermName, select: Tree, tp: Tree): (Tree, Boolean) = {
+       override def onSelectTimeout(bn: TermName, v:TermName, select: Tree, tp: Tree): Tree = {
          val (param,body) = paramWithTransformedBody(v,tp)
          val expression = if (!caseDef.guard.isEmpty) {
            parseGuardInSelectorCaseDef(v, caseDef.guard)
@@ -305,29 +305,24 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
            atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
          }
          val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
-         (atPos(caseDef.pat.pos)(timeout), true)
+         atPos(caseDef.pat.pos)(timeout)
        }
 
-       override def onIdle(bn: TermName): (Tree, Boolean) = {
+       override def onIdle(bn: TermName): Tree = {
          if (!caseDef.guard.isEmpty) {
            c.abort(caseDef.guard.pos,"guard is not supported in select case")
          }
          val r = q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
-         (atPos(caseDef.pat.pos)(r), true)
+         atPos(caseDef.pat.pos)(r)
        }
 
-       override def onDone(bn: TermName, v:TermName, ch: Tree, tp: Tree): (Tree, Boolean) = {
+       override def onDone(bn: TermName, v:TermName, ch: Tree, tp: Tree): Tree = {
          val ch1 = q"${ch}.done"
          onRead(bn,v,ch1,tp)
-         (EmptyTree, false)
        }
      }
 
-     val (r0, processed) = acceptSelectCaseDefPattern(caseDef, builderName, acceptor)
-
-     val retval = r0
-
-     retval
+     acceptSelectCaseDefPattern(caseDef, builderName, acceptor)
 
    }
 
