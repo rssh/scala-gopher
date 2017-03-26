@@ -156,16 +156,11 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      q"""..${q"val ${bn} = ${c.prefix}" :: calls}"""
    }
 
+
    def transformSelectMatch(bn: c.universe.TermName, cases:List[c.universe.CaseDef], actionGenerator: ActionGenerator):List[c.Tree] =
    {
-     import c.universe._
      cases.zipWithIndex map { case (cs, i) =>
-        cs.pat match {
-           case Bind(ident, t) => foreachTransformSelectNonIdleCaseDef(bn,cs, i, actionGenerator)
-           case Ident(TermName("_")) => foreachTransformIdleCaseDef(bn,cs)
-           case Typed(x,t) => foreachTransformSelectNonIdleCaseDef(bn,cs, i, actionGenerator)
-           case _ => c.abort(cs.pat.pos,"transformSelectMatch: expected Bind or Default in pattern, have:"+cs.pat)
-        }
+       transformSelectCaseDef(bn,cs, i, actionGenerator)
      }
    }
 
@@ -173,10 +168,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
 
 
-   def foreachTransformSelectNonIdleCaseDef(builderName:c.TermName,
-                                            caseDef: c.universe.CaseDef,
-                                            caseDefIndex: Int,
-                                            actionGenerator: ActionGenerator):c.Tree = {
+   def transformSelectCaseDef(builderName:c.TermName,
+                              caseDef: c.universe.CaseDef,
+                              caseDefIndex: Int,
+                              actionGenerator: ActionGenerator):c.Tree = {
 
      val symbolsToErase: Set[Symbol] = Option(caseDef.pat.symbol).toSet.flatMap { (sym: Symbol) =>
        Set(sym) ++ Option(sym.owner).toSet
@@ -280,30 +275,30 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
      val acceptor = new SelectCaseDefAcceptor[TermName, (Tree, Boolean)] {
 
-       override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree, body: Tree): (Tree, Boolean) = {
+
+       private def paramWithTransformedBody(v:c.universe.TermName, tp:c.universe.Tree):(ValDef,Tree) =
+       {
          val newName = v
          val tpoa = clearCaseDefOwner(v, newName, tp)
          val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
          val body = clearCaseDefOwner(v, newName, caseDef.body)
+         (param,body)
+       }
+
+       override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree): (Tree, Boolean) = {
+         val (param,body) = paramWithTransformedBody(v,tp)
          val reading = actionGenerator.genReading(builderName, ch, param, body)
          (atPos(caseDef.pat.pos)(reading), true)
        }
 
        override def onWrite(bn: TermName, v:TermName, expr: Tree, ch: Tree, tp:Tree): (Tree, Boolean) = {
-        // TODO: merge with same code in onRead block
-         val newName = v
-         val tpoa = clearCaseDefOwner(v, newName, retrieveOriginal(tp))
-         val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
-         val body = clearCaseDefOwner(v, newName, caseDef.body)
+         val (param,body) = paramWithTransformedBody(v,tp)
          val writing = actionGenerator.genWriting(builderName, ch, expr, param, body)
          (atPos(caseDef.pat.pos)(writing), true)
        }
 
        override def onSelectTimeout(bn: TermName, v:TermName, select: Tree, tp: Tree): (Tree, Boolean) = {
-         val newName = v
-         val tpoa = clearCaseDefOwner(v, newName, tp)
-         val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
-         val body = clearCaseDefOwner(v, newName, caseDef.body)
+         val (param,body) = paramWithTransformedBody(v,tp)
          val expression = if (!caseDef.guard.isEmpty) {
            parseGuardInSelectorCaseDef(v, caseDef.guard)
          } else {
@@ -314,121 +309,28 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
        }
 
        override def onIdle(bn: TermName): (Tree, Boolean) = {
-         (EmptyTree, false)
+         if (!caseDef.guard.isEmpty) {
+           c.abort(caseDef.guard.pos,"guard is not supported in select case")
+         }
+         val r = q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
+         (atPos(caseDef.pat.pos)(r), true)
        }
 
-       override def onDone(bn: TermName, ch: Tree): (Tree, Boolean) = {
+       override def onDone(bn: TermName, v:TermName, ch: Tree, tp: Tree): (Tree, Boolean) = {
+         val ch1 = q"${ch}.done"
+         onRead(bn,v,ch1,tp)
          (EmptyTree, false)
        }
      }
 
      val (r0, processed) = acceptSelectCaseDefPattern(caseDef, builderName, acceptor)
 
-     val retval = if (processed) r0 else {
-       unUnapplyPattern(caseDef.pat) match {
-         case Bind(name, Typed(_, tp)) =>
-           val termName = name.toTermName
-           // when debug problems on later compilation steps, you can create freshName and see visually:
-           // is oldName steel leaked to later compilation phases.
-           //val newName = c.freshName(termName)
-           val newName = termName
-           val tpoa = clearCaseDefOwner(name, newName, retrieveOriginal(tp))
-           val tpo = MacroUtil.skipAnnotation(c)(tpoa)
-           val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
-           val body = clearCaseDefOwner(name, newName, caseDef.body)
-           tpo match {
-             case Select(ch, TypeName("read")) =>
-               c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
-               if (!caseDef.guard.isEmpty) {
-                 c.abort(caseDef.guard.pos, "guard is not supported in read in select case")
-               }
-               //val reading = q"${builderName}.reading(${ch}){ ${param} => ${body} }"
-               val reading = actionGenerator.genReading(builderName, ch, param, body)
-               atPos(caseDef.pat.pos)(reading)
-             case Select(ch, TypeName("write")) =>
-               c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
-               val expression = if (!caseDef.guard.isEmpty) {
-                 parseGuardInSelectorCaseDef(termName, caseDef.guard)
-               } else {
-                 atPos(caseDef.pat.pos)(Ident(termName))
-               }
-               //val writing = q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-               val writing = actionGenerator.genWriting(builderName, ch, expression, param, body)
-               atPos(caseDef.pat.pos)(writing)
-             case Select(select, TypeName("timeout")) =>
-               c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
-               val expression = if (!caseDef.guard.isEmpty) {
-                 parseGuardInSelectorCaseDef(termName, caseDef.guard)
-               } else {
-                 atPos(caseDef.pat.pos)(q"implicitly[akka.util.Timeout].duration")
-               }
-               val timeout = q"${builderName}.timeout(${expression})(${param} => ${body} )"
-               atPos(caseDef.pat.pos)(timeout)
-             case Select(ch, TypeName("done")) =>
-               val done = actionGenerator.genDone(builderName, ch, param, body)
-               atPos(caseDef.pat.pos)(done)
-             case _ =>
-               if (caseDef.guard.isEmpty) {
-                 val message =
-                   """
-                                match pattern in select without guard must be in form x:channel.write or x:channel.read
-                                |row caseDef:
-                              """.stripMargin
-                 c.abort(tp.pos, message + showRaw(caseDef));
-               } else {
-                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
-                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
-                     c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern")
-                     // here is 'reverse' of out read macros
-                     val channel = readed match {
-                       case q"gopher.`package`.FutureWithRead[${t2}](${future})" =>
-                         q"${builderName}.futureInput(${future})"
-                       case _ =>
-                         if (readed.tpe <:< typeOf[gopher.channels.Input[_]]) {
-                           readed
-                         } else if (readed.tpe <:< typeOf[gopher.`package`.FutureWithRead[_]]) {
-                           q"${builderName}.futureInput(${readed}.aread)"
-                         } else {
-                           c.abort(readed.pos, "reading in select pattern guide must be channel or future, we have:" + readed.tpe)
-                         }
-                     }
-                     // q"${builderName}.reading(${channel})(${param} => ${body} )"
-                     actionGenerator.genReading(builderName, channel, param, body)
-                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
-                     c.abort(caseDef.guard.pos," internal error: must be handled in acceptSelectCaseDefPatttern:4")
-                     //q"${builderName}.writing(${ch},${expression})(${param} => ${body} )"
-                     actionGenerator.genWriting(builderName, ch, expression, param, body)
-                   case x@_ =>
-                     c.abort(tp.pos, "can't parse match guard: " + x);
-                 }
+     val retval = r0
 
-               }
-           }
-         case Bind(name, x) =>
-           val rawToShow = x match {
-             case Typed(_, tp) =>
-               MacroUtil.shortString(c)(tp)
-             case _ =>
-               MacroUtil.shortString(c)(x)
-           }
-           c.abort(caseDef.pat.pos, s"match must be in form x:channel.write or x:channel.read, have: ${rawToShow}")
-         case _ =>
-           c.abort(caseDef.pat.pos, "match must be in form x:channel.write or x:channel.read or x:select.timeout");
-       }
-     }
-
-    
-    retval
+     retval
 
    }
 
-   def foreachTransformIdleCaseDef(builderName:c.TermName, caseDef: c.universe.CaseDef):c.Tree=
-   {
-    if (!caseDef.guard.isEmpty) {
-      c.abort(caseDef.guard.pos,"guard is not supported in select case")
-    }
-    q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
-   }
 
    def mapBuildMatch[T:c.WeakTypeTag](cases:List[c.universe.CaseDef], actionGenerator: ActionGenerator):c.Tree =
    {
@@ -486,11 +388,11 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
    }
 
   trait SelectCaseDefAcceptor[A,B] {
-    def onRead(s:A, v: TermName, ch:Tree, tp: Tree, body: Tree):B
+    def onRead(s:A, v: TermName, ch:Tree, tp: Tree):B
     def onWrite(s:A, v:TermName, expression: Tree, ch:Tree, tp: Tree ):B
     def onSelectTimeout(s:A, v: TermName, select:Tree, tp: Tree):B
     def onIdle(s:A):B
-    def onDone(s:A,ch:Tree):B
+    def onDone(s:A,v: TermName,ch:Tree, tp: Tree):B
   }
 
   //TODO: generalize and merge with parsing in SelectorBuilderImpl
@@ -502,7 +404,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
     def acceptTypeTree(tp:Tree, termName:TermName): B = {
       val unwrappedType = MacroUtil.unwrapOriginUnannotatedType(c)(tp)
       unwrappedType match {
-        case Select(ch,TypeName("read")) => acceptor.onRead(a,termName,ch,unwrappedType,caseDef.body)
+        case Select(ch,TypeName("read")) => acceptor.onRead(a,termName,ch,unwrappedType)
         case Select(ch,TypeName("write")) =>
           val expression = if (!caseDef.guard.isEmpty) {
                parseGuardInSelectorCaseDef(termName, caseDef.guard)
@@ -511,7 +413,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
           }
         acceptor.onWrite(a,termName, expression, ch, unwrappedType)
         case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,termName,select, tp)
-        case Select(ch,TypeName("done")) => acceptor.onDone(a,ch)
+        case Select(ch,TypeName("done")) => acceptor.onDone(a,termName,ch,tp)
         case _ =>
           if (caseDef.guard.isEmpty) {
             c.abort(tp.pos,
@@ -522,9 +424,9 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
                 parseGuardInSelectorCaseDef(termName, caseDef.guard) match {
                   case q"scala.async.Async.await[${t}](${readed}.aread):${t1}" =>
                     // here is 'reverse' of out read macros
-                    acceptor.onRead(a,termName,readed,unwrappedType,caseDef.body)
+                    acceptor.onRead(a,termName,readed,unwrappedType)
                   case q"gopher.goasync.AsyncWrapper.await[${t}](${readed}.aread):${t1}" =>
-                    acceptor.onRead(a,termName,readed,unwrappedType,caseDef.body)
+                    acceptor.onRead(a,termName,readed,unwrappedType)
                   case q"scala.async.Async.await[${t}](${ch}.awrite($expression)):${t1}" =>
                     acceptor.onWrite(a,termName,expression,ch,unwrappedType)
                   case q"gopher.goasync.AsyncWrapper.await[${t}](${ch}.awrite($expression)):${t1}" =>

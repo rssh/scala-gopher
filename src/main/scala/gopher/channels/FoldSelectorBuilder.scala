@@ -688,7 +688,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
    {
     val s0=Map[Symbol,SelectRole]()
     val acceptor = new SelectCaseDefAcceptor[Map[Symbol,SelectRole],Map[Symbol,SelectRole]] {
-      override def onRead(s: Map[Symbol, SelectRole], v: TermName, ch: Tree, tp:Tree, body:Tree): Map[Symbol, SelectRole] =
+      override def onRead(s: Map[Symbol, SelectRole], v: TermName, ch: Tree, tp:Tree): Map[Symbol, SelectRole] =
         s.updated(ch.symbol,SelectRole.Read)
 
       override def onWrite(s: Map[c.Symbol, SelectRole], v: TermName, expr :c.Tree, ch: c.Tree, tp: Tree): Map[Symbol, SelectRole] =
@@ -698,7 +698,7 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
 
       override def onIdle(s: Map[Symbol, SelectRole]): Map[Symbol, SelectRole] = s
 
-      override def onDone(s: Map[Symbol, SelectRole], ch: c.Tree): Map[Symbol, SelectRole] =
+      override def onDone(s: Map[Symbol, SelectRole], v:TermName, ch: Tree, tp: Tree): Map[Symbol, SelectRole] =
         s.updated(ch.symbol,SelectRole.Done)
     }
     cases.foldLeft(s0){ (s,e) =>
