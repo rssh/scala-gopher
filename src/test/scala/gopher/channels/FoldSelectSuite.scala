@@ -20,7 +20,7 @@ class FoldSelectSuite extends FunSuite
 
  import scala.concurrent.ExecutionContext.Implicits.global
 
- test("fold-over-selector with changed read",Now) {
+ test("fold-over-selector with changed read") {
   //for(i <- 1 to 10000) {
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()

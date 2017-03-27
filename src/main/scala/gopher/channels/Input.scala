@@ -9,7 +9,7 @@ import gopher._
 import gopher.util._
 import java.util.concurrent.atomic._
 
-import gopher.channels.ContRead.In
+import gopher.channels.ContRead.{ChannelClosed, In}
 
 /**
  * Entity, from which we can read objects of type A.
@@ -134,7 +134,7 @@ trait Input[A] extends GopherAPIProvider
         f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(g(a)))
         case ContRead.Skip => f1(ContRead.Skip)
           Future successful cont
-        case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
+        case ChannelClosed => f1(ChannelClosed)
         case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
         } )
       }
@@ -162,7 +162,7 @@ trait Input[A] extends GopherAPIProvider
               case v@ContRead.Value(a) => Future successful ContRead(f,op(g(a),this),cont.flowTermination)
               case ContRead.Skip => f1(ContRead.Skip)
                                     Future successful cont
-              case ContRead.ChannelClosed => f1(ContRead.ChannelClosed)
+              case ChannelClosed => f1(ChannelClosed)
               case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
        }}}
        thisInput.cbread(mf,ft)
@@ -200,7 +200,7 @@ trait Input[A] extends GopherAPIProvider
             f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
                                   case ContRead.Skip => f1(ContRead.Skip) 
                                                        Future successful cont
-                                  case ContRead.ChannelClosed => f1(ContRead.Skip) 
+                                  case ChannelClosed => f1(ContRead.Skip)
                                                        Future successful ContRead(f,other,cont.flowTermination)
                                   case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
                          })
@@ -274,7 +274,7 @@ trait Input[A] extends GopherAPIProvider
     def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
           Some( (in:ContRead.In[A]) =>
                  in match {
-                   case ContRead.ChannelClosed => Future successful Done((),ft)
+                   case ChannelClosed => Future successful Done((),ft)
                    case x => ContRead.liftIn(cont){ x => f(x)
                                               Future successful contForeach
                                             }(x)
@@ -289,7 +289,7 @@ trait Input[A] extends GopherAPIProvider
     val ft = PromiseFlowTermination[Unit]
     def applyF(cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] =
           Some{
-                case ContRead.ChannelClosed => Future successful Done((),ft)
+                case ChannelClosed => Future successful Done((),ft)
                 case in =>
                      ContRead.liftIn(cont){ x => f(x) map ( _ => ContRead(applyF, this, ft) ) }(in)
               } 
@@ -355,7 +355,7 @@ trait Input[A] extends GopherAPIProvider
     {
           val contFold = ContRead(applyF,this,ft)
           Some{
-            case ContRead.ChannelClosed => Future successful Done(s,ft)
+            case ChannelClosed => Future successful Done(s,ft)
             case ContRead.Value(a) => s = f(s,a)  
                                           Future successful contFold
             case ContRead.Skip => Future successful contFold
@@ -373,7 +373,7 @@ trait Input[A] extends GopherAPIProvider
     def applyF(cont:ContRead[A,S]):Option[ContRead.In[A]=>Future[Continuated[S]]] =
     {
           Some{
-            case ContRead.ChannelClosed => Future successful Done(s,ft)
+            case ChannelClosed => Future successful Done(s,ft)
             case ContRead.Value(a) => f(s,a) map { x => 
                                         s = x
                                         ContRead(applyF,this,ft)
@@ -384,6 +384,36 @@ trait Input[A] extends GopherAPIProvider
     }
     cbread(applyF,ft)
     ft.future
+  }
+
+
+  lazy val closeless : Input[A] = new Input[A]() {
+
+
+    /**
+      * apply f, when input will be ready and send result to API processor
+      */
+    override def cbread[B](f: (ContRead[A, B]) => Option[(In[A]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit = {
+      implicit val es:ExecutionContext = api.executionContext
+      def fc(cont:ContRead[A,B]):Option[(In[A])=>Future[Continuated[B]]] =
+      {
+        f(ContRead(f,this,cont.flowTermination)) map {
+          g => {
+            case ContRead.ChannelClosed => g(ContRead.Skip) map (_ => Never)
+            case x => g(x)
+          }
+        }
+      }
+      thisInput.cbread(fc,ft)
+    }
+
+    override lazy val closeless: Input[A] = this
+
+    /**
+      * instance of gopher API
+      */
+    override def api: GopherAPI = thisInput.api
+
   }
 
 }
@@ -400,7 +430,7 @@ object Input
                                                        if (it.hasNext) 
                                                          ContRead.Value(it.next)
                                                        else 
-                                                         ContRead.ChannelClosed
+                                                         ChannelClosed
                                                      }
                                           api.continue(f1(next),ft)
                                         }
@@ -410,7 +440,7 @@ object Input
    def closed[A](implicit gopherApi: GopherAPI): Input[A] = new Input[A] {
 
      def  cbread[B](f:ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
-      f(ContRead(f,this,ft)) map (f1 => f1(ContRead.ChannelClosed))
+      f(ContRead(f,this,ft)) map (f1 => f1(ChannelClosed))
 
      def api = gopherApi
    }
@@ -424,7 +454,7 @@ object Input
                                     if (readed.compareAndSet(false,true)) {
                                         ContRead.Value(a) 
                                     }else{
-                                        ContRead.ChannelClosed
+                                        ChannelClosed
                                     }))
 
      def api = gopherApi

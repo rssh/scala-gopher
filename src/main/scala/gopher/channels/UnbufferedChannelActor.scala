@@ -119,6 +119,7 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
    require(closed==true)
    stopReaders()
    stopWriters()
+   doClose()
       if (nRefs == 0) {
         // here we leave 'closed' channels in actor-system untile they will be
         // garbage-collected.  TODO: think about actual stop ?

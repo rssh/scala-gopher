@@ -32,6 +32,7 @@ abstract class BaseBufferedChannelActor[A](id:Long, api: GopherAPI) extends Chan
    }
    stopWriters()
    if (nElements == 0) {
+      doClose()
       if (nRefs == 0) {
         // here we leave 'closed' channels in actor-system untile they will be
         // garbage-collected.  TODO: think about actual stop ?

@@ -78,6 +78,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   }
 
   val done = new Input[Unit] {
+
     /**
       * apply f, when input will be ready and send result to API processor
       */

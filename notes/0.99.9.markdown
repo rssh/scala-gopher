@@ -1,2 +1,4 @@
 - akka 2.14.16
 - FoldSelected reimplemented without synthetic runtime channels.
+- added channel.done event as select source  
+- added Input.closeless 

@@ -349,13 +349,13 @@ class MacroSelectSuite extends FunSuite
      assert(r==1)
    }
 
-   test("check for done signal from channel")  {
+   test("check for done signal from channel",Now)  {
      //pending
      import gopherApi._
      val ch = gopherApi.make[Channel[Int]]()
      val sf = select.afold((0)){ (x,s) =>
         s match {
-          case v: ch.read => x + v
+          case v: ch.closeless.read => x + v
           case _: ch.done => select.exit(x)
         }
      }
