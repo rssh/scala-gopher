@@ -349,10 +349,23 @@ class MacroSelectSuite extends FunSuite
      assert(r==1)
    }
 
-   test("check for done signal from channel",Now)  {
-     //pending
+   test("check for done signal from unbuffered channel")  {
      import gopherApi._
      val ch = gopherApi.make[Channel[Int]]()
+     val sf = select.afold((0)){ (x,s) =>
+        s match {
+          case v: ch.closeless.read => x + v
+          case _: ch.done => select.exit(x)
+        }
+     }
+     val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
+     val r = Await.result(sf,1 second)
+     assert(r==15)
+   }
+
+   test("check for done signal from buffered channel")  {
+     import gopherApi._
+     val ch = gopherApi.make[Channel[Int]](10)
      val sf = select.afold((0)){ (x,s) =>
         s match {
           case v: ch.closeless.read => x + v

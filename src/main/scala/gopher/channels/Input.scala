@@ -387,12 +387,13 @@ trait Input[A] extends GopherAPIProvider
   }
 
 
+  /**
+    * @return Input without close event: i.e. reading from closeless channel
+    *         after channel close will wait forever instead throwing CloseChannelException
+    */
   lazy val closeless : Input[A] = new Input[A]() {
 
 
-    /**
-      * apply f, when input will be ready and send result to API processor
-      */
     override def cbread[B](f: (ContRead[A, B]) => Option[(In[A]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit = {
       implicit val es:ExecutionContext = api.executionContext
       def fc(cont:ContRead[A,B]):Option[(In[A])=>Future[Continuated[B]]] =
@@ -409,9 +410,6 @@ trait Input[A] extends GopherAPIProvider
 
     override lazy val closeless: Input[A] = this
 
-    /**
-      * instance of gopher API
-      */
     override def api: GopherAPI = thisInput.api
 
   }
