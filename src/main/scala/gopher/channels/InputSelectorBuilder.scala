@@ -1,10 +1,13 @@
 package gopher.channels
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 import scala.reflect.api._
 import gopher._
 import gopher.util._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.annotation.unchecked._
@@ -86,10 +89,13 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
   
    // 
    override val selector = new Selector[T](api) {
+          val exited = new AtomicBoolean(false)
           override def doExit(a: T): T =
           {
-            proxy.awrite(a) onComplete {
-              _ => proxy.close()
+            if (exited.compareAndSet(false,true)) {
+              proxy.awrite(a) onComplete {
+                _ => proxy.close()
+              }
             }
             super.doExit(a)
           }
