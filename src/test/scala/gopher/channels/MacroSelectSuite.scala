@@ -372,7 +372,11 @@ class MacroSelectSuite extends FunSuite
           case _: ch.done => select.exit(x)
         }
      }
-     val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
+     val f1 = ch.awriteAll(1 to 5) map{ _ =>
+        // let give all buffers to processe
+        Thread.sleep(200)
+        ch.close
+     }
      val r = Await.result(sf,1 second)
      assert(r==15)
    }
@@ -421,7 +425,7 @@ class MacroSelectSuite extends FunSuite
                       _ <- ch2.awriteAll(1 to 10) 
                       _ <- q.awrite(true) } yield 1
      val r = Await.result(chs2,1 second)
-    // assert( r ==  (1 to 10).map(_ * 5).sum + 1)
+     //assert( r ==  (1 to 10).map(_ * 5).sum + 1)
      pending
    }
 
