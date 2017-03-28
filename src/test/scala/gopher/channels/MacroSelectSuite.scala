@@ -378,30 +378,25 @@ class MacroSelectSuite extends FunSuite
    }
 
    test("check for done signal from channel with dummy var")  {
-     pending
-     /*
      import gopherApi._
      val ch = gopherApi.make[Channel[Int]]()
      val sf = select.afold((0)){ (x,s) =>
         s match {
-          case v: ch.read => x + v
+          case v: ch.closeless.read => x + v
           case v: ch.done => select.exit(x)
         }
      }
      val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
      val r = Await.result(sf,1 second)
      assert(r==15)
-     */
    }
 
 
    test("check for done signal from select map")  {
-     pending
-     /*
      import gopherApi._
-     val ch1 = gopherApi.make[Channel[Int]](1)
-     val ch2 = gopherApi.make[Channel[Int]](1)
-     val q = gopherApi.make[Channel[Boolean]](1)
+     val ch1 = gopherApi.make[Channel[Int]]()
+     val ch2 = gopherApi.make[Channel[Int]]()
+     val q = gopherApi.make[Channel[Boolean]]()
      val chs = for(s <- select) yield {
                 s match {
                  case x: ch1.read => x*3
@@ -411,17 +406,19 @@ class MacroSelectSuite extends FunSuite
      }
      val chs2 = select.afold(0){ (n,s) =>
         s match {
-          case x:chs.read => n + x
-          case _:chs.done => select.exit(n)
+          case x:chs.closeless.read =>
+                    n + x
+          case _:chs.done =>
+                    select.exit(n)
         }
      }
+     // note, that if we want call of quit after last write,
+     //   ch1 and ch2 must be unbuffered.
      val sendf = for{ _ <- ch1.awriteAll(1 to 10) 
                       _ <- ch2.awriteAll(1 to 10) 
                       _ <- q.awrite(true) } yield 1
      val r = Await.result(chs2,1 second)
-     System.err.println(s"r=$r") 
-     pending
-     */
+     assert( r ==  (1 to 10).map(_ * 5).sum + 1)
    }
 
 

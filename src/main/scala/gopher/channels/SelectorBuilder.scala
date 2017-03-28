@@ -336,7 +336,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      q"""..${q"val ${bn} = ${c.prefix}.inputBuilder[${weakTypeOf[T]}]()" :: calls}"""
    }
 
-   def map[T:c.WeakTypeTag](f:c.Expr[Any=>T]):c.Expr[Input[T]] =
+   def map[T:c.WeakTypeTag](f:c.Expr[Any=>T]):c.Expr[CloseableInput[T]] =
    {
      val builder = f.tree match {
        case Function(forvals,Match(choice,cases)) => 
@@ -347,7 +347,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
             c.abort(f.tree.pos, "match expected in gopher select map, have: ${MacroUtil.shortString(f.tree)}");
 
      }
-     c.Expr[Input[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
+     c.Expr[CloseableInput[T]](MacroUtil.cleanUntypecheck(c)(q"${builder}.started"))
    }
 
    def builder[T](f:c.Expr[PartialFunction[Any,T]]):c.Tree =
