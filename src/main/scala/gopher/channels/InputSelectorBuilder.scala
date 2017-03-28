@@ -24,6 +24,7 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
 {
 
    val proxy = api.makeChannel[T]()
+   val terminated = new AtomicBoolean(false)
 
    def reading[A](ch: Input[A])(f: A=>T): InputSelectorBuilder[T] =
         macro SelectorBuilder.readingImpl[A,T,InputSelectorBuilder[T]] 
@@ -32,8 +33,10 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[T], A) => Future[T] ): InputSelectorBuilder[T] =
    {
       def normalized(_cont:ContRead[A,T]):Option[ContRead.In[A]=>Future[Continuated[T]]] =
-              Some(ContRead.liftIn(_cont)(a=>f(ec,selector,a) flatMap {
-                    proxy.awrite(_)
+              Some(ContRead.liftIn(_cont)(a=>f(ec,selector,a) flatMap { x =>
+                    if (!terminated.get) {
+                      proxy.awrite(x)
+                    } else Future successful x
                   } map Function.const(ContRead(normalized,ch,selector))))
       withReader[A](ch,normalized)
    }
@@ -89,16 +92,17 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
   
    // 
    override val selector = new Selector[T](api) {
-          val exited = new AtomicBoolean(false)
           override def doExit(a: T): T =
           {
-            if (exited.compareAndSet(false,true)) {
+            if (terminated.compareAndSet(false,true)) {
               proxy.awrite(a) onComplete {
                 _ => proxy.close()
               }
+              //proxy.close()
             }
             super.doExit(a)
           }
+
    }
 
 }

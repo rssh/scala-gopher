@@ -406,14 +406,12 @@ class MacroSelectSuite extends FunSuite
                  case x: ch1.read => x*3
                  case x: ch2.read => x*2
                  case _: q.read =>
-                   //System.err.println("read q, exited")
                    select.exit(1)
                 }
      }
      val chs2 = select.afold(0){ (n,s) =>
         s match {
           case x:chs.closeless.read =>
-                    //System.err.println(s"read $x")
                     n + x
           case _:chs.done =>
                     select.exit(n)
@@ -425,8 +423,7 @@ class MacroSelectSuite extends FunSuite
                       _ <- ch2.awriteAll(1 to 10) 
                       _ <- q.awrite(true) } yield 1
      val r = Await.result(chs2,1 second)
-     //assert( r ==  (1 to 10).map(_ * 5).sum + 1)
-     pending
+     assert( r ==  (1 to 10).map(_ * 5).sum + 1)
    }
 
 
