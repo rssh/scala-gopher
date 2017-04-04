@@ -48,7 +48,16 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
 
    def idle(body:Unit): ForeverSelectorBuilder =
          macro SelectorBuilder.idleImpl[Unit,ForeverSelectorBuilder]
-    
+
+   def handleError(f: Throwable => Unit): ForeverSelectorBuilder =
+      macro SelectorBuilder.handleErrorImpl[Unit,ForeverSelectorBuilder]
+
+  @inline
+   def handleErrorWithFlowTerminationAsync(cont:Continuated[Unit], f: (ExecutionContext, FlowTermination[Unit], Throwable) => Future[Unit] ): this.type =
+    withError{  (ec,cont,ex) =>
+                 f(ec,cont,ex).map(Function.const(cont))(ec)
+    }
+
 
    /**
     * provide syntax for running select loop inside go (or async) block

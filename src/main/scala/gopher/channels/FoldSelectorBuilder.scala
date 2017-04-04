@@ -283,6 +283,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
       }
     }
 
+    override def genError(builder: TermName, selector: Tree, param: ValDef, body: Tree): Tree = {
+      defaultActionGenerator.genError(builder,selector,param,body)
+    }
+
     def genProjChannelIndex(fp:FoldParse, proj: (FoldParseProjection, Int)): (Tree,Int) =
     {
       val i = proj._2
@@ -618,6 +622,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
          (cd.pat, cd.guard)
        }
 
+       override def onError(s: FoldParse, v: TermName, select: Tree, tp: Tree): (Tree, Tree) = {
+         (cd.pat, cd.guard)
+       }
+
      }
 
      val (pat, guard) = acceptSelectCaseDefPattern(cd, fp, acceptor)
@@ -703,6 +711,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
         val doneChannel = c.typecheck(q"${ch}.done")
         s.updated(doneChannel.symbol, SelectRole.Read)
       }
+
+      override def onError(s: Map[Symbol, SelectRole], v: TermName, select: Tree, tp: Tree): Map[Symbol, SelectRole] = s
 
     }
     cases.foldLeft(s0){ (s,e) =>

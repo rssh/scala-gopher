@@ -26,6 +26,8 @@ class SelectFactory(val api: GopherAPI)
 
   type timeout = FiniteDuration
 
+  type error = Throwable
+
   trait SelectFactoryApi
   {
     def api = selectFactory.api

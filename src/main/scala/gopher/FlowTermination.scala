@@ -1,5 +1,7 @@
 package gopher
 
+import gopher.channels.Continuated
+
 import scala.concurrent._
 import scala.annotation._
 
@@ -25,7 +27,7 @@ trait FlowTermination[-A]
    * terminate current flow with exception.
    * Mostly used internally.
    */
-  def doThrow(e: Throwable): Unit
+  def doThrow(e: Throwable, source: Continuated[A]): Unit
 
   /**
    * terminate current flow and leave `a` as result of flow.
@@ -37,6 +39,7 @@ trait FlowTermination[-A]
    * check - if flow is completed. 
    */
   def isCompleted: Boolean
+
 
   def throwIfNotCompleted(ex: Throwable): Unit 
 
