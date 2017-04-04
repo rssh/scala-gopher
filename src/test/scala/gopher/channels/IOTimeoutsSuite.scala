@@ -62,7 +62,7 @@ class IOTimeoutsSuite extends FunSuite with Waiters {
       f2 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
                            w.dismiss()
       } 
-      Await.ready(f2, 1 second)
+      Await.ready(f2, 3 second)
       val f3 = chTimeout.aread
       f3 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
                            w.dismiss()
@@ -99,7 +99,7 @@ class IOTimeoutsSuite extends FunSuite with Waiters {
                 case t: chTimeout.read =>
                             implicitly[FlowTermination[Unit]].doExit(count)
               }
-      Await.ready(f, 1 second)
+      Await.ready(f, 3 second)
       assert(count==2)
   }
 
