@@ -54,7 +54,7 @@ class FoldSelectSuite extends FunSuite
    //val read = (1 to 100).mapAsync(i=>out.aread)
 
     //val r = Await.result(read,1 second)
-    val r = Await.result(read,2 seconds)
+    val r = Await.result(read,5 seconds)
     if (r.last != 541 || r(18)!=67 ) {
       System.err.println(s"r0=$r0")
       System.err.println(s"r1=$r")
