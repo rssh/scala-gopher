@@ -2,3 +2,4 @@
 - FoldSelected reimplemented without synthetic runtime channels.
 - added channel.done event as select source  
 - added Input.closeless 
+- added error handling in select.error branch
