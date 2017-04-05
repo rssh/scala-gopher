@@ -34,7 +34,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
     }
   }
 
-  def addErrorHandler(f: (ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]]): Unit = {
+  def addErrorHandler(f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]): Unit = {
     errorHandler.lazySet(f)
   }
 
@@ -128,7 +128,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
       case ex =>
         val h = errorHandler.get()
         if (h eq null) Future failed ex
-        else h(executionContext,cont,ex)
+        else h(executionContext, this, cont,ex)
     }
   }
 
@@ -279,7 +279,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
 
   private[this] val timeoutRecord: TimeoutRecord = new TimeoutRecord(0L,0 milliseconds, Never)
 
-  private[this] val errorHandler = new AtomicReference[(ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]]]()
+  private[this] val errorHandler = new AtomicReference[(ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]]()
   private[this] val inError = new AtomicBoolean(false)
 
   private[this] val processor = api.continuatedProcessorRef

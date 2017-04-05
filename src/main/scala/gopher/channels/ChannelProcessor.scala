@@ -22,7 +22,7 @@ class ChannelProcessor(api: GopherAPI) extends Actor
                                  case None => /* do nothing */
                                }
                               }catch{
-                                case ex: Throwable => ft.doThrow(ex,sk)
+                                case ex: Throwable => ft.doThrow(ex)
                               }
                              }
       case cr@ContRead(f,ch, ft) =>  

@@ -50,7 +50,19 @@ trait OnceSelectorBuilder[T] extends SelectorBuilder[T@uncheckedVariance]
         macro SelectorBuilder.idleImpl[T,OnceSelectorBuilder[T]]
 
 
-   def foreach(f:Any=>T):T = 
+   def handleError(f: Throwable => T): OnceSelectorBuilder[T] =
+      macro SelectorBuilder.handleErrorImpl[T,OnceSelectorBuilder[T]]
+
+  @inline
+  def handleErrorWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T], Continuated[T], Throwable) => Future[T] ): this.type =
+    withError{  (ec,ft,cont,ex) =>
+      f(ec,ft,cont,ex).map(x=>Done(x,ft))(ec)
+    }
+
+
+
+
+  def foreach(f:Any=>T):T =
         macro SelectorBuilderImpl.foreach[T]
 
    def apply(f: PartialFunction[Any,T]): Future[T] =

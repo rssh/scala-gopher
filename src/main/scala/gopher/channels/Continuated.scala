@@ -62,7 +62,7 @@ object ContRead
         case Skip => Future successful prev
         case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
                               Never.future
-        case Failure(ex) => prev.flowTermination.doThrow(ex,prev)
+        case Failure(ex) => prev.flowTermination.doThrow(ex)
                               Never.future
       }
 
@@ -75,7 +75,7 @@ object ContRead
       case Skip => Future successful prev
       case ChannelClosed => prev.flowTermination.throwIfNotCompleted(new ChannelClosedException())
                               Never.future
-      case Failure(ex) => prev.flowTermination.doThrow(ex,prev)
+      case Failure(ex) => prev.flowTermination.doThrow(ex)
                               Never.future
     }
 

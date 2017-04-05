@@ -27,7 +27,7 @@ trait FlowTermination[-A]
    * terminate current flow with exception.
    * Mostly used internally.
    */
-  def doThrow(e: Throwable, source: Continuated[A]): Unit
+  def doThrow(e: Throwable): Unit
 
   /**
    * terminate current flow and leave `a` as result of flow.
@@ -36,12 +36,15 @@ trait FlowTermination[-A]
   def doExit(a:A): A@unchecked.uncheckedVariance
 
   /**
-   * check - if flow is completed. 
-   */
+    * check - if flow is completed.
+    */
   def isCompleted: Boolean
 
 
-  def throwIfNotCompleted(ex: Throwable): Unit 
+  def throwIfNotCompleted(ex: Throwable): Unit
+
+
+
 
 
 }

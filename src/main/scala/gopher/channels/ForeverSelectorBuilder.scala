@@ -53,9 +53,9 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
       macro SelectorBuilder.handleErrorImpl[Unit,ForeverSelectorBuilder]
 
   @inline
-   def handleErrorWithFlowTerminationAsync(cont:Continuated[Unit], f: (ExecutionContext, FlowTermination[Unit], Throwable) => Future[Unit] ): this.type =
-    withError{  (ec,cont,ex) =>
-                 f(ec,cont,ex).map(Function.const(cont))(ec)
+   def handleErrorWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[Unit], Continuated[Unit], Throwable) => Future[Unit] ): this.type =
+    withError{  (ec,ft,cont,ex) =>
+                 f(ec,ft,cont,ex).map(Function.const(cont))(ec)
     }
 
 

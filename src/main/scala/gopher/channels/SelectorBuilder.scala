@@ -73,7 +73,7 @@ trait SelectorBuilder[A]
    }
 
    @inline
-   def withError(f: (ExecutionContext, Continuated[A], Throwable) =>Future[Continuated[A]]):this.type = {
+   def withError(f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) =>Future[Continuated[A]]):this.type = {
      selector.addErrorHandler(f)
      this
    }
@@ -141,7 +141,6 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
       q"${builder}.onDone(${channel})(${param} => ${body} )"
 
     override def genError(builder: TermName, selector: Tree, param: ValDef, body: Tree): Tree = {
-      System.err.println(s"generate: builder= ${builder}, pram = ${param}, body = ${body}")
       q"${builder}.handleError(${param} => ${body} )"
     }
 
@@ -492,13 +491,14 @@ object SelectorBuilder
       import c.universe._
       f.tree match {
          case Function(valdefs, body) => 
-               buildAsyncCall[B,S](c)(valdefs,body, 
+               val r = buildAsyncCall[B,S](c)(valdefs,body,
                                 { (nvaldefs, nbody) =>
                                  q"""${c.prefix}.readingWithFlowTerminationAsync(${ch},
                                        ${Function(nvaldefs,nbody)}
                                       )
                                   """
                                 })
+               r
          case _ => c.abort(c.enclosingPosition,"argument of reading.apply must be function")
       }
    }
@@ -562,7 +562,9 @@ object SelectorBuilder
      transformer.transform(block)
    }
 
-   def buildAsyncCall[T:c.WeakTypeTag,S](c:Context)(valdefs: List[c.universe.ValDef], body: c.Tree,
+   def buildAsyncCall[T:c.WeakTypeTag,S](c:Context)(
+                                     valdefs: List[c.universe.ValDef],
+                                     body: c.Tree,
                                      lastFun: (List[c.universe.ValDef], c.Tree) => c.Tree): c.Expr[S] =
    {
      import c.universe._
@@ -605,16 +607,20 @@ object SelectorBuilder
      }
    }
 
+
   def handleErrorImpl[T:c.WeakTypeTag,S](c:Context)(f:c.Expr[Throwable=>T]):c.Expr[S]=
   {
     import c.universe._
+    val contValDef = ValDef(Modifiers(Flag.PARAM),
+                            TermName(c.freshName("cont")),
+                            tq"gopher.channels.Continuated[${weakTypeOf[T]}]",
+                             EmptyTree)
     f.tree match {
       case Function(valdefs, body) =>
-        val r = SelectorBuilder.buildAsyncCall[T,S](c)(valdefs,body,{
+        val r = SelectorBuilder.buildAsyncCall[T,S](c)(contValDef::valdefs,body,{
           (nvaldefs, nbody) =>
             q"""${c.prefix}.handleErrorWithFlowTerminationAsync(${Function(nvaldefs,nbody)})"""
         })
-        System.err.println(s"!!!: r=${r}")
         r
       case _ =>
         c.abort(c.enclosingPosition, "second argument of error must have shape Function")

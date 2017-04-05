@@ -111,21 +111,21 @@ case class SyncSelectorArgument[A](
 sealed trait ErrorSelectorArgument[A]
 {
 
-   def normalizedFun: (ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]]
+   def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]
 
 }
 
 case class AsyncErrorSelectorArgument[A](
-                            f: (ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]]
+                            f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]
                                         ) extends ErrorSelectorArgument[A]
 {
-  override def normalizedFun: (ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]] = f
+  override def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]] = f
 }
 
 case class SyncErrorSelectorArgument[A](
-                                          f: (ExecutionContext, Continuated[A], Throwable) => Continuated[A]
+                                          f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Continuated[A]
                                         ) extends ErrorSelectorArgument[A]
 {
-  override def normalizedFun: (ExecutionContext, Continuated[A], Throwable) => Future[Continuated[A]] =
-    (ec,cont,ex) => Future.fromTry(Try(f(ec,cont,ex)))
+  override def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]] =
+    (ec,ft,cont,ex) => Future.fromTry(Try(f(ec,ft,cont,ex)))
 }
