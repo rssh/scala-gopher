@@ -40,6 +40,11 @@ trait SelectorBuilder[A]
    def onTimeout(t:FiniteDuration)(arg: SkipSelectorArgument[A]): this.type =
      withTimeout(t)(arg.normalizedFun)
 
+   def onError(arg: ErrorSelectorArgument[A]): this.type = {
+     withError(arg.normalizedFun)
+     this
+   }
+
    @inline
    def withReader[B](ch:Input[B], f: ContRead[B,A] => Option[ContRead.In[B]=>Future[Continuated[A]]]): this.type =
    {
@@ -64,6 +69,12 @@ trait SelectorBuilder[A]
    def withTimeout(t:FiniteDuration)(f: Skip[A] => Option[Future[Continuated[A]]]):this.type =
    {
      selector.addTimeout(t,f)
+     this
+   }
+
+   @inline
+   def withError(f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) =>Future[Continuated[A]]):this.type = {
+     selector.addErrorHandler(f)
      this
    }
 
@@ -96,6 +107,8 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
     def genDone(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree
 
+    def genError(builder: TermName, selector: Tree, param: ValDef, body: Tree): Tree
+
   }
 
   class DefaultActionGenerator extends ActionGenerator {
@@ -126,6 +139,10 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
     override def genDone(builder: TermName, channel: Tree, param: ValDef, body: Tree): Tree =
       q"${builder}.onDone(${channel})(${param} => ${body} )"
+
+    override def genError(builder: TermName, selector: Tree, param: ValDef, body: Tree): Tree = {
+      q"${builder}.handleError(${param} => ${body} )"
+    }
 
   }
 
@@ -278,29 +295,28 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
      val acceptor = new SelectCaseDefAcceptor[TermName, Tree] {
 
 
-       private def paramWithTransformedBody(v:c.universe.TermName, tp:c.universe.Tree):(ValDef,Tree) =
-       {
+       private def paramWithTransformedBody(v: c.universe.TermName, tp: c.universe.Tree): (ValDef, Tree) = {
          val newName = v
          val tpoa = clearCaseDefOwner(v, newName, tp)
          val param = ValDef(Modifiers(Flag.PARAM), newName, tpoa, EmptyTree)
          val body = clearCaseDefOwner(v, newName, caseDef.body)
-         (param,body)
+         (param, body)
        }
 
        override def onRead(bn: TermName, v: TermName, ch: Tree, tp: Tree): Tree = {
-         val (param,body) = paramWithTransformedBody(v,tp)
+         val (param, body) = paramWithTransformedBody(v, tp)
          val reading = actionGenerator.genReading(builderName, ch, param, body)
          atPos(caseDef.pat.pos)(reading)
        }
 
-       override def onWrite(bn: TermName, v:TermName, expr: Tree, ch: Tree, tp:Tree): Tree = {
-         val (param,body) = paramWithTransformedBody(v,tp)
+       override def onWrite(bn: TermName, v: TermName, expr: Tree, ch: Tree, tp: Tree): Tree = {
+         val (param, body) = paramWithTransformedBody(v, tp)
          val writing = actionGenerator.genWriting(builderName, ch, expr, param, body)
          atPos(caseDef.pat.pos)(writing)
        }
 
-       override def onSelectTimeout(bn: TermName, v:TermName, select: Tree, tp: Tree): Tree = {
-         val (param,body) = paramWithTransformedBody(v,tp)
+       override def onSelectTimeout(bn: TermName, v: TermName, select: Tree, tp: Tree): Tree = {
+         val (param, body) = paramWithTransformedBody(v, tp)
          val expression = if (!caseDef.guard.isEmpty) {
            parseGuardInSelectorCaseDef(v, caseDef.guard)
          } else {
@@ -312,16 +328,24 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
 
        override def onIdle(bn: TermName): Tree = {
          if (!caseDef.guard.isEmpty) {
-           c.abort(caseDef.guard.pos,"guard is not supported in select case")
+           c.abort(caseDef.guard.pos, "guard is not supported in select case")
          }
          val r = q"${builderName}.timeout(${builderName}.api.idleTimeout)( _ => ${caseDef.body})"
          atPos(caseDef.pat.pos)(r)
        }
 
-       override def onDone(bn: TermName, v:TermName, ch: Tree, tp: Tree): Tree = {
+       override def onDone(bn: TermName, v: TermName, ch: Tree, tp: Tree): Tree = {
          val ch1 = q"${ch}.done"
-         onRead(bn,v,ch1,tp)
+         onRead(bn, v, ch1, tp)
        }
+
+       override def onError(bn: TermName, v: TermName, select: Tree, tp: Tree): Tree =
+       {
+         val (param, body) = paramWithTransformedBody(v,tp)
+         val r = actionGenerator.genError(bn,select,param,body)
+         atPos(caseDef.pat.pos)(r)
+       }
+
      }
 
      acceptSelectCaseDefPattern(caseDef, builderName, acceptor)
@@ -390,6 +414,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
     def onSelectTimeout(s:A, v: TermName, select:Tree, tp: Tree):B
     def onIdle(s:A):B
     def onDone(s:A,v: TermName,ch:Tree, tp: Tree):B
+    def onError(s:A, v: TermName, select:Tree, tp: Tree): B
   }
 
   //TODO: generalize and merge with parsing in SelectorBuilderImpl
@@ -411,6 +436,7 @@ class SelectorBuilderImpl(val c: Context) extends ASTUtilImpl
         acceptor.onWrite(a,termName, expression, ch, unwrappedType)
         case Select(select,TypeName("timeout")) => acceptor.onSelectTimeout(a,termName,select, tp)
         case Select(ch,TypeName("done")) => acceptor.onDone(a,termName,ch,tp)
+        case Select(select,TypeName("error")) => acceptor.onError(a,termName,select,tp)
         case _ =>
           if (caseDef.guard.isEmpty) {
             c.abort(tp.pos,
@@ -465,13 +491,14 @@ object SelectorBuilder
       import c.universe._
       f.tree match {
          case Function(valdefs, body) => 
-               buildAsyncCall[B,S](c)(valdefs,body, 
+               val r = buildAsyncCall[B,S](c)(valdefs,body,
                                 { (nvaldefs, nbody) =>
                                  q"""${c.prefix}.readingWithFlowTerminationAsync(${ch},
                                        ${Function(nvaldefs,nbody)}
                                       )
                                   """
                                 })
+               r
          case _ => c.abort(c.enclosingPosition,"argument of reading.apply must be function")
       }
    }
@@ -535,7 +562,9 @@ object SelectorBuilder
      transformer.transform(block)
    }
 
-   def buildAsyncCall[T:c.WeakTypeTag,S](c:Context)(valdefs: List[c.universe.ValDef], body: c.Tree,
+   def buildAsyncCall[T:c.WeakTypeTag,S](c:Context)(
+                                     valdefs: List[c.universe.ValDef],
+                                     body: c.Tree,
                                      lastFun: (List[c.universe.ValDef], c.Tree) => c.Tree): c.Expr[S] =
    {
      import c.universe._
@@ -578,6 +607,25 @@ object SelectorBuilder
      }
    }
 
+
+  def handleErrorImpl[T:c.WeakTypeTag,S](c:Context)(f:c.Expr[Throwable=>T]):c.Expr[S]=
+  {
+    import c.universe._
+    val contValDef = ValDef(Modifiers(Flag.PARAM),
+                            TermName(c.freshName("cont")),
+                            tq"gopher.channels.Continuated[${weakTypeOf[T]}]",
+                             EmptyTree)
+    f.tree match {
+      case Function(valdefs, body) =>
+        val r = SelectorBuilder.buildAsyncCall[T,S](c)(contValDef::valdefs,body,{
+          (nvaldefs, nbody) =>
+            q"""${c.prefix}.handleErrorWithFlowTerminationAsync(${Function(nvaldefs,nbody)})"""
+        })
+        r
+      case _ =>
+        c.abort(c.enclosingPosition, "second argument of error must have shape Function")
+    }
+  }
 
 
 }

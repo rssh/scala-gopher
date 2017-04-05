@@ -57,12 +57,14 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   private def  contRead[B](x:ContRead[A,B]): Unit =
      futureChannelRef.foreach( _ ! x )(api.executionContext)
 
-  def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = 
+  def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = {
+    val cont = ContWrite(f, this, flwt)
     if (closed) {
       flwt.doThrow(new ChannelClosedException())
     } else {
-     futureChannelRef.foreach( _ ! ContWrite(f,this, flwt) )(api.executionContext)
+      futureChannelRef.foreach(_ ! cont)(api.executionContext)
     }
+  }
 
   private def contWrite[B](x:ContWrite[A,B]): Unit =
     futureChannelRef.foreach( _ ! x )(api.executionContext)

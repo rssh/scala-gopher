@@ -1,7 +1,9 @@
 package gopher.channels
 
 import gopher._
+
 import scala.concurrent._
+import scala.util.Try
 
 sealed trait ReadSelectorArgument[A,B]
 {
@@ -106,4 +108,24 @@ case class SyncSelectorArgument[A](
   def normalizedFun = { c => Some(Future successful f(c)) }
 }
 
+sealed trait ErrorSelectorArgument[A]
+{
 
+   def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]
+
+}
+
+case class AsyncErrorSelectorArgument[A](
+                            f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]]
+                                        ) extends ErrorSelectorArgument[A]
+{
+  override def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]] = f
+}
+
+case class SyncErrorSelectorArgument[A](
+                                          f: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Continuated[A]
+                                        ) extends ErrorSelectorArgument[A]
+{
+  override def normalizedFun: (ExecutionContext, FlowTermination[A], Continuated[A], Throwable) => Future[Continuated[A]] =
+    (ec,ft,cont,ex) => Future.fromTry(Try(f(ec,ft,cont,ex)))
+}

@@ -1,5 +1,7 @@
 package gopher
 
+import gopher.channels.Continuated
+
 import scala.concurrent._
 import scala.annotation._
 
@@ -34,11 +36,15 @@ trait FlowTermination[-A]
   def doExit(a:A): A@unchecked.uncheckedVariance
 
   /**
-   * check - if flow is completed. 
-   */
+    * check - if flow is completed.
+    */
   def isCompleted: Boolean
 
-  def throwIfNotCompleted(ex: Throwable): Unit 
+
+  def throwIfNotCompleted(ex: Throwable): Unit
+
+
+
 
 
 }

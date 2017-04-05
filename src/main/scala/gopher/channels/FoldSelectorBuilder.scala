@@ -126,6 +126,9 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
     reregisterOutputIndices()
   }
 
+  trait NormalizedDispatch
+
+
   def normalizedPlainReader[A](f:HandleFunction[A], ch:Input[A]):ContRead.AuxF[A,T]=
   {
     def nf(prev:ContRead[A,T]):Option[ContRead.In[A]=>Future[Continuated[T]]] = Some{
@@ -139,16 +142,18 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
     nf
   }
 
-  def normalizedDispatchReader[A]:ContRead.AuxF[A,T]= {
-    // return never, becouse next step is generated via reregisterInputIndi
-    def nf(prev: ContRead[A, T]): Option[ContRead.In[A] => Future[Continuated[T]]] = {
+  class NormalizedDispatchReader[A] extends ContRead.AuxF[A,T] with NormalizedDispatch
+  {
+
+    override def apply(prev: ContRead[A, T]): Option[(ContRead.In[A]) => Future[Continuated[T]]] =
+    {
       val ch = prev.channel //match {
-                  //case fe: FoldSelectorEffectedInput[_,_] =>
-                  //    System.err.println(s"normalizedEffectedReader:fromEffected ${fe.current} ${fe.index} fe=${fe}  locked=${selector.isLocked}")
-                  //     fe.current
-                  //case _ => prev.channel
-      //}
-      val i = inputIndices.refIndexOf(ch)
+    //case fe: FoldSelectorEffectedInput[_,_] =>
+    //    System.err.println(s"normalizedEffectedReader:fromEffected ${fe.current} ${fe.index} fe=${fe}  locked=${selector.isLocked}")
+    //     fe.current
+    //case _ => prev.channel
+    //}
+    val i = inputIndices.refIndexOf(ch)
       //System.err.println(s"normalizedEffectedReader ch=$ch i=$i locked=${selector.isLocked}")
       if (i == -1)
         None
@@ -168,15 +173,21 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         }
       }
     }
-    nf
+
+  }
+
+  def normalizedDispatchReader[A]:ContRead.AuxF[A,T]= {
+    // return never, becouse next step is generated via reregisterInputIndi
+    new NormalizedDispatchReader[A]
   }
 
 
-
-
-  def normalizedDispatchWriter[A]:ContWrite.AuxF[A,T] =
+  class NormalizedDispatchWriter[A] extends (ContWrite[A,T]=>Option[(A,Future[Continuated[T]])])
+                                       with NormalizedDispatch
   {
-    prev => {
+
+    override def apply(prev: ContWrite[A, T]): Option[(A, Future[Continuated[T]])] =
+    {
       val i = outputIndices.refIndexOf(prev.channel)
       if (i == -1)
         None
@@ -187,6 +198,13 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
         Some((xn,ff(ec,prev.flowTermination,xn) map { _ => reregisterIndices(); Never } ))
       }
     }
+
+
+  }
+
+  def normalizedDispatchWriter[A]:ContWrite.AuxF[A,T] =
+  {
+    new NormalizedDispatchWriter[A]
   }
 
   def normalizedWriter[A](f:HandleFunction[A],x: =>A, ch:Output[A]):ContWrite.AuxF[A,T]= {
@@ -204,6 +222,21 @@ abstract class FoldSelectorBuilder[T](nCases:Int) extends SelectorBuilder[T]
   //  outputIndices.clear()
   }
 
+  def handleError(f: Throwable => T): FoldSelectorBuilder[T] =
+      macro SelectorBuilder.handleErrorImpl[T,FoldSelectorBuilder[T]]
+
+  @inline
+  def handleErrorWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T], Continuated[T], Throwable) => Future[T] ): this.type =
+    withError{  (ec,ft,cont,ex) =>
+      f(ec,ft,cont,ex).map{ x =>
+         cont match {
+           case c: NormalizedDispatch =>
+             reregisterIndices()
+             Never
+           case other => other
+         }
+      }(ec)
+    }
 
 
 }
@@ -281,6 +314,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
             q"${builder}.onDoneFoldEffected($ch, $index){$param => $body}"
         }
       }
+    }
+
+    override def genError(builder: TermName, selector: Tree, param: ValDef, body: Tree): Tree = {
+      defaultActionGenerator.genError(builder,selector,param,body)
     }
 
     def genProjChannelIndex(fp:FoldParse, proj: (FoldParseProjection, Int)): (Tree,Int) =
@@ -618,6 +655,10 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
          (cd.pat, cd.guard)
        }
 
+       override def onError(s: FoldParse, v: TermName, select: Tree, tp: Tree): (Tree, Tree) = {
+         (cd.pat, cd.guard)
+       }
+
      }
 
      val (pat, guard) = acceptSelectCaseDefPattern(cd, fp, acceptor)
@@ -703,6 +744,8 @@ class FoldSelectorBuilderImpl(override val c:Context) extends SelectorBuilderImp
         val doneChannel = c.typecheck(q"${ch}.done")
         s.updated(doneChannel.symbol, SelectRole.Read)
       }
+
+      override def onError(s: Map[Symbol, SelectRole], v: TermName, select: Tree, tp: Tree): Map[Symbol, SelectRole] = s
 
     }
     cases.foldLeft(s0){ (s,e) =>

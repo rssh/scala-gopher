@@ -72,6 +72,15 @@ class InputSelectorBuilder[T](override val api: GopherAPI) extends SelectorBuild
         withTimeout(t){ sk => Some(f(ec,sk.flowTermination,t) flatMap( x =>
                               proxy.awrite(x)) map(Function.const(sk)) ) }
 
+  def handleError(f: Throwable => T): InputSelectorBuilder[T] =
+       macro SelectorBuilder.handleErrorImpl[T,InputSelectorBuilder[T]]
+
+  @inline
+  def handleErrorWithFlowTerminationAsync(f: (ExecutionContext, FlowTermination[T], Continuated[T], Throwable) => Future[T] ): this.type =
+    withError{  (ec,ft,cont,ex) =>
+      f(ec,ft,cont,ex).flatMap(x=> proxy.awrite(x).map(Function.const(cont))(ec))(ec)
+    }
+
 
    def foreach(f:Any=>T):T = 
         macro SelectorBuilderImpl.foreach[T]
