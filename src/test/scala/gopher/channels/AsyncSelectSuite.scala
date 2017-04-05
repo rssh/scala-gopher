@@ -103,6 +103,8 @@ class AsyncSelectSuite extends FunSuite {
 
        Await.ready(process, 10.second)
 
+       Await.ready(consumer, 1.second)
+
        assert(consumer.isCompleted)
        assert(process.isCompleted)
        assert(i>100)
