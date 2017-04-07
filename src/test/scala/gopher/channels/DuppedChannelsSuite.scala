@@ -44,8 +44,8 @@ class DuppedChannelsSuite extends FunSuite with Waiters {
       assert(!aw.isCompleted)
       assert(!at1.isCompleted)
       val at2 = in2.atake(100)
-      Await.ready(at2, 1 second)
-      Await.ready(aw, 100 milliseconds)
+      Await.ready(at2, 2 second)
+      Await.ready(aw, 1 second)
       assert(aw.isCompleted)
   }
   

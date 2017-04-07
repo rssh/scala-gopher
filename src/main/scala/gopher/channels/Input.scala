@@ -147,6 +147,28 @@ trait Input[A] extends GopherAPIProvider
 
   def map[B](g: A=>B): Input[B] = new Mapped(g)
 
+  class FutureMapped[B](g: A=>Future[B]) extends Input[B]
+  {
+
+    override def cbread[C](f: (ContRead[B, C]) => Option[(ContRead.In[B]) => Future[Continuated[C]]], ft: FlowTermination[C]): Unit = {
+      def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
+      {  val contA = ContRead(f,this,cont.flowTermination)
+         implicit val ec = api.executionContext
+         f(contA) map (f1 => {
+             case v@ContRead.Value(a) => g(a).flatMap(x => f1(ContRead.Value(x)))
+             case ContRead.Skip => f1(ContRead.Skip)
+                                   Future successful cont
+             case ChannelClosed => f1(ChannelClosed)
+             case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
+        } )
+      }
+      thisInput.cbread(mf,ft)
+    }
+
+    override def api: GopherAPI = thisInput.api
+  }
+
+  def amap[B](g: A=>Future[B]):Input[B] = new FutureMapped(g)
 
   def zip[B](x: Iterable[B]): Input[(A,B)] = zip(Input.asInput(x,api))
 

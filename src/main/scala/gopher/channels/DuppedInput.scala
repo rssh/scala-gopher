@@ -21,13 +21,12 @@ class DuppedInput[A](origin:Input[A])
   // can't use macroses, so unroll by hands.
   private val selector = api.select.forever;
   selector.readingWithFlowTerminationAsync(origin, 
-    (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => async{ 
+    (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => {
         val f1 = sink1.awrite(a)
         val f2 = sink2.awrite(a)
-        await(f1)
-        await(f2)
-        ();
-    }(ec) )
+        implicit val iec = ec
+        f1.flatMap(_ => f2)map(_ => ())
+    } )
   selector.go.failed.foreach{
     case ex: ChannelClosedException =>
                    sink1.close()
