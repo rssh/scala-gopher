@@ -82,3 +82,19 @@ class SelectFactory(val api: GopherAPI)
 
 }
 
+class ECSelectFactory(override val api:GopherAPI, val ec: ExecutionContext) extends SelectFactory(api)
+{
+
+  thisECSelectFactory =>
+
+  trait EcProvider[A] extends SelectorBuilder[A]
+  {
+    override def ec: ExecutionContext = thisECSelectFactory.ec
+  }
+
+  override def forever: ForeverSelectorBuilder = new ForeverSelectorBuilder with SelectFactoryApi with EcProvider[Unit] {}
+
+  override def once[T]: OnceSelectorBuilder[T] = new OnceSelectorBuilder[T] with SelectFactoryApi with EcProvider[T]
+
+
+}
