@@ -137,7 +137,7 @@ Outside we can use asynchronous version:
 * `channel.awrite(x)` will write `x` and return to us `Future[Unit]` which will be executed after x will send
 * `channel.aread` will return future to the value, which will be read.
 
-Also, channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException.' Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception.  
+Also, channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException.' Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception. Also, each channel provides `done` input for firing close events.
 
 Note, closing channels are not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
 
@@ -311,6 +311,20 @@ val multiplexed = for(s <- select) yield
                     }
 ~~~
  
+## Done signals. 
+
+  Sometimes it is useful to receive a message when some `Input` becomes closed. Such inputs are named 'CloseableInputs' and provides a way to receive close notification in selector using `done` pseudo-type.
+
+~~~ scala
+ select.foreach{
+   case x:ch.read => Console.println(s"received: ${x}")
+   case _:ch.done => Console.println(s"done")
+                     select.exit(())
+ }
+~~~
+
+ Note, that you must exit from current flow in `done` handler, otherwise `done` signals will be intensively generated in a loop.
+
 
 ## Effected{Input,Output,Channel}
 
