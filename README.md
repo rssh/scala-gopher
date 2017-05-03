@@ -4,8 +4,8 @@
 
 ### Dependences:    
  
- * scala 2.12.1 or 2.11.8
- * akka 2.4.14 +
+ * scala 2.12.x or 2.11.x
+ * akka 2.5.0 +
  * scala-async 0.9.6
 
 #### Download: 
@@ -107,6 +107,7 @@ val s = goScope{
   
   Go implemented on top of [SIP-22](http://docs.scala-lang.org/sips/pending/async.html) async and share the same limitations.  In addition to async/await transfoirm `go` provide lifting up asynchronous expressions inside some well-known hight-order functions (i.e. it is possible to use async operations inside for loops).  Details are available in the tech report: https://arxiv.org/abs/1611.00602 .
 
+
 ## Channels
 
 Channels are used for asynchronous communication between execution flows.
@@ -138,12 +139,12 @@ Outside we can use asynchronous version:
 
 Also, channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException.' Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception.  
 
-Note, closing channels is not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
+Note, closing channels are not mandatory; unreachable channels are garbage-collected regardless of they are closed or not. 
 
 
 Channels can be buffered and unbuffered. In a unbuffered channel, write return control to the caller after another side actually will start processing; buffered channel force provider to wait only if internal channel buffer is full.
 
-Also, you can use only `Input` or `Output` interfaces, where appropriative read/write operations are defined. 
+Also, you can use only `Input` or `Output` interfaces, where an appropriative read/write operations are defined. 
 For `Input`, exists usual collection functions, like `map`, `zip`, `takeN`, `fold` ... etc. Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
 
 `|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read a value from channel x or y when one will be available.
@@ -192,7 +193,7 @@ go{
   * `_` - for 'idle' action.
 
 
-  For endless loop inside `go` we can use the shortcut with syntax of partial function:
+  For endless loop inside `go` we can use the shortcut with the syntax of partial function:
     
 ~~~ scala
      gopherApi.select.forever{ 
@@ -202,7 +203,7 @@ go{
 ~~~
     
  
-  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop. `select.exit` and `select.shutdown` macroses can be used as shortcuts.
+  Inside case actions, we can use blocking read/writes and await operations.  Call of doExit in the implicit instance of `FlowTermination[T]` (for a forever loop this is `FlowTermination[Unit]`) can be used for exiting from the loop; `select.exit` and `select.shutdown` macroses are shortcuts for this.
   
   Example: 
 
@@ -239,7 +240,7 @@ val sum = gopherApi.select.afold(0) { (state, selector) =>
 ~~~
 
 
-   More than one variables in state can be modelled with partial function case syntax:
+   More than one variables in state can be modeled with partial function case syntax:
 
 ~~~ scala
 val fib = select.afold((0,1)) { case ((x,y), s) =>
@@ -250,7 +251,7 @@ val fib = select.afold((0,1)) { case ((x,y), s) =>
 }
 ~~~
 
-   Also, we can use 'map over select' to represent results of handling of different events as input side of channel:
+   Also, we can use 'map over select' to represent results of handling of different events as input side of a channel:
 
 ~~~ scala
 val multiplexed = select amap {
@@ -315,9 +316,9 @@ val multiplexed = for(s <- select) yield
 
   One useful programming pattern, often used in CSP-style programming: have a channel from wich we read (or to where we write) as a part of a state.  In Go language, this is usually modelled as a mutable variable, changed inside the same select statement, where one is read/written.
 
-  In scala-gopher, we have the ability to use a technique of 'EffectedChannel', which can be seen as an entity, which holds channel, can be used in read/write and can be changed only via effect (operation, which accepts previous state and return next).
+  In scala-gopher, we have the ability to use a technique of 'EffectedChannel', which can be seen as an entity, which holds channel, can be used in read/write and can be changed only via effect (operation, which accepts the previous state and returns the next).
 
-Let's look on example:
+Let's look at the example:
 
 ~~~ scala
  def generate(n:Int, quit:Promise[Boolean]):Channel[Int] =
@@ -346,7 +347,7 @@ Here in 'filter', we generate a set of prime numbers, and make a sieve of Eratos
 
   The logic of data transformation between channels can be encapsulated in special `Transputer` concept. (Word 'transputer' was chosen
  as a reminder about INMOS processor, for which one of the first CSP languages, Occam, was developed).  You can view on transputer as 
- representation of restartable process that consists from:
+ a representation of a restartable process that consists from:
  
  * Set of named input and output ports.
  * Logic for propagating information from the input to the output ports.
@@ -356,11 +357,11 @@ Here in 'filter', we generate a set of prime numbers, and make a sieve of Eratos
 I.e. we saw that Transputer is similar to Actor with the following difference: 
  When Actor provides reaction to incoming messages from the mailbox and sending signals to other actors, Transputers provide processing of incoming messages from input ports and sending outcoming messages to output ports. When operations inside Actor must not be blocked, operations inside Transputer can wait.
 
-Transformers are build hierarchically with help of 3 operations:
+Transformers are build hierarchically with the help of 3 operations:
 
  * select  (logic is execution of a select statement )
  * parallel combination  (logic is parallel execution of parts)
- * replication           (logic is parallel execution of a set of identical transformers.)
+ * replication           (logic is a parallel execution of a set of identical transformers.)
 
 ### Select transputer
 
@@ -411,7 +412,7 @@ val shutdownFuture = bingo.start()
 
 #### Error recovery 
   
-  On an exception from a loop statement, transputer will be restarted with ports, connected to the same channels. Such behaviour is default; we can configure one by setting recovery policy:
+  On an exception from a loop statement, transputer will be restarted with ports, connected to the same channels. Such behavior is the default; we can configure one by setting recovery policy:
   
 ~~~ scala
 val t = makeTransputer[MyType].recover {
@@ -443,13 +444,13 @@ par.start()
 
 ### Replication 
  
- Replicated transputer is a set of identical transputers t_{i}, running in parallel.  It cam be created with `gopherApi.replicate` call. Next code fragment:
+ Replicated transputer is a set of identical transputers t_{i}, running in parallel.  It can be created with `gopherApi.replicate` call. Next code fragment:
  
 ~~~ scala 
 val r = gopherApi.replicate[MyTransputer](10)
 ~~~
  
- will produce ten copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of the container. (I.e. if we will write something to input port then it will be read by one of the replicas; if one of the replicas will write something to out port, this will be visible in out port of container.)
+ will produce ten copies of MyTransputer (`r` will be a container transputer for them). Ports of all replicated internal transputers will be shared with ports of the container. (I.e. if we will write something to input port then it will be read by one of the replicas; if one of the replicas will write something to out port, this will be visible in out port of the container.)
  
  Mapping from a container to replica port can be changed from sharing to other approaches, like duplicating or distributing, via applying port transformations.
  
@@ -460,7 +461,7 @@ r.inA.duplicate()
  .inB.distribute( _.hashCode )
 ~~~
  
-  will set port `inA` be duplicated in replicas (i.e. message, send to container port `inA` will be received by each instance) and messages from `inB` will be distributed by hashcode: i.e. messages with the same hashcode will be directed to the same replica. Such behaviour is useful when we keep in replicated transputer some state information about messages.
+  will set port `inA` be duplicated in replicas (i.e. message, send to container port `inA` will be received by each instance) and messages from `inB` will be distributed by hashcode: i.e. messages with the same hashcode will be directed to the same replica. Such behavior is useful when we keep in replicated transputer some state information about messages.
   
   Stopping and recovering of replicated transformer is the same as in `par` (i.e. stopping/failing of one instance will cause stopping/failing of container)
   
