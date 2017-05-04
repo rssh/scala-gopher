@@ -4,7 +4,7 @@ name:="scala-gopher"
 organization:="com.github.rssh"
 
 scalaVersion := "2.12.2"
-crossScalaVersions := Seq("2.11.8", "2.12.1")
+crossScalaVersions := Seq("2.11.9", "2.12.2")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -20,7 +20,7 @@ libraryDependencies += scalaVersion( "org.scala-lang" % "scala-reflect" % _ ).va
 libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6"
 //libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-SNAPSHOT"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.0"
 

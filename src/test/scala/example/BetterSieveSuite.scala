@@ -1,21 +1,19 @@
 package example
 
-import gopher._
+import gopher.channels.CommonTestObjects.gopherApi._
 import gopher.channels._
-import CommonTestObjects.gopherApi._
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.language.postfixOps
-
 import org.scalatest._
+
+import scala.concurrent._
+import scala.language.postfixOps
 
 /**
  * more 'scala-like' sieve
  **/
 object BetterSieve
 {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
 
   def generate(n:Int, quit:Promise[Boolean]):Input[Int] =
   {
@@ -35,7 +33,7 @@ object BetterSieve
 
 }
 
-class BetterSieveSuite extends FunSuite
+class BetterSieveSuite extends AsyncFunSuite
 {
 
  test("last prime before 1000") {
@@ -57,8 +55,9 @@ class BetterSieveSuite extends FunSuite
                    //System.err.println()
                    CurrentFlowTermination.exit(());
    }
-   Await.ready(future, 10 seconds)
-   assert( lastPrime == 997)
+   future map { u =>
+     assert(lastPrime == 997)
+   }
  }
 
 }

@@ -26,14 +26,14 @@ object CurrentFlowTermination
    {
     import c.universe._
     c.Expr[A](q"""
-                    implicitly[FlowTermination[${wtt}]].doExit(${a})
+                    implicitly[_root_.gopher.FlowTermination[${wtt}]].doExit(${a})
                   """)
    }
 
    def doThrowImpl(c:Context)(e: c.Expr[Throwable]): c.Expr[Unit]=
    {
     import c.universe._
-    c.Expr[Unit](q"implicitly[FlowTermination[Any]].doThrow(${e})")
+    c.Expr[Unit](q"implicitly[_root_.gopher.FlowTermination[Any]].doThrow(${e})")
    }
 
    def shutdownImpl(c:Context)(): c.Expr[Unit] =
