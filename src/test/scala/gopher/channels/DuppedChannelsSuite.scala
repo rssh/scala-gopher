@@ -1,54 +1,55 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
-import gopher.tags._
-import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.util._
-
 import org.scalatest._
 import org.scalatest.concurrent._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.language._
+import scala.util._
 
-class DuppedChannelsSuite extends FunSuite with Waiters {
+class DuppedChannelsAsyncSuite extends AsyncFunSuite  {
 
-  
+
   test("duped input must show two") {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[String]()
-      val dupped = ch.dup
-      ch.awrite("1")
-      val r1 = dupped._1.aread map { 
-                x => w{ assert(x=="1") }
-                w.dismiss()
-              }
-      val r2 = dupped._2.aread map { 
-                x => w{ assert(x=="1") }
-                w.dismiss()
-               }
-      w.await(timeout(10 seconds),Dismissals(2))
-  }
+    val ch = gopherApi.makeChannel[String]()
+    val dupped = ch.dup
+    ch.awrite("1")
+    val r1 = dupped._1.aread
+    val r2 = dupped._2.aread
+    val r = for(v1 <- r1; v2 <- r2) yield (v1,v2)
 
+    r map (x => assert(x === ("1","1")) )
+
+  }
 
   test("output is blocked by both inputs") {
-      val ch = gopherApi.makeChannel[Int]()
-      val aw=ch.awriteAll(1 to 100)
-      val (in1, in2) = ch.dup
-      val at1 = in1.atake(100)
-      intercept[TimeoutException] {
-        Await.ready(aw, 1 second) 
-      }
-      assert(!aw.isCompleted)
-      assert(!at1.isCompleted)
-      val at2 = in2.atake(100)
-      Await.ready(at2, 2 second)
-      Await.ready(aw, 1 second)
-      assert(aw.isCompleted)
+    import CommonTestObjects.FutureWithTimeout
+    val ch = gopherApi.makeChannel[Int]()
+    val aw=ch.awriteAll(1 to 100)
+    val (in1, in2) = ch.dup
+    val at1 = in1.atake(100)
+    val awt = aw.withTimeout(1 second)
+    val w = recoverToSucceededIf[TimeoutException](awt)
+    w.map(_ => assert(!aw.isCompleted && !at1.isCompleted)).flatMap { x =>
+      in2.atake(100) map (_ => assert(aw.isCompleted))
+    }
   }
-  
+
+
+
+  def gopherApi = CommonTestObjects.gopherApi
+
+
+}
+
+
+class DuppedChannelsSuite extends FunSuite with ScalaFutures with Waiters {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+
   test("on closing of main stream dupped outputs also closed.") {
       val ch = gopherApi.makeChannel[Int](1)
       val (in1, in2) = ch.dup
