@@ -24,14 +24,11 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.1"
 
-//TODO: enable after 1.0
-//libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"
-
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 //fork in Test := true
 //javaOptions in Test += s"""-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_2.11/0.3/jars/trackedfuture_2.11-assembly.jar"""
 
-version:="0.99.9-SNAPSHOT"
+version:="0.99.10"
 
 
 
