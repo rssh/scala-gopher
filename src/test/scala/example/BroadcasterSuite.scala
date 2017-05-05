@@ -6,26 +6,29 @@ package example.broadcast
  * https://rogpeppe.wordpress.com/2009/12/01/concurrent-idioms-1-broadcasting-values-in-go-with-linked-channels/
  */
 
-import scala.concurrent.{Channel=>_,_}
+import java.util.concurrent.atomic.AtomicInteger
+
+import scala.concurrent.{Channel => _, _}
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import scala.async.Async._
-
 import gopher._
 import gopher.channels._
 import CommonTestObjects.gopherApi._
-
+import gopher.tags.Now
 import org.scalatest._
 
 
 class Broadcaster[A]
 {
     import Broadcaster._
+    import scala.concurrent.ExecutionContext.Implicits.global
+
 
     val listenc:   Channel[Channel[Channel[Message[A]]]] = makeChannel()
     val sendc:     Channel[A] = makeChannel()
     val quitc:     Channel[Boolean] = makeChannel()
+
 
     val process = select.afold(makeChannel[Message[A]](1)) { (last,s) =>
          s match {
@@ -101,7 +104,7 @@ object Broadcaster {
 }
 
 
-class BroadcaseSuite extends FunSuite
+class BroadcaseSuite extends AsyncFunSuite
 {
 
   def listen[A](r: Broadcaster.Receiver[A], out:Output[A]): Future[Unit] = go {
@@ -113,37 +116,61 @@ class BroadcaseSuite extends FunSuite
             case None => finish = true
           }
        }
-       ();
+       ()
   }
 
   def doBroadcast(out:Channel[Int]): Unit = go {
 
     val b = new Broadcaster[Int]()
 
+    val nSend = new AtomicInteger(0)
+    val allDelivered = Promise[Int]()
+    def withIncrSend[A](a:A):A =
+    {
+      val n = nSend.incrementAndGet()
+      //wait - until we receive count([1,1,2,2,2])
+      if (n==5) allDelivered success 5
+      a
+    }
+
+    val nout = out.premap(withIncrSend[Int])
+
     val r1 = await(b.alisten())
-    val l1 = listen(r1,out)
+    val l1 = listen(r1,nout)
     val r2 = await(b.alisten())
-    val l2 = listen(r2,out)
+    val l2 = listen(r2,nout)
 
     b.sendc.write(1)
 
+
     val r3 = await(b.alisten())
-    val l3 = listen(r3,out)
+    val l3 = listen(r3,nout)
 
     b.sendc.write(2)
 
     b.quitc.write(true)
 
-    Thread.sleep(500)
-    out.close()
+    allDelivered.future.map(_ => out.close())
+    //Thread.sleep(500)
+    //out.close()
   }
 
-  test("broadcast") {
+  test("broadcast", Now) {
      val channel = makeChannel[Int]()
      doBroadcast(channel)
-     val fsum = channel.afold(0){ (s,n) => s+n }
-     val sum = Await.result(fsum,10 seconds)
-     assert(sum==8)
+     val fsum = channel.afold(0){ (s,n) =>
+       s+n
+     }
+     //val fsum = select.afold(0){ (s,sel) =>
+     //  sel match {
+     //    case n:channel.read => s+n
+     //    case _:channel.done => select.exit(s)
+     //  }
+     //}
+     //val sum = Await.result(fsum,10 seconds)
+     fsum map { sum =>
+       assert(sum == 8)
+     }
   }
 
 }

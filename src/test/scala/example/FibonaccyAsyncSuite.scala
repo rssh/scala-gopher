@@ -1,18 +1,18 @@
 package example
 
-import org.scalatest._
 import gopher._
 import gopher.channels._
-import akka.actor._
-import gopher.tags._
+import org.scalatest._
+
+import scala.concurrent.Future
 import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits._
 
 
 
 object FibonaccyAsync {
+
+  import scala.concurrent.ExecutionContext.Implicits._
+
 
   def fibonacci(ch: Output[Long], quit: Input[Int]): Unit = {
     var (x,y) = (0L,1L)
@@ -26,7 +26,7 @@ object FibonaccyAsync {
        }.go
   }
   
-  def run(n:Int, acceptor: Long => Unit ): Unit =
+  def run(n:Int, acceptor: Long => Unit ): Future[Unit] =
   {
     val c = gopherApi.makeChannel[Long](1);
     val quit = gopherApi.makeChannel[Int](1);
@@ -55,9 +55,7 @@ object FibonaccyAsync {
     
     fibonacci(c,quit)
 
-    Await.ready(receiver, 10 seconds)
-
-    acceptor(last)
+    receiver.map{ _ => acceptor(last)}
 
   }
   
@@ -66,13 +64,12 @@ object FibonaccyAsync {
 }
 
 
-class FibonaccyAsyncSuite extends FunSuite
+class FibonaccyAsyncSuite extends AsyncFunSuite
 {
   
   test("async fibonaccy must be processed up to 50") {
     var last:Long = 0;
-    FibonaccyAsync.run(50, { last = _ } )
-    assert(last != 0)
+    FibonaccyAsync.run(50, { last = _ } ) map(_ => assert(last != 0))
   }
 
 }

@@ -1,23 +1,20 @@
 package example
 
 import gopher._
+import gopher.channels.CommonTestObjects.gopherApi._
 import gopher.channels._
-import CommonTestObjects.gopherApi._
-import scala.concurrent.{Channel=>_,_}
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.language.postfixOps
-
 import org.scalatest._
 
-import gopher.tags._
+import scala.concurrent.{Channel => _, _}
+import scala.language.postfixOps
 
 /**
  * this is direct translation from appropriative go example.
  **/
 object Sieve
 {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
 
   def generate(n:Int, quit:Promise[Boolean]):Channel[Int] =
   {
@@ -76,7 +73,7 @@ object Sieve
 
 }
 
-class SieveSuite extends FunSuite
+class SieveSuite extends AsyncFunSuite
 {
 
  test("last prime before 1000") {
@@ -96,10 +93,9 @@ class SieveSuite extends FunSuite
                    lastPrime=p
        case q: quitInput.read =>
                    //System.err.println()
-                   CurrentFlowTermination.exit(());
+                   CurrentFlowTermination.exit(())
    }
-   Await.ready(future, 10 seconds)
-   assert( lastPrime == 997)
+   future map (_ => assert( lastPrime == 997))
  }
 
 }

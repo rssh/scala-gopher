@@ -22,7 +22,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.0"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.1"
 
 //TODO: enable after 1.0
 //libraryDependencies += "com.typesafe.akka" %% "akka-stream-experimental" % "0.9"

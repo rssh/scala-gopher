@@ -2,12 +2,10 @@ package example
 
 import gopher._
 import gopher.channels._
-import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-
 import org.scalatest._
-import gopher.tags._
+
+import scala.concurrent._
+import scala.language._
 
 /*
  * code from go tutorial: http://tour.golang.org/#66
@@ -52,13 +50,12 @@ object Fibonaccy {
   
 }
 
-class FibonaccySuite extends FunSuite
+class FibonaccySuite extends AsyncFunSuite
 {
   
   test("fibonaccy must be processed up to 50") {
-    @volatile var last:Long = 0;
-    Await.ready( Fibonaccy.run(50, last = _ ), 10 seconds )
-    assert(last != 0)
+    var last:Long = 0;
+    Fibonaccy.run(50, last = _ ) map (x => assert(last!=0))
   }
 
 }

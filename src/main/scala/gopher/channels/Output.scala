@@ -15,6 +15,8 @@ import gopher._
 trait Output[A] extends GopherAPIProvider
 {
 
+  thisOutput =>
+
   type ~> = A
   type writeExp[X] = A
   type write = A
@@ -107,6 +109,31 @@ trait Output[A] extends GopherAPIProvider
    **/
   def withOutputTimeouts(timeout: FiniteDuration): (Output[A],Input[FiniteDuration]) =
         new OutputWithTimeouts(this, timeout).pair
+
+  /**
+    * before passing value to output, apply g to one.
+    */
+  def premap[C](g: C => A): Output[C] = new Output[C] {
+
+
+    override def api: GopherAPI = thisOutput.api
+
+    override def cbwrite[B](f: (ContWrite[C, B]) => Option[(C, Future[Continuated[B]])], ft: FlowTermination[B]): Unit = {
+      def gf(cw:ContWrite[A,B]):Option[(A,Future[Continuated[B]])] =
+      {
+        f(ContWrite(f,this,cw.flowTermination)) map { case (c,fc) =>
+          (g(c),fc)
+        }
+      }
+      thisOutput.cbwrite[B](gf,ft)
+    }
+
+  }
+
+  /**
+    * alias for premap
+    */
+  def pam[B](g: B=>A): Output[B] = premap[B](g)
 
 }
 

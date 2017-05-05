@@ -1,13 +1,10 @@
 package example
 
-import gopher._
 import gopher.channels._
-import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-
 import org.scalatest._
-import gopher.tags._
+
+import scala.concurrent._
+import scala.language._
 
 /*
  * code from go tutorial: http://tour.golang.org/#66 but with fold instead foreach
@@ -16,8 +13,9 @@ import gopher.tags._
 
 object FibonaccyFold {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   import CommonTestObjects.gopherApi._
+
+  import scala.concurrent.ExecutionContext.Implicits.global
   
   def fibonacci(c: Output[Long], quit: Input[Int]): Future[(Long,Long)] = 
      select.afold((0L,1L)) { case ((x,y),s) =>
@@ -41,12 +39,11 @@ object FibonaccyFold {
   
 }
 
-class FibonaccyFoldSuite extends FunSuite
+class FibonaccyFoldSuite extends AsyncFunSuite
 {
   
   test("fibonaccy must be processed up to 50") {
-    val last = Await.result( FibonaccyFold.run(50, _ => () ), 10 seconds )._2
-    assert(last != 0)
+    FibonaccyFold.run(50, _ => () ).map(last => assert(last._2 != 0))
   }
 
 }

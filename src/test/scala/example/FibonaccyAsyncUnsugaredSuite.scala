@@ -1,17 +1,13 @@
 package example
 
-import gopher._
 import gopher.channels._
-import scala.language._
+import org.scalatest._
+
 import scala.async.Async._
 import scala.concurrent._
-import scala.concurrent.duration._
-import org.scalatest._
-import ExecutionContext.Implicits.global
+import scala.language._
 
-import gopher.tags._
-
-class FibonaccyAsyncUnsugaredSuite extends FunSuite {
+class FibonaccyAsyncUnsugaredSuite extends AsyncFunSuite {
 
   
  object Fibonaccy {
@@ -44,10 +40,10 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
     selector.run
   }
   
-  def run(max:Int, acceptor: Long => Unit ): Unit =
+  def run(max:Int, acceptor: Long => Unit ): Future[Unit] =
   {
-    val c = gopherApi.makeChannel[Long]();
-    val quit = gopherApi.makeChannel[Int]();
+    val c = gopherApi.makeChannel[Long]()
+    val quit = gopherApi.makeChannel[Int]()
     
     val selector = new Selector[Long](gopherApi)
     selector.addReader(c zip (1 to max),
@@ -66,17 +62,15 @@ class FibonaccyAsyncUnsugaredSuite extends FunSuite {
 
     val producer = fibonacci(c,quit)
 
-    acceptor(Await.result(consumer, 10 seconds))
-    
+    consumer.map(x => acceptor(x))
   }
   
 
  }
  
  test("fibonaccy must be processed up to 50") {
-    var last:Long = 0;
-    Fibonaccy.run(50, last = _ )
-    assert(last != 0)
+    var last:Long = 0
+    Fibonaccy.run(50, last = _ ) map (x => assert(last != 0))
   }
   
   val gopherApi = CommonTestObjects.gopherApi
