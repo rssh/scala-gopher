@@ -1,21 +1,42 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
-import gopher.tags._
-import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.util._
-
 import org.scalatest._
 import org.scalatest.concurrent._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.language._
+import scala.util._
 
-class InputOpsSuite extends FunSuite with Waiters {
+class InputOpsAsyncSuite extends AsyncFunSuite  {
 
-  
+
+  test("map operation for input") {
+    val ch = gopherApi.makeChannel[String]()
+    ch.awriteAll(List("AAA","123","1234","12345"))
+    val mappedCh = ch map (_.reverse)
+    mappedCh.atake(4) map { l =>
+       assert(l(0) == "AAA" &&
+              l(1) == "321" &&
+              l(2) == "4321" &&
+              l(3) == "54321")
+    }
+  }
+
+
+
+  def gopherApi = CommonTestObjects.gopherApi
+
+
+}
+
+
+class InputOpsSyncSuite extends FunSuite with Waiters {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+
   test("map operation for input") {
       val w = new Waiter
       val ch = gopherApi.makeChannel[String]()

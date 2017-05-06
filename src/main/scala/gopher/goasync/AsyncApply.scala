@@ -79,10 +79,11 @@ object AsyncApply
 
   def createAsyncParam[A:c.WeakTypeTag,B:c.WeakTypeTag](c:Context)(fp:c.Tree):(c.TermName,c.Tree) =
   {
+    //TODO: add ability to change future system.
     import c.universe._
     // TODO: check that fp is ident and get fp as name. 
     val nname = TermName(c.freshName())
-    val paramType = tq"Function[${c.weakTypeOf[A]},Future[${c.weakTypeOf[B]}]]"
+    val paramType = tq"Function[${c.weakTypeOf[A]},scala.concurrent.Future[${c.weakTypeOf[B]}]]"
     (nname,ValDef(Modifiers(Flag.PARAM),nname,paramType,EmptyTree))
   }
 
