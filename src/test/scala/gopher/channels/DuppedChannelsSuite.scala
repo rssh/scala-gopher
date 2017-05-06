@@ -2,14 +2,13 @@ package gopher.channels
 
 import gopher._
 import org.scalatest._
-import org.scalatest.concurrent._
 
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language._
 import scala.util._
 
-class DuppedChannelsAsyncSuite extends AsyncFunSuite  {
+class DuppedChannelsSuite extends AsyncFunSuite  {
 
 
   test("duped input must show two") {
@@ -37,39 +36,30 @@ class DuppedChannelsAsyncSuite extends AsyncFunSuite  {
     }
   }
 
-
-
-  def gopherApi = CommonTestObjects.gopherApi
-
-
-}
-
-
-class DuppedChannelsSuite extends FunSuite with ScalaFutures with Waiters {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-
   test("on closing of main stream dupped outputs also closed.") {
-      val ch = gopherApi.makeChannel[Int](1)
-      val (in1, in2) = ch.dup
-      val f1 = go {
-          ch.write(1) 
-          ch.close()
-      }
-      Await.ready(f1, 1 second) 
-      val w = new Waiter
-      in1.aread map { x =>  w(assert(x==1)); w.dismiss() } onComplete {
-                           case Failure(ex) => w( throw ex )
-                           case Success(_) =>
-                                     in1.aread.failed.foreach{ ex => w(assert(ex.isInstanceOf[ChannelClosedException]));
-                                                           w.dismiss() 
-                                 }
-      }
-      w.await(timeout(10 seconds),Dismissals(2))
+    val ch = gopherApi.makeChannel[Int](1)
+    val (in1, in2) = ch.dup
+    val f1 = go {
+      ch.write(1)
+      ch.close()
+    }
+    for{ fx <- f1
+         x <- in1.aread
+         r <- in1.aread.transformWith {
+           case Success(u) => Future failed new IllegalStateException("Mist be closed")
+           case Failure(u) => Future successful (assert(x == 1))
+         }
+    } yield {
+      r
+    }
+
   }
 
+
+
   def gopherApi = CommonTestObjects.gopherApi
 
-  
+
 }
+
+
