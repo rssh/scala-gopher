@@ -25,6 +25,13 @@ class InputOpsAsyncSuite extends AsyncFunSuite  {
   }
 
 
+  test("filter operation for input") {
+    val ch = gopherApi.makeChannel[String]()
+    ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
+    val filteredCh = ch filter (_.contains("A"))
+    filteredCh.aread map { x => assert(x == "AAA")  }
+  }
+
 
   def gopherApi = CommonTestObjects.gopherApi
 
@@ -36,32 +43,6 @@ class InputOpsSyncSuite extends FunSuite with Waiters {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-
-  test("map operation for input") {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[String]()
-      ch.awriteAll(List("AAA","123","1234","12345"))
-      val mappedCh = ch map (_.reverse)
-      val r = mappedCh.atake(4) map { l =>
-                w{ assert(l(0) == "AAA") }
-                w{ assert(l(1) == "321") }
-                w{ assert(l(2) == "4321") }
-                w{ assert(l(3) == "54321") }
-                w.dismiss()
-              }
-      w.await(timeout(10 seconds))
-  }
-  
-  test("filter operation for input") {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[String]()
-      ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
-      val filteredCh = ch filter (_.contains("A"))
-      filteredCh.aread map { x => w{ assert(x == "AAA") } } onComplete{ case Success(x) => w.dismiss()
-                                                                        case Failure(ex) => w(throw ex) 
-                                                                      }
-      w.await(timeout(10 seconds))
-  }
 
 
   test("zip operation for two simple inputs") {

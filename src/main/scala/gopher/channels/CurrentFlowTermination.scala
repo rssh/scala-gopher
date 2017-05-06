@@ -39,7 +39,7 @@ object CurrentFlowTermination
    def shutdownImpl(c:Context)(): c.Expr[Unit] =
    {
     import c.universe._
-    exitImpl[Unit](c)(c.Expr[Unit](q"()"))
+    exitImpl[Unit](c)(c.Expr[Unit](q"implicitly[_root_.gopher.FlowTermination[Unit]].doExit(())"))
    }
 
 

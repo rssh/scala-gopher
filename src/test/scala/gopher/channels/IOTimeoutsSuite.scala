@@ -1,20 +1,14 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
-import gopher.tags._
-import scala.language._
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.util._
-
 import org.scalatest._
 import org.scalatest.concurrent._
 
-import gopher._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language._
+import scala.util._
 
 class IOTimeoutsSuite extends FunSuite with Waiters {
 
@@ -67,7 +61,7 @@ class IOTimeoutsSuite extends FunSuite with Waiters {
       f3 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
                            w.dismiss()
       } 
-      Await.ready(f3, 5 seconds)
+      Await.ready(f3, 6 seconds)
       w.await(dismissals=Dismissals(3))
                
   }

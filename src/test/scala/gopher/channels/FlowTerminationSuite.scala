@@ -4,16 +4,28 @@ package gopher.channels
 import gopher._
 import org.scalatest._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.language.postfixOps
 
-class FlowTerminationAsyncSuite extends FunSuite
+class FlowTerminationSuite extends AsyncFunSuite
 {
 
 
+
+  test("flowTermination covariance assignment")  {
+
+    val fUnit = PromiseFlowTermination[Unit]()
+    // val fAny: FlowTermination[Any] = fUnit
+    implicit val f_ : FlowTermination[_] = fUnit
+
+    val qq = implicitly[FlowTermination[_]]
+
+    assert(true)
+  }
+
+
   test("select with queue type") {
-    import gopherApi._
+    import gopherApi.{executionContext => _, _}
 
     val channel = makeChannel[Int](100)
 
@@ -42,41 +54,24 @@ class FlowTerminationAsyncSuite extends FunSuite
 
   }
 
+
   test("not propagate signals after exit") {
 
-    import gopherApi._
+    import gopherApi.{executionContext => _, _}
     val channel = makeChannel[Int](100)
     var sum = 0
-    for {u <- select.forever {
+    val f0 = select.forever {
                 case x: channel.read => sum += x
                      select.shutdown()
           }
-         f2 <- channel.awrite(1)
-         f3 <- channel.awrite(2)
-    } yield assert (sum == 1)
+    val  f2 = channel.awrite(1)
+    val  f3 = channel.awrite(2)
+    f0 map { _ => assert(sum == 1) }
   }
 
+
   val gopherApi = CommonTestObjects.gopherApi
 
 }
 
 
-class FlowTerminationSuite extends FunSuite 
-{
-
- 
-   test("flowTermination covariance assignment")  {
-     
-     val fUnit = PromiseFlowTermination[Unit]()
-      // val fAny: FlowTermination[Any] = fUnit
-     implicit val f_ : FlowTermination[_] = fUnit
-     
-     val qq = implicitly[FlowTermination[_]]
-     
-   }
-
-   
-
-  val gopherApi = CommonTestObjects.gopherApi
-   
-}
