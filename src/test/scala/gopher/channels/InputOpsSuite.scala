@@ -7,9 +7,8 @@ import org.scalatest.concurrent._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language._
-import scala.util._
 
-class InputOpsAsyncSuite extends AsyncFunSuite  {
+class InputOpsSuite extends AsyncFunSuite  {
 
 
   test("map operation for input") {
@@ -194,6 +193,85 @@ class InputOpsAsyncSuite extends AsyncFunSuite  {
         f map (_ => assert(!flg))
     }
 
+    test("Input foreach on stream with 'N' elements inside must run N times ") {
+        //val w = new Waiter
+        val ch = gopherApi.makeChannel[Int]()
+        @volatile var count = 0
+        val cf = go { for(s <- ch) {
+            count += 1
+        } }
+        val ar = ch.awriteAll(1 to 10) map (_ -> ch.close)
+        val acf = for(c <- cf) yield assert(count == 10)
+
+        timeouted(ar.flatMap(_ => acf),10 seconds)
+    }
+
+    test("Input afold on stream with 'N' elements inside ") {
+        val ch = gopherApi.makeChannel[Int]()
+        val f = ch.afold(0)((s,e)=>s+1)
+        val ar = ch.awriteAll(1 to 10)
+        ar.onComplete{ case _ => ch.close() }
+        for(r <- f) yield assert(r==10)
+    }
+
+    test("forech with mapped closed stream") {
+        def one(i:Int):Future[Assertion] = {
+            val ch = gopherApi.makeChannel[Int]()
+            val mapped = ch map (_ * 2)
+            @volatile var count = 0
+            val f = go { for(s <- mapped) {
+                //  error in compiler
+                //assert((s % 2) == 0)
+                if ((s%2)!=0) {
+                    throw new IllegalStateException("numbers in mapped channel must be odd")
+                }
+                count += 1
+            }              }
+            val ar = ch.awriteAll(1 to 10) map (_ => ch.close)
+            for{
+                r <- f
+                a <- ar
+            } yield assert(count == 10)
+        }
+        Future.sequence(for(i <- 1 to 10) yield one(i)) map ( _.last )
+    }
+
+    test("forech with filtered closed stream") {
+        val ch = gopherApi.makeChannel[Int]()
+        val filtered = ch filter (_ %2 == 0)
+        @volatile var count = 0
+        val f = go { for(s <- filtered) {
+            count += 1
+        }                    }
+        val ar = ch.awriteAll(1 to 10) map (_ => ch.close)
+        for{ a <- ar
+             r <- f
+            } yield assert(count==5)
+    }
+
+    test("append for finite stream") {
+        val ch1 = gopherApi.makeChannel[Int](10)
+        val ch2 = gopherApi.makeChannel[Int](10)
+        val appended = ch1 append ch2
+        var sum = 0
+        var prev = 0
+        var monotonic = true
+        val f = go { for(s <- appended) {
+            // bug in compiler 2.11.7
+            //w{assert(prev < s)}
+            //if (prev >= s) w{assert(false)}
+            if (prev >= s) monotonic=false
+            prev = s
+            sum += s
+        }  }
+
+        // it works, but for buffered channeld onComplete can be scheduled before. So, <= instead ==
+        val a1 = ch1.awriteAll(1 to 10) map { _ => ch1.close(); assert(sum <= 55);  }
+        val a2 = ch2.awriteAll((1 to 10)map(_*100))map(_ => assert(sum <= 5555))
+        for{ r1 <- a1
+             r2 <- a2} yield assert(monotonic)
+    }
+
 
     def gopherApi = CommonTestObjects.gopherApi
 
@@ -202,76 +280,29 @@ class InputOpsAsyncSuite extends AsyncFunSuite  {
         val p = Promise[T]()
         p.completeWith(f)
         gopherApi.actorSystem.scheduler.scheduleOnce(timeout){
-            p.failure(new TimeoutException)
+            p.tryFailure(new TimeoutException)
         }
         p.future
     }
 
+
+    test("append for empty stream") {
+        val ch1 = gopherApi.makeChannel[Int]()
+        val ch2 = gopherApi.makeChannel[Int]()
+        val appended = ch1 append ch2
+        val f = appended.atake(10).map(_.sum)
+        ch1.close()
+        val a2 = ch2.awriteAll(1 to 10)
+        for(r <- f) yield assert(r==55)
+    }
+
+
 }
 
 
-class InputOpsSyncSuite extends FunSuite with Waiters {
+class InputOpsSyncSuiteDisabled extends FunSuite with Waiters {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-    
-  test("Input foreach on stream with 'N' elements inside must run N times ") {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[Int]()
-      @volatile var count = 0
-      val f = go { for(s <- ch) { 
-                     count += 1
-                 } }
-      val ar = ch.awriteAll(1 to 10)
-      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
-      f.onComplete{ case _ => w{ assert(count == 10) }; w.dismiss() }
-      // Too many awaits.
-      w.await(timeout(10 seconds), dismissals(2))
-  }
 
-  test("Input afold on stream with 'N' elements inside ") {
-      val ch = gopherApi.makeChannel[Int]()
-      val f = ch.afold(0)((s,e)=>s+1)
-      val ar = ch.awriteAll(1 to 10)
-      ar.onComplete{ case _ => ch.close() }
-      val r = Await.result(f,10 seconds) 
-      assert(r==10)
-  }
-
-  test("forech with mapped closed stream") {
-    def one(i:Int) = {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[Int]() 
-      val mapped = ch map (_ * 2)
-      @volatile var count = 0
-      val f = go { for(s <- mapped) { 
-                     //  error in compiler
-                     //assert((s % 2) == 0)
-                     if ((s%2)!=0) {
-                       throw new IllegalStateException("numbers in mapped channel must be odd")
-                     }
-                     count += 1
-                 }              }
-      val ar = ch.awriteAll(1 to 10)
-      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
-      f.onComplete{ case _ => { w{assert(count == 10)}; w.dismiss() } }
-      w.await(timeout(10 seconds), dismissals(2))
-    }
-    for(i <- 1 to 10) one(i)
-  }
-
-  test("forech with filtered closed stream") {
-      val w = new Waiter
-      val ch = gopherApi.makeChannel[Int]() 
-      val filtered = ch filter (_ %2 == 0)
-      @volatile var count = 0
-      val f = go { for(s <- filtered) { 
-                      count += 1
-                 }                    }
-      val ar = ch.awriteAll(1 to 10)
-      ar.onComplete{ case _ => { ch.close(); w.dismiss() } }
-      f.onComplete{ case _ => { w{assert(count == 5)}; w.dismiss() } }
-      w.await(timeout(10 seconds), dismissals(2))
-  }
 
 /*
   test("channel fold with async operation inside") {
@@ -296,45 +327,7 @@ class InputOpsSyncSuite extends FunSuite with Waiters {
 */
 
 
-  test("append for finite stream") {
-      val w = new Waiter
-      val ch1 = gopherApi.makeChannel[Int](10) 
-      val ch2 = gopherApi.makeChannel[Int](10) 
-      val appended = ch1 append ch2
-      var sum = 0
-      var prev = 0
-      var monotonic = true
-      val f = go { for(s <- appended) {
-                     // bug in compiler 2.11.7
-                     //w{assert(prev < s)}
-                     //if (prev >= s) w{assert(false)}
-                     if (prev >= s) monotonic=false
-                     prev = s
-                     sum += s  
-                 }  }
-      val a1 = ch1.awriteAll(1 to 10) 
-      val a2 = ch2.awriteAll((1 to 10)map(_*100)) 
-      // it works, but for buffered channeld onComplete can be scheduled before. So, <= instead ==
-      a1.onComplete{ case _ => { w{assert(sum <= 55)};  ch1.close(); w.dismiss() } }
-      a2.onComplete{ case _ => { w{assert(sum <= 5555)}; w{assert(monotonic)}; w.dismiss() } }
-      w.await(timeout(10 seconds), dismissals(2))
-      assert(sum<=5555)
-      assert(monotonic)
-  }
-         
-  test("append for empty stream") {
-      val w = new Waiter
-      val ch1 = gopherApi.makeChannel[Int]() 
-      val ch2 = gopherApi.makeChannel[Int]() 
-      val appended = ch1 append ch2
-      val f = appended.atake(10).map(_.sum)
-      f.onComplete{ case Success(x) => { w{assert(x==55)}; w.dismiss() } 
-                    case Failure(_) => { w{assert(false)}; w.dismiss() }
-                  }
-      ch1.close()
-      val a2 = ch2.awriteAll(1 to 10) 
-      w.await(timeout(10 seconds), dismissals(1))
-  }
+
 
   def gopherApi = CommonTestObjects.gopherApi
 
