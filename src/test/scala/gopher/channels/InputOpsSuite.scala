@@ -184,6 +184,15 @@ class InputOpsAsyncSuite extends AsyncFunSuite  {
         for (r <- at) yield assert(r.size == 100)
     }
 
+    test("Input foreach on closed stream must do nothing ") {
+        val ch = gopherApi.makeChannel[Int]()
+        @volatile var flg = false
+        val f = go { for(s <- ch) {
+            flg = true
+        } }
+        ch.close()
+        f map (_ => assert(!flg))
+    }
 
 
     def gopherApi = CommonTestObjects.gopherApi
@@ -204,18 +213,7 @@ class InputOpsAsyncSuite extends AsyncFunSuite  {
 class InputOpsSyncSuite extends FunSuite with Waiters {
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  test("Input foreach on closed stream must do nothing ") {
-      val ch = gopherApi.makeChannel[Int]()
-      @volatile var flg = false
-      val f = go { for(s <- ch) { 
-                     flg = true  
-                 } }
-      ch.close()
-      val r = Await.result(f, 10 seconds)
-      assert(!flg)
-  }
-
+    
   test("Input foreach on stream with 'N' elements inside must run N times ") {
       val w = new Waiter
       val ch = gopherApi.makeChannel[Int]()
