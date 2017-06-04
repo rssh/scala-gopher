@@ -112,8 +112,8 @@ class ReplicateSuite extends FunSuite
     ( r.in.distribute( (_ % 37 ) ).
         out.share()
     )
-    val inChannel = gopherApi.makeChannel[Int](10); 
-    val outChannel = gopherApi.makeChannel[Int](10); 
+    val inChannel = gopherApi.makeChannel[Int](10)
+    val outChannel = gopherApi.makeChannel[Int](10)
     r.in.connect(inChannel)
     r.out.connect(outChannel)
     val f0 = r.start()
@@ -135,7 +135,7 @@ class ReplicateSuite extends FunSuite
   }
 
 
-  test("WordCount must be replicated and accessbke via *! ports side") {
+  test("WordCount must be replicated and accessbke via *! ports side", Now) {
     //pending
     import PortAdapters._
     val nReplics = 2

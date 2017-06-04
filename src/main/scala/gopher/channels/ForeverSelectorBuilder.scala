@@ -25,8 +25,10 @@ trait ForeverSelectorBuilder extends SelectorBuilder[Unit]
    def readingWithFlowTerminationAsync[A](ch: Input[A], f: (ExecutionContext, FlowTermination[Unit], A) => Future[Unit] ): this.type =
    {
      lazy val cont = ContRead(normalized, ch, selector)
-     def normalized(_cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] = 
-                                    Some(ContRead.liftIn(_cont)(a=>f(ec,selector,a) map Function.const(cont))) 
+     def normalized(_cont:ContRead[A,Unit]):Option[ContRead.In[A]=>Future[Continuated[Unit]]] = {
+           Some(ContRead.liftIn(_cont)(a => f(ec, selector, a) map Function.const(cont)))
+     }
+
      withReader[A](ch, normalized) 
    }
 

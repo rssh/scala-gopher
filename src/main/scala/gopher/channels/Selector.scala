@@ -50,17 +50,17 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
   private[channels] def lockedRead[E](f: ContRead.AuxF[E, A], ch: Input[E], ft: FlowTermination[A]): ContRead.AuxF[E, A] = {
     val cont0 = ContRead(f,ch,ft)
     def f1(cont: ContRead[E, A]): Option[ContRead.In[E] => Future[Continuated[A]]] = {
-      tryLocked(f(cont0), cont, "read") map { q =>
-        in =>
-          unlockAfter(
-            try {
-              errorHandled(q(in), cont0)
-            } catch {
-              case e: Throwable => ft.doThrow(e)
-                Future successful Never
-            },
-            ft, "read")
-      }
+          tryLocked(f(cont0), cont, "read") map { q =>
+              in =>
+                  unlockAfter(
+                      try {
+                          errorHandled(q(in), cont0)
+                      }catch {
+                          case e: Throwable => ft.doThrow(e)
+                                  Future successful Never
+                      },
+                      ft, "read")
+          }
     }
 
     f1
@@ -69,19 +69,19 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
 
 
   private[channels] def lockedWrite[E](f: ContWrite.AuxF[E, A], ch: Output[E], ft: FlowTermination[A]): ContWrite.AuxF[E, A] = { (cont) =>
-    val cont0 = ContWrite(f,ch,ft)
-    tryLocked(f(cont0), cont, "write") map {
-      case (a, future) =>
-        (a, unlockAfter(errorHandled(future,cont0), ft, "write"))
-    }
+        val cont0 = ContWrite(f, ch, ft)
+        tryLocked(f(cont0), cont, "write") map {
+            case (a, future) =>
+                (a, unlockAfter(errorHandled(future, cont0), ft, "write"))
+        }
   }
 
   private[channels] def lockedSkip(f: Skip.AuxF[A], ft: FlowTermination[A]): Skip.AuxF[A] = { cont =>
     // TODO: check, maybe pass cont in this situation is enough ?
-    val cont0 = Skip(f,ft)
-    tryLocked(f(cont0), cont, "skip") map { f =>
-      unlockAfter( errorHandled(f, cont0), ft, "skip")
-    }
+        val cont0 = Skip(f, ft)
+        tryLocked(f(cont0), cont, "skip") map { f =>
+            unlockAfter(errorHandled(f, cont0), ft, "skip")
+        }
   }
 
   private[channels] def makeLocked(block: Continuated[A]): Continuated[A] = {
@@ -93,6 +93,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
       case Never => Never
     }
   }
+
+
 
 
   @inline
@@ -148,6 +150,8 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
       }
     )
   }
+
+  //private[this] def ifNotCompleted1[X](ft:FlowTermination[A],f:X => Future[Continuated[A]])
 
   private[this] def toWaiters(cont:Continuated[A]):Unit=
   {

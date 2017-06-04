@@ -221,9 +221,9 @@ trait Input[A] extends GopherAPIProvider
          {  val contA = ContRead(f,this,cont.flowTermination)
             f(contA) map (f1 => { case v@ContRead.Value(a) => f1(ContRead.Value(a))
                                   case ContRead.Skip => f1(ContRead.Skip) 
-                                                       Future successful cont
+                                      Future successful cont
                                   case ChannelClosed => f1(ContRead.Skip)
-                                                       Future successful ContRead(f,other,cont.flowTermination)
+                                      Future successful ContRead(f,other,cont.flowTermination)
                                   case ContRead.Failure(ex) => f1(ContRead.Failure(ex))
                          })
          }

@@ -64,9 +64,10 @@ class FlowTerminationSuite extends AsyncFunSuite
                 case x: channel.read => sum += x
                      select.shutdown()
           }
-    val  f2 = channel.awrite(1)
-    val  f3 = channel.awrite(2)
-    f0 map { _ => assert(sum == 1) }
+    for {r2 <- channel.awrite(1)
+         r3 <- channel.awrite(2)
+         r0 <- f0 } yield assert(sum == 1)
+
   }
 
 
