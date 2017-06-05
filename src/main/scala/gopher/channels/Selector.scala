@@ -288,7 +288,7 @@ class Selector[A](api: GopherAPI) extends PromiseFlowTermination[A] {
 
   private[this] val processor = api.continuatedProcessorRef
 
-  private[this] implicit val executionContext: ExecutionContext = api.executionContext
+  private[this] implicit val executionContext: ExecutionContext = api.gopherExecutionContext
   
 
 }

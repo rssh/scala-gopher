@@ -12,7 +12,7 @@ class TransputerSupervisor(api: GopherAPI) extends Actor with ActorLogging
 {
   import TransputerSupervisor._
   
-  implicit def ec =  api.executionContext
+  implicit def ec =  api.gopherExecutionContext
 
   def receive = {
      case Start(t) => log.debug(s"starting ${t}")

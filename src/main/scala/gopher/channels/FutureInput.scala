@@ -53,7 +53,7 @@ class FutureInput[A](future: Future[A], override val api: GopherAPI) extends Inp
                             }
                           }
                        }
-                    }(api.executionContext)
+                    }(api.gopherExecutionContext)
   }
 
   def input: Input[A] = this

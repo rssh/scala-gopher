@@ -2,14 +2,11 @@ package gopher.channels
 
 import gopher._
 import org.scalatest._
-import org.scalatest.concurrent._
 
-import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language._
-import scala.util._
 
-class IOASyncTimeoutsSuite extends AsyncFunSuite {
+class IOTimeoutsSuite extends AsyncFunSuite {
 
     test("messsaged from timeouts must be appear during reading attempt from empty channel") {
         val ch = gopherApi.makeChannel[String]()
@@ -35,6 +32,8 @@ class IOASyncTimeoutsSuite extends AsyncFunSuite {
 
 
     test("on input close it's timeout channel also must close") {
+        // want to use 'read || ec instead serialized
+        implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
         val ch = gopherApi.makeChannel[String](1)
         for{
             _ <- ch.awrite("qqq")
@@ -93,76 +92,63 @@ class IOASyncTimeoutsSuite extends AsyncFunSuite {
         f map { r => assert(r == 1) }
     }
 
+    test("on output close it's timeout channel also must close") {
+        val ch = gopherApi.makeChannel[Int](1)
+        val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
+        val f1 = chReady.awrite(1)
+        for {
+            x1 <- f1
+            _ <- assert(x1 == 1)
+            _ = ch.close()
+            l <- recoverToSucceededIf[ChannelClosedException] {
+                chReady.awrite(2)
+            }
+        } yield l
+    }
+
+    test("during 'normal' processing timeouts are absent") {
+        val ch = gopherApi.makeChannel[Int]()
+        val (chInputReady, chInputTimeout) = ch.withInputTimeouts(300 milliseconds)
+        val (chOutputReady, chOutputTimeout) = ch.withOutputTimeouts(300 milliseconds)
+        @volatile var count = 0
+        @volatile var count1 = 0
+        @volatile var wasInputTimeout = false
+        @volatile var wasOutputTimeout = false
+        val maxCount = 100
+        val fOut = gopherApi.select.forever {
+            case x: chOutputReady.write if (x==count) =>
+                if (count == maxCount) {
+                    implicitly[FlowTermination[Unit]].doExit(())
+                } else {
+                    count += 1
+                }
+            case t: chOutputTimeout.read =>
+            {};
+                wasOutputTimeout = true
+        }
+        val fIn = gopherApi.select.forever {
+            case x: chInputReady.read =>
+                count1 = x
+                if (x == maxCount) {
+                    implicitly[FlowTermination[Unit]].doExit(())
+                }
+            case t: chInputTimeout.read =>
+            {};
+                wasInputTimeout = true
+        }
+        for{
+           _ <- fOut
+           _ <- fIn
+           _ = assert(count == maxCount)
+           _ = assert(count1 == maxCount)
+        } yield assert(!wasOutputTimeout && !wasInputTimeout)
+    }
+
+
 
 
     def gopherApi = CommonTestObjects.gopherApi
 
 
-}
-
-class IOSyncTimeoutsSuite extends FunSuite with Waiters {
-
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-
-  test("on output close it's timeout channel also must close") {
-      val ch = gopherApi.makeChannel[Int](1)
-      val (chReady, chTimeout) = ch.withOutputTimeouts(300 milliseconds)
-      val w = new Waiter()
-      val f1 = chReady.awrite(1)
-      f1 onComplete { 
-                       case Success(x) => w{assert(x==1) }; w.dismiss()  
-                       case Failure(th) => w{ throw th }; w.dismiss()
-                    }
-      Await.ready(f1, 1 second)
-      ch.close()
-      val f2 = chReady.awrite(2)
-      f2 onComplete { x => w(assert(x.isFailure && x.failed.get.isInstanceOf[ChannelClosedException]))
-                           w.dismiss()
-                    }
-      w.await(dismissals=Dismissals(2))
-  }
-
-  test("during 'normal' processing timeouts are absent") {
-      val ch = gopherApi.makeChannel[Int]()
-      val (chInputReady, chInputTimeout) = ch.withInputTimeouts(300 milliseconds)
-      val (chOutputReady, chOutputTimeout) = ch.withOutputTimeouts(300 milliseconds)
-      @volatile var count = 0
-      @volatile var count1 = 0
-      @volatile var wasInputTimeout = false
-      @volatile var wasOutputTimeout = false
-      val maxCount = 100
-      val fOut = gopherApi.select.forever {
-                   case x: chOutputReady.write if (x==count) =>
-                             if (count == maxCount) {
-                                implicitly[FlowTermination[Unit]].doExit(())
-                             } else {
-                                count += 1 
-                             }
-                   case t: chOutputTimeout.read =>
-                             {};
-                             wasOutputTimeout = true
-                } 
-      val fIn = gopherApi.select.forever {
-                   case x: chInputReady.read =>
-                             count1 = x
-                             if (x == maxCount) {
-                                implicitly[FlowTermination[Unit]].doExit(())
-                             }
-                   case t: chInputTimeout.read =>
-                             {};
-                             wasInputTimeout = true
-                }
-      Await.ready(fOut, 1 second)
-      Await.ready(fIn, 1 second)
-      assert(count == maxCount) 
-      assert(count1 == maxCount) 
-      assert(!wasInputTimeout) 
-      assert(!wasOutputTimeout) 
-  }
-
-  def gopherApi = CommonTestObjects.gopherApi
-
-  
 }
 

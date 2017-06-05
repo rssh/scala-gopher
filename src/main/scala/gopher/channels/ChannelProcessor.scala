@@ -37,6 +37,6 @@ class ChannelProcessor(api: GopherAPI) extends Actor
    }
 
 
-   implicit val ec: ExecutionContext = api.executionContext
+   implicit val ec: ExecutionContext = api.gopherExecutionContext
 
 }

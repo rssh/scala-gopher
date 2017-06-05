@@ -83,7 +83,7 @@ trait SelectorBuilder[A]
    // for call from SelectorTransforment wich have another 'go'
    def selectorRun: Future[A] = selector.run
 
-   implicit def ec: ExecutionContext = api.executionContext
+   implicit def ec: ExecutionContext = api.gopherExecutionContext
 
    private[gopher] val selector=new Selector[A](api)
 

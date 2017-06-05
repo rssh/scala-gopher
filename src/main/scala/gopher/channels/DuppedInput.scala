@@ -34,7 +34,7 @@ class DuppedInput[A](origin:Input[A])
   }
 
   def api = origin.api
-  private implicit def ec:ExecutionContext = api.executionContext
+  private implicit def ec:ExecutionContext = api.gopherExecutionContext
 
 
 

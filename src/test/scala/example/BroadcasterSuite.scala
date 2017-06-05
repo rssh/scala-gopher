@@ -155,7 +155,7 @@ class BroadcaseSuite extends AsyncFunSuite
     //out.close()
   }
 
-  test("broadcast", Now) {
+  test("broadcast") {
      val channel = makeChannel[Int]()
      doBroadcast(channel)
      val fsum = channel.afold(0){ (s,n) =>

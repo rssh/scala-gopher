@@ -1,17 +1,18 @@
 package gopher
 
+import java.util.concurrent.atomic.AtomicLong
+
 import akka.actor._
-import akka.pattern._
+import com.typesafe.config._
 import gopher.channels._
 import gopher.transputers._
-import scala.concurrent.{Channel=>_,_}
+
 import scala.concurrent.duration._
+import scala.concurrent.{Channel => _, _}
 import scala.language.experimental.macros
 import scala.language.postfixOps
 import scala.reflect.macros.blackbox.Context
 import scala.util._
-import java.util.concurrent.atomic.AtomicLong
-import com.typesafe.config._
 
 /**
  * Api for providing access to channel and selector interfaces.
@@ -99,7 +100,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   /**
    * execution context used for managing calculation steps in channels engine.
    **/
-  def executionContext: ExecutionContext = es
+  def gopherExecutionContext: ExecutionContext = es
 
   /**
    * the configuration of the gopher system. By default is contained under 'gopher' key in top-level config.
@@ -139,10 +140,10 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
 
   private[gopher] def continue[A](next:Future[Continuated[A]], ft:FlowTermination[A]): Unit =
                        next.onComplete{
-                          case Success(cont) => 
+                          case Success(cont) =>
                                               continuatedProcessorRef ! cont
                           case Failure(ex) => ft.throwIfNotCompleted(ex)
-                       }(executionContext)
+                       }(gopherExecutionContext)
  
   private[this] val channelIdCounter = new AtomicLong(0L)
 

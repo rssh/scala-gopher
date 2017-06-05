@@ -57,7 +57,7 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
                       Future{
                         val cont = f1(ContRead.In value a)
                         api.continue(cont, reader.flowTermination)
-                      }(api.executionContext)
+                      }(api.gopherExecutionContext)
                       api.continue(wcont, writer.flowTermination)
                       true
                 case None =>
@@ -129,7 +129,7 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
   }
 
 
-  private[this] implicit def ec: ExecutionContext = api.executionContext
+  private[this] implicit def ec: ExecutionContext = api.gopherExecutionContext
 
 
 }

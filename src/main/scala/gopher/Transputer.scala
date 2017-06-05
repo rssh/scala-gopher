@@ -406,7 +406,7 @@ class ParTransputer(override val api: GopherAPI, var childs:Seq[Transputer]) ext
    childs.foreach(_.parent = Some(this))
 
    def goOnce: Future[Unit] = {
-     implicit val ec: ExecutionContext = api.executionContext
+     implicit val ec: ExecutionContext = api.gopherExecutionContext
      @volatile var inStop = false
      def withStopChilds[A](f: Future[A]):Future[A] =
      {

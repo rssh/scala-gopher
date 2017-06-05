@@ -101,7 +101,7 @@ abstract class ChannelActor[A](id:Long, api: GopherAPI) extends Actor {
     }
   }
 
-  protected[this] implicit def ec: ExecutionContext = api.executionContext
+  protected[this] implicit def ec: ExecutionContext = api.gopherExecutionContext
 
   protected[this] var closed=false
   var readers = Queue[ContRead[A,_]] ()

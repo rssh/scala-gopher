@@ -25,7 +25,7 @@ class FlowTerminationSuite extends AsyncFunSuite
 
 
   test("select with queue type") {
-    import gopherApi.{executionContext => _, _}
+    import gopherApi.{gopherExecutionContext => _, _}
 
     val channel = makeChannel[Int](100)
 
@@ -57,7 +57,7 @@ class FlowTerminationSuite extends AsyncFunSuite
 
   test("not propagate signals after exit") {
 
-    import gopherApi.{executionContext => _, _}
+    import gopherApi.{gopherExecutionContext => _, _}
     val channel = makeChannel[Int](100)
     var sum = 0
     val f0 = select.forever {

@@ -31,7 +31,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
                                }
                       }
    }
-   implicit val ec = api.executionContext
+   implicit val ec = api.gopherExecutionContext
    if (closed) {
      if (closedEmpty) {
        applyClosed();
@@ -55,19 +55,19 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   }
 
   private def  contRead[B](x:ContRead[A,B]): Unit =
-     futureChannelRef.foreach( _ ! x )(api.executionContext)
+     futureChannelRef.foreach( _ ! x )(api.gopherExecutionContext)
 
   def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])], flwt: FlowTermination[B] ): Unit = {
     val cont = ContWrite(f, this, flwt)
     if (closed) {
       flwt.doThrow(new ChannelClosedException())
     } else {
-      futureChannelRef.foreach(_ ! cont)(api.executionContext)
+      futureChannelRef.foreach(_ ! cont)(api.gopherExecutionContext)
     }
   }
 
   private def contWrite[B](x:ContWrite[A,B]): Unit =
-    futureChannelRef.foreach( _ ! x )(api.executionContext)
+    futureChannelRef.foreach( _ ! x )(api.gopherExecutionContext)
 
   //private[this] implicit val ec = api.executionContext
 
@@ -75,7 +75,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
 
   def close(): Unit =
   {
-    futureChannelRef.foreach( _ ! ChannelClose )(api.executionContext)
+    futureChannelRef.foreach( _ ! ChannelClose )(api.gopherExecutionContext)
     closed=true
   }
 
@@ -90,7 +90,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
         if (isClosed) {
           applyDone(cr)
         } else {
-          futureChannelRef.foreach( _ ! ChannelCloseCallback(cr) )(api.executionContext)
+          futureChannelRef.foreach( _ ! ChannelCloseCallback(cr) )(api.gopherExecutionContext)
         }
       }
 
@@ -104,7 +104,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
   override protected def finalize(): Unit =
   {
    // allow channel actor be grabage collected
-   futureChannelRef.foreach( _ ! ChannelRefDecrement )(api.executionContext)
+   futureChannelRef.foreach( _ ! ChannelRefDecrement )(api.gopherExecutionContext)
   }
 
   private var closed = false

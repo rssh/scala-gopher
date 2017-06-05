@@ -33,7 +33,7 @@ class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
                 api.continue(g(ContRead.Skip),ft)
             }
        }
-   }(api.executionContext)
+   }(api.gopherExecutionContext)
   }
    
   def cbwrite[B](f: ContWrite[T,B] => Option[(T, Future[Continuated[B]])],ft: FlowTermination[B]): Unit = 
@@ -59,7 +59,7 @@ class OneTimeChannel[T](override val api:GopherAPI) extends Channel[T]
     override def cbread[B](f: (ContRead[Unit, B]) => Option[(In[Unit]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit =
     {
       val cr = ContRead[Unit,B](f,this,ft)
-      p.future.onComplete{ _ => applyDone(cr) }(api.executionContext)
+      p.future.onComplete{ _ => applyDone(cr) }(api.gopherExecutionContext)
     }
 
     override def api: GopherAPI = thisOneTimeChannel.api

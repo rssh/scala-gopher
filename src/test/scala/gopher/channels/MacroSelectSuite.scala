@@ -1,57 +1,96 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
-import gopher.tags._
-
 import org.scalatest._
 
-import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.language._
 
-class MacroSelectSuite extends FunSuite 
+class MacroSelectASyncSuite extends AsyncFunSuite
+{
+
+    test("select emulation with macroses")  {
+
+        val channel = gopherApi.makeChannel[Int](100)
+
+        go {
+            var i = 1
+            while(i <= 1000) {
+                channel <~ i
+                i+=1
+            }
+            //TODO: implement for in goas preprocessor to async
+            //for( i <- 1 to 1000)
+            //  channel <~ i
+        }
+
+        var sum = 0
+        val consumer = go {
+            for(s <- gopherApi.select.forever) {
+                s match {
+                    case i: channel.read =>
+                        //System.err.println("received:"+i)
+                        sum = sum + i
+                        if (i==1000)
+                            implicitly[FlowTermination[Unit]].doExit(())
+                }
+            }
+            sum
+        }
+
+        for{
+            _ <- consumer
+            xsum = (1 to 1000).sum
+        } yield assert(xsum == sum)
+
+    }
+
+    test("select with run-once")  {
+        import gopherApi._
+        val channel1 = makeChannel[Int](100)
+        val channel2 = makeChannel[Int](100)
+
+        val g = go {
+            var nWrites=0
+            for(s <- select.once)
+                s match {
+                    case x: channel1.write if (x==1) => {
+                        System.err.println("RO: write 1 to channel1");
+                        {}; nWrites = nWrites + 1
+                    }
+                    case x: channel2.write if (x==1) => {
+                        System.err.println("RO: write 1 to channel2");
+                        {}; nWrites = nWrites + 1
+                    }
+                }
+
+            var nReads=0
+            for(s <- select.once)
+                s match {
+                    case  x: channel1.read => { {}; nReads = nReads + 1 }
+                    case  x: channel2.read => { {}; nReads = nReads + 1 }
+                }
+
+            (nWrites, nReads)
+        }
+
+        g map { case(nWrites,nReads) => assert(nWrites==1 && nReads==1)}
+
+    }
+
+
+
+    lazy val gopherApi = CommonTestObjects.gopherApi
+}
+
+
+class MacroSelectSyncSuite extends FunSuite
 {
 
    import scala.concurrent.ExecutionContext.Implicits.global
 
   
-   test("select emulation with macroses")  {
-     
-     val channel = gopherApi.makeChannel[Int](100)
-     
-     go {
-       var i = 1
-       while(i <= 1000) {
-         channel <~ i 
-         i+=1
-       }
-       //TODO: implement for in goas preprocessor to async
-       //for( i <- 1 to 1000) 
-       //  channel <~ i 
-     }
-     
-     var sum = 0;
-     val consumer = go {
-       for(s <- gopherApi.select.forever) {
-          s match {
-             case i: channel.read =>
-                     //System.err.println("received:"+i)
-                     sum = sum + i
-                     if (i==1000)  
-                        implicitly[FlowTermination[Unit]].doExit(())
-          }
-       }
-       sum
-     }
-
-     Await.ready(consumer, 5.second)
-
-     val xsum = (1 to 1000).sum
-     assert(xsum == sum)
-     
-     
-   }
 
    
    test("select with run-once")  {
@@ -325,7 +364,6 @@ class MacroSelectSuite extends FunSuite
    }
 
    test("one-time channel make")  {
-     import gopherApi._
      val ch = gopherApi.make[OneTimeChannel[Int]]()
      val f1 = ch.awrite(1)
      val f2 = ch.awrite(2)

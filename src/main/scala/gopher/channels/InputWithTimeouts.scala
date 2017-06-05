@@ -25,7 +25,7 @@ class InputWithTimeouts[A](origin: Input[A], timeout: FiniteDuration)
      {
       val c = api.actorSystem.scheduler.scheduleOnce(timeout){
                                                    timeouts.awrite(timeout)   
-                                                  }(api.executionContext)
+                                                  }(api.gopherExecutionContext)
       def fIn(cont: ContRead[A,B]):Option[ContRead.In[A]=>Future[Continuated[B]]] =
       {
         f(ContRead(f,this,ft)) map { f1 => 

@@ -21,7 +21,7 @@ class ZippedInput[A,B](override val api: GopherAPI, inputA: Input[A], inputB: In
  def  cbread[C](f: (ContRead[(A,B),C] => Option[ContRead.In[(A,B)] => Future[Continuated[C]]]), flwt: FlowTermination[C] ): Unit =
  {
    if (!pairs.isEmpty) {
-         implicit val ec = api.executionContext
+         implicit val ec = api.gopherExecutionContext
          f(ContRead(f,this,flwt)) match {
            case Some(f1) => 
                         val ready = pairs.poll();
@@ -68,7 +68,7 @@ class ZippedInput[A,B](override val api: GopherAPI, inputA: Input[A], inputB: In
                         if (cont eq null) {
                            pairs.add(pair)
                         } else {
-                           implicit val ec = api.executionContext
+                           implicit val ec = api.gopherExecutionContext
                            cont.function(cont) match {
                              case Some(f1) => 
                                       api.continue(f1(ContRead.Value(pair)),cont.flowTermination)

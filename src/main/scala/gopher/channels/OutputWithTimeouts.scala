@@ -27,7 +27,7 @@ class OutputWithTimeouts[A](origin: Output[A], timeout: FiniteDuration)
       {
        val c = api.actorSystem.scheduler.scheduleOnce(timeout){
                                                    timeouts.awrite(timeout)
-                                                  }(api.executionContext)
+                                                  }(api.gopherExecutionContext)
        def fIn(cont: ContWrite[A,B]):Option[(A,Future[Continuated[B]])] =
        {
         try {

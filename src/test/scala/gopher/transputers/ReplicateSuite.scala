@@ -135,7 +135,7 @@ class ReplicateSuite extends FunSuite
   }
 
 
-  test("WordCount must be replicated and accessbke via *! ports side", Now) {
+  test("WordCount must be replicated and accessbke via *! ports side") {
     //pending
     import PortAdapters._
     val nReplics = 2

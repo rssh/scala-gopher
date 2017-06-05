@@ -153,7 +153,7 @@ trait Input[A] extends GopherAPIProvider
     override def cbread[C](f: (ContRead[B, C]) => Option[(ContRead.In[B]) => Future[Continuated[C]]], ft: FlowTermination[C]): Unit = {
       def mf(cont:ContRead[A,C]):Option[ContRead.In[A]=>Future[Continuated[C]]] =
       {  val contA = ContRead(f,this,cont.flowTermination)
-         implicit val ec = api.executionContext
+         implicit val ec = api.gopherExecutionContext
          f(contA) map (f1 => {
              case v@ContRead.Value(a) => g(a).flatMap(x => f1(ContRead.Value(x)))
              case ContRead.Skip => f1(ContRead.Skip)
@@ -417,7 +417,7 @@ trait Input[A] extends GopherAPIProvider
 
 
     override def cbread[B](f: (ContRead[A, B]) => Option[(In[A]) => Future[Continuated[B]]], ft: FlowTermination[B]): Unit = {
-      implicit val es:ExecutionContext = api.executionContext
+      implicit val es:ExecutionContext = api.gopherExecutionContext
       def fc(cont:ContRead[A,B]):Option[(In[A])=>Future[Continuated[B]]] =
       {
         f(ContRead(f,this,cont.flowTermination)) map {
@@ -508,7 +508,7 @@ object Input
         f(ContRead(f,this,ft)) foreach {
           g => g(ContRead.In.value(a))
         }
-      }(api.executionContext)
+      }(api.gopherExecutionContext)
 
   }
 

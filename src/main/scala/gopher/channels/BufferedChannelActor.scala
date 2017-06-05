@@ -61,7 +61,7 @@ class BufferedChannelActor[A](id:Long, capacity:Int, api: GopherAPI) extends Bas
               Future{
                 val cont = f1(ContRead.In value readedElement )
                 api.continue(cont, reader.flowTermination)
-              }(api.executionContext)
+              }(api.gopherExecutionContext)
               true
        case None =>
               false
