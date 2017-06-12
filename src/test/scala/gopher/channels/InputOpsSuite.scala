@@ -10,6 +10,7 @@ import scala.language._
 
 class InputOpsSuite extends AsyncFunSuite  {
 
+   override implicit def executionContext = ExecutionContext.global
 
   test("map operation for input") {
     val ch = gopherApi.makeChannel[String]()

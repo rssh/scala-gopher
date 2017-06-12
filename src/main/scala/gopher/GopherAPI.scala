@@ -107,6 +107,11 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
    **/
   def config: Config = as.settings.config.atKey("gopher")
 
+  /**
+    * time API
+    */
+  lazy val time = new Time(this,gopherExecutionContext)
+
   lazy val idleTimeout: FiniteDuration = {
     val m = try {
               config.getInt("idle-detection-tick")
@@ -117,6 +122,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
   }
 
   def currentFlow = CurrentFlowTermination
+
 
   //private[gopher] val idleDetector = new IdleDetector(this)
 

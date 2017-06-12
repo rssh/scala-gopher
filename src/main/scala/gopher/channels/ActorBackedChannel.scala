@@ -3,16 +3,14 @@ package gopher.channels
 
 import akka.actor._
 import akka.pattern._
+import gopher._
+import gopher.channels.ContRead.In
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.util._
 import scala.language.experimental.macros
 import scala.language.postfixOps
-import scala.reflect.macros.blackbox.Context
-import scala.reflect.api._
-import gopher._
-import gopher.channels.ContRead.In
+import scala.util._
 
 class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api: GopherAPI) extends Channel[A]
 {
@@ -34,7 +32,7 @@ class ActorBackedChannel[A](futureChannelRef: Future[ActorRef], override val api
    implicit val ec = api.gopherExecutionContext
    if (closed) {
      if (closedEmpty) {
-       applyClosed();
+       applyClosed()
      } else {
          // TODO: ask timeput on closed channel set in config.
          futureChannelRef.foreach{ ref => val f = ref.ask(ClosedChannelRead(cont))(5 seconds)
