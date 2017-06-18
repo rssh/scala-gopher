@@ -3,15 +3,14 @@ package gopher.channels
 
 import akka.actor._
 import akka.pattern._
+import gopher._
+
 import scala.concurrent._
 import scala.concurrent.duration._
-import gopher._
 import scala.language.experimental.macros
 import scala.language.postfixOps
-import scala.reflect.macros.blackbox.Context
-import scala.reflect.api._
 
-trait Channel[A] extends InputOutput[A] with CloseableInput[A]
+trait Channel[A] extends CloseableInputOutput[A,A]
 {
 
    thisChannel =>
@@ -20,17 +19,14 @@ trait Channel[A] extends InputOutput[A] with CloseableInput[A]
 
    // override some operations
 
-   class Filtered(p:A=>Boolean) extends super.Filtered(p)
+   class FilteredChannel(p:A=>Boolean) extends FilteredIOC(p)
                                     with Channel[A]
-                                    with DoneSignalDelegate[A]
-   {
-     def  cbwrite[B](f: ContWrite[A,B] => Option[(A,Future[Continuated[B]])],ft: FlowTermination[B]):Unit =
-       thisChannel.cbwrite(f,ft)
+    {
+        override def close() = thisChannel.close()
+    }
 
-     def close() = thisChannel.close()
-   }
-   
-   override def filter(p:A=>Boolean): Channel[A] = new Filtered(p)
+   override def filter(p:A=>Boolean): Channel[A] = new FilteredChannel(p)
+
 
 }
 

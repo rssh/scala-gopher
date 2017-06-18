@@ -1,13 +1,11 @@
 package gopher.channels
 
 import gopher._
-import gopher.channels._
-import scala.concurrent._
-import scala.concurrent.duration._
-
 import org.scalatest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent._
+import scala.concurrent.duration._
 
 /*
  * Go analog:
@@ -38,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
    */
 object ReadCoroutines {
   
-  lazy val integers:InputOutput[Int] =
+  lazy val integers:InputOutput[Int,Int] =
   {
     val y = gopherApi.makeChannel[Int]()
     @volatile var count = 0
@@ -59,6 +57,7 @@ object ReadCoroutines {
 class ReadCoroutinesSuite extends FunSuite {
 
   import ReadCoroutines._
+
   import language.postfixOps
   
   test("get few numbers from generarator") {
