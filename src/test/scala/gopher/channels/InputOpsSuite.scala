@@ -273,6 +273,20 @@ class InputOpsSuite extends AsyncFunSuite  {
              r2 <- a2} yield assert(monotonic)
     }
 
+    test("order of reading from unbuffered channel") {
+        val ch = gopherApi.makeChannel[Int]()
+        ch.awriteAll(List(10,12,34,43))
+
+        for{
+            r1 <- ch.aread
+            r2 <- ch.aread
+            r3 <- ch.aread
+            r4 <- ch.aread
+        } yield assert((r1,r2,r3,r4) == (10,12,34,43) )
+
+
+    }
+
 
     def gopherApi = CommonTestObjects.gopherApi
 

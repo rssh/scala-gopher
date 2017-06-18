@@ -1,9 +1,9 @@
 package gopher.channels;
 
-import scala.language._
-import scala.concurrent._
-import java.util.concurrent.atomic.AtomicBoolean
 import gopher._
+
+import scala.concurrent._
+import scala.language._
 
 /**
  * represent continuated computation from A to B.
@@ -33,6 +33,7 @@ case class ContRead[A,B](
    override val flowTermination: FlowTermination[B]) extends FlowContinuated[B]
 {
   type El = A
+  type S  = B
   type F = ContRead[A,B]=>Option[ContRead.In[A] => Future[Continuated[B]]]
 }
 
@@ -89,7 +90,9 @@ object ContRead
                     type F = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
                    }
 
-   type AuxF[A,B] = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]] 
+   type AuxF[A,B] = ContRead[A,B]=>Option[ContRead.In[A]=>Future[Continuated[B]]]
+
+   type AuxE[A] = ({type B; type L=ContRead[A,B]})#L
 }
 
 

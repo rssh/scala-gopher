@@ -1,8 +1,11 @@
 package gopher.channels
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
+
 import gopher.{ChannelClosedException, FlowTermination, GopherAPI}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait InputOutput[A,B] extends Input[B] with Output[A]
@@ -30,36 +33,77 @@ trait InputOutput[A,B] extends Input[B] with Output[A]
 
     class CompositionIO[C](other:InputOutput[B,C]) extends InputOutput[A,C]
     {
-        private val s = new ForeverSelectorBuilder(){
-            override def api = thisInputOutput.api
+
+        protected val internalFlowTermination = PromiseFlowTermination[Unit]()
+
+        private val listeners = new ConcurrentHashMap[Long,ContRead.AuxE[C]]
+        private val listenerIdsGen = new AtomicLong(0L)
+        override val api: GopherAPI = thisInputOutput.api
+
+
+
+        def internalRead(cr:ContRead[B,Unit]):Option[(ContRead.In[B]=>Future[Continuated[Unit]])] = {
+          {
+              implicit val ec = api.gopherExecutionContext
+              Some {
+                  case ContRead.Value(a) =>
+                      other.cbwrite[Unit](cw => {
+                          Some {
+                              (a, Future successful cr)
+                          }
+                      }, internalFlowTermination)
+                      Future successful Never // cr will be called after write.
+                  case ContRead.Skip => Future successful cr
+                  case ContRead.ChannelClosed =>
+                      internalFlowTermination.doExit(())
+                      Future successful Never
+                  case ContRead.Failure(ex) => internalFlowTermination.throwIfNotCompleted(ex)
+                      Future successful Never
+              }
+          }
         }
 
-        s.readingWithFlowTerminationAsync(thisInputOutput,
-            {(ec:ExecutionContext,ft:FlowTermination[Unit],a:B) =>
-                implicit val iec = ec
-                other.awrite(a) map (_ => ())
+        thisInputOutput.cbread(internalRead,internalFlowTermination)
+
+        internalFlowTermination.future.onComplete{ r =>
+            listeners.forEach { (id, cr) =>
+                val cre = cr.asInstanceOf[ContRead[A,cr.S]]
+                cre.function(cre).foreach{ q =>
+                    val n = r match {
+                        case Failure(ex) => ContRead.Failure(ex)
+                        case Success(_) => ContRead.ChannelClosed
+                    }
+                    api.continue(q(n),cre.flowTermination)
+                }
             }
-        )
+        }(api.gopherExecutionContext)
 
-        protected val internalFuture = s.go
-
-
-        // TODO: think, maybe we need intercept cbread here ?
-        override def cbread[D](f: (ContRead[C, D]) => Option[(ContRead.In[C]) => Future[Continuated[D]]], ft: FlowTermination[D]): Unit =
+        override def cbread[D](f: (ContRead[C, D]) => Option[ContRead.In[C] => Future[Continuated[D]]], ft: FlowTermination[D]): Unit =
         {
-            if (checkNotCompleted(ft)) other.cbread(f,ft)
+            val id = listenerIdsGen.incrementAndGet()
+            def wf(cr:ContRead[C,D]):Option[ContRead.In[C] => Future[Continuated[D]]]=
+            {
+              f(cr) map { q =>
+                  listeners.remove(id)
+                  q
+              }
+            }
+            val cr = ContRead(f,this,ft)
+            listeners.put(id,cr.asInstanceOf[ContRead.AuxE[C]])
+            other.cbread(wf,ft)
         }
 
         override def cbwrite[B](f: (ContWrite[A, B]) => Option[(A, Future[Continuated[B]])], ft: FlowTermination[B]): Unit =
         {
+
             if (checkNotCompleted(ft)) thisInputOutput.cbwrite(f,ft)
         }
 
         private def checkNotCompleted[D](ft:FlowTermination[D]): Boolean =
         {
-            if (internalFuture.isCompleted) {
+            if (internalFlowTermination.isCompleted) {
                 implicit val ec = api.gopherExecutionContext
-                internalFuture.onComplete{
+                internalFlowTermination.future.onComplete{
                     case Failure(ex) => ft.doThrow(ex)
                     case Success(_) => ft.doThrow(new ChannelClosedException())
                 }
@@ -67,10 +111,8 @@ trait InputOutput[A,B] extends Input[B] with Output[A]
             } else true
         }
 
-        override val api: GopherAPI = thisInputOutput.api
     }
 
-    //TODO: add test suite.
     def compose[C](other:InputOutput[B,C]):InputOutput[A,C] =
       new CompositionIO[C](other)
 
@@ -102,9 +144,11 @@ trait CloseableInputOutput[A,B] extends InputOutput[A,B] with CloseableInput[B]
                                                       with CloseableInputOutput[A,C]
 
     override def compose[C](other: InputOutput[B,C]):CloseableInputOutput[A,C] =
-      new CompositionIOC[C](other)
+      new CompositionIOC[C](other)  {
 
-    override def |>[C](other:InputOutput[B,C]):CloseableInputOutput[A,C] = this.compose(other)
+      }
+
+    override def |>[C](other:InputOutput[B,C]): CloseableInputOutput[A,C] = this.compose(other)
 
 
 }
