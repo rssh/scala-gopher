@@ -17,7 +17,7 @@ import scala.util._
 /**
  * Api for providing access to channel and selector interfaces.
  */
-class GopherAPI(as: ActorSystem, es: ExecutionContext)
+class  GopherAPI(as: ActorSystem, es: ExecutionContext)
 {
 
   /**
@@ -112,6 +112,7 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
     */
   lazy val time = new Time(this,gopherExecutionContext)
 
+
   lazy val idleTimeout: FiniteDuration = {
     val m = try {
               config.getInt("idle-detection-tick")
@@ -119,6 +120,15 @@ class GopherAPI(as: ActorSystem, es: ExecutionContext)
               case ex: ConfigException.Missing => 100
             }
     m.milliseconds
+  }
+
+
+  lazy val defaultExpireCapacity: Int = {
+    try {
+      config.getInt("default-expire-capacity")
+    } catch {
+      case ex: ConfigException.Missing => 1000
+    }
   }
 
   def currentFlow = CurrentFlowTermination

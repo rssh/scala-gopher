@@ -121,6 +121,7 @@ trait InputOutput[A,B] extends Input[B] with Output[A]
       */
     def |>[C](other:InputOutput[B,C]):InputOutput[A,C] = this.compose(other)
 
+
 }
 
 

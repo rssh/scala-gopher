@@ -68,6 +68,14 @@ class ChannelCloseSuite extends AsyncFunSuite
     fp map (_ => assert(q == 1))
   }
 
+  test("awrite to close must produce ChannelClosedFailure in Future") {
+    val channel = gopherApi.makeChannel[Int](100)
+    channel.close
+    recoverToSucceededIf[ChannelClosedException](
+       channel.awrite(1)
+    )
+  }
+
 
   def gopherApi = CommonTestObjects.gopherApi
 

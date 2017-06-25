@@ -48,6 +48,21 @@ trait Input[A] extends GopherAPIProvider
     ft.future
   }
 
+  def timedAread(waitTime:FiniteDuration): Future[A] = {
+      val ft = PromiseFlowTermination[A]()
+      cbread[A](
+          {cont => if (ft.isCompleted) None
+                  else Some(ContRead.liftIn(cont) {
+                         a => Future successful Done(a,ft)
+                   })
+      }, ft)
+      implicit val ec = api.gopherExecutionContext
+      api.actorSystem.scheduler.scheduleOnce(waitTime){
+          ft.throwIfNotCompleted(new TimeoutException)
+      }
+      ft.future
+  }
+
   /**
    * instance of gopher API
    */

@@ -1,12 +1,10 @@
 package gopher.channels
 
 import akka.actor._
-
-import scala.language._
-import scala.concurrent._
-import scala.collection.immutable._
 import gopher._
 
+import scala.concurrent._
+import scala.language._
 import scala.util.control.NonFatal
 
 
@@ -49,7 +47,7 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
     done
   }
 
-  private[this] def processReader[B,C](reader:ContRead[A,B],writer:ContWrite[A,C]): Boolean =
+  protected[this] def processReader[B,C](reader:ContRead[A,B],writer:ContWrite[A,C]): Boolean =
    reader.function(reader) match {
        case Some(f1) => 
               writer.function(writer) match {
@@ -98,7 +96,7 @@ class UnbufferedChannelActor[A](id:Long, unused:Int, api: GopherAPI) extends Cha
     }
   }
 
-  private[this] def processWriter[B,C](writer:ContWrite[A,B],
+  protected[this] def processWriter[B,C](writer:ContWrite[A,B],
                                        f1:ContRead.In[A]=>Future[Continuated[C]],
                                        reader:ContRead[A,C]): Boolean =
    writer.function(writer) match {

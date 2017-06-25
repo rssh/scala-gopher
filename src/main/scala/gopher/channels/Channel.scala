@@ -27,6 +27,19 @@ trait Channel[A] extends CloseableInputOutput[A,A]
 
    override def filter(p:A=>Boolean): Channel[A] = new FilteredChannel(p)
 
+   trait CloseDelagate {
+       def close(): Unit = thisChannel.close()
+   }
+
+
+
+   def compose(ch:Channel[A]):Channel[A]  = new CompositionIOC[A](ch) with Channel[A] with CloseDelagate {}
+
+   def expire(expireTime:FiniteDuration,capacity:Int = api.defaultExpireCapacity):Channel[A] =
+   {
+       val expireChannel = new ExpireChannel[A](expireTime,capacity,api)
+       expireChannel.compose(this)
+   }
 
 }
 
@@ -46,5 +59,7 @@ object Channel
 
      new ActorBackedChannel[A](futureChannelRef, api)
   }
+
+
 
 }

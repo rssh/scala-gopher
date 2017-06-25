@@ -135,6 +135,7 @@ trait Output[A] extends GopherAPIProvider
     */
   def pam[B](g: B=>A): Output[B] = premap[B](g)
 
+
 }
 
 object Output
