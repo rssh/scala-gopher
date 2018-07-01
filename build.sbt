@@ -3,8 +3,8 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.12.4"
-crossScalaVersions := Seq("2.11.9", "2.12.3")
+scalaVersion := "2.12.6"
+crossScalaVersions := Seq("2.11.9", "2.12.6")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -22,7 +22,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.6"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.13"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 fork in Test := true
