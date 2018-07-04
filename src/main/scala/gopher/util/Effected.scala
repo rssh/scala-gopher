@@ -39,7 +39,7 @@ class MultithreadedEffected[T](initValue:T) extends Effected[T]
    setv(f(v.get))
   }
 
-  override def replace(x:T)
+  override def replace(x:T): Unit =
   {
    setv(x)
   }
