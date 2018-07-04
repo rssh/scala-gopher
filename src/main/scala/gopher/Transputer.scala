@@ -194,38 +194,38 @@ trait Transputer
  /**
   * called when transducer is started.
   */
- protected def onStart() { }
+ protected def onStart(): Unit = { }
 
  /**
   * called when transducer is restarted.
   *
   *@param prev - previous (i.e. failed) instance of trnasputer.
   */
- protected def onRestart(prev:Transputer) { }
+ protected def onRestart(prev:Transputer): Unit = { }
 
 
  /**
   * called when transducer is choose to resume durign recovery.
   */
- protected def onResume() { }
+ protected def onResume(): Unit = { }
 
  /**
   * called when failure is escalated.
   **/
- protected def onEscalatedFailure(ex: Throwable) { }
+ protected def onEscalatedFailure(ex: Throwable): Unit = { }
 
  /**
   * called when transputer is stopped.
   */
- protected def onStop() { }
+ protected def onStop(): Unit = { }
 
- private[gopher] def beforeResume() 
+ private[gopher] def beforeResume(): Unit = 
  {
    flowTermination = createFlowTermination()
    onResume();
  }
 
- private[gopher] def beforeRestart(prev: Transputer) 
+ private[gopher] def beforeRestart(prev: Transputer): Unit = 
  {
    if (!(prev eq null)) {
       recoveryStatistics = prev.recoveryStatistics
