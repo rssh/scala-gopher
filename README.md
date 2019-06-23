@@ -4,15 +4,22 @@
 
 ### Dependences:    
  
- * scala 2.12.x or 2.11.x
- * akka 2.5.x +
- * scala-async 0.9.6
+ * scala 2.13 ) scala 2.12.x and 2.11.x)
+ * akka 2.5.x
+ * scala-async 
 
 #### Download: 
 
+For scala 2.13:
+
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.13"
+
+(or `0.99.13-SNAPSHOT` for development version).
+
+For scala 2.12:
+
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.10"
 
-(or `0.99.11-SNAPSHOT` for development version).
 
 Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
 
