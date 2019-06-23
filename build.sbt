@@ -28,7 +28,9 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.23"
 fork in Test := true
 //javaOptions in Test += s"""-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_2.11/0.3/jars/trackedfuture_2.11-assembly.jar"""
 
-version:="0.99.12-SNAPSHOT"
+version:="0.99.13"
+
+credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 publishMavenStyle := true
 
