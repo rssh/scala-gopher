@@ -1,6 +1,6 @@
 package gopher.channels
 
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,Promise,Future}
 import gopher._
 import java.util.concurrent.atomic._
 

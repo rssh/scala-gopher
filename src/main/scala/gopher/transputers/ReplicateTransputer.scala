@@ -3,6 +3,7 @@ package gopher.transputers
 import gopher._
 import gopher.channels._
 import gopher.util._
+
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 import scala.reflect.api._
@@ -10,8 +11,8 @@ import scala.concurrent._
 import scala.annotation._
 import scala.language.higherKinds
 import async.Async._
-
 import scala.collection.mutable.ArraySeq
+import scala.reflect.ClassTag
 
 trait PortAdapter[P[_],A]
 {
@@ -66,7 +67,7 @@ class DistributePortAdapter[A](f: A=>Int, buffLen: Int = 1) extends PortAdapter[
 }
 
 
-class AggregatePortAdapter[A](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter[Output,A]
+class AggregatePortAdapter[A:ClassTag](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter[Output,A]
 {
 
    def apply(x:Output[A], n:Int, api: GopherAPI): (IndexedSeq[Output[A]],Option[ForeverSelectorBuilder=>Unit]) =
@@ -74,13 +75,13 @@ class AggregatePortAdapter[A](f: Seq[A]=>A, buffLen:Int = 1) extends PortAdapter
        val newPorts = (1 to n) map (_ => api.makeChannel[A](buffLen))
        val sf: (ForeverSelectorBuilder=>Unit) = _.readingWithFlowTerminationAsync(newPorts(0),
            (ec:ExecutionContext, ft: FlowTermination[Unit], a: A) => async{
-              val data = new ArraySeq[A](n)
+              val data = new Array[A](n)
               data(0) = a
               val i=1
               while(i<n) {
                 data(i)=await(newPorts(i).aread)
               }
-              await(x.awrite(f(data)))
+              await(x.awrite(f(data.toIndexedSeq)))
               ()
            }(ec)
        )

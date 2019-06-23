@@ -16,7 +16,7 @@ class GoWithDeferSuite extends FunSuite {
   test("2.1. goWithDefer: simple statement with defer must be processed") {
     @volatile var x = 0
     val f = go {
-      defer{ x = 2 }
+      defer( {x = 2} )
       x = 1
     }
     Await.ready(f, 1 second)

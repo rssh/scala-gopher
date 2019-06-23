@@ -43,7 +43,8 @@ object AsyncApply
                q"${p}.${ah}"
       case q"${p}.$h[..$w]" =>
                val ah = genAsyncName(c)(h,hof.pos)
-               q"${p}.${ah}[..$w]"
+               val r = q"${p}.${ah}[..$w]"
+               r
       case q"($fp)=>$res($fp1)" if (fp.symbol == fp1.symbol) => 
                val nested = transformHof[A,B](c)(res,imps)
                val (paramName, paramDef) = createAsyncParam[A,B](c)(fp)

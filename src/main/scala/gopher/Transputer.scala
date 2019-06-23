@@ -104,8 +104,7 @@ trait Transputer
 
  def +(p: Transputer) = new ParTransputer(api, Seq(this,p))
  
- def start():Future[Unit] =
- {
+ def start():Future[Unit] = {
    onStart()
    api.transputerSupervisorRef ! TransputerSupervisor.Start(this)
    flowTermination.future
@@ -118,9 +117,9 @@ trait Transputer
  /**
   * set recover function 
   **/
- def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type =
-  { recoveryFunction = f 
-    this
+ def recover(f: PartialFunction[Throwable,SupervisorStrategy.Directive]): this.type = {
+   recoveryFunction = f
+   this
   }
 
  /**
@@ -167,12 +166,13 @@ trait Transputer
 
    def copyVar[T:ClassTag:ru.TypeTag,V:ClassTag](x:T, y: T, varName: String): Unit =
    {
-     val imx = mirror.reflect(x);
-     val imy = mirror.reflect(y);
+     val imx = mirror.reflect(x)
+     val imy = mirror.reflect(y)
      val field = ru.typeOf[T].decl(ru.TermName(varName)).asTerm.accessed.asTerm
-     
+
      val v = imy.reflectField(field).get
      imx.reflectField(field).set(v)
+
    }
 
    def copyPorts[T:ru.TypeTag:ClassTag]:Unit =
@@ -181,8 +181,8 @@ trait Transputer
      for((x,y) <- newIns zip prevIns) copyVar(x,y,"v")
    }
 
-   copyPorts[InPort[_]];
-   copyPorts[OutPort[_]];
+   copyPorts[InPort[_]]
+   copyPorts[OutPort[_]]
  }
 
 

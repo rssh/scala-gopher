@@ -112,12 +112,14 @@ object GoAsync
     val transformer = new Transformer {
       override def transform(tree:Tree):Tree =
        tree match {
-            case q"gopher.`package`.defer(..${args})" => 
-                       q"implicitly[gopher.Defers[${weakTypeOf[T]}]].defer(..${args map (transform(_))} )"
+            case q"gopher.`package`.defer(..${args})" =>
+              val transformedArgs = args.map(x => Block(transform(x)))
+              q"implicitly[gopher.Defers[${weakTypeOf[T]}]].defer(..${transformedArgs} )"
             case q"$gopher.`package`.recover[$tps](..${args})" =>
-                       q"implicitly[gopher.Defers[${weakTypeOf[T]}]].recover(..${args map (transform(_))} )"
+              val transformedArgs = args.map(x => transform(x))
+              q"implicitly[gopher.Defers[${weakTypeOf[T]}]].recover(..${transformedArgs} )"
             case _ =>
-                      super.transform(tree)
+                   super.transform(tree)
        }
     }
     transformer.transform(body)

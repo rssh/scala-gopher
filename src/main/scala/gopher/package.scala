@@ -1,10 +1,12 @@
 
 import scala.language.experimental.macros
 import scala.language.implicitConversions
-
+import scala.language.higherKinds
 import scala.concurrent._
 import gopher.channels._
 import gopher.goasync._
+
+import scala.collection.BuildFrom
 
 /**
  * Provides scala API for 'go-like' CSP channels.
@@ -59,12 +61,12 @@ import gopher.goasync._
  * }
  *}}}
  *
- *@see [[GopherAPI]]
- *@see [[channels.Channel]]
- *@see [[channels.Input]]
- *@see [[channels.Output]]
- *@see [[channels.SelectorBuilder]]
- *@see [[channels.SelectFactory]]
+ *@see [[gopher.GopherAPI]]
+ *@see [[gopher.channels.Channel]]
+ *@see [[gopher.channels.Input]]
+ *@see [[gopher.channels.Output]]
+ *@see [[gopher.channels.SelectorBuilder]]
+ *@see [[gopher.channels.SelectFactory]]
  *@author Ruslan Shevchenko <ruslan@shevchenko.kiev.ua>
  */
 package object gopher {
@@ -132,7 +134,7 @@ package object gopher {
 //
 // implicit def toFuture[A](sb:SelectorBuilder[A]):Future[A] = sb.go
 
- @scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
+ //@scala.annotation.compileTimeOnly("FlowTermination methods must be used inside flow scopes (go, reading/writing/idle args)")
  implicit def compileTimeFlowTermination[A]: FlowTermination[A] = ???
 
  /**
@@ -186,9 +188,9 @@ package object gopher {
  def asyncApply1[A,B,C](hof:(A=>B)=>C)(nf:A=>Future[B]):Future[C] =
                           macro gopher.goasync.AsyncApply.impl1[A,B,C]
 
- import scala.collection.generic._
- implicit def toAsyncIterable[T](x:Iterable[T]): AsyncIterable[T] = new AsyncIterable[T](x)
- implicit def toAsyncOption[T](x:Option[T]): AsyncOption[T] = new AsyncOption[T](x)
+  implicit def toAsyncIterable[CC[_] <: Iterable[_],A](x:CC[A]): AsyncIterable[A,CC] = new AsyncIterable[A,CC](x)
+  //implicit def toAsyncIterableI[T](x:Iterable[T]): AsyncIterableI[T] = new AsyncIterableI[T](x)
+  implicit def toAsyncOption[T](x:Option[T]): AsyncOption[T] = new AsyncOption[T](x)
 
 
 

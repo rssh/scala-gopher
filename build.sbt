@@ -3,8 +3,8 @@ name:="scala-gopher"
 
 organization:="com.github.rssh"
 
-scalaVersion := "2.12.7"
-crossScalaVersions := Seq("2.11.9", "2.12.7")
+scalaVersion := "2.13.0"
+//crossScalaVersions := Seq("2.12.7")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -17,18 +17,18 @@ scalacOptions ++= Seq("-unchecked","-deprecation", "-feature"
 
 libraryDependencies += scalaVersion( "org.scala-lang" % "scala-reflect" % _ ).value
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6"
+libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.10.0"
 //libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6-SNAPSHOT"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.13"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.23"
 
 //testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
 fork in Test := true
 //javaOptions in Test += s"""-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_2.11/0.3/jars/trackedfuture_2.11-assembly.jar"""
 
-version:="0.99.11-SNAPSHOT"
+version:="0.99.12-SNAPSHOT"
 
 publishMavenStyle := true
 

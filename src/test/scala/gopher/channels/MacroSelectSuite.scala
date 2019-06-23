@@ -3,7 +3,7 @@ package gopher.channels
 import gopher._
 import org.scalatest._
 
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.language._
 

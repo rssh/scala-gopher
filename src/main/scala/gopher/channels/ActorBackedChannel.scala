@@ -6,7 +6,7 @@ import akka.pattern._
 import gopher._
 import gopher.channels.ContRead.In
 
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
 import scala.language.experimental.macros
 import scala.language.postfixOps

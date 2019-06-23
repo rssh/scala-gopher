@@ -4,7 +4,7 @@ package gopher.channels
 import gopher._
 import org.scalatest._
 
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.language.postfixOps
 
 class FlowTerminationSuite extends AsyncFunSuite
@@ -16,9 +16,10 @@ class FlowTerminationSuite extends AsyncFunSuite
 
     val fUnit = PromiseFlowTermination[Unit]()
     // val fAny: FlowTermination[Any] = fUnit
-    implicit val f_ : FlowTermination[_] = fUnit
 
-    val qq = implicitly[FlowTermination[_]]
+    val f_ : FlowTermination[_] = fUnit
+    val qq = f_
+
 
     assert(true)
   }

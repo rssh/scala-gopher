@@ -4,7 +4,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.async.Async._
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
 import scala.reflect.api._
 import gopher._
 
@@ -18,7 +17,7 @@ class OutputWithTimeouts[A](origin: Output[A], timeout: FiniteDuration)
 
   def pair:(Output[A],Input[FiniteDuration]) = (wrapped, timeouts)
 
-  val timeouts: Channel[FiniteDuration] = api.makeChannel[FiniteDuration]()
+  val timeouts: gopher.channels.Channel[FiniteDuration] = api.makeChannel[FiniteDuration]()
 
   val wrapped: Output[A] = new Output[A] {
 
