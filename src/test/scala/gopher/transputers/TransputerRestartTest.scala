@@ -93,7 +93,7 @@ class TransputerRestartTest extends FunSuite
      r
   }
 
-  test("bingo resume", Now) {
+  test("bingo resume") {
      val inX = gopherApi.iterableInput(1 to 100)
      val inY = gopherApi.iterableInput(1 to 100)
      val bingo = gopherApi.makeTransputer[BingoWithRecover]
