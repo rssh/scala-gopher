@@ -4,17 +4,17 @@
 
 ### Dependences:    
  
- * scala 2.13 ) scala 2.12.x and 2.11.x)
- * akka 2.5.x
+ * scala 2.13.3
+ * akka 2.6.8
  * scala-async 
 
 #### Download: 
 
 For scala 2.13:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.13"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.15"
 
-(or `0.99.13-SNAPSHOT` for development version).
+(or `0.99.16-SNAPSHOT` for development version).
 
 For scala 2.12:
 
