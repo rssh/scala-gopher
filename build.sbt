@@ -8,7 +8,7 @@ scalaVersion := "2.13.3"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 scalacOptions ++= Seq("-unchecked","-deprecation", "-feature", "-Xasync",
                          /* ,  "-Ymacro-debug-lite"  */
