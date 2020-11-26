@@ -1,71 +1,38 @@
-
-name:="scala-gopher"
-
-organization:="com.github.rssh"
-
-scalaVersion := "2.13.3"
-//crossScalaVersions := Seq("2.12.7")
-
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
-
-scalacOptions ++= Seq("-unchecked","-deprecation", "-feature", "-Xasync",
-                         /* ,  "-Ymacro-debug-lite"  */
-                         /*  ,   "-Ydebug"  ,  "-Ylog:lambdalift"  */ 
-                     )
-
-libraryDependencies += scalaVersion( "org.scala-lang" % "scala-reflect" % _ ).value
-
-libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.10.0"
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.6.8"
-
-//testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-n", "Now")
-fork in Test := true
-//javaOptions in Test += s"""-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_2.11/0.3/jars/trackedfuture_2.11-assembly.jar"""
-
-version:="0.99.16-SNAPSHOT"
-
-credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
-
-publishMavenStyle := true
-
-publishTo := version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT")) 
-    Some("snapshots" at nexus + "content/repositories/snapshots") 
-  else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
-} .value
+//val dottyVersion = "3.0.0-M1-bin-20201022-b26dbc4-NIGHTLY"
+val dottyVersion = "3.0.0-RC1-bin-SNAPSHOT"
+//val dottyVersion = dottyLatestNightlyBuild.get
 
 
-publishArtifact in Test := false
-
-pomIncludeRepository := { _ => false }
-
-pomExtra := (
-  <url>http://rssh.github.com/scala-gopher</url>
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <url>git@github.com:rssh/scala-gopher.git</url>
-    <connection>scm:git:git@github.com:rssh/scala-gopher.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>rssh</id>
-      <name>Ruslan Shevchenko</name>
-      <url>rssh.github.com</url>
-    </developer>
-  </developers>
+val sharedSettings = Seq(
+    version := "2.0.0-SNAPSHOT",
+    organization := "com.github.rssh",
+    scalaVersion := dottyVersion,
+    name := "scala-gopher",
+    //resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
+    resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.3.4-SNAPSHOT",
 )
 
+lazy val root = project
+  .in(file("."))
+  .aggregate(gopher.js, gopher.jvm)
+  .settings(
+    Sphinx / sourceDirectory := baseDirectory.value / "docs",
+    git.remoteRepo := "git@github.com:rssh/dotty-cps-async.git",
+    publishArtifact := false,
+  ).enablePlugins(SphinxPlugin)
+   .enablePlugins(GhpagesPlugin)
+
+
+lazy val gopher = crossProject(JSPlatform, JVMPlatform)
+    .in(file("."))
+    .settings(sharedSettings)
+    .disablePlugins(SitePlugin)
+    .jvmSettings(
+        scalacOptions ++= Seq( "-unchecked" ), 
+        libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
+    ).jsSettings(
+        scalaJSUseMainModuleInitializer := true,
+        libraryDependencies += ("org.scala-js" %% "scalajs-junit-test-runtime" % "1.2.0" % Test).withDottyCompat(scalaVersion.value)
+    )
 
