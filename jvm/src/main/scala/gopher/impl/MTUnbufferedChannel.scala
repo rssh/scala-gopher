@@ -13,13 +13,14 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A <: AnyRef](controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A] with IOChannel[F,A,A] with OChannel[F,A] with IChannel[F,A]:
+class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A](controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A] with IOChannel[F,A,A] with OChannel[F,A] with IChannel[F,A]:
 
   private val readers = new ConcurrentLinkedDeque[Reader[A]]()
   private val writers = new ConcurrentLinkedDeque[Writer[A]]()
-  private val ref = new AtomicReference[A|Null](null)
+  private val ref = new AtomicReference[AnyRef|Null](null)
   private val isClosed = new AtomicBoolean(false)
   private val stepRunnable: Runnable = (()=>step())
+
   
   def addReader(reader: Reader[A]): Unit =
      if (reader.canExpire) then
@@ -40,7 +41,7 @@ class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A <: AnyRef](controlExecutor: Execu
     var progress = true
     while(progress)
       progress = false
-      val a: A|Null = ref.get()
+      val a: AnyRef|Null = ref.get()
       if !(a eq null) then
         val reader = readers.poll()
         if !(reader eq null) then
@@ -48,7 +49,8 @@ class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A <: AnyRef](controlExecutor: Execu
            reader.capture() match
              case Some(f) => 
                 if (ref.compareAndSet(a,null))
-                    taskExecutor.execute( ()=>f(Success(a.nn)) ) // TODO: what if f throws exception [?] 
+                    // TODO: explicit boxing/unboxing ?
+                    taskExecutor.execute( ()=>f(Success(a.nn.asInstanceOf[A])) ) // TODO: what if f throws exception [?] 
                     reader.markUsed()
                 else
                     // somebody from other thread stole our 'a', so need to try again
@@ -71,7 +73,8 @@ class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A <: AnyRef](controlExecutor: Execu
            progress = true
            writer.capture() match
              case Some((a,f)) =>  
-                 if (ref.compareAndSet(null,a)) 
+                 val ar = a.asInstanceOf[AnyRef]
+                 if (ref.compareAndSet(null,ar)) 
                      taskExecutor.execute( () => f(Success(()))  )
                      writer.markUsed()
                  else
