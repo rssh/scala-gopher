@@ -6,10 +6,10 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
 
 
    def makeChannel[A](bufSize:Int) =
-       if (bufSize == 1)
-          new impl.UnbufferedChannel[F,A](this)
+       if (bufSize == 1) then
+          impl.UnbufferedChannel[F,A](this)
        else 
-          ???
+          impl.BufferedChannel[F,A](this,bufSize)
 
 object JSGopher extends GopherAPI:
 

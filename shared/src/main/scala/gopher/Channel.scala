@@ -2,7 +2,7 @@ package gopher
 
 import cps._
 
-trait Channel[F[_],W,R] extends ReadChannel[F,R] with WriteChannel[F,W]:
+trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R]:
 
   override protected def asyncMonad: CpsAsyncMonad[F]
 
