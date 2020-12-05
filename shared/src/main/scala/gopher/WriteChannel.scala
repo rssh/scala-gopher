@@ -4,15 +4,16 @@ import cps._
 
 import scala.util.Try
 
-trait OChannel[F[_]:CpsAsyncMonad, A]:
+trait WriteChannel[F[_], A]:
 
+   protected def asyncMonad: CpsAsyncMonad[F]
 
    def awrite(a:A):F[Unit] =
-     summon[CpsAsyncMonad[F]].adoptCallbackStyle(f =>
+      asyncMonad.adoptCallbackStyle(f =>
          addWriter(SimpleWriter(a, f))
-     )
+      )
    
-   inline def write(a:A): Unit = await(awrite(a)) 
+   inline def write(a:A): Unit = await(awrite(a))(using asyncMonad) 
 
    def addWriter(writer: Writer[A]): Unit 
      

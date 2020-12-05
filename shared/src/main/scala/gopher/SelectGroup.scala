@@ -17,11 +17,11 @@ trait SelectGroup[F[_]:CpsSchedulingMonad, S]:
     val retval = m.adoptCallbackStyle[S](f => call=f)
 
 
-    def addReader[A](ch: IChannel[F,A], action: Try[A]=>F[S]): Unit =
+    def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
         ch.addReader(record)
 
-    def addWriter[A](ch: OChannel[F,A], element: A, action: Try[Unit]=>F[S]): Unit =
+    def addWriter[A](ch: WriteChannel[F,A], element: A, action: Try[Unit]=>F[S]): Unit =
         val record = WriterRecord(ch, element, action)
         ch.addWriter(record)
 
@@ -35,7 +35,7 @@ trait SelectGroup[F[_]:CpsSchedulingMonad, S]:
       def markUsed(): Unit = waitState.lazySet(2)
       def markFree(): Unit = waitState.set(0)
 
-    case class ReaderRecord[A](ch: IChannel[F,A], action: Try[A] => F[S]) extends Reader[A] with Expiration:
+    case class ReaderRecord[A](ch: ReadChannel[F,A], action: Try[A] => F[S]) extends Reader[A] with Expiration:
       type Element = A
       type State = S
 
@@ -51,7 +51,7 @@ trait SelectGroup[F[_]:CpsSchedulingMonad, S]:
 
 
 
-    case class WriterRecord[A](ch: OChannel[F,A], 
+    case class WriterRecord[A](ch: WriteChannel[F,A], 
                                element: A, 
                                action: Try[Unit] => F[S], 
                                ) extends Writer[A] with Expiration:

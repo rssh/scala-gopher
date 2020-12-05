@@ -13,7 +13,7 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A](controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A] with IOChannel[F,A,A] with OChannel[F,A] with IChannel[F,A]:
+class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A](controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A,A]:
 
   private val readers = new ConcurrentLinkedDeque[Reader[A]]()
   private val writers = new ConcurrentLinkedDeque[Writer[A]]()
@@ -21,6 +21,7 @@ class MTUnbufferedChannel[F[_]:CpsAsyncMonad,A](controlExecutor: ExecutorService
   private val isClosed = new AtomicBoolean(false)
   private val stepRunnable: Runnable = (()=>step())
 
+  override protected def asyncMonad: CpsAsyncMonad[F] = summon[CpsAsyncMonad[F]]
   
   def addReader(reader: Reader[A]): Unit =
      if (reader.canExpire) then

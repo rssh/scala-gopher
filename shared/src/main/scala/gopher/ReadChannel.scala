@@ -5,24 +5,27 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-trait IChannel[F[_], A]:
+trait ReadChannel[F[_], A]:
 
    type Read = A
 
+   // workarround for https://github.com/lampepfl/dotty/issues/10477
+   protected def asyncMonad: CpsAsyncMonad[F]
+
+   protected def rAsyncMonad: CpsAsyncMonad[F] = asyncMonad
+
    def addReader(reader: Reader[A]): Unit
 
-   // workarround for https://github.com/lampepfl/dotty/issues/10477
-   protected def m: CpsAsyncMonad[F]
   
    def aread:F[A] = 
-      m.adoptCallbackStyle(f => addReader(SimpleReader(f)))
+      asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))
                                
-   inline def read: A = await(aread)(using m)
+   inline def read: A = await(aread)(using rAsyncMonad)
 
-   inline def ? : A = await(aread)(using m)
+   inline def ? : A = await(aread)(using rAsyncMonad)
 
    def aOptRead: F[Option[A]] =
-       m.adoptCallbackStyle( f =>
+       asyncMonad.adoptCallbackStyle( f =>
                    addReader(SimpleReader{ x => x match
                                             case Failure(ex: ChannelClosedException) => f(Success(None)) 
                                             case Failure(ex) => f(Failure(ex)) 
@@ -30,7 +33,7 @@ trait IChannel[F[_], A]:
                                          })
        )
 
-   inline def optRead: Option[A] = await(aOptRead)(using m)
+   inline def optRead: Option[A] = await(aOptRead)(using rAsyncMonad)
 
    class SimpleReader(f: Try[A] => Unit) extends Reader[A]:
 
