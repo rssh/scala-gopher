@@ -11,9 +11,6 @@ val sharedSettings = Seq(
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
     libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.3.4p1-M2-SNAPSHOT",
-    // 0.7.5 for scaladoc is not exists
-    //libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.5" % "test",
-    //testFrameworks += new TestFramework("utest.runner.Framework")
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.19" % Test,
     testFrameworks += new TestFramework("munit.Framework")
 )

@@ -20,6 +20,8 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
   protected def internalDequeueFinish(): Unit
   protected def internalEnqueue(a:A): Boolean 
 
+  override def close(): Unit =
+    closed = true
 
   protected def submitTask(f: ()=>Unit ): Unit =
     JSExecutionContext.queue.execute{ () =>
@@ -34,7 +36,7 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
     }
 
   def addReader(reader: Reader[A]): Unit = 
-      if (closed) {
+      if (closed && internalDequeuePeek().isEmpty ) {
         reader.capture().foreach{ f =>
             submitTask( () => 
               f(Failure(new ChannelClosedException()))
@@ -63,9 +65,11 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
     var progress = true
     while(progress)
       internalDequeuePeek() match
-        case Some(a) => progress = processReaders(a)
-        case None => progress = processWriters()
-      
+        case Some(a) => 
+          progress = processReaders(a)
+        case None => 
+          progress = processWriters()
+            
   protected def processReaders(a:A): Boolean =
     var progress = false
     if (!readers.isEmpty) then

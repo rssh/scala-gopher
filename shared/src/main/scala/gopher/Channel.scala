@@ -1,8 +1,9 @@
 package gopher
 
 import cps._
+import java.io.Closeable
 
-trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R]:
+trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Closeable:
 
   override protected def asyncMonad: CpsAsyncMonad[F]
 

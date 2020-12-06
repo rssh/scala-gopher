@@ -13,10 +13,10 @@ class JVMGopher[F[_]:CpsSchedulingMonad](cfg: JVMGopherConfig) extends Gopher[F]
 
 
    def makeChannel[A](bufSize:Int) =
-       if (bufSize == 1)
-          MTUnbufferedChannel[F,A](cfg.controlExecutor,cfg.taskExecutor)
+       if (bufSize == 0)
+         GuardedSPSCUnbufferedChannel[F,A](this, cfg.controlExecutor,cfg.taskExecutor)
        else 
-          ???
+         GuardedSPSCBufferedChannel[F,A](this, bufSize, cfg.controlExecutor,cfg.taskExecutor) 
 
 object JVMGopher extends GopherAPI:
 
