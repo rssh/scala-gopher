@@ -16,9 +16,7 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
 
   protected override def asyncMonad: cps.CpsAsyncMonad[F] = summon[CpsAsyncMonad[F]]
 
-  protected def internalDequeuePeek(): Option[A]
-  protected def internalDequeueFinish(): Unit
-  protected def internalEnqueue(a:A): Boolean 
+
 
   override def close(): Unit =
     closed = true
@@ -36,7 +34,7 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
     }
 
   def addReader(reader: Reader[A]): Unit = 
-      if (closed && internalDequeuePeek().isEmpty ) {
+      if (closed && writers.isEmpty ) {
         reader.capture().foreach{ f =>
             submitTask( () => 
               f(Failure(new ChannelClosedException()))
@@ -59,34 +57,6 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
           process()
         }
   
+  protected def process(): Unit
 
 
-  private def process(): Unit = 
-    var progress = true
-    while(progress)
-      internalDequeuePeek() match
-        case Some(a) => 
-          progress = processReaders(a)
-        case None => 
-          progress = processWriters()
-            
-  protected def processReaders(a:A): Boolean =
-    var progress = false
-    if (!readers.isEmpty) then
-      val reader = readers.dequeue()
-      progress = true
-      reader.capture().foreach{ f => 
-          internalDequeueFinish()
-          submitTask( () => f(Success(a)) )
-      }
-    progress  
-      
-  protected def processWriters(): Boolean =
-    var progress = false
-    if (!writers.isEmpty) then
-      val writer = writers.dequeue()
-      writer.capture().foreach{ case (a,f) =>
-          internalEnqueue(a)
-          f(Success(()))
-      }
-    progress

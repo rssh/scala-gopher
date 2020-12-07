@@ -10,17 +10,52 @@ import scala.util.control.NonFatal
 
 class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends BaseChannel[F,A](gopherApi):
   
-  private var value: Option[A] = None
+  protected def process(): Unit =
+    var progress = true
+    while(progress) {
+      progress = false
+      var done = false
+      while(!done && !readers.isEmpty && !writers.isEmpty) {
+         findReader() match
+           case Some(reader) =>
+             findWriter() match 
+                case Some(writer) =>
+                  reader.capture() match 
+                    case Some(readFun) =>
+                      writer.capture() match 
+                        case Some((a,writeFun)) =>
+                          submitTask( () => readFun(Success(a)))
+                          submitTask( () => writeFun(Success(())) )
+                          progress = true
+                          done = true
+                        case None =>
+                          // impossible, because in js we have-no interleavinf, bug anyway
+                          // let's fallback
+                          readers.prepend(reader)
+                    case None =>
+                      // impossible, but let's fallback
+                      writers.prepend(writer)
+                case None =>
+                  done = true
+           case None => 
+            done = true 
+      }
+    } 
 
-  protected override def internalDequeuePeek(): Option[A] = value
+
+  private def findUnexpired[T <: Expirable[?]](q: Queue[T]): Option[T] =
+    var retval: Option[T] = None
+    while(retval.isEmpty && ! q.isEmpty) {
+      val c = q.dequeue;
+      if (!c.isExpired) {
+        retval = Some(c)
+      }
+    }
+    retval
+
+  private def findReader(): Option[Reader[A]] =
+    findUnexpired(readers)
+
+  private def findWriter(): Option[Writer[A]] =
+    findUnexpired(writers)
   
-  protected override def internalDequeueFinish(): Unit = 
-    value = None
-
-  protected def internalEnqueue(a:A): Boolean =
-    value match
-      case None => value = Some(a)
-                   true
-      case Some(a1) => false
-
-

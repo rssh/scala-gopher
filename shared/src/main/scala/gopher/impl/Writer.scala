@@ -1,4 +1,4 @@
-package gopher
+package gopher.impl
 
 import scala.util.Try
 

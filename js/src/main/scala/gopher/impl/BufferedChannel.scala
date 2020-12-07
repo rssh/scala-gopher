@@ -10,51 +10,70 @@ import scala.util.control.NonFatal
 
 class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: Int) extends BaseChannel[F,A](gopherApi):
 
-  val  ringBuffer: js.Array[A] = new js.Array[A](bufSize+1)
+  val  ringBuffer: js.Array[A] = new js.Array[A](bufSize)
   var  start: Int = 0
-  var  end: Int = 0
+  var  size: Int = 0
 
   //  [1] [2] [3]
   //  ˆ        ˆ
 
-  def  isEmpty = (start == end)
+  def  isEmpty = (size == 0)
 
-  def  nElements =  if (end > start) then {
-                       end - start 
-                    } else if (start < end) then {
-                       bufSize - start + end
-                    } else 0
+  def  nElements = size
   
-  def isFull = (nElements == bufSize)
+  def isFull = (size == bufSize)
 
-  protected override def internalDequeuePeek(): Option[A] = 
+  protected def internalDequeuePeek(): Option[A] = 
     if isEmpty then None else Some(ringBuffer(start))
   
-  protected override def internalDequeueFinish(): Unit = 
+  protected def internalDequeueFinish(): Unit = 
+    require(size > 0)
     start = (start + 1) % bufSize
+    size = size - 1
 
   protected def internalEnqueue(a:A): Boolean =
-    if (start < end) then
-      if (end <= bufSize) then
-          ringBuffer(end) = a
-          end = end + 1
-          true
-      else if (start == 0) then
-          false
-      else
-          ringBuffer(end) = a
-          end = 0
-          true
-    else 
-      if (end < start - 1) then
-        ringBuffer(end) = a
-        end = end + 1
-        true
-      else
-        false
+    if size < bufSize then
+      val end = (start + size) % bufSize
+      ringBuffer(end) = a
+      size = size + 1
+      true
+    else
+      false
+    
 
-        
+  protected def process(): Unit = 
+    var progress = true
+    while(progress)
+      progress = false
+      internalDequeuePeek() match 
+        case Some(a) => 
+           progress |= processReaders(a)
+        case None =>
+           // nothing.
+      progress |= processWriters()
+                
+  protected def processReaders(a:A): Boolean =
+    var progress = false
+    if (!readers.isEmpty && !isEmpty) then
+      val reader = readers.dequeue()
+      progress = true
+      reader.capture().foreach{ f => 
+        internalDequeueFinish()
+        submitTask( () => f(Success(a)) )
+      }
+    progress  
+          
+  protected def processWriters(): Boolean =
+    var progress = false
+    if (!writers.isEmpty && !isFull) then
+      val writer = writers.dequeue()
+      writer.capture().foreach{ case (a,f) =>
+          internalEnqueue(a)
+          f(Success(()))
+      }
+    progress
 
+  
 
 
       

@@ -47,6 +47,7 @@ class HofAsyncSuite extends FunSuite
    }
 
    
+   // Moved to new
    test("test async operations inside map")  {
      val channel = gopherApi.makeChannel[Int](100)
      channel.awriteAll(1 to 100)

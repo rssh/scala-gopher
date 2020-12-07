@@ -9,6 +9,5 @@ trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Clo
 
   //protected override def asyncMonad: CpsAsyncMonad[F]
 
-
 end Channel
 

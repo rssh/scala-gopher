@@ -1,6 +1,7 @@
 package gopher
 
 import cps._
+import gopher.impl._
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
