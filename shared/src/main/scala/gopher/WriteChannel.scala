@@ -4,8 +4,11 @@ import cps._
 import gopher.impl._
 
 import scala.util.Try
+import scala.annotation.targetName
 
 trait WriteChannel[F[_], A]:
+
+   type write = A
 
    protected def asyncMonad: CpsAsyncMonad[F]
 
@@ -15,6 +18,9 @@ trait WriteChannel[F[_], A]:
       )
    
    inline def write(a:A): Unit = await(awrite(a))(using asyncMonad) 
+
+   @targetName("write1")
+   inline def <~ (a:A): Unit = await(awrite(a))(using asyncMonad) 
 
    def addWriter(writer: Writer[A]): Unit 
      

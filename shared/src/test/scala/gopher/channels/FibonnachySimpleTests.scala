@@ -1,15 +1,17 @@
 package gopher.channels
 
+import scala.concurrent._
+import cps._
+import cps.monads.FutureAsyncMonad
 import gopher._
 
 import munit._
 
-/* TODO: enablle after implementing select macroses.
 class FibbonachySimpleTest extends FunSuite {
 
 
   import scala.concurrent.ExecutionContext.Implicits.global
-  val gopherApi = SharedGopherAPI.apply[Future]()
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
 
   def fibonaccy0(c: WriteChannel[Future,Long], quit: ReadChannel[Future,Int]): Future[Unit] =
@@ -17,20 +19,62 @@ class FibbonachySimpleTest extends FunSuite {
       var (x,y) = (0,1)
       var done = false
       while(!done) {
+        // TODO: add select group to given
+        SelectGroup[Future,Unit]().writing(c, x){
+                       x=y
+                       y=x+y
+                    }
+                   .reading(quit){ v =>
+                       done = true
+                   }
+                   .run
+      }
+    }
+
+  def fibonaccy1(c: WriteChannel[Future,Long], quit: ReadChannel[Future,Int]): Future[Unit] =
+    async[Future]{
+      var (x,y) = (0L,1L)
+      var done = false
+      while(!done) {
         select{
-          case z: c.Write if (z == x) =>
+          case z: c.write if (z == x) =>
             x = y
             y = z + y
-          case q: quit.Read => 
+          case q: quit.read => 
             done = true
         }
       }
     }
 
-  test("simple fibonnachy fun") {
+  def run(starter: (WriteChannel[Future,Long], ReadChannel[Future,Int])=> Future[Unit],
+          acceptor: Long => Unit, n:Int): Future[Unit] = {
+    val fib = makeChannel[Long]()
+    val q = makeChannel[Int]()
+    val start = fibonaccy0(fib, q)
+    async{
+      for( i <- 1 to n) {
+        var x = fib.read
+        acceptor(x)
+      }
+      q <~ 1
+    }
+  }
 
+  test("simple fibonnachy fun (no macroses)") {
+    @volatile var last: Long = 0L
+    async{
+      await(run(fibonaccy0, last = _, 50))
+      assert(last != 0)
+    }
+  }
+
+  test("fibonnachy fun (select macros)") {
+    @volatile var last: Long = 0L
+    async{
+      await(run(fibonaccy0, last = _, 50))
+      assert(last != 0)
+    }
   }
 
 
 }
-*/

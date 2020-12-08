@@ -8,7 +8,7 @@ import scala.util.Failure
 
 trait ReadChannel[F[_], A]:
 
-   type Read = A
+   type read = A
 
    // workarround for https://github.com/lampepfl/dotty/issues/10477
    protected def asyncMonad: CpsAsyncMonad[F]
@@ -24,6 +24,9 @@ trait ReadChannel[F[_], A]:
    inline def read: A = await(aread)(using rAsyncMonad)
 
    inline def ? : A = await(aread)(using rAsyncMonad)
+
+   object Read:
+     def unapply(): Option[A] = ???
 
    def aOptRead: F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>

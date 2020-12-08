@@ -2,9 +2,12 @@ package gopher
 
 import scala.annotation._
 
+sealed trait SelectFlow[S]
+
+
 
 /**
- * FlowTermination[-A] - termination of flow.
+ * FlowTermination- termination of flow.
  *
  * Inside each block in select loop or
  * select apply (once or forever) we have implicit
@@ -14,17 +17,17 @@ import scala.annotation._
  *{{{
  *  select.forever{
  *      case x: info.read => Console.println(s"received from info \$x")
- *      case x: control.read => implicitly[FlowTermination[Unit]].doExit(())
+ *      case x: control.read => Select.Done(())
  *  }
  *}}}
  **/
-trait FlowTermination[-A]:
+trait FlowTermination:
 
   /**
    * terminate current flow and leave `a` as result of flow.
    * have no effect if flow is already completed.
    */
-  def apply(value: A): A@unchecked.uncheckedVariance 
+  def apply[A](value: A): A 
 
 
   

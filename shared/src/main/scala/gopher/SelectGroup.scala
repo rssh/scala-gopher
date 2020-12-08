@@ -11,7 +11,7 @@ import scala.util._
  * Select group is a virtual 'lock' object, where only
  * ne fro rieader and writer can exists at the sae time.
  **/
-class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
+class SelectGroup[F[_]:CpsSchedulingMonad, S]:
 
     /**
      * instance of select group created for call of select.
@@ -21,17 +21,18 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
     private inline def m = summon[CpsSchedulingMonad[F]]
     val retval = m.adoptCallbackStyle[S](f => call=f)
    
-    def addReader[A](ch: ReadChannel[F,A], action: FlowTermination[S] ?=> Try[A]=>F[S]): Unit =
+    def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
         ch.addReader(record)
 
-    def addWriter[A](ch: WriteChannel[F,A], element: A, action: FlowTermination[S] ?=> Try[Unit]=>F[S]): Unit =
+    def addWriter[A](ch: WriteChannel[F,A], element: A, action: Try[Unit]=>F[S]): Unit =
         val record = WriterRecord(ch, element, action)
         ch.addWriter(record)
 
     def step():F[S] =
        retval
 
+    inline def run: S = await(step())
 
     /**
      * FluentDSL for user SelectGroup without macroses.
@@ -48,28 +49,38 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
       this
 
     // reading call will be tranformed to reader_async in async expressions
-    def  reading_async[A](ch: ReadChannel[F,A]) (f: A => F[S] ): F[this.type] =
+    def  reading_async[A](ch: ReadChannel[F,A])(f: A => F[S] ): F[this.type] =
       addReader[A](ch,{
         case Success(a) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex) 
       })
       m.pure(this)
 
+    def  writing[A](ch: WriteChannel[F,A], a:A)(f: =>S ): SelectGroup[F,S] =
+      addWriter[A](ch,a,{
+        case Success(()) => m.tryPure(f)
+        case Failure(ex) => m.error(ex)
+      })
+      this
 
-    //  TODO: version with flow termination
-    //def  reading[A](ch: ReadChannel[F,A])( flowTermination ?=> A => F[S] )
-  
+    def  writing_async[A](ch: WriteChannel[F,A], a:A) (f: ()=> F[S] ): F[this.type] =
+      addWriter[A](ch,a,{
+        case Success(()) => m.tryImpure(f())
+        case Failure(ex) => m.error(ex)
+      })
+      m.pure(this)
+
+
     //
-
-
-                 
     trait Expiration:
       def canExpire: Boolean = true
       def isExpired: Boolean = waitState.get()==2
       def markUsed(): Unit = waitState.lazySet(2)
       def markFree(): Unit = waitState.set(0)
 
-    case class ReaderRecord[A](ch: ReadChannel[F,A], action: FlowTermination[S] ?=> Try[A] => F[S]) extends Reader[A] with Expiration:
+
+
+    case class ReaderRecord[A](ch: ReadChannel[F,A], action: Try[A] => F[S]) extends Reader[A] with Expiration:
       type Element = A
       type State = S
 
@@ -87,7 +98,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
 
     case class WriterRecord[A](ch: WriteChannel[F,A], 
                                element: A, 
-                               action: FlowTermination[S] ?=> Try[Unit] => F[S], 
+                               action: Try[Unit] => F[S], 
                                ) extends Writer[A] with Expiration:
       type Element = A
       type State = S
@@ -99,6 +110,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
                                                  )))
              else
                  None
+
 
 
 

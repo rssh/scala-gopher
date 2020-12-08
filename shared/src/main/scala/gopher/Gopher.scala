@@ -15,3 +15,6 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
 def makeChannel[A](bufSize:Int = 1)(using g:Gopher[?]):Channel[g.Monad,A,A] =
       g.makeChannel(bufSize)
 
+def select(using g:Gopher[?]):Select[g.Monad] =
+      g.select
+
