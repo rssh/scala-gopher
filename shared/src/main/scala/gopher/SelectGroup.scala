@@ -11,7 +11,7 @@ import scala.util._
  * Select group is a virtual 'lock' object, where only
  * ne fro rieader and writer can exists at the sae time.
  **/
-class SelectGroup[F[_]:CpsSchedulingMonad, S]:
+class SelectGroup[F[_]:CpsSchedulingMonad, S](using FlowTermination[S]):
 
     /**
      * instance of select group created for call of select.
@@ -20,12 +20,12 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S]:
     var call: Try[S] => Unit = { _ => () }
     private inline def m = summon[CpsSchedulingMonad[F]]
     val retval = m.adoptCallbackStyle[S](f => call=f)
-
-    def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
+   
+    def addReader[A](ch: ReadChannel[F,A], action: FlowTermination[S] ?=> Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
         ch.addReader(record)
 
-    def addWriter[A](ch: WriteChannel[F,A], element: A, action: Try[Unit]=>F[S]): Unit =
+    def addWriter[A](ch: WriteChannel[F,A], element: A, action: FlowTermination[S] ?=> Try[Unit]=>F[S]): Unit =
         val record = WriterRecord(ch, element, action)
         ch.addWriter(record)
 
@@ -69,7 +69,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S]:
       def markUsed(): Unit = waitState.lazySet(2)
       def markFree(): Unit = waitState.set(0)
 
-    case class ReaderRecord[A](ch: ReadChannel[F,A], action: Try[A] => F[S]) extends Reader[A] with Expiration:
+    case class ReaderRecord[A](ch: ReadChannel[F,A], action: FlowTermination[S] ?=> Try[A] => F[S]) extends Reader[A] with Expiration:
       type Element = A
       type State = S
 
@@ -87,7 +87,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S]:
 
     case class WriterRecord[A](ch: WriteChannel[F,A], 
                                element: A, 
-                               action: Try[Unit] => F[S], 
+                               action: FlowTermination[S] ?=> Try[Unit] => F[S], 
                                ) extends Writer[A] with Expiration:
       type Element = A
       type State = S
