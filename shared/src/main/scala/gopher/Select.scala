@@ -3,44 +3,71 @@ package gopher
 import cps._
 
 import scala.quoted._
+import scala.compiletime._
 
 class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
-    inline def apply[A](inline pf: PartialFunction[Any,A]): A =
-      ${  Select.onceImpl[F,A]('pf)  }    
+  inline def apply[A](inline pf: PartialFunction[Any,A]): A =
+    ${  
+      Select.onceImpl[F,A]('pf, '{summonInline[CpsSchedulingMonad[F]]} )  
+     }    
+     
+
 
 object Select:
 
-  sealed trait SelectorCaseExpr
-  case class ReadExpression[F[_], A, S](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr
-  case class WriteExpression[F[_], A, S](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[() => F[S]]) extends SelectorCaseExpr
-  case class DefaultExpression[S](ch: Expr[ () => S ]) extends SelectorCaseExpr
+  sealed trait SelectGroupExpr[F[_],S]:
+    def  toExpr: Expr[SelectGroup[F,S]]
+
+  sealed trait SelectorCaseExpr[F[_]:Type, S:Type]:
+     type Monad[X] = F[X]
+     def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]]
+
+  case class ReadExpression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
+     def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+       '{  $base.reading($ch)($f) }
+       
+  case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[() => S]) extends SelectorCaseExpr[F,S]:
+      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+      '{  $base.writing($ch,$a)($f()) }
+   
+  case class DefaultExpression[F[_]:Type,S:Type](ch: Expr[ () => S ]) extends SelectorCaseExpr[F,S]:
+      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+       '{  ??? }
+    
   
 
-  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]])(using Quotes): Expr[A] =
+  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]])(using Quotes): Expr[A] =
     import quotes.reflect._
-    onceImplTree[F,A](Term.of(pf)).asExprOf[A]
+    onceImplTree[F,A](Term.of(pf), m).asExprOf[A]
 
-  def onceImplTree[F[_]:Type, A:Type](using Quotes)(pf: quotes.reflect.Term): quotes.reflect.Term =
+  def onceImplTree[F[_]:Type, S:Type](using Quotes)(pf: quotes.reflect.Term, m: Expr[CpsSchedulingMonad[F]]): quotes.reflect.Term =
     import quotes.reflect._
     pf match
       case Lambda(valDefs, body) =>
-        onceImplTree[F,A](body)
+        onceImplTree[F,S](body, m)
       case Inlined(_,List(),body) => 
-        onceImplTree[F,A](body)
+        onceImplTree[F,S](body, m)
       case Match(scrutinee,cases) =>
-        val caseExprs = cases map(x => parseCaseDef[F,A](x))
-    ???
+        //val caseExprs = cases map(x => parseCaseDef[F,A](x))
+        //if (caseExprs.find(_.isInstanceOf[DefaultExpression[?]]).isDefined) {
+        //  report.error("default is not supported")
+        //}
+        val s0 = '{
+            new SelectGroup[F,S](using $m)
+          }
+        val g: Expr[SelectGroup[F,S]] = cases.foldLeft(s0){(s,e) =>
+           parseCaseDef(e).appended(s)
+        }
+        val r = '{ $g.run }
+        Term.of(r)
+    
 
-  def parseCaseDef[F[_]:Type,S:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr =
+  def parseCaseDef[F[_]:Type,S:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S] =
     import quotes.reflect._
     caseDef.pattern match 
       case Inlined(_,List(),body) => 
             parseCaseDef(CaseDef(body, caseDef.guard, caseDef.rhs))
-      case Typed(expr, tp@TypeSelect(ch,"read")) =>
-        if (caseDef.guard.isDefined) then
-          report.error("guard in read should be empty", caseDef.asExpr)
-        println(s"caseDef.rhs.tpe=${caseDef.rhs.tpe}" )
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"read"))) =>
           val mt = MethodType(List(v))(_ => List(tp.tpe), _ => caseDef.rhs.tpe)
           val readFun = Lambda(Symbol.spliceOwner,mt,
@@ -72,12 +99,16 @@ object Select:
           if (ch.tpe <:< TypeRepr.of[WriteChannel[F,?]]) then
             tp.tpe.asType match
               case '[a] => 
-                WriteExpression(ch.asExprOf[WriteChannel[F,a]],e.asExprOf[a], writeFun.asExprOf[Unit=>S]) 
+                WriteExpression(ch.asExprOf[WriteChannel[F,a]],e.asExprOf[a], writeFun.asExprOf[()=>S]) 
               case _ =>
-                report.error("Can't determinate ") 
+                report.error("Can't determinate type of write", tp.asExpr) 
+                throw new RuntimeException("Macro error")
+          else
+            report.error("Write channel expected", ch.asExpr)
+            throw new RuntimeException("not a write channel")
       case _ =>
         println(s"unparsed caseDef pattern: ${caseDef.pattern}" )
-    ???
+        ???
 
     
   def substIdent(using Quotes)(term: quotes.reflect.Term, 

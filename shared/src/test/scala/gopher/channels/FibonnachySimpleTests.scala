@@ -21,8 +21,9 @@ class FibbonachySimpleTest extends FunSuite {
       while(!done) {
         // TODO: add select group to given
         SelectGroup[Future,Unit]().writing(c, x){
+                       val x0 = x
                        x=y
-                       y=x+y
+                       y=x0+y
                     }
                    .reading(quit){ v =>
                        done = true
@@ -37,9 +38,10 @@ class FibbonachySimpleTest extends FunSuite {
       var done = false
       while(!done) {
         select{
-          case z: c.write if (z == x) =>
-            x = y
-            y = z + y
+          case out: c.write if (out == x) =>
+            val tmp = y
+            y = x + y
+            x = tmp
           case q: quit.read => 
             done = true
         }
@@ -50,10 +52,10 @@ class FibbonachySimpleTest extends FunSuite {
           acceptor: Long => Unit, n:Int): Future[Unit] = {
     val fib = makeChannel[Long]()
     val q = makeChannel[Int]()
-    val start = fibonaccy0(fib, q)
+    val start = starter(fib,q)
     async{
       for( i <- 1 to n) {
-        var x = fib.read
+        val x = fib.read
         acceptor(x)
       }
       q <~ 1
@@ -63,7 +65,7 @@ class FibbonachySimpleTest extends FunSuite {
   test("simple fibonnachy fun (no macroses)") {
     @volatile var last: Long = 0L
     async{
-      await(run(fibonaccy0, last = _, 50))
+      await(run(fibonaccy0, last = _, 40))
       assert(last != 0)
     }
   }
@@ -71,7 +73,7 @@ class FibbonachySimpleTest extends FunSuite {
   test("fibonnachy fun (select macros)") {
     @volatile var last: Long = 0L
     async{
-      await(run(fibonaccy0, last = _, 50))
+      await(run(fibonaccy0, last = _, 40))
       assert(last != 0)
     }
   }
