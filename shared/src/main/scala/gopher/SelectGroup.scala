@@ -56,16 +56,16 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S]:
       })
       m.pure(this)
 
-    def  writing[A](ch: WriteChannel[F,A], a:A)(f: =>S ): SelectGroup[F,S] =
+    def  writing[A](ch: WriteChannel[F,A], a:A)(f: A =>S ): SelectGroup[F,S] =
       addWriter[A](ch,a,{
-        case Success(()) => m.tryPure(f)
+        case Success(()) => m.tryPure(f(a))
         case Failure(ex) => m.error(ex)
       })
       this
 
-    def  writing_async[A](ch: WriteChannel[F,A], a:A) (f: ()=> F[S] ): F[this.type] =
+    def  writing_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
       addWriter[A](ch,a,{
-        case Success(()) => m.tryImpure(f())
+        case Success(()) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex)
       })
       m.pure(this)

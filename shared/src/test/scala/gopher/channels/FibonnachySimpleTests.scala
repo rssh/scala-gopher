@@ -16,12 +16,11 @@ class FibbonachySimpleTest extends FunSuite {
 
   def fibonaccy0(c: WriteChannel[Future,Long], quit: ReadChannel[Future,Int]): Future[Unit] =
     async[Future]{
-      var (x,y) = (0,1)
+      var (x,y) = (0L,1L)
       var done = false
       while(!done) {
         // TODO: add select group to given
-        SelectGroup[Future,Unit]().writing(c, x){
-                       val x0 = x
+        SelectGroup[Future,Unit]().writing(c, x){ x0 =>
                        x=y
                        y=x0+y
                     }
@@ -38,10 +37,9 @@ class FibbonachySimpleTest extends FunSuite {
       var done = false
       while(!done) {
         select{
-          case out: c.write if (out == x) =>
-            val tmp = y
-            y = x + y
-            x = tmp
+          case z: c.write if (z == x) =>
+            x = z
+            y = z + y
           case q: quit.read => 
             done = true
         }

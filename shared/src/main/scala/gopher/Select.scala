@@ -27,9 +27,9 @@ object Select:
      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
        '{  $base.reading($ch)($f) }
        
-  case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[() => S]) extends SelectorCaseExpr[F,S]:
+  case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
-      '{  $base.writing($ch,$a)($f()) }
+      '{  $base.writing($ch,$a)($f) }
    
   case class DefaultExpression[F[_]:Type,S:Type](ch: Expr[ () => S ]) extends SelectorCaseExpr[F,S]:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
@@ -81,9 +81,12 @@ object Select:
           else
             report.error("read pattern is not a read channel", ch.asExpr)
             throw new RuntimeException("Incorrect select caseDef")
-      case Bind(v, tp@Typed(expr, TypeSelect(ch,"write"))) =>
-          val mt = MethodType(List())(_ => List(), _ => caseDef.rhs.tpe)
-          val writeFun = Lambda(Symbol.spliceOwner,mt, (owner,args) => caseDef.rhs.changeOwner(owner))    
+      case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"write"))) =>
+          val mt = MethodType(List(v))(_ => List(tp.tpe), _ => caseDef.rhs.tpe)
+          //val newSym = Symbol.newVal(Symbol.spliceOwner,v,tp.tpe.widen,Flags.EmptyFlags, Symbol.noSymbol)
+          //val newIdent = Ref(newSym)
+          val writeFun = Lambda(Symbol.spliceOwner,mt, (owner,args) => 
+                                    substIdent(caseDef.rhs,b.symbol, args.head.asInstanceOf[Term], owner).changeOwner(owner))    
           val e = caseDef.guard match
             case Some(condition) =>
               condition match
@@ -96,10 +99,15 @@ object Select:
                 case _ =>  
                   report.error(s"Condition is not in form x==expr,${condition} ",condition.asExpr)
                   throw new RuntimeException("condition is not in writing form")
+            case None =>
+              // are we have shadowed symbol with the same name?
+              //  mb try to find one ?
+              report.error("condition in write is required")
+              throw new RuntimeException("condition in wrte is required")
           if (ch.tpe <:< TypeRepr.of[WriteChannel[F,?]]) then
             tp.tpe.asType match
               case '[a] => 
-                WriteExpression(ch.asExprOf[WriteChannel[F,a]],e.asExprOf[a], writeFun.asExprOf[()=>S]) 
+                WriteExpression(ch.asExprOf[WriteChannel[F,a]],e.asExprOf[a], writeFun.asExprOf[a=>S]) 
               case _ =>
                 report.error("Can't determinate type of write", tp.asExpr) 
                 throw new RuntimeException("Macro error")
