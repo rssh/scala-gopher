@@ -4,6 +4,7 @@ import cps._
 
 import scala.quoted._
 import scala.compiletime._
+import scala.concurrent.duration._
 
 class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
@@ -26,15 +27,15 @@ object Select:
 
   case class ReadExpression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
-       '{  $base.reading($ch)($f) }
+       '{  $base.onRead($ch)($f) }
        
   case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
-      '{  $base.writing($ch,$a)($f) }
+      '{  $base.onWrite($ch,$a)($f) }
    
-  case class DefaultExpression[F[_]:Type,S:Type](ch: Expr[ () => S ]) extends SelectorCaseExpr[F,S]:
+  case class TimeoutExpression[F[_]:Type,S:Type](t: Expr[FiniteDuration], f: Expr[ FiniteDuration => S ]) extends SelectorCaseExpr[F,S]:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
-       '{  ??? }
+       '{  $base.onTimeout($t)($f) }
     
   
 
@@ -70,54 +71,71 @@ object Select:
       case Inlined(_,List(),body) => 
             parseCaseDef(CaseDef(body, caseDef.guard, caseDef.rhs))
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"read"))) =>
-          val mt = MethodType(List(v))(_ => List(tp.tpe), _ => caseDef.rhs.tpe)
-          val readFun = Lambda(Symbol.spliceOwner,mt,
-                               (owner, args) => substIdent(caseDef.rhs,b.symbol,args.head.asInstanceOf[Term], owner).changeOwner(owner))
+          val readFun = makeLambda(v,tp.tpe,b.symbol,caseDef.rhs)
           if (ch.tpe <:< TypeRepr.of[ReadChannel[F,?]]) 
             tp.tpe.asType match
               case '[a] => ReadExpression(ch.asExprOf[ReadChannel[F,a]],readFun.asExprOf[a=>S])
               case _ => 
-                report.error("can't determinate read type", caseDef.pattern.asExpr)
-                throw new RuntimeException("Can't determinae read type")
+                reportError("can't determinate read type", caseDef.pattern.asExpr)
           else
-            report.error("read pattern is not a read channel", ch.asExpr)
-            throw new RuntimeException("Incorrect select caseDef")
+            reportError("read pattern is not a read channel", ch.asExpr)
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"write"))) =>
-          val mt = MethodType(List(v))(_ => List(tp.tpe), _ => caseDef.rhs.tpe)
-          //val newSym = Symbol.newVal(Symbol.spliceOwner,v,tp.tpe.widen,Flags.EmptyFlags, Symbol.noSymbol)
-          //val newIdent = Ref(newSym)
-          val writeFun = Lambda(Symbol.spliceOwner,mt, (owner,args) => 
-                                    substIdent(caseDef.rhs,b.symbol, args.head.asInstanceOf[Term], owner).changeOwner(owner))    
-          val e = caseDef.guard match
-            case Some(condition) =>
-              condition match
-                case Apply(quotes.reflect.Select(Ident(v1),method),List(expr)) =>
-                  if (v1 != v) {
-                     report.error(s"write name mismatch ${v1}, expected ${v}", condition.asExpr)
-                     throw new RuntimeException("macro failed")
-                  }
-                  expr
-                case _ =>  
-                  report.error(s"Condition is not in form x==expr,${condition} ",condition.asExpr)
-                  throw new RuntimeException("condition is not in writing form")
-            case None =>
-              // are we have shadowed symbol with the same name?
-              //  mb try to find one ?
-              report.error("condition in write is required")
-              throw new RuntimeException("condition in wrte is required")
+          val writeFun = makeLambda(v,tp.tpe, b.symbol, caseDef.rhs)
+          val e = matchCaseDefCondition(caseDef, v)
           if (ch.tpe <:< TypeRepr.of[WriteChannel[F,?]]) then
             tp.tpe.asType match
               case '[a] => 
                 WriteExpression(ch.asExprOf[WriteChannel[F,a]],e.asExprOf[a], writeFun.asExprOf[a=>S]) 
               case _ =>
-                report.error("Can't determinate type of write", tp.asExpr) 
-                throw new RuntimeException("Macro error")
+                reportError("Can't determinate type of write", tp.asExpr) 
           else
-            report.error("Write channel expected", ch.asExpr)
-            throw new RuntimeException("not a write channel")
+            reportError("Write channel expected", ch.asExpr)
+      case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"after"))) =>
+          val timeoutFun = makeLambda(v, tp.tpe, b.symbol, caseDef.rhs)
+          val e = matchCaseDefCondition(caseDef, v)
+          if (ch.tpe =:= TypeRepr.of[gopher.Time]) 
+             TimeoutExpression(e.asExprOf[FiniteDuration], timeoutFun.asExprOf[FiniteDuration => S])
+          else
+            reportError(s"Expected Time, we have ${ch.show}", ch.asExpr) 
       case _ =>
-        println(s"unparsed caseDef pattern: ${caseDef.pattern}" )
-        ???
+        report.error(
+          s"""
+              expected one of: 
+                     v: channel.read
+                     v: channel.write if v == expr
+                     v: Time.after if v == expr
+              we have
+                    ${caseDef.pattern.show}
+          """, caseDef.pattern.asExpr)
+        reportError(s"unparsed caseDef pattern: ${caseDef.pattern}", caseDef.pattern.asExpr)
+        
+  end parseCaseDef
+
+  def matchCaseDefCondition(using Quotes)(caseDef: quotes.reflect.CaseDef, v: String): quotes.reflect.Term =
+    import quotes.reflect._
+    caseDef.guard match
+      case Some(condition) =>
+        condition match
+          case Apply(quotes.reflect.Select(Ident(v1),method),List(expr)) =>
+            if (v1 != v) {
+               reportError(s"write name mismatch ${v1}, expected ${v}", condition.asExpr)
+            }
+            // TODO: check that method is '==''
+            expr
+          case _ =>  
+            reportError(s"Condition is not in form x==expr,${condition} ",condition.asExpr)
+      case _ =>
+        reportError(s"Condition is required ",caseDef.pattern.asExpr)
+    
+
+  def makeLambda(using Quotes)(argName: String, 
+                argType: quotes.reflect.TypeRepr, 
+                oldArgSymbol: quotes.reflect.Symbol,
+                body: quotes.reflect.Term): quotes.reflect.Term =
+    import quotes.reflect._
+    val mt = MethodType(List(argName))(_ => List(argType), _ => body.tpe.widen)
+    Lambda(Symbol.spliceOwner, mt, (owner,args) =>
+      substIdent(body,oldArgSymbol, args.head.asInstanceOf[Term], owner).changeOwner(owner))
 
     
   def substIdent(using Quotes)(term: quotes.reflect.Term, 
@@ -132,6 +150,13 @@ object Select:
             case _ => super.transformTerm(tree)(owner)
       }
       argTransformer.transformTerm(term)(owner)
+
+  def reportError(message: String, posExpr: Expr[?])(using Quotes): Nothing =
+    import quotes.reflect._
+    report.error(message, posExpr)
+    throw new RuntimeException(s"Error in macro: $message")
+
+
 
 
     

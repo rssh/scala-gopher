@@ -59,11 +59,11 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
     /**
      * FluentDSL for user SelectGroup without macroses.
      *```
-     * SelectGroup.reading(input){ x => println(x) }
-     *            .reading(endSignal){ () => done=true }
+     * SelectGroup.onRead(input){ x => println(x) }
+     *            .onRead(endSignal){ () => done=true }
      *```        
      **/
-    def  reading[A](ch: ReadChannel[F,A]) (f: A => S ): this.type =
+    def  onRead[A](ch: ReadChannel[F,A]) (f: A => S ): this.type =
       addReader[A](ch,{
         case Success(a) => m.tryPure(f(a))
         case Failure(ex) => m.error(ex)
@@ -71,24 +71,46 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       this
 
     // reading call will be tranformed to reader_async in async expressions
-    def  reading_async[A](ch: ReadChannel[F,A])(f: A => F[S] ): F[this.type] =
+    def  onRead_async[A](ch: ReadChannel[F,A])(f: A => F[S] ): F[this.type] =
       addReader[A](ch,{
         case Success(a) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex) 
       })
       m.pure(this)
 
-    def  writing[A](ch: WriteChannel[F,A], a:A)(f: A =>S ): SelectGroup[F,S] =
+    /**
+     * FluentDSL for user SelectGroup without macroses.
+     *```
+     * SelectGroup.onWrite(input){ x => println(x) }
+     *            .onWrite(endSignal){ () => done=true }
+     *```        
+     **/
+    def  onWrite[A](ch: WriteChannel[F,A], a:A)(f: A =>S ): SelectGroup[F,S] =
       addWriter[A](ch,a,{
         case Success(()) => m.tryPure(f(a))
         case Failure(ex) => m.error(ex)
       })
       this
 
-    def  writing_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
+    def  onWrite_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
       addWriter[A](ch,a,{
         case Success(()) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex)
+      })
+      m.pure(this)
+
+    
+    def onTimeout(t:FiniteDuration)(f: FiniteDuration => S): SelectGroup[F,S] =
+      setTimeout(t,{
+         case  Success(x) => m.tryPure(f(x))
+         case  Failure(ex) => m.error(ex)
+      }) 
+      this
+
+    def onTimeout_async(t:FiniteDuration)(f: FiniteDuration => F[S]): F[SelectGroup[F,S]] =
+      setTimeout(t,{
+        case  Success(x) => m.tryImpure(f(x))
+        case  Failure(ex) => m.error(ex)
       })
       m.pure(this)
 

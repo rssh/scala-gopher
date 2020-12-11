@@ -20,11 +20,11 @@ class FibbonachySimpleTest extends FunSuite {
       var done = false
       while(!done) {
         // TODO: add select group to given
-        select.group[Unit]().writing(c, x){ x0 =>
+        select.group[Unit]().onWrite(c, x){ x0 =>
                        x=y
                        y=x0+y
                     }
-                   .reading(quit){ v =>
+                   .onRead(quit){ v =>
                        done = true
                    }
                    .run
