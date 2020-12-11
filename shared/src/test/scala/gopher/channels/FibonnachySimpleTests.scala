@@ -20,7 +20,7 @@ class FibbonachySimpleTest extends FunSuite {
       var done = false
       while(!done) {
         // TODO: add select group to given
-        SelectGroup[Future,Unit]().writing(c, x){ x0 =>
+        select.group[Unit]().writing(c, x){ x0 =>
                        x=y
                        y=x0+y
                     }
@@ -45,6 +45,7 @@ class FibbonachySimpleTest extends FunSuite {
         }
       }
     }
+
 
   def run(starter: (WriteChannel[Future,Long], ReadChannel[Future,Int])=> Future[Unit],
           acceptor: Long => Unit, n:Int): Future[Unit] = {

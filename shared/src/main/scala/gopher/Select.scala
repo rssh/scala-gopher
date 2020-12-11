@@ -9,9 +9,10 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
   inline def apply[A](inline pf: PartialFunction[Any,A]): A =
     ${  
-      Select.onceImpl[F,A]('pf, '{summonInline[CpsSchedulingMonad[F]]} )  
+      Select.onceImpl[F,A]('pf, '{summonInline[CpsSchedulingMonad[F]]}, 'api )  
      }    
-     
+
+  def group[S](): SelectGroup[F,S] = new SelectGroup[F,S](api)   
 
 
 object Select:
@@ -37,24 +38,24 @@ object Select:
     
   
 
-  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]])(using Quotes): Expr[A] =
+  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
     import quotes.reflect._
-    onceImplTree[F,A](Term.of(pf), m).asExprOf[A]
+    onceImplTree[F,A](Term.of(pf), m, api).asExprOf[A]
 
-  def onceImplTree[F[_]:Type, S:Type](using Quotes)(pf: quotes.reflect.Term, m: Expr[CpsSchedulingMonad[F]]): quotes.reflect.Term =
+  def onceImplTree[F[_]:Type, S:Type](using Quotes)(pf: quotes.reflect.Term, m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]]): quotes.reflect.Term =
     import quotes.reflect._
     pf match
       case Lambda(valDefs, body) =>
-        onceImplTree[F,S](body, m)
+        onceImplTree[F,S](body, m, api)
       case Inlined(_,List(),body) => 
-        onceImplTree[F,S](body, m)
+        onceImplTree[F,S](body, m, api)
       case Match(scrutinee,cases) =>
         //val caseExprs = cases map(x => parseCaseDef[F,A](x))
         //if (caseExprs.find(_.isInstanceOf[DefaultExpression[?]]).isDefined) {
         //  report.error("default is not supported")
         //}
         val s0 = '{
-            new SelectGroup[F,S](using $m)
+            new SelectGroup[F,S]($api)(using $m)
           }
         val g: Expr[SelectGroup[F,S]] = cases.foldLeft(s0){(s,e) =>
            parseCaseDef(e).appended(s)

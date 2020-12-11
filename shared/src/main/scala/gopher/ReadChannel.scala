@@ -25,8 +25,9 @@ trait ReadChannel[F[_], A]:
 
    inline def ? : A = await(aread)(using rAsyncMonad)
 
-   object Read:
-     def unapply(): Option[A] = ???
+   //object Read:
+   //  inline def unapply(): Option[A] = 
+   //     Some(read)
 
    def aOptRead: F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>

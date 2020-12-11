@@ -6,6 +6,7 @@ import gopher.impl._
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
+import java.util.Timer
 
 
 
@@ -18,6 +19,12 @@ class JVMGopher[F[_]:CpsSchedulingMonad](cfg: JVMGopherConfig) extends Gopher[F]
        else 
          GuardedSPSCBufferedChannel[F,A](this, bufSize, cfg.controlExecutor,cfg.taskExecutor) 
 
+   def timer = JVMGopher.timer
+
+   def taskExecutor = cfg.taskExecutor
+
+
+
 object JVMGopher extends GopherAPI:
 
    def apply[F[_]:CpsSchedulingMonad](cfg: GopherConfig):Gopher[F] =
@@ -25,6 +32,8 @@ object JVMGopher extends GopherAPI:
                         case DefaultGopherConfig => defaultConfig
                         case jcfg:JVMGopherConfig => jcfg
       new JVMGopher[F](jvmConfig)
+
+   lazy val timer = new Timer("gopher")   
 
    lazy val defaultConfig=JVMGopherConfig(
       controlExecutor=Executors.newFixedThreadPool(2),

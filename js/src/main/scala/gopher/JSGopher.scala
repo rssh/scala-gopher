@@ -1,6 +1,7 @@
 package gopher
 
 import cps._
+import java.util.Timer
 
 class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
 
@@ -11,6 +12,9 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
        else 
           impl.BufferedChannel[F,A](this,bufSize)
 
+   def timer = JSGopher.timer
+
+
 object JSGopher extends GopherAPI:
 
    def apply[F[_]:CpsSchedulingMonad](cfg: GopherConfig):Gopher[F] =
@@ -18,4 +22,6 @@ object JSGopher extends GopherAPI:
                         case DefaultGopherConfig => JSGopherConfig("default")
                         case jcfg:JSGopherConfig => jcfg
       new JSGopher[F](jsConfig)
+
+   val timer = new Timer("gopher")
 

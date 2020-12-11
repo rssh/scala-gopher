@@ -12,9 +12,6 @@ trait GopherAPI:
 
   def apply[F[_]:CpsSchedulingMonad](cfg:GopherConfig = DefaultGopherConfig): Gopher[F]
           
-
-
-
 /**
  * Shared gopehr api, which is initialized by platofrm part,
  * Primary used for cross-platforming test, you shoul initialize one of platform API
@@ -26,6 +23,7 @@ object SharedGopherAPI {
 
   def apply[F[_]:CpsSchedulingMonad](cfg:GopherConfig = DefaultGopherConfig): Gopher[F] =
     api.apply[F](cfg)
+
 
 
   def api: GopherAPI = 
