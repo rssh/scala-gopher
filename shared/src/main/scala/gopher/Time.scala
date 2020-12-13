@@ -8,7 +8,11 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
 import scala.language.experimental.macros
+import scala.util.Try
 import scala.util.Failure
+import scala.util.Success
+import java.util.concurrent.atomic.AtomicReference
+import java.util.TimerTask
 
 /**
   * Time API, simular to one in golang standard library.
@@ -19,26 +23,32 @@ class Time[F[_]](gopherAPI: Gopher[F]) {
 
     def after(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =
     {
-        ???
-        /*
-        val ch = OneTimeChannel.apply[Instant]()(gopherAPI)
-        gopherAPI.actorSystem.scheduler.scheduleOnce(duration){
-            ch.awrite(Instant.now())
-        }(ec)
-        ch
-        */
+        val ch = gopherAPI.makeOnceChannel[FiniteDuration]()
+        gopherAPI.timer.schedule(
+            new TimerTask {
+                override def run() = {
+                    val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
+                    ch.awrite(now)
+                }
+                
+            },
+            System.currentTimeMillis + duration.toMillis
+        )
+        ch    
     }
 
     def asleep(duration: FiniteDuration): F[FiniteDuration] =
     {
-        ???
-        /*
-        val p = Promise[Instant]()
-        gopherAPI.actorSystem.scheduler.scheduleOnce(duration){
-            p success Instant.now()
-        }(ec)
-        p.future
-        */
+        var fun: Try[FiniteDuration] => Unit = _ => ()
+        val retval = gopherAPI.asyncMonad.adoptCallbackStyle[FiniteDuration](listener => fun = listener)
+        gopherAPI.timer.schedule({
+           new TimerTask {
+               override def run =
+                 val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
+                 fun(Success(now))
+           }
+        }, System.currentTimeMillis + duration.toMillis)
+        retval
     }
 
     inline def sleep(duration: FiniteDuration): FiniteDuration = 

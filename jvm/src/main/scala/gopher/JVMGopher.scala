@@ -7,17 +7,24 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
 import java.util.Timer
+import scala.concurrent.duration._
 
 
 
 class JVMGopher[F[_]:CpsSchedulingMonad](cfg: JVMGopherConfig) extends Gopher[F]:
 
 
-   def makeChannel[A](bufSize:Int) =
-       if (bufSize == 0)
-         GuardedSPSCUnbufferedChannel[F,A](this, cfg.controlExecutor,cfg.taskExecutor)
-       else 
-         GuardedSPSCBufferedChannel[F,A](this, bufSize, cfg.controlExecutor,cfg.taskExecutor) 
+   def makeChannel[A](bufSize:Int = 0, autoClose: Boolean = false, ttl: Duration = Duration.Inf) =
+      if (ttl == Duration.Inf) then
+         if autoClose then
+            PromiseChannel[F,A](this, taskExecutor)
+         else
+            if (bufSize == 0)
+               GuardedSPSCUnbufferedChannel[F,A](this, cfg.controlExecutor,cfg.taskExecutor)
+            else 
+               GuardedSPSCBufferedChannel[F,A](this, bufSize, cfg.controlExecutor,cfg.taskExecutor) 
+      else
+         ???
 
    def timer = JVMGopher.timer
 

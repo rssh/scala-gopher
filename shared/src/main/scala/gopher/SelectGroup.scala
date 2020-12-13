@@ -54,7 +54,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
     def step():F[S] =
        retval
 
-    inline def run: S = await(step())
+    inline def run(): S = await(step())
 
     /**
      * FluentDSL for user SelectGroup without macroses.

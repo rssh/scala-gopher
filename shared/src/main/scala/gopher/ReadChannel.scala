@@ -16,7 +16,6 @@ trait ReadChannel[F[_], A]:
    protected def rAsyncMonad: CpsAsyncMonad[F] = asyncMonad
 
    def addReader(reader: Reader[A]): Unit
-
   
    def aread:F[A] = 
       asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))

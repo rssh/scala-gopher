@@ -1,27 +1,35 @@
 package gopher
 
 import cps._
+import scala.concurrent.duration.Duration
 import java.util.Timer
+
 
 trait Gopher[F[_]:CpsSchedulingMonad]:
 
   type Monad[X] = F[X]
   def asyncMonad: CpsSchedulingMonad[F] = summon[CpsSchedulingMonad[F]]
 
-  def makeChannel[A](bufSize:Int = 0): Channel[F,A,A]
+  def makeChannel[A](bufSize:Int = 0,
+                    autoClose: Boolean = false, 
+                    expire: Duration = Duration.Inf): Channel[F,A,A]                  
 
+  def makeOnceChannel[A](): Channel[F,A,A] =
+                    makeChannel[A](1,true)                   
+                  
   def select: Select[F] =
     new Select[F](this)  
 
   def time: Time[F] = new Time[F](this)
-
   
   def timer: Timer
 
 
   
-def makeChannel[A](bufSize:Int = 1)(using g:Gopher[?]):Channel[g.Monad,A,A] =
-      g.makeChannel(bufSize)
+def makeChannel[A](bufSize:Int = 0, 
+                  autoClose: Boolean = false,
+                  expire: Duration = Duration.Inf)(using g:Gopher[?]):Channel[g.Monad,A,A] =
+      g.makeChannel(bufSize, autoClose, expire)
 
 def select(using g:Gopher[?]):Select[g.Monad] =
       g.select

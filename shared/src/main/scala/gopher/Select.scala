@@ -13,8 +13,9 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
       Select.onceImpl[F,A]('pf, '{summonInline[CpsSchedulingMonad[F]]}, 'api )  
      }    
 
-  def group[S](): SelectGroup[F,S] = new SelectGroup[F,S](api)   
+  def group[S]: SelectGroup[F,S] = new SelectGroup[F,S](api)   
 
+  def loop: SelectLoop[F] = new SelectLoop[F](api)
 
 object Select:
 
@@ -61,7 +62,7 @@ object Select:
         val g: Expr[SelectGroup[F,S]] = cases.foldLeft(s0){(s,e) =>
            parseCaseDef(e).appended(s)
         }
-        val r = '{ $g.run }
+        val r = '{ $g.run() }
         Term.of(r)
     
 

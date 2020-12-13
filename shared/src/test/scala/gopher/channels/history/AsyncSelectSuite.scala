@@ -1,21 +1,30 @@
-package gopher.channels
+package gopher.channels.history
 
 import gopher._
-import org.scalatest._
+import scala.concurrent._
+import cps.monads.FutureAsyncMonad
 
-class AsyncSelectSuite extends AsyncFunSuite {
+import munit._
+
+class AsyncSelectSuite extends FunSuite {
 
   val MAX_N=100
 
+  import scala.concurrent.ExecutionContext.Implicits.global
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
+
+  
   test("async base: channel write, select read")  {
 
-    val channel = gopherApi.makeChannel[Int](10)
+    val channel = makeChannel[Int](10)
 
     channel.awriteAll(1 to MAX_N)
 
     var sum = 0;
 
-    val consumer = gopherApi.select.loop.onRead(channel){
+    /*
+    val consumer = gopherApi.select.loop.onRead(channel){ a
+      sum = sum + a
       (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
         if (a < MAX_N) {
           cont
@@ -23,6 +32,12 @@ class AsyncSelectSuite extends AsyncFunSuite {
           Done((),cont.flowTermination)
         }
     }.go
+    */
+
+    val consumer = select.loop.onRead(channel){ a =>
+           sum = sum + a
+           a < MAX_N
+    }.runAsync()
 
     //val consumer = go {
     //  for(s <- select) {
@@ -43,30 +58,21 @@ class AsyncSelectSuite extends AsyncFunSuite {
 
   }
 
+
   test("async base: select write, select read")  {
 
-    val channel = gopherApi.makeChannel[Int](10)
+    val channel = makeChannel[Int](10)
 
     var sum=0
     var curA=0
-    val process = gopherApi.select.loop.
-      onRead(channel){
-        (a:Int, cont:ContRead[Int,Unit]) => sum = sum + a
+    val process = select.loop.
+      onRead(channel){ a => sum = sum + a
           //System.err.println("received:"+a)
-          if (a < MAX_N) {
-            cont
-          } else {
-            Done((),cont.flowTermination)
-          }
-      }.onWrite(channel){
-      cont:ContWrite[Int,Unit] =>
-        curA = curA+1
-        if (curA < MAX_N) {
-          (curA, cont)
-        } else {
-          (curA,Done((),cont.flowTermination))
-        }
-    }.go
+          a < MAX_N
+      }.onWrite(channel, curA){ a =>
+          curA = curA + 1
+          curA < MAX_N
+      }.runAsync()
 
     process map { _ =>
       assert(curA == MAX_N)
@@ -74,9 +80,10 @@ class AsyncSelectSuite extends AsyncFunSuite {
 
   }
 
-  test("async base: select read, default action")  {
+/*
+  test("async base: select read, timeout action")  {
 
-    val channel = gopherApi.makeChannel[Int](10)
+    val channel = makeChannel[Int](10)
 
     val consumer = channel.atake(100)
 
@@ -99,7 +106,9 @@ class AsyncSelectSuite extends AsyncFunSuite {
         rc <- consumer } yield assert(i > 100)
 
   }
+  */
 
+  /*
   test("async base: catch exception in read")  {
     val ERROR_N = 10
     var lastReaded = 0
@@ -134,11 +143,9 @@ class AsyncSelectSuite extends AsyncFunSuite {
     }
 
   }
+  */
 
-
-  def actorSystem = CommonTestObjects.actorSystem
-  def gopherApi = CommonTestObjects.gopherApi
-
+ 
 
 }
 
