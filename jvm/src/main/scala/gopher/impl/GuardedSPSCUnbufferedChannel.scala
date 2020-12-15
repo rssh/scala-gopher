@@ -20,6 +20,7 @@ class GuardedSPSCUnbufferedChannel[F[_]:CpsAsyncMonad,A](
 
     protected override def step(): Unit = {
       var progress = true 
+      var isClosed = publishedClosed.get()
       while (progress) {
         var readerLoopDone = false
         progress = false
@@ -46,22 +47,28 @@ class GuardedSPSCUnbufferedChannel[F[_]:CpsAsyncMonad,A](
                               // reader same, other writer
                               reader.markFree()
                               progress = true // return when
-                              if (!writer.isExpired)
-                                writers.addLast(writer)
-                                Thread.onSpinWait() 
+                              progressWaitWriter(writer)
                         case None =>
                           writers.addFirst(writer)
                           writersLoopDone = true
                           progress = true
-                          if (!reader.isExpired)
-                            readers.addLast(reader)
-                            Thread.onSpinWait()
-                }  
+                          progressWaitReader(reader)
+                }
         }
+        if (isClosed && (readers.isEmpty || writers.isEmpty) ) then
+          if (!writers.isEmpty) {
+            progress |= processWriteClose()
+          }
+          if (readers.isEmpty) {
+            progress |= processReadClose()
+          }
         if (!progress) then
           if !checkLeaveStep() then
             progress = true
+            isClosed = publishedClosed.get()
       }
     }
+
+    
 
 

@@ -44,9 +44,12 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
 
   def addWriter(writer: Writer[A]): Unit =
       if (writer.canExpire) then
-          writers.removeIf( _.isExpired )        
-      writers.add(writer)
-      controlExecutor.submit(stepRunnable)
+          writers.removeIf( _.isExpired )  
+      if (publishedClosed.get()) then
+          closeWriter(writer)
+      else      
+          writers.add(writer)
+          controlExecutor.submit(stepRunnable)
 
   def close(): Unit =
     publishedClosed.set(true)
@@ -96,9 +99,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
               taskExecutor.execute(() => f(Failure(new ChannelClosedException())) )
             case None =>
               progress = true
-              Thread.onSpinWait()
-              if (!r.isExpired ) then
-                readers.addLast(r)  
+              progressWaitReader(r)
     }
     progress
 
@@ -113,10 +114,36 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
             taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
           case None =>
             progress = true
-            if (!w.isExpired) then
-              writers.addLast(w)
+            progressWaitWriter(w)
     }
     progress
+
+  protected def closeWriter(w: Writer[A]): Unit = {
+    var done = false
+    while (!done && !w.isExpired)
+      w.capture() match
+        case Some((a,f)) => 
+          taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
+          done = true
+        case None =>
+          if (!w.isExpired) then
+            Thread.onSpinWait()
+  }
+
+  // precondition:  r.capture() == None
+  protected def progressWaitReader(r: Reader[A]): Unit =
+    if (!r.isExpired)
+      if (readers.isEmpty)
+        Thread.onSpinWait()
+      readers.addLast(r)
+  
+      // precondition:  w.capture() == None
+  protected def progressWaitWriter(w: Writer[A]): Unit =
+    if (!w.isExpired)
+      if (writers.isEmpty)
+        Thread.onSpinWait()
+      writers.addLast(w)
+  
 
 
 object GuardedSPSCBaseChannel:

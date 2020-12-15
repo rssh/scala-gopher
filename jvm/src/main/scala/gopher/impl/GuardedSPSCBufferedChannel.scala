@@ -85,7 +85,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
         else
           if isClosed then 
             progress |= processReadClose()
-        if (!state.isFull()) then
+        if (!state.isFull() && !isClosed) then
           progress |= processWriteStep()
         if (isClosed)
            progress |= processWriteClose()
@@ -93,6 +93,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
             state.publish()
             if (! checkLeaveStep()) {
               progress = true
+              isClosed = publishedClosed.get()
             } 
         }
       }
@@ -124,11 +125,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
           // not in this thread, but progress.
           progress = true
           val (r, c) = nonExpiredBusyReads.dequeue
-          if (!r.isExpired) {
-             readers.addLast(r)
-             //TOOD: check lack of other progress ??
-             //Thread.onSpinWait()
-          }
+          progressWaitReader(r)
           nonExpiredBusyReads = c
         }
         progress
@@ -160,8 +157,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
         progress = true
         val (w, c) = nonExpiredBusyWriters.dequeue
         nonExpiredBusyWriters = c
-        if (! w.isExpired) then
-          writers.addLast(w)
+        progressWaitWriter(w)
       } 
       progress
   
