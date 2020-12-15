@@ -26,9 +26,12 @@ class JVMGopher[F[_]:CpsSchedulingMonad](cfg: JVMGopherConfig) extends Gopher[F]
       else
          ???
 
-   def timer = JVMGopher.timer
+
+   val time = new JVMTime(this)
 
    def taskExecutor = cfg.taskExecutor
+
+   def scheduledExecutor = JVMGopher.scheduledExecutor
 
 
 
@@ -39,11 +42,13 @@ object JVMGopher extends GopherAPI:
                         case DefaultGopherConfig => defaultConfig
                         case jcfg:JVMGopherConfig => jcfg
       new JVMGopher[F](jvmConfig)
-
+   
    lazy val timer = new Timer("gopher")   
+
+   lazy val scheduledExecutor = Executors.newScheduledThreadPool(1) 
 
    lazy val defaultConfig=JVMGopherConfig(
       controlExecutor=Executors.newFixedThreadPool(2),
-      taskExecutor=ForkJoinPool.commonPool()
+      taskExecutor=ForkJoinPool.commonPool(),
    )
 

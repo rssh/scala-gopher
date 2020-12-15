@@ -2,7 +2,6 @@ package gopher
 
 import cps._
 import scala.concurrent.duration.Duration
-import java.util.Timer
 
 
 trait Gopher[F[_]:CpsSchedulingMonad]:
@@ -16,15 +15,12 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
 
   def makeOnceChannel[A](): Channel[F,A,A] =
                     makeChannel[A](1,true)                   
-                  
+
   def select: Select[F] =
     new Select[F](this)  
 
-  def time: Time[F] = new Time[F](this)
+  def time: Time[F] 
   
-  def timer: Timer
-
-
   
 def makeChannel[A](bufSize:Int = 0, 
                   autoClose: Boolean = false,

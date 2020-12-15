@@ -25,7 +25,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
     private inline def m = summon[CpsSchedulingMonad[F]]
     val retval = m.adoptCallbackStyle[S](f => call=f)
     val startTime = new AtomicLong(0L)
-    var timeoutTask: Option[TimerTask] = None
+    var timeoutScheduled: Option[Time.Scheduled] = None
    
     def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
@@ -36,19 +36,16 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
         ch.addWriter(record)
 
     def setTimeout(timeout: FiniteDuration, action: Try[FiniteDuration] => F[S]): Unit =
-        timeoutTask.foreach(_.cancel())
-        val newTask = new TimerTask() {
-          val record = new TimeoutRecord(timeout,action)
-          override def run(): Unit = {
-            val v = System.currentTimeMillis() - startTime.get()
-            record.capture() match 
+        timeoutScheduled.foreach(_.cancel())
+        val record = new TimeoutRecord(timeout,action)
+        val newTask = () => {
+          val v = System.currentTimeMillis() - startTime.get()
+          record.capture() match 
               case Some(f) => f(Success(v milliseconds))
               case None => // do nothing.
-          }
         }
-        timeoutTask = Some(newTask)
-        api.timer.schedule(newTask, System.currentTimeMillis() + timeout.toMillis);
-
+        timeoutScheduled = Some(api.time.schedule(newTask,timeout))
+        
         
 
     def step():F[S] =
@@ -131,7 +128,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       override def capture(): Option[Try[A]=>Unit] =
              if waitState.compareAndSet(0,1) then
                  Some(v => {
-                    timeoutTask.foreach(_.cancel())
+                    timeoutScheduled.foreach(_.cancel())
                     m.spawn(
                       m.mapTry(action(v))(x => call(x))
                     )
@@ -151,7 +148,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       override def capture(): Option[(A,Try[Unit]=>Unit)] =
             if waitState.compareAndSet(0,1) then
               Some((element, (v:Try[Unit]) => {
-                        timeoutTask.foreach(_.cancel())
+                        timeoutScheduled.foreach(_.cancel())
                         m.spawn(
                           m.mapTry(action(v))(x=>call(x))
                         )}

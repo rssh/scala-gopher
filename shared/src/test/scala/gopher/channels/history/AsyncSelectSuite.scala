@@ -2,6 +2,9 @@ package gopher.channels.history
 
 import gopher._
 import scala.concurrent._
+import scala.concurrent.duration._
+import scala.language.postfixOps
+import scala.util._
 import cps.monads.FutureAsyncMonad
 
 import munit._
@@ -80,7 +83,7 @@ class AsyncSelectSuite extends FunSuite {
 
   }
 
-/*
+
   test("async base: select read, timeout action")  {
 
     val channel = makeChannel[Int](10)
@@ -89,47 +92,50 @@ class AsyncSelectSuite extends FunSuite {
 
     var i = 1
     var d = 1
-    val process = gopherApi.select.loop[Int].onWrite(channel) {
-      cont:ContWrite[Int,Int] => i=i+1
-        (i,cont)
-    }.onIdle{
-      cont:Skip[Int] =>
+    val process = select.loop.onWrite(channel, i) { a =>
+        i=i+1
+        i < 1000
+    }.onTimeout(100 millisecond){ t =>
         if (i < 100) {
           d=d+1
-          cont
+          true
         } else {
-          Done(d,cont.flowTermination)
+          false
         }
-    }.go
+    }.runAsync()
 
     for{rp <- process
         rc <- consumer } yield assert(i > 100)
 
   }
-  */
+  
 
-  /*
   test("async base: catch exception in read")  {
     val ERROR_N = 10
     var lastReaded = 0
-    val channel = gopherApi.makeChannel[Int](10)
-    val process = gopherApi.select.loop.
+    val channel = makeChannel[Int](10)
+    val process = select.loop.
       onRead(channel){
-        (a:Int, cont:ContRead[Int,Unit]) => lastReaded=a
+        (a:Int) => lastReaded=a
           if (a == ERROR_N) {
             throw new IllegalStateException("qqq")
           }
-          cont
-      }.go
+          true
+      }.runAsync()
 
     channel.awriteAll(1 to MAX_N)
 
-    recoverToSucceededIf[IllegalStateException]{
-      process
+    process.transform{
+      case Failure(ex: IllegalStateException) =>
+          Success(assert(true))
+      case Success(_) =>
+          assert("" == "processs should failed wit IllegalStateException")   
+          Success(()) 
     }
 
   }
 
+  /*
   test("async base: catch exception in idle")  {
     val process = gopherApi.select.loop.onIdle(
       (cont: Skip[Int]) =>

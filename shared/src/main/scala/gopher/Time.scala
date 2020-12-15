@@ -3,7 +3,7 @@ package gopher
 import cps._
 
 
-import scala.concurrent._
+
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
@@ -14,25 +14,22 @@ import scala.util.Success
 import java.util.concurrent.atomic.AtomicReference
 import java.util.TimerTask
 
+
 /**
   * Time API, simular to one in golang standard library.
   * @see gopherApi#time
   */
-class Time[F[_]](gopherAPI: Gopher[F]) {
+abstract class Time[F[_]](gopherAPI: Gopher[F]) {
 
 
     def after(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =
     {
         val ch = gopherAPI.makeOnceChannel[FiniteDuration]()
-        gopherAPI.timer.schedule(
-            new TimerTask {
-                override def run() = {
-                    val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
-                    ch.awrite(now)
-                }
-                
+        schedule( () => {
+                val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
+                ch.awrite(now)
             },
-            System.currentTimeMillis + duration.toMillis
+            duration
         )
         ch    
     }
@@ -41,13 +38,11 @@ class Time[F[_]](gopherAPI: Gopher[F]) {
     {
         var fun: Try[FiniteDuration] => Unit = _ => ()
         val retval = gopherAPI.asyncMonad.adoptCallbackStyle[FiniteDuration](listener => fun = listener)
-        gopherAPI.timer.schedule({
-           new TimerTask {
-               override def run =
-                 val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
-                 fun(Success(now))
-           }
-        }, System.currentTimeMillis + duration.toMillis)
+        schedule(() => {
+                  val now = FiniteDuration(System.currentTimeMillis, TimeUnit.MILLISECONDS)
+                  fun(Success(now))
+                }, 
+                duration)
         retval
     }
 
@@ -98,6 +93,13 @@ class Time[F[_]](gopherAPI: Gopher[F]) {
     def now(): FiniteDuration = 
         FiniteDuration(System.currentTimeMillis(),TimeUnit.MILLISECONDS)
 
+
+    /**
+    * Low lwvel interface for scheduler
+    */
+    def schedule(fun: () => Unit, delay: FiniteDuration): Time.Scheduled
+
+
 }
 
 object Time:
@@ -118,3 +120,15 @@ object Time:
 
     def after[F[_]](duration: FiniteDuration)(using Gopher[F]): ReadChannel[F,FiniteDuration] =
         summon[Gopher[F]].time.after(duration)
+
+    /**
+    * Task, which can be cancelled.
+    **/    
+    trait Scheduled {
+
+       def cancel(): Boolean
+
+       def onDone( listener: Try[Boolean]=>Unit ): Unit
+
+    }
+    

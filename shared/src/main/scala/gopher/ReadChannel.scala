@@ -24,6 +24,23 @@ trait ReadChannel[F[_], A]:
 
    inline def ? : A = await(aread)(using rAsyncMonad)
 
+   def atake(n: Int): F[IndexedSeq[A]] = 
+      given CpsAsyncMonad[F] = asyncMonad
+      async[F]{
+         var b = IndexedSeq.newBuilder[A]
+         try {
+            var c = 0
+            while(c < n) {
+               val a = read
+               b.addOne(a)
+               c = c + 1
+            }
+         }catch{
+            case ex: ChannelClosedException =>
+         }
+         b.result()
+      }
+
    //object Read:
    //  inline def unapply(): Option[A] = 
    //     Some(read)

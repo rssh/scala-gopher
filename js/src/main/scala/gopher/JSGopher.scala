@@ -20,7 +20,7 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
       else
          ???
 
-   def timer = JSGopher.timer
+   val time = new impl.JSTime(this)
 
 
 object JSGopher extends GopherAPI:
