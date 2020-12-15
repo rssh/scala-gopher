@@ -130,26 +130,26 @@ class AsyncSelectSuite extends FunSuite {
           Success(assert(true))
       case Success(_) =>
           assert("" == "processs should failed wit IllegalStateException")   
-          Success(()) 
+          Failure(new RuntimeException("fail")) 
     }
 
   }
 
-  /*
   test("async base: catch exception in idle")  {
-    val process = gopherApi.select.loop.onIdle(
-      (cont: Skip[Int]) =>
-        if (true) {
+    val process = select.loop.onTimeout(100 milliseconds)(
+       t =>
           throw new IllegalStateException("qqq")
-        } else cont
-    ).go
+    ).runAsync()
 
-    recoverToSucceededIf[IllegalStateException]{
-      process
+    process.transform{
+      case Failure(ex: IllegalStateException) =>
+          Success(assert(true))
+      case Success(_) =>
+          assert("" == "processs should failed wit IllegalStateException")   
+          Failure(new RuntimeException("fail")) 
     }
 
   }
-  */
 
  
 
