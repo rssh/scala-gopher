@@ -38,6 +38,10 @@ object Select:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
        '{  $base.onTimeout($t)($f) }
     
+  case class DoneExression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[Unit=>S]) extends SelectorCaseExpr[F,S]:
+      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+        '{  $base.onRead($ch.done)($f) }
+
   
 
   def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
@@ -98,6 +102,18 @@ object Select:
              TimeoutExpression(e.asExprOf[FiniteDuration], timeoutFun.asExprOf[FiniteDuration => S])
           else
             reportError(s"Expected Time, we have ${ch.show}", ch.asExpr) 
+      case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"done"))) =>
+          val readFun = makeLambda(v,tp.tpe,b.symbol,caseDef.rhs)
+          tp.tpe.asType match
+            case '[a] => 
+                if (ch.tpe <:< TypeRepr.of[ReadChannel[F,a]]) then
+                    DoneExression(ch.asExprOf[ReadChannel[F,a]],readFun.asExprOf[Unit=>S])
+                else
+                  reportError("done base is not a read channel", ch.asExpr) 
+            case _ =>
+                reportError("can't determinate read type", caseDef.pattern.asExpr)
+            
+            
       case _ =>
         report.error(
           s"""
