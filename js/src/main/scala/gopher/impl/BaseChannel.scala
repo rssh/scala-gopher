@@ -12,14 +12,15 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
 
   protected val readers: Queue[Reader[A]] = Queue.empty
   protected val writers: Queue[Writer[A]] = Queue.empty
+  protected val doneReaders: Queue[Reader[Unit]] = Queue.empty 
   protected var closed: Boolean = false
 
   protected override def asyncMonad: cps.CpsAsyncMonad[F] = summon[CpsAsyncMonad[F]]
 
 
-
   override def close(): Unit =
     closed = true
+    processClose()
 
   protected def submitTask(f: ()=>Unit ): Unit =
     JSExecutionContext.queue.execute{ () =>
@@ -34,7 +35,7 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
     }
 
   def addReader(reader: Reader[A]): Unit = 
-      if (closed && writers.isEmpty ) {
+      if (closed && isEmpty ) {
         reader.capture().foreach{ f =>
             submitTask( () => 
               f(Failure(new ChannelClosedException()))
@@ -56,7 +57,51 @@ abstract class BaseChannel[F[_]:CpsAsyncMonad,A](root: JSGopher[F]) extends Chan
           writers.enqueue(writer)
           process()
         }
+
+  def addDoneReader(reader: Reader[Unit]): Unit =
+        if (closed && isEmpty) {
+          reader.capture().foreach{ f =>
+            submitTask( () => f(Success(())))
+          }
+        } else {
+          doneReaders.enqueue(reader)
+        }    
+
+  protected def processClose(): Unit =
+    if (isEmpty) then
+      processCloseDone()
+      submitTask(processCloseWriters)
+      submitTask(processCloseReaders)
+          
+
+  protected def processCloseDone(): Unit =
+    val success = Success(())
+    doneReaders.foreach( reader =>
+      reader.capture().foreach{ f =>
+         f(success)
+      }
+    )
+
+  protected def processCloseReaders(): Unit =
+    val channelClosed = Failure(ChannelClosedException())
+    readers.foreach{ reader =>
+      reader.capture().foreach{ f =>
+         f(channelClosed)
+      }
+    }
+
+  protected def processCloseWriters(): Unit =
+    val channelClosed = Failure(ChannelClosedException())
+    writers.foreach{ writer =>
+      writer.capture().foreach{ (a,f) =>
+         f(channelClosed)
+      }
+    }
+
+
+  protected def isEmpty: Boolean
   
   protected def process(): Unit
 
+    
 

@@ -84,6 +84,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
           progress |= processReadsStep()
         else
           if isClosed then 
+            progress |= processDoneClose()
             progress |= processReadClose()
         if (!state.isFull() && !isClosed) then
           progress |= processWriteStep()

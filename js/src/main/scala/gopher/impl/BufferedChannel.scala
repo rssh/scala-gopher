@@ -51,6 +51,8 @@ class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: In
         case None =>
            // nothing.
       progress |= processWriters()
+    if (closed) then
+      processClose()
                 
   protected def processReaders(a:A): Boolean =
     var progress = false

@@ -8,6 +8,8 @@ import scala.util.Failure
 
 trait ReadChannel[F[_], A]:
 
+   thisReadChannel =>
+
    type read = A
 
    // workarround for https://github.com/lampepfl/dotty/issues/10477
@@ -16,7 +18,17 @@ trait ReadChannel[F[_], A]:
    protected def rAsyncMonad: CpsAsyncMonad[F] = asyncMonad
 
    def addReader(reader: Reader[A]): Unit
-  
+
+   def addDoneReader(reader: Reader[Unit]): Unit 
+
+   lazy val done: ReadChannel[F,Unit] = DoneReadChannel()
+
+   type done = Unit
+
+   /**
+    * async version of read. Immediatly return future, which will contains result of read or failur with StreamClosedException
+    * in case of stream is closed.
+    */
    def aread:F[A] = 
       asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))
                                
@@ -24,6 +36,9 @@ trait ReadChannel[F[_], A]:
 
    inline def ? : A = await(aread)(using rAsyncMonad)
 
+  /**
+   * return F which contains sequence from first `n` elements.
+   */
    def atake(n: Int): F[IndexedSeq[A]] = 
       given CpsAsyncMonad[F] = asyncMonad
       async[F]{
@@ -39,11 +54,7 @@ trait ReadChannel[F[_], A]:
             case ex: ChannelClosedException =>
          }
          b.result()
-      }
-
-   //object Read:
-   //  inline def unapply(): Option[A] = 
-   //     Some(read)
+      }   
 
    def aOptRead: F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>
@@ -56,6 +67,38 @@ trait ReadChannel[F[_], A]:
 
    inline def optRead: Option[A] = await(aOptRead)(using rAsyncMonad)
 
+   def foreach_async(f: A=>F[Unit]): F[Unit] =
+      given CpsAsyncMonad[F] = asyncMonad
+      async[F]{
+         var done = false
+         while(!done) {
+            optRead match
+               case Some(v) => await(f(v))
+               case None => done = true
+         }
+      }
+
+   /**
+   * run code each time when new object is arriced.
+   * until end of stream is not reached
+   **/  
+   inline def foreach(f: A=>Unit): Unit = 
+      await(foreach_async( x => rAsyncMonad.pure(f(x)) ))(using rAsyncMonad)
+ 
+
+   class DoneReadChannel extends ReadChannel[F,Unit]:
+
+      def addReader(reader: Reader[Unit]): Unit =
+         thisReadChannel.addDoneReader(reader)
+
+      def addDoneReader(reader: Reader[Unit]): Unit =
+         thisReadChannel.addDoneReader(reader)
+
+      protected def asyncMonad: CpsAsyncMonad[F] = thisReadChannel.asyncMonad   
+
+   end DoneReadChannel
+
+
    class SimpleReader(f: Try[A] => Unit) extends Reader[A]:
 
       def canExpire: Boolean = false
@@ -65,6 +108,10 @@ trait ReadChannel[F[_], A]:
 
       def markUsed(): Unit = ()
       def markFree(): Unit = ()
+
+   end SimpleReader
+
+end ReadChannel
 
 
 

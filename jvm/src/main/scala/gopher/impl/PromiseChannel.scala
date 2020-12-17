@@ -18,6 +18,7 @@ import scala.util.Failure
  class PromiseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher[F], taskExecutor: ExecutorService) extends Channel[F,A,A]:
 
     protected val readers = new ConcurrentLinkedDeque[Reader[A]]()
+    protected val doneReaders = new ConcurrentLinkedDeque[Reader[Unit]]()
     protected val ref: AtomicReference[AnyRef | Null] = new AtomicReference(null)
     protected val closed: AtomicBoolean = new AtomicBoolean(false)
     protected val readed: AtomicBoolean = new AtomicBoolean(false)
@@ -33,7 +34,7 @@ import scala.util.Failure
           while(!done && !reader.isExpired) {
             reader.capture() match
               case Some(f) => 
-                f(Failure(new ChannelClosedException()))
+                taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                 done = true
               case None => 
                 if (!reader.isExpired) then
@@ -52,7 +53,7 @@ import scala.util.Failure
                 step()
                 done = true
               else 
-                f(Failure(new ChannelClosedException()))
+                taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                 done = true
             case None =>   
               if (!writer.isExpired) {
@@ -60,11 +61,29 @@ import scala.util.Failure
                 Thread.onSpinWait()
               } 
 
+    def addDoneReader(reader: Reader[Unit]): Unit =
+      if (!closed.get()) then
+        doneReaders.add(reader)
+      else 
+        var done = false
+        while(!done & !reader.isExpired) {
+          reader.capture() match
+            case Some(f) => 
+              taskExecutor.execute(()=>f(Success(())))
+              done = true
+            case None =>
+              if (!reader.isExpired)
+                Thread.onSpinWait()
+        }
+
+
+
     def close(): Unit =
       closed.set(true)
       if (ref.get() eq null) 
         closeAll() 
-      
+    
+        
     
     def step(): Unit =
       val ar = ref.get()
@@ -79,9 +98,9 @@ import scala.util.Failure
                     done = true
                     if (readed.compareAndSet(false,true)) then
                       val a = ar.nn.asInstanceOf[A]
-                      f(Success(a))
+                      taskExecutor.execute(() => f(Success(a)))
                     else
-                      f(Failure(new ChannelClosedException()))
+                      taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                   case None =>
                     if (!r.isExpired) {
                       if (readers.isEmpty)
@@ -94,14 +113,29 @@ import scala.util.Failure
         closeAll()
 
     def closeAll(): Unit = 
-      while(!readers.isEmpty) 
+      while(!readers.isEmpty) {
         val r = readers.poll()
         if (!(r eq null) && !r.isExpired) then
           r.capture() match
             case Some(f) =>
-              f(Failure(new ChannelClosedException))
+              taskExecutor.execute(() => f(Failure(new ChannelClosedException)))
             case None =>
               if (!r.isExpired) then
                 if (readers.isEmpty) then
                   Thread.onSpinWait()
                 readers.addLast(r)
+      }
+      while(!doneReaders.isEmpty) {
+        val r = doneReaders.poll()
+        if !((r eq null) || r.isExpired) then
+          r.capture() match
+            case Some(f) => 
+              taskExecutor.execute(()=>f(Success(())))
+            case None =>
+              if (!r.isExpired) then
+                if (doneReaders.isEmpty) then
+                  Thread.onSpinWait()
+                doneReaders.addLast(r)
+      }
+
+      

@@ -27,6 +27,10 @@ def makeChannel[A](bufSize:Int = 0,
                   expire: Duration = Duration.Inf)(using g:Gopher[?]):Channel[g.Monad,A,A] =
       g.makeChannel(bufSize, autoClose, expire)
 
+def makeOnceChannel[A]()(using g:Gopher[?]): Channel[g.Monad,A,A] =
+      g.makeOnceChannel[A]()                   
+
+
 def select(using g:Gopher[?]):Select[g.Monad] =
       g.select
 

@@ -26,6 +26,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
 
   protected val readers = new ConcurrentLinkedDeque[Reader[A]]()
   protected val writers = new ConcurrentLinkedDeque[Writer[A]]()
+  protected val doneReaders = new ConcurrentLinkedDeque[Reader[Unit]]()
 
   protected val publishedClosed = new AtomicBoolean(false)
 
@@ -43,14 +44,18 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
     controlExecutor.submit(stepRunnable)
 
   def addWriter(writer: Writer[A]): Unit =
-      if (writer.canExpire) then
-          writers.removeIf( _.isExpired )  
-      if (publishedClosed.get()) then
-          closeWriter(writer)
-      else      
-          writers.add(writer)
-          controlExecutor.submit(stepRunnable)
+    if (writer.canExpire) then
+        writers.removeIf( _.isExpired )  
+    if (publishedClosed.get()) then
+        closeWriter(writer)
+    else      
+        writers.add(writer)
+        controlExecutor.submit(stepRunnable)
 
+  def addDoneReader(reader: Reader[Unit]): Unit =
+    doneReaders.add(reader)
+    controlExecutor.submit(stepRunnable)
+      
   def close(): Unit =
     publishedClosed.set(true)
     controlExecutor.submit(stepRunnable)    
@@ -118,6 +123,22 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
     }
     progress
 
+  protected def processDoneClose(): Boolean  = {
+    var progress = false
+    while(!doneReaders.isEmpty) {
+      val r = doneReaders.poll()
+      if !(r eq null) && !r.isExpired then
+        r.capture() match
+          case Some(f) =>
+            progress = true
+            taskExecutor.execute(() => f(Success(())))
+          case None =>
+            progressWaitDoneReader(r)
+    }
+    progress
+  }
+  
+
   protected def closeWriter(w: Writer[A]): Unit = {
     var done = false
     while (!done && !w.isExpired)
@@ -130,20 +151,24 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
             Thread.onSpinWait()
   }
 
+
+
   // precondition:  r.capture() == None
   protected def progressWaitReader(r: Reader[A]): Unit =
-    if (!r.isExpired)
-      if (readers.isEmpty)
-        Thread.onSpinWait()
-      readers.addLast(r)
+    progressWait(r,readers)
   
-      // precondition:  w.capture() == None
+  // precondition:  w.capture() == None
   protected def progressWaitWriter(w: Writer[A]): Unit =
-    if (!w.isExpired)
-      if (writers.isEmpty)
-        Thread.onSpinWait()
-      writers.addLast(w)
+    progressWait(w,writers)
   
+  protected def progressWaitDoneReader(r: Reader[Unit]): Unit =
+    progressWait(r,doneReaders)
+      
+  protected def progressWait[T <: Expirable[_]](v:T, queue: ConcurrentLinkedDeque[T]): Unit =
+    if (!v.isExpired) 
+      if (queue.isEmpty)
+        Thread.onSpinWait()
+      queue.addLast(v)
 
 
 object GuardedSPSCBaseChannel:

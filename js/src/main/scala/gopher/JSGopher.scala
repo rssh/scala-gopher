@@ -15,8 +15,7 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
             else 
                impl.BufferedChannel[F,A](this,bufSize)
          else
-            ???
-            //impl.PromiseChannel[F,A](this)
+            impl.PromiseChannel[F,A](this)
       else
          ???
 

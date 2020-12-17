@@ -10,6 +10,10 @@ import scala.util.control.NonFatal
 
 class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends BaseChannel[F,A](gopherApi):
   
+
+  protected def isEmpty: Boolean =
+    writers.isEmpty
+
   protected def process(): Unit =
     var progress = true
     while(progress) {
@@ -41,6 +45,9 @@ class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends B
             done = true 
       }
     } 
+    if (closed) {
+       processClose()
+    }
 
 
   private def findUnexpired[T <: Expirable[?]](q: Queue[T]): Option[T] =
@@ -59,3 +66,4 @@ class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends B
   private def findWriter(): Option[Writer[A]] =
     findUnexpired(writers)
   
+    
