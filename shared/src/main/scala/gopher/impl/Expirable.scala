@@ -2,6 +2,14 @@ package gopher.impl
 
 import cps._
 
+/**
+* Object, which can be expired
+* (usually - reader or writer in SelectGroup)
+* Usage protocol is next:
+*  capture
+*   if A inside is used, call markUsed and use A
+*   if A inside is unused for some reason -- call markFree
+**/
 trait Expirable[A]:
  
    /**

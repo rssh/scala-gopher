@@ -12,9 +12,11 @@ trait ReadChannel[F[_], A]:
 
    type read = A
 
-   // workarround for https://github.com/lampepfl/dotty/issues/10477
-   protected def asyncMonad: CpsAsyncMonad[F]
+   protected def gopherApi: Gopher[F]
 
+   protected def asyncMonad: CpsSchedulingMonad[F] = gopherApi.asyncMonad
+
+   // workarround for https://github.com/lampepfl/dotty/issues/10477
    protected def rAsyncMonad: CpsAsyncMonad[F] = asyncMonad
 
    def addReader(reader: Reader[A]): Unit
@@ -85,6 +87,8 @@ trait ReadChannel[F[_], A]:
    inline def foreach(f: A=>Unit): Unit = 
       await(foreach_async( x => rAsyncMonad.pure(f(x)) ))(using rAsyncMonad)
  
+   def dup(): (ReadChannel[F,A], ReadChannel[F,A]) =
+      DuppedInput(this)(using gopherApi).pair
 
    class DoneReadChannel extends ReadChannel[F,Unit]:
 
@@ -94,7 +98,7 @@ trait ReadChannel[F[_], A]:
       def addDoneReader(reader: Reader[Unit]): Unit =
          thisReadChannel.addDoneReader(reader)
 
-      protected def asyncMonad: CpsAsyncMonad[F] = thisReadChannel.asyncMonad   
+      protected def gopherApi: Gopher[F] = thisReadChannel.gopherApi  
 
    end DoneReadChannel
 

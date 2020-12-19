@@ -15,15 +15,13 @@ import scala.util.Failure
 /**
  * Channel is closed immediatly after successfull write.
  **/
- class PromiseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher[F], taskExecutor: ExecutorService) extends Channel[F,A,A]:
+ class PromiseChannel[F[_],A](override val gopherApi: JVMGopher[F], taskExecutor: ExecutorService) extends Channel[F,A,A]:
 
     protected val readers = new ConcurrentLinkedDeque[Reader[A]]()
     protected val doneReaders = new ConcurrentLinkedDeque[Reader[Unit]]()
     protected val ref: AtomicReference[AnyRef | Null] = new AtomicReference(null)
     protected val closed: AtomicBoolean = new AtomicBoolean(false)
     protected val readed: AtomicBoolean = new AtomicBoolean(false)
-
-    protected override def asyncMonad = summon[CpsAsyncMonad[F]]
 
     def addReader(reader: Reader[A]): Unit =
         if (ref.get() eq null) then
@@ -34,11 +32,11 @@ import scala.util.Failure
           while(!done && !reader.isExpired) {
             reader.capture() match
               case Some(f) => 
+                reader.markUsed()
                 taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                 done = true
               case None => 
                 if (!reader.isExpired) then
-                  reader.markFree()
                   Thread.onSpinWait()
           }
           
@@ -50,16 +48,17 @@ import scala.util.Failure
               val ar: AnyRef = a.asInstanceOf[AnyRef] //
               if (ref.compareAndSet(null,ar) && !closed.get() ) then
                 closed.lazySet(true)
+                writer.markFree()
                 step()
                 done = true
               else 
+                writer.markUsed()
                 taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                 done = true
             case None =>   
-              if (!writer.isExpired) {
-                writer.markFree()
+              if (!writer.isExpired) 
                 Thread.onSpinWait()
-              } 
+              
 
     def addDoneReader(reader: Reader[Unit]): Unit =
       if (!closed.get()) then
@@ -69,6 +68,7 @@ import scala.util.Failure
         while(!done & !reader.isExpired) {
           reader.capture() match
             case Some(f) => 
+              reader.markUsed()
               taskExecutor.execute(()=>f(Success(())))
               done = true
             case None =>

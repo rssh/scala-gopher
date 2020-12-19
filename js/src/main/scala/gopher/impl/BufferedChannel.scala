@@ -61,6 +61,7 @@ class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: In
       progress = true
       reader.capture().foreach{ f => 
         internalDequeueFinish()
+        reader.markUsed()
         submitTask( () => f(Success(a)) )
       }
     progress  
@@ -69,10 +70,17 @@ class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: In
     var progress = false
     if (!writers.isEmpty && !isFull) then
       val writer = writers.dequeue()
-      writer.capture().foreach{ case (a,f) =>
+      writer.capture() match
+        case Some((a,f)) =>
           internalEnqueue(a)
-          f(Success(()))
-      }
+          writer.markUsed()
+          submitTask(  () => f(Success(())) )
+          progress = true
+        case None =>
+          if (!writer.isExpired) then
+            // impossible, we have no parallel execution
+            println(s"Deadlock detected, this=${this}, writer=${writer}, writer.isExpired=${writer.isExpired}, writer.capture=${writer.capture()}")
+            throw DeadlockDetected()
     progress
 
   

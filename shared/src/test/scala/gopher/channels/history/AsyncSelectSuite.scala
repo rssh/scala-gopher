@@ -62,7 +62,7 @@ class AsyncSelectSuite extends FunSuite {
   }
 
 
-  test("async base: select write, select read")  {
+  test("async base: select write, select read".only)  {
 
     val channel = makeChannel[Int](10)
 

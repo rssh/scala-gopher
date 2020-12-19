@@ -120,6 +120,7 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
                 done = true
               case None =>
                 if !reader.isExpired then
+                  reader.markFree()
                   nonExpiredBusyReads = nonExpiredBusyReads.enqueue(reader) 
         }
         while(nonExpiredBusyReads.nonEmpty) {
@@ -145,10 +146,12 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
               if (state.write(a)) then 
                  taskExecutor.execute(() => f(Success(())))
                  progress = true
+                 writer.markUsed()
               else
                  // impossible, because state
                  //TODO: log
-                 println("impossibe,unsuccesfull write after !isFull")
+                 //log("impossibe,unsuccesfull write after !isFull")
+                 writer.markFree()
                  writers.addFirst(writer)
             case None =>
               if (!writer.isExpired)

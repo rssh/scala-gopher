@@ -21,6 +21,7 @@ class PromiseChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends Base
       if (!w.isExpired) then
         w.capture() match
           case Some((a,f)) =>
+            w.markUsed()
             submitTask(()=>f(Success(())))
             value = Some(a)
             closed = true
@@ -38,11 +39,17 @@ class PromiseChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends Base
           r.capture() match
             case Some(f) =>
               if (!readed) then
+                r.markUsed()
                 submitTask(()=>f(Success(value.get)))
                 readed = true
               else
-                processCloseDone() // to have .done call befor channel-closed. 
-                submitTask(()=>f(Failure(ChannelClosedException())))
+                r.markFree()
+                processCloseDone() // to have .done call befor channel-closed.
+                if (!r.isExpired) then
+                  r.capture().foreach{ f => 
+                    r.markUsed()
+                    submitTask(()=>f(Failure(ChannelClosedException())))
+                  }
             case None =>
               if (!r.isExpired) 
                 throw new DeadlockDetected()  

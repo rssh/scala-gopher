@@ -20,7 +20,7 @@ import scala.util.Failure
  *   Step functions is executed in some thread loop, and in the same time, only one instance of step function is running.
  *   (which is ensured by guard)
  **/
-abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher[F], controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A,A]:
+abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherApi: JVMGopher[F], controlExecutor: ExecutorService, taskExecutor: ExecutorService) extends Channel[F,A,A]:
 
   import GuardedSPSCBaseChannel._
 
@@ -31,8 +31,6 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
   protected val publishedClosed = new AtomicBoolean(false)
 
   protected val stepGuard = new AtomicInteger(STEP_FREE)
-
-  override protected def asyncMonad: CpsAsyncMonad[F] = summon[CpsAsyncMonad[F]]
 
   protected val stepRunnable: Runnable = (()=>entryStep())
 
@@ -102,6 +100,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
             case Some(f) =>
               progress = true
               taskExecutor.execute(() => f(Failure(new ChannelClosedException())) )
+              r.markUsed()
             case None =>
               progress = true
               progressWaitReader(r)
@@ -117,6 +116,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
           case Some((a,f)) =>
             progress = true
             taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
+            w.markUsed()
           case None =>
             progress = true
             progressWaitWriter(w)
@@ -132,6 +132,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
           case Some(f) =>
             progress = true
             taskExecutor.execute(() => f(Success(())))
+            r.markUsed()
           case None =>
             progressWaitDoneReader(r)
     }
@@ -145,9 +146,11 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
       w.capture() match
         case Some((a,f)) => 
           taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
+          w.markUsed()
           done = true
         case None =>
           if (!w.isExpired) then
+            w.markFree()
             Thread.onSpinWait()
   }
 
@@ -166,6 +169,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher
       
   protected def progressWait[T <: Expirable[_]](v:T, queue: ConcurrentLinkedDeque[T]): Unit =
     if (!v.isExpired) 
+      v.markFree()
       if (queue.isEmpty)
         Thread.onSpinWait()
       queue.addLast(v)

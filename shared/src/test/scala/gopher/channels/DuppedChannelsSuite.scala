@@ -1,28 +1,36 @@
 package gopher.channels
 
+import cps._
+import cps.monads.FutureAsyncMonad
 import gopher._
-import org.scalatest._
+import munit._
 
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language._
 import scala.util._
 
-class DuppedChannelsSuite extends AsyncFunSuite  {
+class DuppedChannelsSuite extends FunSuite  {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
 
   test("duped input must show two") {
-    val ch = gopherApi.makeChannel[String]()
-    val dupped = ch.dup
-    ch.awrite("1")
+    val ch = makeChannel[String]()
+    val dupped = ch.dup()
+    val r0 = ch.awrite("1")
     val r1 = dupped._1.aread
     val r2 = dupped._2.aread
     val r = for(v1 <- r1; v2 <- r2) yield (v1,v2)
 
-    r map (x => assert(x === ("1","1")) )
+    r map {x => 
+      assert(x == ("1","1")) 
+    }
 
   }
 
+/*
   test("output is blocked by both inputs") {
     import CommonTestObjects.FutureWithTimeout
     val ch = gopherApi.makeChannel[Int]()
@@ -54,10 +62,8 @@ class DuppedChannelsSuite extends AsyncFunSuite  {
     }
 
   }
+*/
 
-
-
-  def gopherApi = CommonTestObjects.gopherApi
 
 
 }

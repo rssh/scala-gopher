@@ -142,9 +142,6 @@ class ChannelCloseSuite extends FunSuite
    }
   
 
-
-
-
 }
 
 

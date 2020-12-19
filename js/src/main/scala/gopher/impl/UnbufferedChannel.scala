@@ -32,9 +32,12 @@ class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends B
                           submitTask( () => writeFun(Success(())) )
                           progress = true
                           done = true
+                          writer.markUsed()
+                          reader.markUsed()
                         case None =>
                           // impossible, because in js we have-no interleavinf, bug anyway
                           // let's fallback
+                          reader.markFree()
                           readers.prepend(reader)
                     case None =>
                       // impossible, but let's fallback
