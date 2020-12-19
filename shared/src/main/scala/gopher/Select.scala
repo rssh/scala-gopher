@@ -46,7 +46,7 @@ object Select:
 
   def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
     import quotes.reflect._
-    onceImplTree[F,A](Term.of(pf), m, api).asExprOf[A]
+    onceImplTree[F,A](pf.asTerm, m, api).asExprOf[A]
 
   def onceImplTree[F[_]:Type, S:Type](using Quotes)(pf: quotes.reflect.Term, m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]]): quotes.reflect.Term =
     import quotes.reflect._
@@ -67,7 +67,7 @@ object Select:
            parseCaseDef(e).appended(s)
         }
         val r = '{ $g.run() }
-        Term.of(r)
+        r.asTerm
     
 
   def parseCaseDef[F[_]:Type,S:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S] =
