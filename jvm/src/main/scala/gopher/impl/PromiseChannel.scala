@@ -29,16 +29,14 @@ import scala.util.Failure
           step()
         else
           var done = false
-          while(!done && !reader.isExpired) {
-            reader.capture() match
-              case Some(f) => 
-                reader.markUsed()
-                taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
-                done = true
-              case None => 
-                if (!reader.isExpired) then
-                  Thread.onSpinWait()
-          }
+          reader.capture() match
+            case Some(f) => 
+              reader.markUsed()
+              taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
+              done = true
+            case None => 
+              readers.add(reader)
+              step()
           
     def addWriter(writer: Writer[A]): Unit =
         var done = false
@@ -48,15 +46,15 @@ import scala.util.Failure
               val ar: AnyRef = a.asInstanceOf[AnyRef] //
               if (ref.compareAndSet(null,ar) && !closed.get() ) then
                 closed.lazySet(true)
-                writer.markFree()
-                step()
-                done = true
-              else 
+                taskExecutor.execute(()=> f(Success(())))
                 writer.markUsed()
+                step()
+              else 
                 taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
-                done = true
+                writer.markUsed() 
+              done = true
             case None =>   
-              if (!writer.isExpired) 
+              if (!writer.isExpired) then
                 Thread.onSpinWait()
               
 
@@ -96,6 +94,7 @@ import scala.util.Failure
                  r.capture() match
                   case Some(f) =>
                     done = true
+                    r.markUsed()
                     if (readed.compareAndSet(false,true)) then
                       val a = ar.nn.asInstanceOf[A]
                       taskExecutor.execute(() => f(Success(a)))
@@ -112,24 +111,13 @@ import scala.util.Failure
       else if (closed.get()) then
         closeAll()
 
-    def closeAll(): Unit = 
-      while(!readers.isEmpty) {
-        val r = readers.poll()
-        if (!(r eq null) && !r.isExpired) then
-          r.capture() match
-            case Some(f) =>
-              taskExecutor.execute(() => f(Failure(new ChannelClosedException)))
-            case None =>
-              if (!r.isExpired) then
-                if (readers.isEmpty) then
-                  Thread.onSpinWait()
-                readers.addLast(r)
-      }
+    def closeAll(): Unit =
       while(!doneReaders.isEmpty) {
         val r = doneReaders.poll()
         if !((r eq null) || r.isExpired) then
           r.capture() match
             case Some(f) => 
+              r.markUsed()
               taskExecutor.execute(()=>f(Success(())))
             case None =>
               if (!r.isExpired) then
@@ -137,5 +125,20 @@ import scala.util.Failure
                   Thread.onSpinWait()
                 doneReaders.addLast(r)
       }
+      while(!readers.isEmpty) {
+        val r = readers.poll()
+        if (!(r eq null) && !r.isExpired) then
+          r.capture() match
+            case Some(f) =>
+              r.markUsed()
+              taskExecutor.execute(() => f(Failure(new ChannelClosedException)))
+            case None =>
+              if (!r.isExpired) then
+                if (readers.isEmpty) then
+                  Thread.onSpinWait()
+                readers.addLast(r)
+      }
+
+
 
       

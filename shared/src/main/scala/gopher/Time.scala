@@ -121,6 +121,14 @@ object Time:
     def after[F[_]](duration: FiniteDuration)(using Gopher[F]): ReadChannel[F,FiniteDuration] =
         summon[Gopher[F]].time.after(duration)
 
+    
+    def asleep[F[_]](duration: FiniteDuration)(using Gopher[F]): F[FiniteDuration] =
+        summon[Gopher[F]].time.asleep(duration)
+
+    inline def sleep[F[_]](duration: FiniteDuration)(using Gopher[F]): FiniteDuration = 
+        summon[Gopher[F]].time.sleep(duration)    
+    
+
     /**
     * Task, which can be cancelled.
     **/    
@@ -131,4 +139,7 @@ object Time:
        def onDone( listener: Try[Boolean]=>Unit ): Unit
 
     }
+
     
+
+

@@ -17,6 +17,7 @@ class ChannelCloseSuite extends FunSuite
   import scala.concurrent.ExecutionContext.Implicits.global
   given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
+  
   test("writing after close is impossile")  {
 
     val channel = makeChannel[Int](100)

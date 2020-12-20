@@ -32,76 +32,66 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
     }
 
   def addReader(reader: Reader[A]): Unit = 
-      if (closed && isEmpty ) {
-        reader.capture().foreach{ f =>
-            reader.markUsed()
-            submitTask( () => 
-              f(Failure(new ChannelClosedException()))
-            )
-        }
-      } else {
-        readers.enqueue(reader)
-        process()
-      }
+    readers.enqueue(reader)
+    process()
     
   def addWriter(writer: Writer[A]): Unit =
-        if (closed) {
-          writer.capture().foreach{ (a,f) =>
-            writer.markUsed()
-            submitTask( () =>
-              f(Failure(new ChannelClosedException()))
-            )
-          }
-        } else {
-          writers.enqueue(writer)
-          process()
+    if (closed) {
+        writer.capture().foreach{ (a,f) =>
+          writer.markUsed()
+          submitTask( () =>
+            f(Failure(new ChannelClosedException()))
+          )
         }
+    } else {
+        writers.enqueue(writer)
+        process()
+    }
 
   def addDoneReader(reader: Reader[Unit]): Unit =
-        if (closed && isEmpty) {
-          reader.capture().foreach{ f =>
+    if (closed && isEmpty) {
+        reader.capture() match
+          case Some(f) =>
             reader.markUsed()
             submitTask( () => f(Success(())))
-          }
-        } else {
-          doneReaders.enqueue(reader)
-        }    
+          case None =>
+            // mb is blocked and will be evaluated in 
+            doneReaders.enqueue(reader)
+            process()
+    } else {
+        doneReaders.enqueue(reader)
+    }    
 
   protected def processClose(): Unit =
     if (isEmpty) then
       processCloseDone()
-      submitTask(processCloseWriters)
       submitTask(processCloseReaders)
-          
+    submitTask(processCloseWriters)
+         
+  protected def exhauseQueue[T <: Expirable[A],A](queue: Queue[T], action: A => Unit): Unit =
+    while(!queue.isEmpty) {
+      val v = queue.dequeue()
+      if (!v.isExpired) then
+        v.capture() match
+          case Some(a) =>
+            v.markUsed()
+            action(a)
+          case None =>
+            throw DeadlockDetected()
+    }
 
   protected def processCloseDone(): Unit =
     val success = Success(())
-    doneReaders.foreach( reader =>
-      reader.capture().foreach{ f =>
-         reader.markUsed()
-         f(success)
-      }
-    )
-
+    exhauseQueue(doneReaders, f => f(success))
+    
   protected def processCloseReaders(): Unit =
     val channelClosed = Failure(ChannelClosedException())
-    readers.foreach{ reader =>
-      reader.capture().foreach{ f =>
-         reader.markUsed()
-         f(channelClosed)
-      }
-    }
+    exhauseQueue(readers, f => f(channelClosed))    
 
   protected def processCloseWriters(): Unit =
     val channelClosed = Failure(ChannelClosedException())
-    writers.foreach{ writer =>
-      writer.capture().foreach{ (a,f) =>
-         writer.markUsed()
-         f(channelClosed)
-      }
-    }
-
-
+    exhauseQueue(writers, { case (a,f) => f(channelClosed) })
+ 
   protected def isEmpty: Boolean
   
   protected def process(): Unit

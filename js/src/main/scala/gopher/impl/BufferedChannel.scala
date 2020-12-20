@@ -79,7 +79,6 @@ class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: In
         case None =>
           if (!writer.isExpired) then
             // impossible, we have no parallel execution
-            println(s"Deadlock detected, this=${this}, writer=${writer}, writer.isExpired=${writer.isExpired}, writer.capture=${writer.capture()}")
             throw DeadlockDetected()
     progress
 

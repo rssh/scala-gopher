@@ -150,7 +150,6 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
           done = true
         case None =>
           if (!w.isExpired) then
-            w.markFree()
             Thread.onSpinWait()
   }
 
@@ -169,7 +168,6 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
       
   protected def progressWait[T <: Expirable[_]](v:T, queue: ConcurrentLinkedDeque[T]): Unit =
     if (!v.isExpired) 
-      v.markFree()
       if (queue.isEmpty)
         Thread.onSpinWait()
       queue.addLast(v)

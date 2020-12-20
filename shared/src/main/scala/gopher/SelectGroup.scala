@@ -17,6 +17,8 @@ import scala.language.postfixOps
  **/
 class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
 
+    thisSelectGroup =>
+
     /**
      * instance of select group created for call of select.
      **/
@@ -67,13 +69,18 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       })
       this
 
+
     // reading call will be tranformed to reader_async in async expressions
-    def  onRead_async[A](ch: ReadChannel[F,A])(f: A => F[S] ): F[this.type] =
+    def  onReadAsync[A](ch: ReadChannel[F,A])(f: A => F[S] ): this.type =
       addReader[A](ch,{
         case Success(a) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex) 
       })
-      m.pure(this)
+      this
+    
+    // reading call will be tranformed to reader_async in async expressions
+    def  onRead_async[A](ch: ReadChannel[F,A])(f: A => F[S] ): F[this.type] =
+      m.pure(onReadAsync(ch)(f))
 
     /**
      * FluentDSL for user SelectGroup without macroses.
@@ -89,12 +96,16 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       })
       this
 
-    def  onWrite_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
+
+    def  onWriteAsync[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): this.type =
       addWriter[A](ch,a,{
         case Success(()) => m.tryImpure(f(a))
         case Failure(ex) => m.error(ex)
       })
-      m.pure(this)
+      this
+
+    def  onWrite_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
+      m.pure(onWriteAsync(ch,a)(f))
 
     
     def onTimeout(t:FiniteDuration)(f: FiniteDuration => S): SelectGroup[F,S] =
@@ -104,12 +115,16 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       }) 
       this
 
-    def onTimeout_async(t:FiniteDuration)(f: FiniteDuration => F[S]): F[SelectGroup[F,S]] =
+    def onTimeoutAsync(t:FiniteDuration)(f: FiniteDuration => F[S]): SelectGroup[F,S] =
       setTimeout(t,{
-        case  Success(x) => m.tryImpure(f(x))
-        case  Failure(ex) => m.error(ex)
+          case  Success(x) => m.tryImpure(f(x))
+          case  Failure(ex) => m.error(ex)
       })
-      m.pure(this)
+      this
+  
+
+    def onTimeout_async(t:FiniteDuration)(f: FiniteDuration => F[S]): F[SelectGroup[F,S]] =
+      m.pure(onTimeoutAsync(t)(f))
 
 
     //
@@ -117,7 +132,9 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       def canExpire: Boolean = true
       def isExpired: Boolean = waitState.get()==2
       def markUsed(): Unit = waitState.lazySet(2)
-      def markFree(): Unit = waitState.set(0)
+      def markFree(): Unit = {
+        waitState.set(0)
+      }
 
 
 

@@ -14,14 +14,13 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     this
 
   // TODO: think about special notation for builders
+  def onReadAsync[A](ch: ReadChannel[F,A])(f: A => F[Boolean]): this.type =
+    groupBuilder = groupBuilder.andThen( _.onReadAsync(ch)(f) )
+    this
+
+  // TODO: think about special notation for builders
   def onRead_async[A](ch: ReadChannel[F,A])(f: A => F[Boolean]): F[this.type] =
-    groupBuilder = groupBuilder.andThen{
-      g => {
-        g.onRead_async(ch)(f)
-        g
-      }
-    }
-    summon[CpsMonad[F]].pure(this)
+    summon[CpsMonad[F]].pure(onReadAsync(ch)(f))
   
 
   def onWrite[A](ch: WriteChannel[F,A], a: =>A)(f: A=>Boolean): this.type =
@@ -30,13 +29,15 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     }
     this
 
-  def onWrite_async[A](ch: WriteChannel[F,A], a: =>A)(f: A=>F[Boolean]): F[this.type] =
+  def onWriteAsync[A](ch: WriteChannel[F,A], a: =>A)(f: A=>F[Boolean]): this.type =
     groupBuilder = groupBuilder.andThen{
-        g => 
-          g.onWrite_async(ch,a)(f)
-          g 
+      g => g.onWriteAsync(ch,a)(f)
     }
-    summon[CpsMonad[F]].pure(this)
+    this
+    
+
+  def onWrite_async[A](ch: WriteChannel[F,A], a: =>A)(f: A=>F[Boolean]): F[this.type] =
+    summon[CpsMonad[F]].pure(onWriteAsync(ch,a)(f))
   
     
   def onTimeout(t: FiniteDuration)(f: FiniteDuration => Boolean): this.type =
@@ -45,18 +46,27 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     }
     this
 
-  def onTimeout_async(t: FiniteDuration)(f: FiniteDuration => F[Boolean]): F[this.type] =
+  def onTimeoutAsync(t: FiniteDuration)(f: FiniteDuration => F[Boolean]): this.type =
     groupBuilder = groupBuilder.andThen{
-      g => g.onTimeout_async(t)(f)
-           g
+        g => g.onTimeoutAsync(t)(f)
     }
-    summon[CpsMonad[F]].pure(this)
+    this
+  
     
+  def onTimeout_async(t: FiniteDuration)(f: FiniteDuration => F[Boolean]): F[this.type] =
+    summon[CpsMonad[F]].pure(onTimeoutAsync(t)(f))
+    
+
   def runAsync(): F[Unit] = async[F] {
-    while{
-      val group = api.select.group[Boolean]
-      groupBuilder(group).run()
-    } do () 
+    try
+      while{
+        val group = api.select.group[Boolean]
+        val r = groupBuilder(group).run()
+        r
+      } do ()
+    catch
+      case ex:Throwable =>
+        ex.printStackTrace() 
   }
 
   inline def run(): Unit = await(runAsync())

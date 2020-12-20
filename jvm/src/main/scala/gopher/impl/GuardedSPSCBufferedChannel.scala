@@ -120,7 +120,6 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
                 done = true
               case None =>
                 if !reader.isExpired then
-                  reader.markFree()
                   nonExpiredBusyReads = nonExpiredBusyReads.enqueue(reader) 
         }
         while(nonExpiredBusyReads.nonEmpty) {

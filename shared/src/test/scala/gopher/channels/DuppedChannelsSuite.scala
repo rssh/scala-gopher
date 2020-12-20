@@ -7,7 +7,7 @@ import munit._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.language._
+import scala.language.postfixOps
 import scala.util._
 
 class DuppedChannelsSuite extends FunSuite  {
@@ -30,39 +30,44 @@ class DuppedChannelsSuite extends FunSuite  {
 
   }
 
-/*
+
   test("output is blocked by both inputs") {
-    import CommonTestObjects.FutureWithTimeout
-    val ch = gopherApi.makeChannel[Int]()
+    //import CommonTestObjects.FutureWithTimeout
+    val ch = makeChannel[Int]()
     val aw=ch.awriteAll(1 to 100)
-    val (in1, in2) = ch.dup
+    val (in1, in2) = ch.dup()
     val at1 = in1.atake(100)
-    val awt = aw.withTimeout(1 second)
-    val w = recoverToSucceededIf[TimeoutException](awt)
-    w.map(_ => assert(!aw.isCompleted && !at1.isCompleted)).flatMap { x =>
-      in2.atake(100) map (_ => assert(aw.isCompleted))
+    // TODO:make withTimeout as extension ?
+    //val awt = aw.withTimeout(1 second)
+    async {
+      assert(!aw.isCompleted && !at1.isCompleted)
+      val res = await(in2.atake(100))
+      await(aw)
     }
   }
 
+
   test("on closing of main stream dupped outputs also closed.") {
-    val ch = gopherApi.makeChannel[Int](1)
-    val (in1, in2) = ch.dup
-    val f1 = go {
+    val ch = makeChannel[Int](1)
+    val (in1, in2) = ch.dup()
+    val f1 = async{
       ch.write(1)
       ch.close()
     }
     for{ fx <- f1
          x <- in1.aread
          r <- in1.aread.transformWith {
-           case Success(u) => Future failed new IllegalStateException("Mist be closed")
-           case Failure(u) => Future successful (assert(x == 1))
+           case Success(u) => 
+               Future failed new IllegalStateException("Mist be closed")
+           case Failure(u) => 
+               Future successful (assert(x == 1))
          }
     } yield {
       r
     }
 
   }
-*/
+
 
 
 
