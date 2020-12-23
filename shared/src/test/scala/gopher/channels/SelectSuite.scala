@@ -1,86 +1,78 @@
 package gopher.channels
 
 
-import org.scalatest._
+import munit._
 import scala.language._
 import scala.concurrent._
 import scala.concurrent.duration._
+
+import cps._
 import gopher._
-import gopher.tags._
+import cps.monads.FutureAsyncMonad
 
 
 class SelectSuite extends FunSuite 
 {
 
+  import scala.concurrent.ExecutionContext.Implicits.global
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
+
+
  
    test("basic select with reading syntax sugar")  {
      
-     val channel = gopherApi.makeChannel[Int](100)
+    val channel = makeChannel[Int](100)
      
-     val producer = channel.awriteAll(1 to 1000)
-       
-     @volatile var sum = 0;
-     val consumer = gopherApi.select.forever.reading(channel){ i =>
+    val producer = channel.awriteAll(1 to 1000)
+     
+    async {
+
+      @volatile var sum = 0;
+      val consumer = select.loop.reading(channel){ i =>
                                        sum = sum+i
-                                       if (i==1000) {
-                                          implicitly[FlowTermination[Unit]].doExit(())
-                                       } else {
-                                       }
-                                     }.go
+                                       i < 1000
+      }.runAsync()
+      await(consumer)
 
-
-     
-     Await.ready(consumer, 10.second)
-
-     val xsum = (1 to 1000).sum
-     assert(xsum == sum)
+      val xsum = (1 to 1000).sum   
+      assert(xsum == sum)
+    }
    }
 
-   test("basic select with 'apply' reading syntax sugar")  {
-
-     val channel = gopherApi.makeChannel[Int](100)
-     val producer = channel.awriteAll(1 to 1000)
-
-     @volatile var sum = 0;
-     val consumer = gopherApi.select.forever.reading(channel) { i =>
-                                       sum = sum+i
-                                       if (i==1000) gopherApi.currentFlow.exit(())
-                                     }.go
-
-     Await.ready(consumer, 1000.second)
-     val xsum = (1 to 1000).sum
-     assert(xsum == sum)
-
-   }
 
     
    test("basic select with async reading form oter stream in apply")  {
 
-     val channel1 = gopherApi.makeChannel[Int](100)
-     val channel2 = gopherApi.makeChannel[Int](100)
+    async{
+      val channel1 = makeChannel[Int](100)
+      val channel2 = makeChannel[Int](100)
 
-     val producer1 = channel1.awriteAll(1 to 1000)
-     val producer2_1 = channel2.awriteAll(1 to 10)
+      val producer1 = channel1.awriteAll(1 to 1000)
+      val producer2_1 = channel2.awriteAll(1 to 10)
 
-     @volatile var sum = 0;
-     val consumer = gopherApi.select.forever.reading(channel1) { i1 =>
+
+      @volatile var sum = 0;
+      // but when reading instead onRead
+      // TODO: submit bug to doty
+      val consumer = select.loop.onRead(channel1) { i1 =>
                                        val i2 = channel2.read
                                        sum = sum+i1 + i2
-                                       if (i1==1000) gopherApi.currentFlow.exit(())
-                                     }.go
+                                       (i1 < 1000) 
+                                      } .runAsync()
 
-     assert(consumer.isCompleted == false, "consumer must not be complete after reading first stream" )
-     assert(producer1.isCompleted == false)
+      assert(consumer.isCompleted == false, "consumer must not be complete after reading first stream" )
+      assert(producer1.isCompleted == false)
 
-     val producer2_2 = channel2.awriteAll(1 to 1000)
+      val producer2_2 = channel2.awriteAll(1 to 1000)
 
-     Await.ready(consumer, 1000.second)
+      await(consumer)
 
-     assert(consumer.isCompleted)
+      assert(consumer.isCompleted)
+    }
 
    }
 
-
+   /*
 
    test("basic select write with apply")  {
 
@@ -276,6 +268,6 @@ class SelectSuite extends FunSuite
      assert(sum > 100000)
    }
   
-  def gopherApi = CommonTestObjects.gopherApi
+  */
    
 }

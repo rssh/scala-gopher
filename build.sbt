@@ -10,7 +10,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.3.5",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.3.6-SNAPSHOT",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.20" % Test,
     testFrameworks += new TestFramework("munit.Framework")
 )

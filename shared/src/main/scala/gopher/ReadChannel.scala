@@ -5,6 +5,7 @@ import gopher.impl._
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import scala.concurrent.duration.Duration
 
 trait ReadChannel[F[_], A]:
 
@@ -87,8 +88,8 @@ trait ReadChannel[F[_], A]:
    inline def foreach(f: A=>Unit): Unit = 
       await(foreach_async( x => rAsyncMonad.pure(f(x)) ))(using rAsyncMonad)
  
-   def dup(): (ReadChannel[F,A], ReadChannel[F,A]) =
-      DuppedInput(this)(using gopherApi).pair
+   def dup(bufSize: Int=1, expiration: Duration=Duration.Inf): (ReadChannel[F,A], ReadChannel[F,A]) =
+      DuppedInput(this, bufSize, expiration)(using gopherApi).pair
 
    class DoneReadChannel extends ReadChannel[F,Unit]:
 

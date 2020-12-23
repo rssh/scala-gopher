@@ -22,6 +22,8 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
   def onRead_async[A](ch: ReadChannel[F,A])(f: A => F[Boolean]): F[this.type] =
     summon[CpsMonad[F]].pure(onReadAsync(ch)(f))
   
+  inline def reading[A](ch: ReadChannel[F,A])(f: A=>Boolean): this.type =
+    onRead(ch)(f)
 
   def onWrite[A](ch: WriteChannel[F,A], a: =>A)(f: A=>Boolean): this.type =
     groupBuilder = groupBuilder.andThen{
@@ -35,9 +37,11 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     }
     this
     
-
-  def onWrite_async[A](ch: WriteChannel[F,A], a: =>A)(f: A=>F[Boolean]): F[this.type] =
-    summon[CpsMonad[F]].pure(onWriteAsync(ch,a)(f))
+  def onWrite_async[A](ch: WriteChannel[F,A], fa: ()=>F[A])(f: A=>F[Boolean]): F[this.type] =
+    api.asyncMonad.map(fa())(a => onWriteAsync(ch,a)(f))
+    
+  inline def writing[A](ch: WriteChannel[F,A], a: =>A)(f: A=>Boolean): this.type =
+      onWrite(ch,a)(f)
   
     
   def onTimeout(t: FiniteDuration)(f: FiniteDuration => Boolean): this.type =
@@ -66,6 +70,7 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
       } do ()
     catch
       case ex:Throwable =>
+        // TODO: log
         ex.printStackTrace() 
   }
 
