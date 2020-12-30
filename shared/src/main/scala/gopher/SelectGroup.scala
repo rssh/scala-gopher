@@ -15,7 +15,7 @@ import scala.language.postfixOps
  * Select group is a virtual 'lock' object, where only
  * ne fro rieader and writer can exists at the sae time.
  **/
-class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
+class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectListeners[F,S]: 
 
     thisSelectGroup =>
 
@@ -89,7 +89,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
      *            .onWrite(endSignal){ () => done=true }
      *```        
      **/
-    def  onWrite[A](ch: WriteChannel[F,A], a:A)(f: A =>S ): SelectGroup[F,S] =
+    def  onWrite[A](ch: WriteChannel[F,A], a: =>A)(f: A =>S ): this.type =
       addWriter[A](ch,a,{
         case Success(()) => m.tryPure(f(a))
         case Failure(ex) => m.error(ex)
@@ -108,14 +108,14 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       m.pure(onWriteAsync(ch,a)(f))
 
     
-    def onTimeout(t:FiniteDuration)(f: FiniteDuration => S): SelectGroup[F,S] =
+    def onTimeout(t:FiniteDuration)(f: FiniteDuration => S): this.type =
       setTimeout(t,{
          case  Success(x) => m.tryPure(f(x))
          case  Failure(ex) => m.error(ex)
       }) 
       this
 
-    def onTimeoutAsync(t:FiniteDuration)(f: FiniteDuration => F[S]): SelectGroup[F,S] =
+    def onTimeoutAsync(t:FiniteDuration)(f: FiniteDuration => F[S]): this.type =
       setTimeout(t,{
           case  Success(x) => m.tryImpure(f(x))
           case  Failure(ex) => m.error(ex)
@@ -123,7 +123,7 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F]):
       this
   
 
-    def onTimeout_async(t:FiniteDuration)(f: FiniteDuration => F[S]): F[SelectGroup[F,S]] =
+    def onTimeout_async(t:FiniteDuration)(f: FiniteDuration => F[S]): F[this.type] =
       m.pure(onTimeoutAsync(t)(f))
 
 

@@ -172,49 +172,53 @@ class SelectSuite extends FunSuite
   }
 
 
-  /*
-  test("basic compound select with for syntax")  {
+
+  test("basic compound select with loop select syntax")  {
     
-     import scala.concurrent.ExecutionContext.Implicits.global
-     import scala.async.Async._
 
-     val channel1 = gopherApi.makeChannel[Int](1)
-     val channel2 = gopherApi.makeChannel[Int](1)
-     val channel3 = gopherApi.makeChannel[Int](1)
-     val channel4 = gopherApi.makeChannel[Int](1)
+      val channel1 = makeChannel[Int](1)
+      val channel2 = makeChannel[Int](1)
+      val channel3 = makeChannel[Int](1)
+      val channel4 = makeChannel[Int](1)
 
-     val producer = channel1.awriteAll(1 to 1000)
+      val producer = channel1.awriteAll(1 to 1000)
 
-     @volatile var q = false
+      @volatile var q = false
 
-     val selector = async {
+      val selector = async {
        @volatile var x=0
        @volatile var nw=0
        @volatile var ch1s=0
  
        //pending
        // for syntax will be next:
-       select.loop{ s =>
-        select match {
+       select.loop{ 
            case ir: channel1.read  =>
                                    channel4.awrite(ir)
-                                   ch1s=ir           
+                                   ch1s=ir      
+                                   true     
            case iw: channel3.write if (iw==(x+1)) =>
-                                   {}; nw = nw+1
-           case t: time.after    => q=true
+                                   {}; 
+                                   nw = nw+1
+                                   true
+           case t: Time.after if t == (5 milliseconds) => q=true
+                                  false
        }
 
-     }
+      }
 
-     async{
-       for(c <- channel4) channel2.write(c)
-     }
-     await(selector)
+      val copier =   async{
+          for(c <- channel4) channel2.write(c)
+      }
+     
+      async{
+        await(selector)
 
-     assert(q==true)
+        assert(q==true)
+      }
 
   }
-  */
+  
 
    /*
 

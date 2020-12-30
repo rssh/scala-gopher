@@ -6,6 +6,7 @@ import scala.quoted._
 import scala.compiletime._
 import scala.concurrent.duration._
 
+
 class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
   inline def apply[A](inline pf: PartialFunction[Any,A]): A =
@@ -20,26 +21,26 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 object Select:
 
   sealed trait SelectGroupExpr[F[_],S]:
-    def  toExpr: Expr[SelectGroup[F,S]]
+    def  toExprOf[X <: SelectListeners[F,S]]: Expr[X]
 
   sealed trait SelectorCaseExpr[F[_]:Type, S:Type]:
      type Monad[X] = F[X]
-     def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]]
+     def appended[L <: SelectListeners[F,S] : Type](base: Expr[L])(using Quotes): Expr[L]
 
   case class ReadExpression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
-     def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+     def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
        '{  $base.onRead($ch)($f) }
        
   case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
-      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
       '{  $base.onWrite($ch,$a)($f) }
    
   case class TimeoutExpression[F[_]:Type,S:Type](t: Expr[FiniteDuration], f: Expr[ FiniteDuration => S ]) extends SelectorCaseExpr[F,S]:
-      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
        '{  $base.onTimeout($t)($f) }
     
   case class DoneExression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[Unit=>S]) extends SelectorCaseExpr[F,S]:
-      def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
+      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
         '{  $base.onRead($ch.done)($f) }
 
   def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
@@ -54,7 +55,21 @@ object Select:
           r.asExprOf[A]
        }
        runImpl( builder, pf)
-  
+
+  def loopImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Boolean]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[Unit] =
+      def builder(caseDefs: List[SelectorCaseExpr[F,Boolean]]):Expr[Unit] = {
+          val s0 = '{
+              new SelectLoop[F]($api)(using $m)
+          }
+          val g: Expr[SelectLoop[F]] = caseDefs.foldLeft(s0){(s,e) =>
+              e.appended(s)
+          }
+          val r = '{ $g.run() }
+          r.asExprOf[Unit]
+      }
+      runImpl( builder, pf)
+      
+
 
   def runImpl[F[_]:Type, A:Type,B :Type](builder: List[SelectorCaseExpr[F,A]]=>Expr[B],
                                  pf: Expr[PartialFunction[Any,A]])(using Quotes): Expr[B] =
@@ -107,7 +122,7 @@ object Select:
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"after"))) =>
           val timeoutFun = makeLambda(v, tp.tpe, b.symbol, caseDef.rhs)
           val e = matchCaseDefCondition(caseDef, v)
-          if (ch.tpe =:= TypeRepr.of[gopher.Time]) 
+          if (ch.tpe <:< TypeRepr.of[gopher.Time] ||  ch.tpe <:< TypeRepr.of[gopher.Time.type]) 
              TimeoutExpression(e.asExprOf[FiniteDuration], timeoutFun.asExprOf[FiniteDuration => S])
           else
             reportError(s"Expected Time, we have ${ch.show}", ch.asExpr) 
