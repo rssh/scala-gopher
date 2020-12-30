@@ -17,18 +17,20 @@ trait WriteChannel[F[_], A]:
          addWriter(SimpleWriter(a, f))
       )
    
-   object write:   
-      inline def apply(a:A): Unit = await(awrite(a))(using asyncMonad) 
-      inline def unapply(a:A): Some[A] = ???
+   //object write:   
+   //   inline def apply(a:A): Unit = await(awrite(a))(using asyncMonad) 
+   //   inline def unapply(a:A): Some[A] = ???
+
+   inline def write(a:A): Unit = await(awrite(a))(using asyncMonad)
 
    @targetName("write1")
    inline def <~ (a:A): Unit = await(awrite(a))(using asyncMonad) 
 
    //def Write(x:A):WritePattern = new WritePattern(x)
 
-   class WritePattern(x:A):
-       inline def unapply(y:Any): Option[A] = 
-         Some(x)
+   //class WritePattern(x:A):
+   //    inline def unapply(y:Any): Option[A] = 
+   //      Some(x)
 
    def addWriter(writer: Writer[A]): Unit 
      

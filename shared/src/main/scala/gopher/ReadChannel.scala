@@ -81,12 +81,18 @@ trait ReadChannel[F[_], A]:
          }
       }
 
+   def aforeach_async(f: A=>F[Unit]): F[F[Unit]] =
+      rAsyncMonad.pure(foreach_async(f))
+
+   def aforeach(f: A=> Unit): F[Unit] =
+      foreach_async( x => rAsyncMonad.pure(f(x)))   
+
    /**
    * run code each time when new object is arriced.
    * until end of stream is not reached
    **/  
    inline def foreach(f: A=>Unit): Unit = 
-      await(foreach_async( x => rAsyncMonad.pure(f(x)) ))(using rAsyncMonad)
+      await(aforeach(f))(using rAsyncMonad)
  
    def dup(bufSize: Int=1, expiration: Duration=Duration.Inf): (ReadChannel[F,A], ReadChannel[F,A]) =
       DuppedInput(this, bufSize, expiration)(using gopherApi).pair

@@ -42,32 +42,41 @@ object Select:
       def appended(base: Expr[SelectGroup[F,S]])(using Quotes): Expr[SelectGroup[F,S]] =
         '{  $base.onRead($ch.done)($f) }
 
+  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
+       def builder(caseDefs: List[SelectorCaseExpr[F,A]]):Expr[A] = {
+          val s0 = '{
+             new SelectGroup[F,A]($api)(using $m)
+          }
+          val g: Expr[SelectGroup[F,A]] = caseDefs.foldLeft(s0){(s,e) =>
+             e.appended(s)
+          }
+          val r = '{ $g.run() }
+          r.asExprOf[A]
+       }
+       runImpl( builder, pf)
   
 
-  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
+  def runImpl[F[_]:Type, A:Type,B :Type](builder: List[SelectorCaseExpr[F,A]]=>Expr[B],
+                                 pf: Expr[PartialFunction[Any,A]])(using Quotes): Expr[B] =
     import quotes.reflect._
-    onceImplTree[F,A](pf.asTerm, m, api).asExprOf[A]
+    runImplTree[F,A,B](builder, pf.asTerm)
 
-  def onceImplTree[F[_]:Type, S:Type](using Quotes)(pf: quotes.reflect.Term, m: Expr[CpsSchedulingMonad[F]], api: Expr[Gopher[F]]): quotes.reflect.Term =
+  def runImplTree[F[_]:Type, A:Type, B:Type](using Quotes)(
+                builder: List[SelectorCaseExpr[F,A]] => Expr[B],
+                pf: quotes.reflect.Term
+                ): Expr[B] =
     import quotes.reflect._
     pf match
       case Lambda(valDefs, body) =>
-        onceImplTree[F,S](body, m, api)
+        runImplTree[F,A,B](builder, body)
       case Inlined(_,List(),body) => 
-        onceImplTree[F,S](body, m, api)
+        runImplTree[F,A,B](builder, body)
       case Match(scrutinee,cases) =>
         //val caseExprs = cases map(x => parseCaseDef[F,A](x))
         //if (caseExprs.find(_.isInstanceOf[DefaultExpression[?]]).isDefined) {
         //  report.error("default is not supported")
         //}
-        val s0 = '{
-            new SelectGroup[F,S]($api)(using $m)
-          }
-        val g: Expr[SelectGroup[F,S]] = cases.foldLeft(s0){(s,e) =>
-           parseCaseDef(e).appended(s)
-        }
-        val r = '{ $g.run() }
-        r.asTerm
+        builder(cases.map(parseCaseDef[F,A](_)))
     
 
   def parseCaseDef[F[_]:Type,S:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S] =

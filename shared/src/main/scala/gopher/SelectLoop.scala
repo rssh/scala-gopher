@@ -59,7 +59,7 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     
   def onTimeout_async(t: FiniteDuration)(f: FiniteDuration => F[Boolean]): F[this.type] =
     summon[CpsMonad[F]].pure(onTimeoutAsync(t)(f))
-    
+  
 
   def runAsync(): F[Unit] = async[F] {
     try
@@ -77,6 +77,6 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]):
   inline def run(): Unit = await(runAsync())
 
    
-
+  
 
 
