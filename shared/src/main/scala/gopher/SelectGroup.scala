@@ -53,6 +53,9 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectLis
     def step():F[S] =
        retval
 
+    def runAsync():F[S] =
+       retval
+
     inline def run(): S = await(step())
 
     /**

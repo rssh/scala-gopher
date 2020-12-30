@@ -220,20 +220,23 @@ class SelectSuite extends FunSuite
   }
   
 
-   /*
 
-   test("basic select.once with reading syntax sugar")  {
+   test("basic select.group with reading syntax sugar")  {
 
-     val channel1 = gopherApi.makeChannel[String](1)
-     val channel2 = gopherApi.makeChannel[String](1)
-     val selector = (gopherApi.select.once.reading(channel1)(x=>x)
-                                                  .reading(channel2)(x=>x)
-                    ).go
-     channel2.awrite("A")
-     assert(Await.result(selector, 10.second)=="A")
+    async {
+      val channel1 = makeChannel[String](1)
+      val channel2 = makeChannel[String](1)
+      val selector = select.group[String].onRead(channel1)(x=>x)
+                               .onRead(channel2)(x=>x)
+                              .runAsync()
+      channel2.awrite("A")
+      val r = await(selector)
+      assert(r=="A")
      
+    }
    }
 
+   /*
    test("basic select.once with writing syntax sugar")  {
      val channel1 = gopherApi.makeChannel[Int](100)
      val channel2 = gopherApi.makeChannel[Int](100)
