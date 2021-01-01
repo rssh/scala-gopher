@@ -258,7 +258,7 @@ class SelectSuite extends FunSuite
    
 
   
-   test("basic select.once with idle syntax sugar")  {
+   test("basic select.once with idle syntax sugar".only)  {
      async{
       val ch = makeChannel[String](1)
       val selector = (select.once[String].onRead(ch)(x=>x)

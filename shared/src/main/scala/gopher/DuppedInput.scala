@@ -11,13 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 
-class DuppedInput[F[_],A](origin:ReadChannel[F,A], bufSize: Int=1, expiration: Duration = Duration.Inf)(using api:Gopher[F])
+class DuppedInput[F[_],A](origin:ReadChannel[F,A], bufSize: Int=1)(using api:Gopher[F])
 {
 
   def pair = (sink1, sink2)
 
-  val sink1 = makeChannel[A](bufSize,false,expiration)
-  val sink2 = makeChannel[A](bufSize,false,expiration)
+  val sink1 = makeChannel[A](bufSize,false)
+  val sink2 = makeChannel[A](bufSize,false)
 
   given CpsSchedulingMonad[F] = api.asyncMonad
 

@@ -3,14 +3,15 @@ package gopher
 import cps._
 import gopher.impl._
 
-import scala.util.Try
 import scala.annotation.targetName
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 trait WriteChannel[F[_], A]:
 
    type write = A
 
-   protected def asyncMonad: CpsAsyncMonad[F]
+   def asyncMonad: CpsAsyncMonad[F]
 
    def awrite(a:A):F[Unit] =
       asyncMonad.adoptCallbackStyle(f =>
@@ -32,6 +33,7 @@ trait WriteChannel[F[_], A]:
    //    inline def unapply(y:Any): Option[A] = 
    //      Some(x)
 
+   //TODO: make protected[gopher]
    def addWriter(writer: Writer[A]): Unit 
      
    def awriteAll(collection: IterableOnce[A]): F[Unit] = 
@@ -46,6 +48,10 @@ trait WriteChannel[F[_], A]:
    inline def writeAll(collection: IterableOnce[A]): Unit = 
       await(awriteAll(collection))(using asyncMonad)
 
+
+   def withExpiration(ttl: FiniteDuration): WriteChannelWithExpiration[F,A] =
+      new WriteChannelWithExpiration(this, ttl)
+
    class SimpleWriter(a:A, f: Try[Unit]=>Unit) extends Writer[A]:
 
       def canExpire: Boolean = false
@@ -57,4 +63,7 @@ trait WriteChannel[F[_], A]:
       def markUsed(): Unit = ()
 
       def markFree(): Unit = ()
+
+   
+
 

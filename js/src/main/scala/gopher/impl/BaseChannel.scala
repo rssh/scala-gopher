@@ -77,7 +77,10 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
             v.markUsed()
             action(a)
           case None =>
-            throw DeadlockDetected()
+            // do nothing.
+            //   exists case, when this is possible: wheb we close channel from
+            // select-group callback, which is evaluated now.
+            //  in this case we will see one as evaluating.       
     }
 
   protected def processCloseDone(): Unit =

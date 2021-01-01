@@ -10,8 +10,7 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
   def asyncMonad: CpsSchedulingMonad[F] = summon[CpsSchedulingMonad[F]]
 
   def makeChannel[A](bufSize:Int = 0,
-                    autoClose: Boolean = false, 
-                    expire: Duration = Duration.Inf): Channel[F,A,A]                  
+                    autoClose: Boolean = false): Channel[F,A,A]                  
 
   def makeOnceChannel[A](): Channel[F,A,A] =
                     makeChannel[A](1,true)                   
@@ -23,9 +22,8 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
   
   
 def makeChannel[A](bufSize:Int = 0, 
-                  autoClose: Boolean = false,
-                  expire: Duration = Duration.Inf)(using g:Gopher[?]):Channel[g.Monad,A,A] =
-      g.makeChannel(bufSize, autoClose, expire)
+                  autoClose: Boolean = false)(using g:Gopher[?]):Channel[g.Monad,A,A] =
+      g.makeChannel(bufSize, autoClose)
 
 def makeOnceChannel[A]()(using g:Gopher[?]): Channel[g.Monad,A,A] =
       g.makeOnceChannel[A]()                   

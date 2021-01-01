@@ -7,17 +7,15 @@ import scala.concurrent.duration._
 class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
 
 
-   def makeChannel[A](bufSize:Int = 0, autoClose: Boolean = false, expire: Duration = Duration.Inf) =
-      if (expire == Duration.Inf )
-         if (!autoClose) then
-            if (bufSize == 0) then
-               impl.UnbufferedChannel[F,A](this)
-            else 
-               impl.BufferedChannel[F,A](this,bufSize)
-         else
-            impl.PromiseChannel[F,A](this)
+   def makeChannel[A](bufSize:Int = 0, autoClose: Boolean = false) =
+      if (!autoClose) then
+         if (bufSize == 0) then
+            impl.UnbufferedChannel[F,A](this)
+         else 
+            impl.BufferedChannel[F,A](this,bufSize)
       else
-         ???
+         impl.PromiseChannel[F,A](this)
+      
 
    val time = new impl.JSTime(this)
 
