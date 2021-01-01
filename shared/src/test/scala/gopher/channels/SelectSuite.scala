@@ -236,54 +236,83 @@ class SelectSuite extends FunSuite
     }
    }
 
-   /*
+   
    test("basic select.once with writing syntax sugar")  {
-     val channel1 = gopherApi.makeChannel[Int](100)
-     val channel2 = gopherApi.makeChannel[Int](100)
-     @volatile var s:Int = 0
-     val selector = (gopherApi.select.once.writing(channel1,s){q:Int =>"A"}
-                                          .writing(channel2,s){s=>"B"}
-                    ).go
-     // hi, Captain Obvious
-     assert(Set("A","B") contains Await.result(selector, 10.second) )
-     channel1.close()
-     channel2.close()
+     async {
+      val channel1 = makeChannel[Int](100)
+      val channel2 = makeChannel[Int](100)
+      @volatile var s:Int = 0
+      val selector = (select.group.onWrite(channel1,s){ (q:Int) =>"A"}
+                                  .onWrite(channel2,s){s=>"B"}
+                    ).runAsync()
+      //println("before awaiting selector")
+      val r = await(selector)
+      //println("after awaiting selector")
+      
+      // hi, Captain Obvious
+      assert(Set("A","B") contains r )
+      channel1.close()
+      channel2.close()
+    }
    }
+   
 
+  
    test("basic select.once with idle syntax sugar")  {
-     val ch = gopherApi.makeChannel[String](1)
-     val selector = (gopherApi.select.once[String].reading(ch)(x=>x)
-                                                  .idle("IDLE")
-                    ).go
-     assert(Await.result(selector, 10.second)=="IDLE")
-     ch.close()
+     async{
+      val ch = makeChannel[String](1)
+      val selector = (select.once[String].onRead(ch)(x=>x)
+                                        .onTimeout(5 milliseconds)(t => "IDLE")
+                    ).runAsync()
+      val r = await(selector)              
+      assert(r=="IDLE")
+      ch.close()
+     }
    }
 
 
+   
    test("basic select.foreach with partial-function syntax sugar")  {
-     val info = gopherApi.makeChannel[Long](1)
-     val quit = gopherApi.makeChannel[Int](2)
-     @volatile var (x,y)=(0L,1L)
-     val writer = gopherApi.select.forever{
+      val info = makeChannel[Long](1)
+      val quit = makeChannel[Int](2)
+      @volatile var (x,y)=(0L,1L)
+      
+      val writer = async {
+        select.loop{
                       case z:info.write if (z==x) =>
                                               x = y
                                               y = y + x
+                                              true
                       case q:quit.read =>
-                                         implicitly[FlowTermination[Unit]].doExit(())
-                  }
-     @volatile var sum=0L
-     val reader = gopherApi.select.forever{
+                                        false
+        }
+      }
+
+      @volatile var sum=0L
+      val reader = {
+      //implicit val printCode = cps.macroFlags.PrintCode
+      //implicit val debugLevel = cps.macroFlags.DebugLevel(20)
+        async{
+          select.loop{
                       case z:info.read => sum += z
                                           if (sum > 100000) {
-                                            quit.write(1)
-                                            implicitly[FlowTermination[Unit]].doExit(())
-                                         }
+                                            //quit.write(1)
+                                            await(quit.awrite(1))
+                                            false
+                                          } else {
+                                            true
+                                          }
                   }
-     Await.ready(writer, 10.second)
-     Await.ready(reader, 10.second)
-     assert(sum > 100000)
+        }
+      }
+
+      async{
+        await(writer)
+        await(reader)
+        assert(sum > 100000)
+      }
    }
   
-  */
+
    
 }

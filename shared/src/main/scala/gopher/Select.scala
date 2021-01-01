@@ -16,7 +16,10 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
   def group[S]: SelectGroup[F,S] = new SelectGroup[F,S](api)   
 
+  def once[S]: SelectGroup[F,S] = new SelectGroup[F,S](api)   
+
   def loop: SelectLoop[F] = new SelectLoop[F](api)
+
 
 object Select:
 
