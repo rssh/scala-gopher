@@ -32,6 +32,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .jvmSettings(
         scalacOptions ++= Seq( "-unchecked", "-Ycheck:macro" ),
     ).jsSettings(
+        libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").withDottyCompat(scalaVersion.value),
         // TODO: switch to ModuleES ?
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         scalaJSUseMainModuleInitializer := true,

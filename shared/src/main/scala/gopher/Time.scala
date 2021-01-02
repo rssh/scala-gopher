@@ -1,9 +1,9 @@
 package gopher
 
 import cps._
+import gopher.impl._
 
-
-
+import scala.concurrent._
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 
@@ -11,7 +11,7 @@ import scala.language.experimental.macros
 import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.TimerTask
 
 
@@ -21,6 +21,7 @@ import java.util.TimerTask
   */
 abstract class Time[F[_]](gopherAPI: Gopher[F]) {
 
+    type after = FiniteDuration
 
     def after(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =
     {
@@ -58,37 +59,45 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
       */
     def tick(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =
     {
-        ???
-     //newTicker(duration)
+     newTicker(duration).channel
     }
 
-    /*
-    class Ticker(duration: FiniteDuration)
-    {
+    
+    class Ticker(duration: FiniteDuration) {
         
-        val ch = ExpireChannel[Instant](duration,0)(gopherAPI)
-        val cancellable = gopherAPI.actorSystem.scheduler.schedule(duration,duration)(tick)(ec)
-        gopherAPI.actorSystem.registerOnTermination{
-            if (!cancellable.isCancelled) cancellable.cancel()
+        val channel = gopherAPI.makeChannel[FiniteDuration](0).withExpiration(duration, false)
+
+        private val scheduled = schedule(tick, duration)
+        private val stopped = AtomicBoolean(false)
+
+        def stop(): Unit = {
+            scheduled.cancel()
+            stopped.set(true)
         }
 
-        def tick():Unit = {
-            if (!cancellable.isCancelled) {
-                ch.awrite(Instant.now()).onComplete{
-                    case Failure(ex:ChannelClosedException) => cancellable.cancel()
-                    case Failure(ex) => cancellable.cancel() // strange, but stop.
-                    case _ =>
-                }(ec)
-            }
+        private def tick():Unit = {
+            if (!stopped.get()) then 
+                channel.addWriter(SimpleWriter(now(),{
+                        case Success(_) => // ok, somebody readed
+                        case Failure(ex) =>
+                            ex match
+                                case ex: ChannelClosedException => 
+                                    scheduled.cancel()
+                                    stopped.lazySet(true)
+                                case ex: TimeoutException => // 
+                                case other => // impossible, 
+                                    gopherAPI.logImpossible(other)
+                }))
+                schedule(tick, duration)
         }
         
     }
 
-    def newTicker(duration: FiniteDuration): Channel[Instant] =
+    def newTicker(duration: FiniteDuration): Ticker =
     {
-        (new Ticker(duration)).ch
+        new Ticker(duration)
     }
-    */
+    
 
     def now(): FiniteDuration = 
         FiniteDuration(System.currentTimeMillis(),TimeUnit.MILLISECONDS)

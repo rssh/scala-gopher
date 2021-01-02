@@ -21,6 +21,9 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectLis
 
     /**
      * instance of select group created for call of select.
+     * 0 - free
+     * 1 - now processes
+     * 2 - expired
      **/
     val waitState: AtomicInteger = new AtomicInteger(0)
     var call: Try[S] => Unit = { _ => () }

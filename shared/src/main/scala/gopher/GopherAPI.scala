@@ -31,7 +31,6 @@ object SharedGopherAPI {
       initPlatformSpecific()  
     _api.get
 
-  
 
   private[gopher] def setApi(api: GopherAPI): Unit =
     this._api = Some(api)

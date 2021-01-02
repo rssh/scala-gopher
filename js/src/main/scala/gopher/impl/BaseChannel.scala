@@ -6,6 +6,7 @@ import scala.collection.mutable.Queue
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.util._
 import scala.util.control.NonFatal
+import java.util.logging.Level
 
 
 abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends Channel[F,A,A]:
@@ -26,6 +27,7 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
       catch
         case NonFatal(ex) =>
           if (true) then
+            gopherApi.log(Level.WARNING, "impossible: exception in channel callback", ex)
             ex.printStackTrace()
           if (false) then
             JSExecutionContext.queue.execute(  ()=> throw ex )  

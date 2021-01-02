@@ -2,6 +2,7 @@ package gopher
 
 import cps._
 import java.util.Timer
+import java.util.logging._
 import scala.concurrent.duration._
 
 class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
@@ -18,6 +19,20 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
       
 
    val time = new impl.JSTime(this)
+
+   def setLogFun(logFun:(Level, String, Throwable|Null) => Unit): ((Level, String, Throwable|Null) => Unit) =
+      val r = currentLogFun
+      currentLogFun = logFun
+      r 
+
+   def log(level: Level, message: String, ex: Throwable| Null): Unit =
+      currentLogFun.apply(level,message,ex)
+
+   private var currentLogFun: (Level, String, Throwable|Null )=> Unit = { (level,message,ex) =>
+      System.err.println(s"${level}:${message}");
+      if !(ex eq null) then
+         ex.nn.printStackTrace()
+   } 
 
 
 object JSGopher extends GopherAPI:

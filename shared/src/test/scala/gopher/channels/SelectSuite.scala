@@ -198,7 +198,6 @@ class SelectSuite extends FunSuite
                                    ch1s=ir      
                                    true     
            case iw: channel3.write if (iw==(x+1)) =>
-                                   {}; 
                                    nw = nw+1
                                    true
            case t: Time.after if t == (5 milliseconds) => q=true

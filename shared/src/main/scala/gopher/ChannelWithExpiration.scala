@@ -4,8 +4,8 @@ import cps._
 import gopher.impl._
 import scala.concurrent.duration.FiniteDuration
 
-class ChannelWithExpiration[F[_],W,R](internal: Channel[F,W,R], ttl: FiniteDuration) 
-                                                        extends WriteChannelWithExpiration[F,W](internal, ttl)
+class ChannelWithExpiration[F[_],W,R](internal: Channel[F,W,R], ttl: FiniteDuration, throwTimeouts: Boolean) 
+                                                        extends WriteChannelWithExpiration[F,W](internal, ttl, throwTimeouts, internal.gopherApi)
                                                            with Channel[F,W,R]:
 
 
@@ -19,9 +19,9 @@ class ChannelWithExpiration[F[_],W,R](internal: Channel[F,W,R], ttl: FiniteDurat
   override def addDoneReader(reader: Reader[Unit]): Unit =
     internal.addDoneReader(reader)
   
-    
-  override def withExpiration(ttl: FiniteDuration): ChannelWithExpiration[F,W,R] =
-      new ChannelWithExpiration(internal , ttl)
+
+  override def withExpiration(ttl: FiniteDuration, throwTimeouts: Boolean): ChannelWithExpiration[F,W,R] =
+      new ChannelWithExpiration(internal , ttl, throwTimeouts)
     
 
   override def close(): Unit = internal.close()

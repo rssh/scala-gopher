@@ -49,20 +49,9 @@ trait WriteChannel[F[_], A]:
       await(awriteAll(collection))(using asyncMonad)
 
 
-   def withExpiration(ttl: FiniteDuration): WriteChannelWithExpiration[F,A] =
-      new WriteChannelWithExpiration(this, ttl)
+   def withWriteExpiration(ttl: FiniteDuration, throwTimeouts: Boolean)(using gopherApi: Gopher[F]): WriteChannelWithExpiration[F,A] =
+       new WriteChannelWithExpiration(this, ttl, throwTimeouts, gopherApi)
 
-   class SimpleWriter(a:A, f: Try[Unit]=>Unit) extends Writer[A]:
-
-      def canExpire: Boolean = false
-
-      def isExpired: Boolean = false
-  
-      def capture(): Option[(A,Try[Unit]=>Unit)] = Some((a,f))
-
-      def markUsed(): Unit = ()
-
-      def markFree(): Unit = ()
 
    
 

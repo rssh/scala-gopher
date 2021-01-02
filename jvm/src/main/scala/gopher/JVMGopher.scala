@@ -6,7 +6,9 @@ import gopher.impl._
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.atomic.AtomicReference
 import java.util.Timer
+import java.util.logging._
 import scala.concurrent.duration._
 
 
@@ -22,14 +24,24 @@ class JVMGopher[F[_]:CpsSchedulingMonad](cfg: JVMGopherConfig) extends Gopher[F]
             GuardedSPSCUnbufferedChannel[F,A](this, cfg.controlExecutor,cfg.taskExecutor)
          else 
             GuardedSPSCBufferedChannel[F,A](this, bufSize, cfg.controlExecutor,cfg.taskExecutor) 
-      
-
+   
+            
 
    val time = new JVMTime(this)
 
+   def setLogFun(logFun:(Level, String, Throwable|Null) => Unit): ((Level, String, Throwable|Null) => Unit) =
+      currentLogFun.getAndSet(logFun)
+
+   def log(level: Level, message: String, ex: Throwable| Null): Unit =
+      currentLogFun.get().apply(level,message,ex)
+          
    def taskExecutor = cfg.taskExecutor
 
    def scheduledExecutor = JVMGopher.scheduledExecutor
+
+ 
+   private val currentLogFun: AtomicReference[(Level,String,Throwable|Null)=>Unit]=new AtomicReference(JVMGopher.defaultLogFun) 
+
 
 
 
@@ -50,3 +62,12 @@ object JVMGopher extends GopherAPI:
       taskExecutor=ForkJoinPool.commonPool(),
    )
 
+   val logger = Logger.getLogger("JVMGopher")
+
+   def defaultLogFun(level: Level, message:String, ex: Throwable|Null): Unit = 
+      if (ex eq null) {
+         logger.log(level, message)
+      } else {
+         logger.log(level, message, ex)
+      }
+      
