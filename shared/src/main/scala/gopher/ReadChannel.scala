@@ -13,7 +13,7 @@ trait ReadChannel[F[_], A]:
 
    type read = A
 
-   protected def gopherApi: Gopher[F]
+   def gopherApi: Gopher[F]
 
    def asyncMonad: CpsSchedulingMonad[F] = gopherApi.asyncMonad
 
@@ -105,7 +105,7 @@ trait ReadChannel[F[_], A]:
       def addDoneReader(reader: Reader[Unit]): Unit =
          thisReadChannel.addDoneReader(reader)
 
-      protected def gopherApi: Gopher[F] = thisReadChannel.gopherApi  
+      def gopherApi: Gopher[F] = thisReadChannel.gopherApi  
 
    end DoneReadChannel
 
