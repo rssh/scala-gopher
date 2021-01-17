@@ -1,42 +1,45 @@
 package gopher.channels
 
+import cps._
 import gopher._
-import org.scalatest._
+import munit._
 
 import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
-import scala.language._
+import scala.language.postfixOps
 
-class MacroSelectASyncSuite extends AsyncFunSuite
+import cps.monads.FutureAsyncMonad
+
+class MacroSelectSuite extends FunSuite
 {
 
-    override implicit def executionContext: ExecutionContext = ExecutionContext.Implicits.global
+    import ExecutionContext.Implicits.global
+    given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
+    
     test("select emulation with macroses")  {
 
-        val channel = gopherApi.makeChannel[Int](100)
+        val channel = makeChannel[Int](100)
 
-        go {
+        async[Future] {
             var i = 1
             while(i <= 1000) {
                 channel <~ i
                 i+=1
             }
             //TODO: implement for in goas preprocessor to async
+            // dotty bug: position not set
             //for( i <- 1 to 1000)
             //  channel <~ i
         }
 
         var sum = 0
-        val consumer = go {
-            for(s <- gopherApi.select.forever) {
-                s match {
-                    case i: channel.read =>
-                        //System.err.println("received:"+i)
-                        sum = sum + i
-                        if (i==1000)
-                            implicitly[FlowTermination[Unit]].doExit(())
-                }
+        val consumer = async[Future] {
+            select.loop{
+              case i: channel.read =>
+                //System.err.println("received:"+i)
+                sum = sum + i
+                i < 1000
             }
             sum
         }
@@ -48,29 +51,27 @@ class MacroSelectASyncSuite extends AsyncFunSuite
 
     }
 
+    
     test("select with run-once")  {
-        import gopherApi._
         val channel1 = makeChannel[Int](100)
         val channel2 = makeChannel[Int](100)
 
-        val g = go {
+        val g = async[Future] {
             var nWrites=0
-            for(s <- select.once)
-                s match {
-                    case x: channel1.write if (x==1) => {
-                        {}; nWrites = nWrites + 1
+            select{
+                case x: channel1.write if (x==1) => {
+                                nWrites = nWrites + 1
                     }
-                    case x: channel2.write if (x==1) => {
-                        {}; nWrites = nWrites + 1
+                case x: channel2.write if (x==1) => {
+                                nWrites = nWrites + 1
                     }
-                }
+            }
 
             var nReads=0
-            for(s <- select.once)
-                s match {
+            select {
                     case  x: channel1.read => { {}; nReads = nReads + 1 }
                     case  x: channel2.read => { {}; nReads = nReads + 1 }
-                }
+            }
 
             (nWrites, nReads)
         }
@@ -79,108 +80,125 @@ class MacroSelectASyncSuite extends AsyncFunSuite
 
     }
 
+    
     test("select from futureInput") {
-        import gopherApi._
-        val channel = makeChannel[Int](100)
-        val future = Future successful 10
-        val fu = futureInput(future)
-        var res = 0
-        val r = select.forever {
-            case x: channel.read =>
-                Console.println(s"readed from channel: ${x}")
-            case x: fu.read =>
-                //Console.println(s"readed from future: ${x}")
-                res = x
-                implicitly[FlowTermination[Unit]].doExit(())
-            //  syntax for using channels/futures in cases without
-            //  setting one in stable identifers.
-            case x: Int if (x == future.read) => {};
-                res = x
+        async[Future] {
+            val channel = makeChannel[Int](100)
+            val future = Future successful 10
+            val fu = futureInput(future)
+            var res = 0
+            val r = select{
+                case x: channel.read =>
+                    Console.println(s"readed from channel: ${x}")
+                    true
+                case x: fu.read =>
+                    //Console.println(s"readed from future: ${x}")
+                    res = x
+                    false
+                //  syntax for using channels/futures in cases without
+                //  setting one in stable identifers.
+                //case x: Int if (x == future.read) =>
+                //    res = x
+            }
+            assert(res == 10)
         }
-        r map (_ => assert(res == 10))
     }
 
+    
+    /*
+     TODO: think, are we want to keep this syntax in 2.0.0 (?)
     test("select syntax with read/writes in guard")  {
         import gopherApi._
         val channel1 = makeChannel[Int](100)
         val channel2 = makeChannel[Int](100)
         var res = 0
-        val r = select.forever{
+        val r = select.loop{
             case x: Int if (x==channel1.write(3)) =>
                 Console.println(s"write to channel1: ${x} ")
+                true
             case x: Int if (x==channel2.read) =>
                 Console.println(s"readed from channel2: ${x}")
+                true
             case x: Int if (x==(Future successful 10).read) =>
                 res=x
-                implicitly[FlowTermination[Unit]].doExit(())
+                false
         }
         r map (_ => assert(res==10))
     }
+    */
+    
 
 
     test("select syntax with @unchecked annotation")  {
-        import gopherApi._
         val channel1 = makeChannel[List[Int]](100)
         val channel2 = makeChannel[List[Int]](100)
         var res = 0
-        val r = select.once{
-            case x: channel1.read @ unchecked =>
-            {};
-                res=1
-            case x: List[Int] @ unchecked if (x==channel2.read) =>
-            {};
-                res=2
-        }
         channel1.awrite(List(1,2,3))
-        r map (_ => assert(res==1))
-    }
-
-    test("tuple in caseDef as one symbol")  {
-        import gopherApi._
-        val ch = makeChannel[(Int,Int)](100)
-        var res = 0
-        val r = select.once{
-            case xpair: ch.read @unchecked  =>
-                // fixed error in compiler: Can't find proxy
-                val (a,b)=xpair
-                res=1
+        async {
+            select.once{
+                case x: channel1.read @ unchecked =>
+                    res=1
+                case x: channel2.read @ unchecked =>
+                    res=2
+            }
+            assert(res==1)
         }
-        ch.awrite((1,1))
-        r map ( _ => assert(res==1))
+        
     }
 
+    
+    test("tuple in caseDef as one symbol")  {
+        async {
+            val ch = makeChannel[(Int,Int)](100)
+            var res = 0
+            ch.awrite((1,1))
+            val r = select.once{
+                case xpair: ch.read @unchecked  =>
+                    // fixed error in compiler: Can't find proxy
+                    val (a,b)=xpair
+                    res=a
+            }
+            assert(res == 1)
+        }
+    }
+
+    
     test("multiple readers for one write")  {
-        import gopherApi._
         val ch = makeChannel[Int](10)
         var x1 = 0
         var x2 = 0
         var x3 = 0
         var x4 = 0
         var x5 = 0
-        val f1 = select.once{
-            case x:ch.read =>
-            {};
-                x1=1
+        val f1 = async {
+            select.once{
+                case x:ch.read =>
+                    x1=1
+            }
         }
-        val f2 = select.once{
-            case x:ch.read =>
-            {};
-                x2=1
+        val f2 = async {
+            select.once{
+                case x:ch.read =>
+                    x2=1
+            }
         }
-        val f3 = select.once{
-            case x:ch.read =>
-            {};
-                x3=1
+        val f3 = async {
+            select.once{
+                case x:ch.read =>
+                    x3=1
+            }
         }
-        val f4 = select.once{
-            case x:ch.read =>
-            {};
-                x4=1
+        val f4 = async {
+            select.once{
+                case x:ch.read =>
+                    x4=1
+            }
         }
-        val f5 = select.once{
-            case x:ch.read =>
-            {};
-                x5=1
+        val f5 = async{
+            select.once{
+                case x:ch.read =>
+                    x5=1
+            }
         }
         for {_ <- ch.awrite(1)
              _ <- Future.firstCompletedOf(List(f1, f2, f3, f4, f5))
@@ -191,19 +209,20 @@ class MacroSelectASyncSuite extends AsyncFunSuite
         } yield assert(x1+x2+x3+x4+x5==1)
     }
 
-
+    
     test("fold over selector")  {
-        import gopherApi._
-        val s0 = Seq[Future[Assertion]]()
-        val assertions = (1 to 100).foldLeft(s0) { (s, e) =>
             val ch = makeChannel[Int](10)
             val back = makeChannel[Int]()
             val quit = Promise[Boolean]()
-            val r = select.afold(0){ (x,s) =>
-                s match {
-                    case a:ch.read => back <~ a
-                        x+a
-                    case q:Boolean if (q==quit.future.read) => CurrentFlowTermination.exit(x)
+            val quitChannel = futureInput(quit.future)
+            val r = async {
+                select.fold(0){ (x,g) =>
+                    g.select {
+                        case a:ch.read => back <~ a
+                            x+a
+                        case q: quitChannel.read => 
+                            g.done(x)
+                    }
                 }
             }
             ch.awriteAll(1 to 10)
@@ -212,25 +231,24 @@ class MacroSelectASyncSuite extends AsyncFunSuite
                     quit success true
                 }
             }
-            val fs = r map (sum => assert(sum==(1 to 10).sum))
-            fs +: s
-        }
-        Future.sequence(assertions).map(_.head)
+            r map (sum => assert(sum==(1 to 10).sum))
     }
 
+    
     test("fold over selector with idle-1")  {
-        import gopherApi._
         val ch1 = makeChannel[Int](10)
         val ch2 = makeChannel[Int](10)
         ch1.awrite(1)
+        //implicit val printCode = cps.macroFlags.PrintCode
+        //implicit val debugLevel = cps.macroFlags.DebugLevel(20)
         for {
             _ <- Future.successful(())
             sf = select.afold((0, 0, 0)) { case ((n1, n2, nIdle), s) =>
-                s match {
+                s.select{
                     case x: ch1.read =>
                         val nn1 = n1 + 1
                         if (nn1 > 100) {
-                            CurrentFlowTermination.exit((nn1, n2, nIdle))
+                            s.done((nn1, n2, nIdle))
                         } else {
                             ch2.write(x)
                             (nn1, n2, nIdle)
@@ -238,21 +256,20 @@ class MacroSelectASyncSuite extends AsyncFunSuite
                     case x: ch2.read =>
                         ch1.write(x)
                         (n1, n2 + 1, nIdle)
-                    case _ =>
+                    case t : Time.after if (t == (50 milliseconds)) =>
                         (n1, n2, nIdle + 1)
-
                 }
-            }
+            } 
             (n1, n2, ni) <- sf
             _ = assert(n1 + n2 + ni > 100)
             sf2 = select.afold((0, 0)) { case ((n1, nIdle), s) =>
-                s match {
+                s.select{
                     case x: ch1.read =>
                         (n1 + 1, nIdle)
-                    case _ =>
+                    case t: Time.after if t == (50 milliseconds) =>
                         val nni = nIdle + 1
                         if (nni > 3) {
-                            CurrentFlowTermination.exit((n1, nni))
+                            s.done((n1, nni))
                         } else {
                             (n1, nni)
                         }
@@ -264,42 +281,39 @@ class MacroSelectASyncSuite extends AsyncFunSuite
     }
 
 
-    lazy val gopherApi = CommonTestObjects.gopherApi
-}
-
-
-class MacroSelectSyncSuite extends FunSuite
-{
-
-   import scala.concurrent.ExecutionContext.Implicits.global
-
-
-
-   test("amap over selector")  {
-     import gopherApi._
-     val ch1 = makeChannel[Int](10)
-     val ch2 = makeChannel[Int](10)
-     val quit = Promise[Boolean]()
-     val out = select.amap {
-         case x:ch1.read => x*2
-         case x:ch2.read => 
+    /*
+    test("map over selector")  {
+        val ch1 = makeChannel[Int](10)
+        val ch2 = makeChannel[Int](10)
+        val quit = Promise[Boolean]()
+        val out = select.map{ s =>
+            s.apply{
+                case x:ch1.read => x*2
+                case Channel.Read(x:Int,ch) if ch == ch2  => 
                          //System.err.println(s"received:${x}")
                          x*3
-         case q:Boolean if (q==quit.future.read) => 
+                case Channel.Read(q, ch) if ch == quit.future.asChannel => 
                          //System.err.println("received quit")
-                         select.exit(1)
-     }
-     ch1.awriteAll(1 to 10)
-     ch2.awriteAll(100 to 110)
-     val f = out.afold(0){ 
-               case (s,x) => //System.err.println(s"in afold ${x}")
-                             s+x }
-     Thread.sleep(1000)
-     quit success true
-     val x = Await.result(f, 10 seconds)
-     assert(x > 3000)
-   }
+                         s.done(())
+            }
+        }
+        ch1.awriteAll(1 to 10)
+        ch2.awriteAll(100 to 110)
+        val f = async {
+                out.fold(0){  (s,x) => //System.err.println(s"in afold ${x}")
+                            s+x
+            } 
+        }
+        async {
+            Time.asleep(1 second)
+            quit success true
+            val x = await(f)
+            assert(x > 3000)
+        }
+    }
+    */
 
+   /*
    test("generic channel make")  {
      val ch1 = gopherApi.make[Channel[Int]]()
      val ch2 = gopherApi.make[Channel[Int]](1)
@@ -442,5 +456,6 @@ class MacroSelectSyncSuite extends FunSuite
 
 
    lazy val gopherApi = CommonTestObjects.gopherApi
+   */
    
 }

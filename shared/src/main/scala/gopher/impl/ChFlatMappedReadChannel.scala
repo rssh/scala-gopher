@@ -4,7 +4,7 @@ import cps._
 import gopher._
 import scala.util._
 
-class FlatMappedReadChannel[F[_],A, B](prev: ReadChannel[F,A], f: A=>ReadChannel[F,B]) extends ReadChannel[F,B] {
+class ChFlatMappedReadChannel[F[_], A, B](prev: ReadChannel[F,A], f: A=>ReadChannel[F,B]) extends ReadChannel[F,B] {
 
   def addReader(reader: Reader[B]): Unit = 
      bChannel.addReader(reader)

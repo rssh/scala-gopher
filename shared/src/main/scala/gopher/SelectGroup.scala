@@ -61,6 +61,22 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectLis
 
     inline def run(): S = await(step())
 
+    inline def apply(inline pf: PartialFunction[Any,S]): S =
+    ${  
+        Select.onceImpl[F,S]('pf, 'api )  
+    }    
+  
+    inline def select(inline pf: PartialFunction[Any,S]): S =
+    ${  
+        Select.onceImpl[F,S]('pf, 'api )  
+    }
+
+    /**
+    * short alias for SelectFold.Done
+    */
+    def done[S](s:S):SelectFold.Done[S] =
+      SelectFold.Done(s)
+
     /**
      * FluentDSL for user SelectGroup without macroses.
      *```

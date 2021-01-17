@@ -27,6 +27,10 @@ trait WriteChannel[F[_], A]:
    @targetName("write1")
    inline def <~ (a:A): Unit = await(awrite(a))(using asyncMonad) 
 
+   @targetName("write2")
+   inline def ! (a:A): Unit = await(awrite(a))(using asyncMonad) 
+
+
    //def Write(x:A):WritePattern = new WritePattern(x)
 
    //class WritePattern(x:A):

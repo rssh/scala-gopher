@@ -1,9 +1,9 @@
 package gopher.channels
 
-import gopher.ChannelClosedException
-import org.scalatest.AsyncFunSuite
+import gopher._
+import munit._
 
-class IOComposeSuite extends AsyncFunSuite {
+class IOComposeSuite extends FunSuite {
 
 
     test("simple composition of IO with map") {

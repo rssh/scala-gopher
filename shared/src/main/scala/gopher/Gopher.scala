@@ -2,6 +2,7 @@ package gopher
 
 import cps._
 import scala.concurrent.duration.Duration
+import scala.util.Try
 
 import java.util.logging.{Level => LogLevel}
 
@@ -42,4 +43,15 @@ def makeOnceChannel[A]()(using g:Gopher[?]): Channel[g.Monad,A,A] =
 
 def select(using g:Gopher[?]):Select[g.Monad] =
       g.select
+
+def futureInput[F[_],A](f: F[A])(using g: Gopher[F]): ReadChannel[F,A] =
+      val ch = g.makeOnceChannel[Try[A]]()
+      g.asyncMonad.spawn{
+            g.asyncMonad.flatMapTry(f)(r => ch.awrite(r))
+      } 
+      ch.map(_.get)
+
+extension [F[_],A](fa: F[A])(using g: Gopher[F])
+      def asChannel : ReadChannel[F,A] =
+            futureInput(fa)
 

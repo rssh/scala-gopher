@@ -64,7 +64,7 @@ class SelectLoop[F[_]:CpsSchedulingMonad](api: Gopher[F]) extends SelectListener
 
   inline def apply(inline pf: PartialFunction[Any,Boolean]): Unit =
     ${  
-      Select.loopImpl[F]('pf, '{summonInline[CpsSchedulingMonad[F]]}, 'api )  
+      Select.loopImpl[F]('pf,  'api )  
     }    
   
 

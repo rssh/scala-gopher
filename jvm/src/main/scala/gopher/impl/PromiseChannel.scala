@@ -24,19 +24,8 @@ import scala.util.Failure
     protected val readed: AtomicBoolean = new AtomicBoolean(false)
 
     def addReader(reader: Reader[A]): Unit =
-        if (ref.get() eq null) then
-          readers.add(reader)
-          step()
-        else
-          var done = false
-          reader.capture() match
-            case Some(f) => 
-              reader.markUsed()
-              taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
-              done = true
-            case None => 
-              readers.add(reader)
-              step()
+        readers.add(reader)
+        step()
           
     def addWriter(writer: Writer[A]): Unit =
         var done = false
