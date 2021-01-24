@@ -62,20 +62,27 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
         var done = false
         while(!done) 
           val g = SelectGroup[F,A](api)
-          try 
+          try {
             val e = await(step(g))
             r.write(e)
-          catch 
+          } catch { 
             case ex: ChannelClosedException =>
               r.close()
               done=true
+          }
       }
     }
     r
 
- 
-  
+  def forever: SelectForever[F] = new SelectForever[F](api)
 
+  inline def aforever(inline pf: PartialFunction[Any,Unit]): F[Unit] =
+    async {
+      val runner = new SelectForever[F](api)
+      runner.apply(pf)
+    }
+
+    
   
 
 
@@ -130,6 +137,20 @@ object Select:
       }
       runImpl( builder, pf)
       
+
+  def foreverImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Unit]], api:Expr[Gopher[F]])(using Quotes): Expr[Unit] =
+      def builder(caseDefs: List[SelectorCaseExpr[F,Unit]]):Expr[Unit] = {
+          val s0 = '{
+              new SelectForever[F]($api)(using ${api}.asyncMonad)
+          }
+          val g: Expr[SelectForever[F]] = caseDefs.foldLeft(s0){(s,e) =>
+              e.appended(s)
+          }
+          val r = '{ $g.run() }
+          r.asExprOf[Unit]
+      }
+      runImpl(builder, pf)
+
 
 
   def runImpl[F[_]:Type, A:Type,B :Type](builder: List[SelectorCaseExpr[F,A]]=>Expr[B],
