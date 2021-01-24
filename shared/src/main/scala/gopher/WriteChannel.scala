@@ -45,7 +45,8 @@ trait WriteChannel[F[_], A]:
       async[F]{
          val it = collection.iterator
          while(it.hasNext) {
-            write(it.next())
+            val v = it.next()
+            write(v)
         }
       }
 

@@ -6,6 +6,7 @@ import munit._
 
 import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
+import scala.util._
 import scala.language.postfixOps
 
 import cps.monads.FutureAsyncMonad
@@ -280,182 +281,169 @@ class MacroSelectSuite extends FunSuite
            assert(n2i>3)
     }
 
-
-    /*
-    test("map over selector")  {
+       
+    test("map over selector".only)  {
         val ch1 = makeChannel[Int](10)
         val ch2 = makeChannel[Int](10)
         val quit = Promise[Boolean]()
-        val out = select.map{ s =>
-            s.apply{
-                case x:ch1.read => x*2
-                case Channel.Read(x:Int,ch) if ch == ch2  => 
-                         //System.err.println(s"received:${x}")
+        val quitChannel = quit.future.asChannel
+        val out = select.mapAsync[Int]{ s =>
+            val v = async{
+                  s.apply{
+                    case x:ch1.read => 
+                         x*2
+                    case Channel.Read(x:Int,ch) if ch == ch2  => 
                          x*3
-                case Channel.Read(q, ch) if ch == quit.future.asChannel => 
-                         //System.err.println("received quit")
-                         s.done(())
+                    case Channel.Read(q, ch) if ch == quitChannel => 
+                         throw ChannelClosedException()
+                  }
             }
+            v
         }
         ch1.awriteAll(1 to 10)
         ch2.awriteAll(100 to 110)
-        val f = async {
-                out.fold(0){  (s,x) => //System.err.println(s"in afold ${x}")
-                            s+x
-            } 
-        }
+        val f: Future[Int] = out.afold(0){  (s,x) => s+x }
         async {
-            Time.asleep(1 second)
+            Time.sleep(1 second)
             quit success true
             val x = await(f)
+            //println(s"x==$x")
             assert(x > 3000)
         }
     }
-    */
+    
+    
 
-   /*
-   test("generic channel make")  {
-     val ch1 = gopherApi.make[Channel[Int]]()
-     val ch2 = gopherApi.make[Channel[Int]](1)
-     // yet not supported by compiler.
-     //val ch3 = gopherApi.make[Channel[Int]](capacity=3)
-     val f1 = ch1.awrite(1)
-     val f2 = ch2.awrite(2)
-     val x = Await.result(ch1.aread, 10 seconds)
-     assert(x==1)
-   }
 
-   test("input afold") {
-     import gopherApi._
+    test("input fold") {
+      val ch1 = makeChannel[Int]()
+      ch1.awriteAll(1 to 10) map { _ => ch1.close() }
+      async {
+        val x = ch1.fold(0){ case (s,x) => s+x }
+        assert(x==55)
+      }
+    }
+
+
+    test("map over selector")  {
      val ch1 = makeChannel[Int]()
-     ch1.awriteAll(1 to 10) map { _ => ch1.close() }
-     val f = ch1.afold(0){ case (s,x) => s+x }
-     val x = Await.result(f, 10 seconds)
-     assert(x==55)
-   }
-
-   test("map over selector")  {
-     import gopherApi._
-     val ch1 = gopherApi.make[Channel[Int]]()
-     val ch2 = gopherApi.make[Channel[Int]](1)
+     val ch2 = makeChannel[Int](1)
      val f1 = ch1.awrite(1)
      val f2 = ch2.awrite(2)
-     val chs = for(s <- select) yield {
-                s match {
+     async {
+        val chs = for(s <- select) yield {
+                s.apply{
                   case x:ch1.read => x*3
                   case x:ch2.read => x*5
                 }
               }
-     val fs1 = chs.aread
-     val fs2 = chs.aread
-     val s1 = Await.result(fs1, 1 second)
-     val s2 = Await.result(fs2, 1 second)
-     assert(s1==3 || s1==10)
-   }
-
-   test("one-time channel make")  {
-     val ch = gopherApi.make[OneTimeChannel[Int]]()
-     val f1 = ch.awrite(1)
-     val f2 = ch.awrite(2)
-     val x = Await.result(ch.aread, 10 seconds)
-     val x2 = Await.result(f2.failed, 10 seconds)
-     assert(x==1)
-     assert(x2.isInstanceOf[ChannelClosedException])
-   }
-
-   test("check for done signal from one-time channel")  {
-     import gopherApi._
-     val ch = gopherApi.make[OneTimeChannel[Int]]()
-     val sf = select.afold((0)){ (x,s) =>
-        s match {
-          case v: ch.read => x + v
-          case _: ch.done => select.exit(x)
+        val fs1 = chs.aread
+        val fs2 = chs.aread
+        val s1 = await(fs1)
+        val s2 = await(fs2)
+        assert(s1==3 || s1==10)
+     }
+    }
+    
+   
+    
+    test("one-time channel make")  {
+        val ch = makeOnceChannel[Int]()
+        val f1 = ch.awrite(1)
+        val f2 = ch.awrite(2)
+        async {
+            val x = await(ch.aread)
+            val x2 = Try(await(f2.failed)) 
+            assert(x == 1)
+            assert(x2.get.isInstanceOf[ChannelClosedException])
         }
-     }
-     val f1 = ch.awrite(1)
-     val r = Await.result(sf,1 second)
-     assert(r==1)
-   }
+    }
+   
 
-   test("check for done signal from unbuffered channel")  {
-     import gopherApi._
-     val ch = gopherApi.make[Channel[Int]]()
-     val sf = select.afold((0)){ (x,s) =>
-        s match {
-          case v: ch.closeless.read => x + v
-          case _: ch.done => select.exit(x)
+   
+    test("check for done signal from one-time channel")  {
+        val ch = makeOnceChannel[Int]()
+        val sf = select.afold((0)){ (x,s) =>
+            s.select{
+                case v: ch.read => x + v
+                case v: ch.done.read => s.done(x)
+            }
         }
-     }
-     val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
-     val r = Await.result(sf,1 second)
-     assert(r==15)
-   }
-
-   test("check for done signal from buffered channel")  {
-     import gopherApi._
-     val ch = gopherApi.make[Channel[Int]](10)
-     val sf = select.afold((0)){ (x,s) =>
-        s match {
-          case v: ch.closeless.read => x + v
-          case _: ch.done => select.exit(x)
+        val f1 = ch.awrite(1)
+        async {
+            val r = await(sf)
+            assert(r==1)
         }
-     }
-     val f1 = ch.awriteAll(1 to 5) map{ _ =>
-        // let give all buffers to processe
-        Thread.sleep(200)
-        ch.close
-     }
-     val r = Await.result(sf,1 second)
-     assert(r==15)
-   }
+    } 
 
-   test("check for done signal from channel with dummy var")  {
-     import gopherApi._
-     val ch = gopherApi.make[Channel[Int]]()
-     val sf = select.afold((0)){ (x,s) =>
-        s match {
-          case v: ch.closeless.read => x + v
-          case v: ch.done => select.exit(x)
+   
+    test("check for done signal from unbuffered channel")  {
+        val ch = makeChannel[Int]()
+        val sf = select.afold((0)){ (x,s) =>
+            s.select{
+                case v: ch.read => x + v
+                case v: ch.done.read => s.done(x)
+            }
         }
-     }
-     val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
-     val r = Await.result(sf,1 second)
-     assert(r==15)
-   }
+        val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
+        async {
+            val r = await(sf)
+            assert(r==15)
+        }
+    }
+
+   
+    test("check for done signal from buffered channel")  {
+        val ch = makeChannel[Int](10)
+        val sf = select.afold((0)){ (x,s) =>
+            s.select {
+                case v: ch.read => x + v
+                case c: ch.done.read => s.done(x)
+            }
+        }
+        val f1 = async {
+            ch.writeAll(1 to 5)
+            // let give all buffers to processe
+            Time.sleep(200 millis)
+            ch.close()
+        } 
+        async {
+            val r = await(sf)
+            assert(r == 15)
+        }
+    }
 
 
-   test("check for done signal from select map")  {
-     import gopherApi._
-     val ch1 = gopherApi.make[Channel[Int]]()
-     val ch2 = gopherApi.make[Channel[Int]]()
-     val q = gopherApi.make[Channel[Boolean]]()
-     val chs = for(s <- select) yield {
-                s match {
-                 case x: ch1.read => x*3
-                 case x: ch2.read => x*2
-                 case _: q.read =>
-                   select.exit(1)
+    test("check for done signal from select map")  {  
+        val ch1 = makeChannel[Int]()
+        val ch2 = makeChannel[Int]()
+        val q = makeChannel[Boolean]()
+        async{ 
+            val chs: ReadChannel[Future,Int] = for(s <- select) yield {
+                s.select{
+                    case x: ch1.read => x*3
+                    case x: ch2.read => x*2
+                    case x: q.read =>
+                        throw ChannelClosedException()
                 }
-     }
-     val chs2 = select.afold(0){ (n,s) =>
-        s match {
-          case x:chs.closeless.read =>
-                    n + x
-          case _:chs.done =>
-                    select.exit(n)
-        }
-     }
-     // note, that if we want call of quit after last write,
-     //   ch1 and ch2 must be unbuffered.
-     val sendf = for{ _ <- ch1.awriteAll(1 to 10) 
+            }
+            val chs2 = select.afold(0){ (n,s) =>
+                s.select{
+                    case x:chs.read =>
+                        n + x
+                    case x:chs.done.read =>
+                        s.done(n)
+                }
+            }
+            // note, that if we want call of quit after last write,
+            //   ch1 and ch2 must be unbuffered.
+            val sendf = for{ _ <- ch1.awriteAll(1 to 10) 
                       _ <- ch2.awriteAll(1 to 10) 
                       _ <- q.awrite(true) } yield 1
-     val r = Await.result(chs2,1 second)
-     assert( r ==  (1 to 10).map(_ * 5).sum + 1)
-   }
+            val r = await(chs2)
+            assert( r ==  (1 to 10).map(_ * 5).sum + 1)
+        }
+    }
 
-
-   lazy val gopherApi = CommonTestObjects.gopherApi
-   */
    
 }

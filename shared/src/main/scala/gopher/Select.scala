@@ -52,28 +52,28 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     
   //def map[A](step: PartialFunction[SelectGroup[F,A],A|SelectFold.Done[Unit]]): ReadChannel[F,A] =
   
-  def map[A](step: SelectGroup[F,A] => A|SelectFold.Done[Unit]): ReadChannel[F,A] =
+  def map[A](step: SelectGroup[F,A] => A): ReadChannel[F,A] =
     mapAsync[A](x => api.asyncMonad.pure(step(x)))
 
-  def mapAsync[A](step: SelectGroup[F,A] => F[A|SelectFold.Done[Unit]]): ReadChannel[F,A] =
+  def mapAsync[A](step: SelectGroup[F,A] => F[A]): ReadChannel[F,A] =
     val r = makeChannel[A]()(using api)
     api.asyncMonad.spawn{
       async{
         var done = false
-        while(!done) {
+        while(!done) 
           val g = SelectGroup[F,A](api)
-          await(step(g)) match
-            case SelectFold.Done(()) => done=true
-            case other => 
-              r.write(other.asInstanceOf[A])
-        }
+          try 
+            val e = await(step(g))
+            r.write(e)
+          catch 
+            case ex: ChannelClosedException =>
+              r.close()
+              done=true
       }
     }
     r
 
-  def map_async[A](step: SelectGroup[F,A] => F[A|SelectFold.Done[Unit]]): F[ReadChannel[F,A]] =
-    api.asyncMonad.pure(mapAsync(step))
-
+ 
   
 
   
@@ -199,13 +199,16 @@ object Select:
             handleRead(b,v,ch,tp.tpe)
       case b@Bind(v, tp@Typed(expr, Annotated(TypeSelect(ch,"read"),_))) =>
             handleRead(b,v,ch,tp.tpe)
+      case tp@Typed(expr, TypeSelect(ch,"read")) =>
+              // todo: introduce 'dummy' val
+              reportError("binding var in read expression is mandatory", caseDef.pattern.asExpr)
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"write"))) =>
             handleWrite(b,v,ch,tp.tpe)
       case b@Bind(v, tp@Typed(expr, Annotated(TypeSelect(ch,"write"),_))) =>
             handleWrite(b,v,ch,tp.tpe)
       case b@Bind(v, tp@Typed(expr, TypeSelect(ch,"after"))) =>
           val timeoutFun = makeLambda(v, tp.tpe, b.symbol, caseDef.rhs)
-          val e = matchCaseDefCondition(caseDef, v)
+          val e = caseDefGuard.getOrElse(v, reportError(s"can't find condifion for $v",caseDef.pattern.asExpr))
           if (ch.tpe <:< TypeRepr.of[gopher.Time] ||  ch.tpe <:< TypeRepr.of[gopher.Time.type]) 
              TimeoutExpression(e.asExprOf[FiniteDuration], timeoutFun.asExprOf[FiniteDuration => S])
           else
@@ -246,27 +249,13 @@ object Select:
                      v: Time.after if v == expr
               we have
                     ${caseDef.pattern.show}
+                    (tree:  ${caseDef.pattern})
           """, caseDef.pattern.asExpr)
         reportError(s"unparsed caseDef pattern: ${caseDef.pattern}", caseDef.pattern.asExpr)
         
   end parseCaseDef
 
-  
-  def matchCaseDefCondition(using Quotes)(caseDef: quotes.reflect.CaseDef, v: String): quotes.reflect.Term =
-    import quotes.reflect._
-    caseDef.guard match
-      case Some(condition) =>
-        condition match
-          case Apply(quotes.reflect.Select(Ident(v1),method),List(expr)) =>
-            if (v1 != v) {
-               reportError(s"write name mismatch ${v1}, expected ${v}", condition.asExpr)
-            }
-            expr
-          case _ =>  
-            reportError(s"Condition is not in form x==expr,${condition} ",condition.asExpr)
-      case _ =>
-        reportError(s"Condition is required ",caseDef.pattern.asExpr)
-  
+
   def parseCaseDefGuard(using Quotes)(caseDef: quotes.reflect.CaseDef): Map[String,quotes.reflect.Term] =
       import quotes.reflect._
       caseDef.guard match

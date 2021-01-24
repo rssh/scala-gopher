@@ -93,9 +93,36 @@ trait ReadChannel[F[_], A]:
    **/  
    inline def foreach(f: A=>Unit): Unit = 
       await(aforeach(f))(using rAsyncMonad)
- 
+
+   def map[B](f: A=>B): ReadChannel[F,B] =
+      new MappedReadChannel(this, f)
+   
+   def mapAsync[B](f: A=>F[B]): ReadChannel[F,B] =
+      new MappedAsyncReadChannel(this, f)
+
    def dup(bufSize: Int=1, expiration: Duration=Duration.Inf): (ReadChannel[F,A], ReadChannel[F,A]) =
       DuppedInput(this, bufSize)(using gopherApi).pair
+
+   def afold[S](s0:S)(f: (S,A)=>S): F[S] =
+      fold_async(s0)((s,e) => asyncMonad.pure(f(s,e)))
+
+   def fold_async[S](s0:S)(f: (S,A) => F[S] ): F[S] =
+      given CpsSchedulingMonad[F] = asyncMonad
+      async[F] {
+         var s = s0
+         while{
+           optRead match
+             case Some(a) => 
+                  s = await(f(s,a))
+                  true
+             case None =>
+                  false
+         }do()
+         s
+      }
+   
+   inline def fold[S](s0:S)(f: (S,A) => S ): S =
+      await[F,S](afold(s0)(f))(using rAsyncMonad)   
 
    class DoneReadChannel extends ReadChannel[F,Unit]:
 

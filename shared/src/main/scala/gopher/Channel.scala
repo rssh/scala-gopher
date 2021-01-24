@@ -13,8 +13,10 @@ trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Clo
   def withExpiration(ttl: FiniteDuration, throwTimeouts: Boolean): ChannelWithExpiration[F,W,R] =
     new ChannelWithExpiration(this, ttl, throwTimeouts)
 
-  def map[R1](f: R=>R1): Channel[F,W,R1] =
+  override def map[R1](f: R=>R1): Channel[F,W,R1] =
     MappedChannel(this,f)
+
+  //override def mapAsync[R1](f: R=>F[R1]): Channel[F,W,R1] = ???   
 
   def flatMap[R1](f: R=> ReadChannel[F,R1]): Channel[F,W,R1] =
     ChFlatMappedChannel(this,f)
