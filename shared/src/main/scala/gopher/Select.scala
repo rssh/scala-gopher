@@ -7,7 +7,7 @@ import scala.compiletime._
 import scala.concurrent.duration._
 
 
-class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
+class Select[F[_]](api: Gopher[F]):
 
   inline def apply[A](inline pf: PartialFunction[Any,A]): A =
     ${  
@@ -57,6 +57,7 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
   def mapAsync[A](step: SelectGroup[F,A] => F[A]): ReadChannel[F,A] =
     val r = makeChannel[A]()(using api)
+    given CpsSchedulingMonad[F] = api.asyncMonad
     api.asyncMonad.spawn{
       async{
         var done = false
@@ -74,10 +75,10 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
     }
     r
 
-  def forever: SelectForever[F] = new SelectForever[F](api)
+  def forever: SelectForever[F] = new SelectForever[F](api  )
 
   inline def aforever(inline pf: PartialFunction[Any,Unit]): F[Unit] =
-    async {
+    async(using api.asyncMonad).apply {
       val runner = new SelectForever[F](api)
       runner.apply(pf)
     }
@@ -88,78 +89,77 @@ class Select[F[_]:CpsSchedulingMonad](api: Gopher[F]):
 
 object Select:
 
-  sealed trait SelectGroupExpr[F[_],S]:
-    def  toExprOf[X <: SelectListeners[F,S]]: Expr[X]
+  sealed trait SelectGroupExpr[F[_],S, R]:
+    def  toExprOf[X <: SelectListeners[F,S, R]]: Expr[X]
 
-  sealed trait SelectorCaseExpr[F[_]:Type, S:Type]:
+  sealed trait SelectorCaseExpr[F[_]:Type, S:Type, R:Type]:
      type Monad[X] = F[X]
-     def appended[L <: SelectListeners[F,S] : Type](base: Expr[L])(using Quotes): Expr[L]
+     def appended[L <: SelectListeners[F,S,R] : Type](base: Expr[L])(using Quotes): Expr[L]
 
-  case class ReadExpression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
-     def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
+  case class ReadExpression[F[_]:Type, A:Type, S:Type, R:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S,R]:
+     def appended[L <: SelectListeners[F,S,R]: Type](base: Expr[L])(using Quotes): Expr[L] =
        '{  $base.onRead($ch)($f) }
        
-  case class WriteExpression[F[_]:Type, A:Type, S:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[A => S]) extends SelectorCaseExpr[F,S]:
-      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
+  case class WriteExpression[F[_]:Type, A:Type, S:Type, R:Type](ch: Expr[WriteChannel[F,A]], a: Expr[A], f: Expr[A => S]) extends SelectorCaseExpr[F,S,R]:
+      def appended[L <: SelectListeners[F,S,R]: Type](base: Expr[L])(using Quotes): Expr[L] =
       '{  $base.onWrite($ch,$a)($f) }
    
-  case class TimeoutExpression[F[_]:Type,S:Type](t: Expr[FiniteDuration], f: Expr[ FiniteDuration => S ]) extends SelectorCaseExpr[F,S]:
-      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
+  case class TimeoutExpression[F[_]:Type,S:Type, R:Type](t: Expr[FiniteDuration], f: Expr[ FiniteDuration => S ]) extends SelectorCaseExpr[F,S,R]:
+      def appended[L <: SelectListeners[F,S,R]: Type](base: Expr[L])(using Quotes): Expr[L] =
        '{  $base.onTimeout($t)($f) }
     
-  case class DoneExression[F[_]:Type, A:Type, S:Type](ch: Expr[ReadChannel[F,A]], f: Expr[Unit=>S]) extends SelectorCaseExpr[F,S]:
-      def appended[L <: SelectListeners[F,S]: Type](base: Expr[L])(using Quotes): Expr[L] =
+  case class DoneExression[F[_]:Type, A:Type, S:Type, R:Type](ch: Expr[ReadChannel[F,A]], f: Expr[Unit=>S]) extends SelectorCaseExpr[F,S,R]:
+      def appended[L <: SelectListeners[F,S,R]: Type](base: Expr[L])(using Quotes): Expr[L] =
         '{  $base.onRead($ch.done)($f) }
 
+  def selectListenerBuilder[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](
+           constructor: Expr[L], caseDefs: List[SelectorCaseExpr[F,S,R]], api:Expr[Gopher[F]])(using Quotes): Expr[R] =
+            val s0 = constructor
+            val g  = caseDefs.foldLeft(s0){(s,e) =>
+              e.appended(s)
+            }
+            //  dotty bug if g.run
+            val r = '{ await($g.runAsync())(using ${api}.asyncMonad) }
+            r.asExprOf[R]
+
+
   def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
-       def builder(caseDefs: List[SelectorCaseExpr[F,A]]):Expr[A] = {
+       def builder(caseDefs: List[SelectorCaseExpr[F,A,A]]):Expr[A] = {
           val s0 = '{
-             new SelectGroup[F,A]($api)(using ${api}.asyncMonad)
+             new SelectGroup[F,A]($api)
           }
-          val g: Expr[SelectGroup[F,A]] = caseDefs.foldLeft(s0){(s,e) =>
-             e.appended(s)
-          }
-          val r = '{ $g.run() }
-          r.asExprOf[A]
+          selectListenerBuilder(s0, caseDefs, api)
        }
-       runImpl( builder, pf)
+       runImpl(builder, pf)
 
   def loopImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Boolean]], api: Expr[Gopher[F]])(using Quotes): Expr[Unit] =
-      def builder(caseDefs: List[SelectorCaseExpr[F,Boolean]]):Expr[Unit] = {
+      def builder(caseDefs: List[SelectorCaseExpr[F,Boolean,Unit]]):Expr[Unit] = {
           val s0 = '{
-              new SelectLoop[F]($api)(using ${api}.asyncMonad)
+              new SelectLoop[F]($api)
           }
-          val g: Expr[SelectLoop[F]] = caseDefs.foldLeft(s0){(s,e) =>
-              e.appended(s)
-          }
-          val r = '{ $g.run() }
-          r.asExprOf[Unit]
+          selectListenerBuilder(s0, caseDefs, api)
       }
       runImpl( builder, pf)
       
 
   def foreverImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Unit]], api:Expr[Gopher[F]])(using Quotes): Expr[Unit] =
-      def builder(caseDefs: List[SelectorCaseExpr[F,Unit]]):Expr[Unit] = {
+      def builder(caseDefs: List[SelectorCaseExpr[F,Unit,Unit]]):Expr[Unit] = {
           val s0 = '{
-              new SelectForever[F]($api)(using ${api}.asyncMonad)
+              new SelectForever[F]($api)
           }
-          val g: Expr[SelectForever[F]] = caseDefs.foldLeft(s0){(s,e) =>
-              e.appended(s)
-          }
-          val r = '{ $g.run() }
-          r.asExprOf[Unit]
+          selectListenerBuilder(s0, caseDefs, api)
       }
       runImpl(builder, pf)
 
 
 
-  def runImpl[F[_]:Type, A:Type,B :Type](builder: List[SelectorCaseExpr[F,A]]=>Expr[B],
+  def runImpl[F[_]:Type, A:Type,B :Type](builder: List[SelectorCaseExpr[F,A,B]]=>Expr[B],
                                  pf: Expr[PartialFunction[Any,A]])(using Quotes): Expr[B] =
     import quotes.reflect._
     runImplTree[F,A,B](builder, pf.asTerm)
 
   def runImplTree[F[_]:Type, A:Type, B:Type](using Quotes)(
-                builder: List[SelectorCaseExpr[F,A]] => Expr[B],
+                builder: List[SelectorCaseExpr[F,A,B]] => Expr[B],
                 pf: quotes.reflect.Term
                 ): Expr[B] =
     import quotes.reflect._
@@ -173,15 +173,15 @@ object Select:
         //if (caseExprs.find(_.isInstanceOf[DefaultExpression[?]]).isDefined) {
         //  report.error("default is not supported")
         //}
-        builder(cases.map(parseCaseDef[F,A](_)))
+        builder(cases.map(parseCaseDef[F,A,B](_)))
     
 
-  def parseCaseDef[F[_]:Type,S:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S] =
+  def parseCaseDef[F[_]:Type,S:Type,R:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S,R] =
     import quotes.reflect._
 
     val caseDefGuard = parseCaseDefGuard(caseDef)
 
-    def handleRead(bind: Bind, valName: String, channel:Term, tp:TypeRepr): SelectorCaseExpr[F,S] =
+    def handleRead(bind: Bind, valName: String, channel:Term, tp:TypeRepr): SelectorCaseExpr[F,S,R] =
       val readFun = makeLambda(valName,tp,bind.symbol,caseDef.rhs)
       if (channel.tpe <:< TypeRepr.of[ReadChannel[F,?]]) 
         tp.asType match
@@ -191,7 +191,7 @@ object Select:
       else
         reportError("read pattern is not a read channel", channel.asExpr)
   
-    def handleWrite(bind: Bind, valName: String, channel:Term, tp:TypeRepr): SelectorCaseExpr[F,S] =   
+    def handleWrite(bind: Bind, valName: String, channel:Term, tp:TypeRepr): SelectorCaseExpr[F,S,R] =   
       val writeFun = makeLambda(valName,tp, bind.symbol, caseDef.rhs)
       val e = caseDefGuard.getOrElse(valName,
         reportError(s"not found binding ${valName} in write condition", caseDef.pattern.asExpr)

@@ -16,10 +16,20 @@ trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Clo
   override def map[R1](f: R=>R1): Channel[F,W,R1] =
     MappedChannel(this,f)
 
-  //override def mapAsync[R1](f: R=>F[R1]): Channel[F,W,R1] = ???   
+  override def mapAsync[R1](f: R=>F[R1]): Channel[F,W,R1] = 
+    MappedAsyncChannel(this, f)   
 
   def flatMap[R1](f: R=> ReadChannel[F,R1]): Channel[F,W,R1] =
     ChFlatMappedChannel(this,f)
+
+  //def flatMapAsync[R1](f: R=> F[ReadChannel[F,R1]]): Channel[F,W,R1] =
+  //  ChFlatMappedAsyncChannel(this,f)
+  
+  override def filter(p: R=>Boolean): Channel[F,W,R] =
+    FilteredChannel(this, p)
+
+  override def filterAsync(p: R=>F[Boolean]): Channel[F,W,R] =
+    FilteredAsyncChannel(this,p)
 
 
 end Channel

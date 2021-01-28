@@ -22,13 +22,13 @@ trait WriteChannel[F[_], A]:
    //   inline def apply(a:A): Unit = await(awrite(a))(using asyncMonad) 
    //   inline def unapply(a:A): Some[A] = ???
 
-   inline def write(a:A): Unit = await(awrite(a))(using asyncMonad)
+   inline def write(inline a:A): Unit = await(awrite(a))(using asyncMonad)
 
    @targetName("write1")
-   inline def <~ (a:A): Unit = await(awrite(a))(using asyncMonad) 
+   inline def <~ (inline a:A): Unit = await(awrite(a))(using asyncMonad) 
 
    @targetName("write2")
-   inline def ! (a:A): Unit = await(awrite(a))(using asyncMonad) 
+   inline def ! (inline a:A): Unit = await(awrite(a))(using asyncMonad) 
 
 
    //def Write(x:A):WritePattern = new WritePattern(x)
@@ -50,7 +50,7 @@ trait WriteChannel[F[_], A]:
         }
       }
 
-   inline def writeAll(collection: IterableOnce[A]): Unit = 
+   inline def writeAll(inline collection: IterableOnce[A]): Unit = 
       await(awriteAll(collection))(using asyncMonad)
 
 

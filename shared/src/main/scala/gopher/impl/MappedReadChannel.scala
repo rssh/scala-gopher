@@ -6,7 +6,6 @@ import scala.util.control.NonFatal
 
 class MappedReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> B) extends ReadChannel[F,B] {
 
-  def addDoneReader(reader: Reader[Unit]): Unit = internal.addDoneReader(reader)
 
   class MReader(nested: Reader[B]) extends Reader[A] {
 
@@ -37,6 +36,8 @@ class MappedReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> B) extends
   def addReader(reader: Reader[B]): Unit = 
     internal.addReader(MReader(reader))
   
+  def addDoneReader(reader: Reader[Unit]): Unit = internal.addDoneReader(reader)
+
   def gopherApi:Gopher[F] = internal.gopherApi
 
 }

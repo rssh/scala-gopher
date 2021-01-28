@@ -91,7 +91,7 @@ trait ReadChannel[F[_], A]:
    * run code each time when new object is arriced.
    * until end of stream is not reached
    **/  
-   inline def foreach(f: A=>Unit): Unit = 
+   inline def foreach(inline f: A=>Unit): Unit = 
       await(aforeach(f))(using rAsyncMonad)
 
    def map[B](f: A=>B): ReadChannel[F,B] =
@@ -99,6 +99,13 @@ trait ReadChannel[F[_], A]:
    
    def mapAsync[B](f: A=>F[B]): ReadChannel[F,B] =
       new MappedAsyncReadChannel(this, f)
+
+
+   def filter(p: A=>Boolean): ReadChannel[F,A] = 
+      new FilteredReadChannel(this,p)
+
+   def filterAsync(p: A=>F[Boolean]): ReadChannel[F,A] = 
+      new FilteredAsyncReadChannel(this,p)
 
    def dup(bufSize: Int=1, expiration: Duration=Duration.Inf): (ReadChannel[F,A], ReadChannel[F,A]) =
       DuppedInput(this, bufSize)(using gopherApi).pair
@@ -121,7 +128,7 @@ trait ReadChannel[F[_], A]:
          s
       }
    
-   inline def fold[S](s0:S)(f: (S,A) => S ): S =
+   inline def fold[S](inline s0:S)(inline f: (S,A) => S ): S =
       await[F,S](afold(s0)(f))(using rAsyncMonad)   
 
    class DoneReadChannel extends ReadChannel[F,Unit]:

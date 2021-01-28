@@ -15,7 +15,7 @@ import scala.language.postfixOps
  * Select group is a virtual 'lock' object, where only
  * ne fro rieader and writer can exists at the sae time.
  **/
-class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectListeners[F,S]: 
+class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]: 
 
     thisSelectGroup =>
 
@@ -27,10 +27,12 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectLis
      **/
     val waitState: AtomicInteger = new AtomicInteger(0)
     var call: Try[S] => Unit = { _ => () }
-    private inline def m = summon[CpsSchedulingMonad[F]]
+    private inline def m = api.asyncMonad
     val retval = m.adoptCallbackStyle[S](f => call=f)
     val startTime = new AtomicLong(0L)
     var timeoutScheduled: Option[Time.Scheduled] = None
+
+    override def asyncMonad = api.asyncMonad
    
     def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
@@ -58,8 +60,6 @@ class SelectGroup[F[_]:CpsSchedulingMonad, S](api: Gopher[F])  extends SelectLis
 
     def runAsync():F[S] =
        retval
-
-    inline def run(): S = await(step())
 
     inline def apply(inline pf: PartialFunction[Any,S]): S =
     ${  

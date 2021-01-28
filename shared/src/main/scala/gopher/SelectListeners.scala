@@ -1,8 +1,10 @@
 package gopher
 
+import cps._
 import scala.concurrent.duration.FiniteDuration
 
-trait SelectListeners[F[_],S]:
+trait SelectListeners[F[_],S, R]:
+
 
   def  onRead[A](ch: ReadChannel[F,A]) (f: A => S ): this.type
 
@@ -10,12 +12,19 @@ trait SelectListeners[F[_],S]:
 
   def  onTimeout(t: FiniteDuration)(f: FiniteDuration => S): this.type
 
+  def  asyncMonad: CpsSchedulingMonad[F]
 
-abstract class SelectGroupBuilder[F[_],S](api: Gopher[F]) extends SelectListeners[F,S]:
+  def  runAsync():F[R]
+ 
+  inline def run(): R = await(runAsync())(using asyncMonad)
+
+
+
+
+abstract class SelectGroupBuilder[F[_],S, R](api: Gopher[F]) extends SelectListeners[F,S, R]:
 
   protected var  groupBuilder: SelectGroup[F,S] => SelectGroup[F,S] = identity   
  
-
   def onRead[A](ch: ReadChannel[F,A])(f: A => S): this.type =
     groupBuilder = groupBuilder.andThen{
       g => g.onRead(ch)(f)
@@ -59,7 +68,8 @@ abstract class SelectGroupBuilder[F[_],S](api: Gopher[F]) extends SelectListener
     }
     this
   
-  
+  def  asyncMonad: CpsSchedulingMonad[F] = api.asyncMonad
+
  
 
 
