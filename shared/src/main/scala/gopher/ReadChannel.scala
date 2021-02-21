@@ -35,9 +35,9 @@ trait ReadChannel[F[_], A]:
    def aread:F[A] = 
       asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))
                                
-   inline def read: A = await(aread)(using rAsyncMonad)
+   transparent inline def read: A = await(aread)(using rAsyncMonad)
 
-   inline def ? : A = await(aread)(using rAsyncMonad)
+   transparent inline def ? : A = await(aread)(using rAsyncMonad)
 
   /**
    * return F which contains sequence from first `n` elements.
@@ -68,7 +68,7 @@ trait ReadChannel[F[_], A]:
                                          })
        )
 
-   inline def optRead: Option[A] = await(aOptRead)(using rAsyncMonad)
+   transparent inline def optRead: Option[A] = await(aOptRead)(using rAsyncMonad)
 
    def foreach_async(f: A=>F[Unit]): F[Unit] =
       given CpsAsyncMonad[F] = asyncMonad
@@ -91,7 +91,7 @@ trait ReadChannel[F[_], A]:
    * run code each time when new object is arriced.
    * until end of stream is not reached
    **/  
-   inline def foreach(inline f: A=>Unit): Unit = 
+   transparent inline def foreach(inline f: A=>Unit): Unit = 
       await(aforeach(f))(using rAsyncMonad)
 
    def map[B](f: A=>B): ReadChannel[F,B] =
@@ -128,9 +128,9 @@ trait ReadChannel[F[_], A]:
          s
       }
    
-   inline def fold[S](inline s0:S)(inline f: (S,A) => S ): S =
+   transparent inline def fold[S](inline s0:S)(inline f: (S,A) => S ): S =
       await[F,S](afold(s0)(f))(using rAsyncMonad)   
-
+   
    class DoneReadChannel extends ReadChannel[F,Unit]:
 
       def addReader(reader: Reader[Unit]): Unit =

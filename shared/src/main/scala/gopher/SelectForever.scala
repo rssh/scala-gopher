@@ -9,10 +9,13 @@ import scala.concurrent.duration._
 class SelectForever[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Unit, Unit](api):
 
 
-  inline def apply(inline pf: PartialFunction[Any,Unit]): Unit =
+  transparent inline def apply(inline pf: PartialFunction[Any,Unit]): Unit =
     ${  
       Select.foreverImpl('pf,'api)
     }
+
+  transparent inline def applyAsync(inline pf: PartialFunction[Any,F[Unit]]): Unit =
+    ???
 
   def runAsync(): F[Unit] = 
     given CpsSchedulingMonad[F] = api.asyncMonad

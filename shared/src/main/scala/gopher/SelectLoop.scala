@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Unit](api):
 
 
-  inline def apply(inline pf: PartialFunction[Any,Boolean]): Unit =
+  transparent inline def apply(inline pf: PartialFunction[Any,Boolean]): Unit =
     ${  
       Select.loopImpl[F]('pf,  'api )  
     }

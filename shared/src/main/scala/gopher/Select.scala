@@ -45,10 +45,14 @@ class Select[F[_]](api: Gopher[F]):
     }
   }
   
-  inline def afold[S](s0:S)(inline step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> S | SelectFold.Done[S]) : F[S] =
+  transparent inline def afold[S](s0:S)(inline step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> S | SelectFold.Done[S]) : F[S] =
     async[F](using api.asyncMonad).apply{
       fold(s0)(step)
     }
+
+  def afold_async[S](s0:S)(step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> F[S | SelectFold.Done[S]]) : F[S] =
+    fold_async(s0)(step)
+  
     
   //def map[A](step: PartialFunction[SelectGroup[F,A],A|SelectFold.Done[Unit]]): ReadChannel[F,A] =
   
@@ -77,12 +81,18 @@ class Select[F[_]](api: Gopher[F]):
 
   def forever: SelectForever[F] = new SelectForever[F](api  )
 
-  inline def aforever(inline pf: PartialFunction[Any,Unit]): F[Unit] =
+  transparent inline def aforever(inline pf: PartialFunction[Any,Unit]): F[Unit] =
     async(using api.asyncMonad).apply {
       val runner = new SelectForever[F](api)
       runner.apply(pf)
     }
 
+  def aforever_async(pf: PartialFunction[Any,F[Unit]]): F[Unit] =
+      given CpsSchedulingMonad[F] = api.asyncMonad
+      async(using api.asyncMonad).apply {
+        val runner = new SelectForever[F](api)
+        runner.applyAsync(pf)
+      }
     
   
 

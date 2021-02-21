@@ -32,7 +32,7 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
     val startTime = new AtomicLong(0L)
     var timeoutScheduled: Option[Time.Scheduled] = None
 
-    override def asyncMonad = api.asyncMonad
+    override def asyncMonad = api.asyncMonad  
    
     def addReader[A](ch: ReadChannel[F,A], action: Try[A]=>F[S]): Unit =
         val record = ReaderRecord(ch, action)
@@ -61,12 +61,12 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
     def runAsync():F[S] =
        retval
 
-    inline def apply(inline pf: PartialFunction[Any,S]): S =
+    transparent inline def apply(inline pf: PartialFunction[Any,S]): S =
     ${  
         Select.onceImpl[F,S]('pf, 'api )  
     }    
   
-    inline def select(inline pf: PartialFunction[Any,S]): S =
+    transparent inline def select(inline pf: PartialFunction[Any,S]): S =
     ${  
         Select.onceImpl[F,S]('pf, 'api )  
     }
