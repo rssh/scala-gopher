@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 
 class Select[F[_]](api: Gopher[F]):
 
-  inline def apply[A](inline pf: PartialFunction[Any,A]): A =
+  transparent inline def apply[A](inline pf: PartialFunction[Any,A]): A =
     ${  
       Select.onceImpl[F,A]('pf, 'api )  
      }    
@@ -98,6 +98,8 @@ class Select[F[_]](api: Gopher[F]):
 
 
 object Select:
+
+  import cps.forest.TransformUtil
 
   sealed trait SelectGroupExpr[F[_],S, R]:
     def  toExprOf[X <: SelectListeners[F,S, R]]: Expr[X]
@@ -321,7 +323,8 @@ object Select:
                 oldArgSymbol: quotes.reflect.Symbol,
                 body: quotes.reflect.Term): quotes.reflect.Term =
     import quotes.reflect._
-    val mt = MethodType(List(argName))(_ => List(argType), _ => body.tpe.widen)
+    val widenReturnType = TransformUtil.veryWiden(body.tpe)
+    val mt = MethodType(List(argName))(_ => List(argType), _ => widenReturnType)
     Lambda(Symbol.spliceOwner, mt, (owner,args) =>
       substIdent(body,oldArgSymbol, args.head.asInstanceOf[Term], owner).changeOwner(owner))
 
