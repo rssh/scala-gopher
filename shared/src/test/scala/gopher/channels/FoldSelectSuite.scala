@@ -15,37 +15,11 @@ class FoldSelectSuite extends FunSuite
 
   import scala.concurrent.ExecutionContext.Implicits.global
   given Gopher[Future] = SharedGopherAPI.apply[Future]()
-
-    /*
-    // TODO:  report dotty bug. 
-    test("fold-over-selector-compile-bug with changed read") {
-      val in = makeChannel[Int]()
-      val out = makeChannel[Int]()
-      var r0 = IndexedSeq[Int]()
-  
-      // dotty bug,
-      
-      val generator = async {
-        select.fold(in){ (ch,s) =>
-          s.select{
-            case p: ch.read =>
-              //r0 = r0 :+ p
-              //out.write(p)
-              //ch.filter{ _ % p != 0 }
-              ch
-          }
-        }
-      }
-      
-  
-    }
-    */
     
-  
 
-  // TODO:  report dotty bug. 
-  /*
   test("fold-over-selector with changed read") {
+    implicit val printCode = cps.macroFlags.PrintCode
+
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
     var r0 = IndexedSeq[Int]()
@@ -62,8 +36,8 @@ class FoldSelectSuite extends FunSuite
       }
     }
 
-    generator.failed.foreach{ _.printStackTrace() }
-    async {
+    //generator.failed.foreach{ _.printStackTrace() }
+    val writer = async {
       for(i <- 2 to Int.MaxValue) {
         in.write(i)
       }
@@ -78,13 +52,10 @@ class FoldSelectSuite extends FunSuite
 
     read map (r => assert(r(18) == 67 && r.last == 541) )
     
-
   }
-  */
   
   
-
-  
+  /*
   test("fold-over-selector with swap read") {
 
     val in1 = makeChannel[Int]()
@@ -115,6 +86,7 @@ class FoldSelectSuite extends FunSuite
     generator.map(r => assert(r._3 == -50))
 
   }
+  */
     
 
 }

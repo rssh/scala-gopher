@@ -52,6 +52,52 @@ class MacroSelectSuite extends FunSuite
 
     }
 
+    test("select operation with async-op insode ")  {
+
+        val channel = makeChannel[Int](100)
+        val middle = makeChannel[Int](100)
+
+        async[Future] {
+            var i = 1
+            while(i <= 1000) {
+                channel <~ i
+                i+=1
+            }
+            //TODO: implement for in goas preprocessor to async
+            // dotty bug: position not set
+            //for( i <- 1 to 1000)
+            //  channel <~ i
+        }
+
+        var sum = 0
+        val consumer1 = async[Future] {
+            select.loop{
+              case i: channel.read =>
+                //System.err.println("received:"+i)
+                middle.write(i)
+                i < 1000
+            }
+            sum
+        }
+
+        val consumer2 = async[Future] {
+            select.loop{
+              case i: middle.read =>
+                //System.err.println("received:"+i)
+                sum = sum + i
+                i < 1000
+            }
+            sum
+        }
+
+        for{
+            _ <- consumer2
+            xsum = (1 to 1000).sum
+        } yield assert(xsum == sum)
+
+    }
+
+
     
     test("select with run-once")  {
         val channel1 = makeChannel[Int](100)
