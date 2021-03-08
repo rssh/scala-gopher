@@ -1,43 +1,47 @@
 package gopher.channels
 
+import cps._
 import gopher._
-import org.scalatest._
-import org.scalatest.concurrent._
+import munit._
 
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language._
 
-class InputOpsSuite extends AsyncFunSuite  {
+import cps.monads.FutureAsyncMonad
 
-   override implicit def executionContext = ExecutionContext.global
 
-  test("map operation for input") {
-    val ch = gopherApi.makeChannel[String]()
-    ch.awriteAll(List("AAA","123","1234","12345"))
-    val mappedCh = ch map (_.reverse)
-    mappedCh.atake(4) map { l =>
-       assert(l(0) == "AAA" &&
+class InputOpsSuite extends FunSuite  {
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+    given Gopher[Future] = SharedGopherAPI.apply[Future]() 
+
+    test("map operation for input") {
+        val ch = makeChannel[String]()
+        ch.awriteAll(List("AAA","123","1234","12345"))
+        val mappedCh = ch map (_.reverse)
+        mappedCh.atake(4) map { l =>
+            assert(l(0) == "AAA" &&
               l(1) == "321" &&
               l(2) == "4321" &&
               l(3) == "54321")
+        }
     }
-  }
 
 
-  test("filter operation for input") {
-    val ch = gopherApi.makeChannel[String]()
-    ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
-    val filteredCh = ch filter (_.contains("A"))
-    filteredCh.aread map { x => assert(x == "AAA")  }
-  }
+    test("filter operation for input") {
+        val ch = makeChannel[String]()
+        ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
+        val filteredCh = ch filter (_.contains("A"))
+        filteredCh.aread map { x => assert(x == "AAA")  }
+    }
 
 
+  
     test("zip operation for two simple inputs") {
-        //val w = new Waiter
-        val ch1 = gopherApi.makeChannel[String]()
+        val ch1 = makeChannel[String]()
         ch1.awriteAll(List("qqq", "AAA","123","1234","12345"))
-        val ch2 = gopherApi.makeChannel[Int]()
+        val ch2 = makeChannel[Int]()
         ch2.awriteAll(List(1, 2, 3, 4, 5, 6))
         val zipped = ch1 zip ch2
         for{ r1 <- zipped.aread
@@ -53,6 +57,7 @@ class InputOpsSuite extends AsyncFunSuite  {
         } yield l
     }
 
+    /*
     test("zip operation from two finite channels") {
         val ch1 = Input.asInput(List(1,2),gopherApi)
         val ch2 = Input.asInput(List(1,2,3,4,5,6),gopherApi)
@@ -311,15 +316,16 @@ class InputOpsSuite extends AsyncFunSuite  {
         for(r <- f) yield assert(r==55)
     }
 
+*/
 
 }
 
 
+/*
 class InputOpsSyncSuiteDisabled extends FunSuite with Waiters {
 
 
 
-/*
   test("channel fold with async operation inside") {
       val ch1 = gopherApi.makeChannel[Int](10) 
       val ch2 = gopherApi.makeChannel[Int](10) 
@@ -339,12 +345,9 @@ class InputOpsSyncSuiteDisabled extends FunSuite with Waiters {
       val r = Await.result(fs, 10 seconds)
       assert(r==110)
   }
-*/
 
 
-
-
-  def gopherApi = CommonTestObjects.gopherApi
 
   
 }
+*/

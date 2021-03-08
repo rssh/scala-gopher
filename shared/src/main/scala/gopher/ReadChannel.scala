@@ -100,7 +100,6 @@ trait ReadChannel[F[_], A]:
    def mapAsync[B](f: A=>F[B]): ReadChannel[F,B] =
       new MappedAsyncReadChannel(this, f)
 
-
    def filter(p: A=>Boolean): ReadChannel[F,A] = 
       new FilteredReadChannel(this,p)
 
@@ -131,6 +130,27 @@ trait ReadChannel[F[_], A]:
    transparent inline def fold[S](inline s0:S)(inline f: (S,A) => S ): S =
       await[F,S](afold(s0)(f))(using rAsyncMonad)   
    
+   def zip[B](x: ReadChannel[F,B]): ReadChannel[F,(A,B)] = 
+      given CpsSchedulingMonad[F] = asyncMonad
+      val retval = gopherApi.makeChannel[(A,B)]()
+      asyncMonad.spawn(async[F]{
+         var done = false
+         while(!done) {
+            this.optRead match
+               case Some(a) =>
+                  x.optRead match
+                     case Some(b) =>
+                        retval.write((a,b))
+                     case None =>
+                        done=true
+               case None =>
+                  done = true
+         }
+         retval.close()
+      })
+      retval
+
+
    class DoneReadChannel extends ReadChannel[F,Unit]:
 
       def addReader(reader: Reader[Unit]): Unit =

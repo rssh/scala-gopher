@@ -18,7 +18,7 @@ class FoldSelectSuite extends FunSuite
     
 
   test("fold-over-selector with changed read") {
-    implicit val printCode = cps.macroFlags.PrintCode
+    //implicit val printCode = cps.macroFlags.PrintCode
 
     val in = makeChannel[Int]()
     val out = makeChannel[Int]()
