@@ -24,7 +24,7 @@ trait Expirable[A]:
    def isExpired: Boolean
 
    /**
-    * capture object, and after this we can or return one
+    * capture object, and after this we can or use one (markUsed will be called) or abandon (markFree)
     **/
    def capture(): Option[A]
 

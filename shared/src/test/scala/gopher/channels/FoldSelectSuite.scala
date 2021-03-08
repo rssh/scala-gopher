@@ -55,7 +55,7 @@ class FoldSelectSuite extends FunSuite
   }
   
   
-  /*
+
   test("fold-over-selector with swap read") {
 
     val in1 = makeChannel[Int]()
@@ -86,7 +86,7 @@ class FoldSelectSuite extends FunSuite
     generator.map(r => assert(r._3 == -50))
 
   }
-  */
+  
     
 
 }
