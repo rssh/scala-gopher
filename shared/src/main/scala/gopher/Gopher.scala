@@ -55,3 +55,6 @@ extension [F[_],A](fa: F[A])(using g: Gopher[F])
       def asChannel : ReadChannel[F,A] =
             futureInput(fa)
 
+extension [F[_],A](c: IterableOnce[A])(using g: Gopher[F])
+      def asReadChannel: ReadChannel[F,A] =
+            ReadChannel.fromIterable(c)

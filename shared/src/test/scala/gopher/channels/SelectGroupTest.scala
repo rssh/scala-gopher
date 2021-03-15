@@ -22,7 +22,6 @@ class SelectGroupTest extends FunSuite {
     test( s"select group should not run few async processes in parallel ($name)" ){
 
      
-
       val group = new SelectGroup[Future,Unit](summon[Gopher[Future]])
 
       val inW1 = new AtomicInteger(0)

@@ -172,8 +172,8 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
                       m.mapTry(action(v))(x => call(x))
                     )
                  })
-             else
-                 None
+             else 
+                None
 
 
 

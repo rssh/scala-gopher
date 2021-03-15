@@ -36,6 +36,9 @@ end Channel
 
 object Channel:
 
+  def apply[F[_],A]()(using Gopher[F]): Channel[F,A,A] =
+    summon[Gopher[F]].makeChannel[A]()
+
   case class Read[F[_],A](a:A,  ch:ReadChannel[F,A]|F[A]) {
     type Element = A
   }

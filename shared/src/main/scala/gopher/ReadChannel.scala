@@ -150,6 +150,12 @@ trait ReadChannel[F[_], A]:
       })
       retval
 
+   def or(other: ReadChannel[F,A]):ReadChannel[F,A] = 
+      new OrReadChannel(this, other)
+
+   def |(other: ReadChannel[F,A]):ReadChannel[F,A] =
+      new OrReadChannel(this,other)   
+
 
    class DoneReadChannel extends ReadChannel[F,Unit]:
 
@@ -175,6 +181,27 @@ trait ReadChannel[F[_], A]:
       def markFree(): Unit = ()
 
    end SimpleReader
+
+end ReadChannel
+
+object ReadChannel:
+
+   def fromIterable[F[_],A](c: IterableOnce[A])(using Gopher[F]): ReadChannel[F,A] =
+      given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
+      val retval = makeChannel[A]()
+      asyncMonad.spawn(async{
+         val it = c.iterator
+         while(it.hasNext) {
+            val a = it.next()
+            retval.write(a) 
+         }
+         retval.close()
+      })
+      retval
+
+
+   def fromFuture[F[_],A](f: F[A])(using Gopher[F]): ReadChannel[F,A] =
+      futureInput(f)
 
 end ReadChannel
 

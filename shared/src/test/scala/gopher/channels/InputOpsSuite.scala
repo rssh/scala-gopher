@@ -57,37 +57,47 @@ class InputOpsSuite extends FunSuite  {
         } yield l
     }
 
-    /*
+    
     test("zip operation from two finite channels") {
-        val ch1 = Input.asInput(List(1,2),gopherApi)
-        val ch2 = Input.asInput(List(1,2,3,4,5,6),gopherApi)
+        val ch1 = List(1,2).asReadChannel
+        val ch2 = List(1,2,3,4,5,6).asReadChannel
         val zipped = ch1 zip ch2
         for{
             r1 <- zipped.aread
             a1 = assert(r1 == (1, 1))
             r2 <- zipped.aread
-            a2 = assert(r2 == (2,2))
-            r3 <- recoverToSucceededIf[ChannelClosedException]{ zipped.aread }
+            a2 = assert( (r2 == (2,2)) )
+            r3 <- async{
+                try 
+                    zipped.read
+                    assert(""=="exception should be called before")
+                catch
+                    case ex: Throwable =>
+                        assert(ex.isInstanceOf[ChannelClosedException])    
+            }
         } yield r3
     }
 
+    
     test("take from zip") {
-        val ch1 = Input.asInput(List(1,2,3,4,5),gopherApi)
-        val ch2 = Input.asInput(List(1,2,3,4,5,6),gopherApi)
+        val ch1 = List(1,2,3,4,5).asReadChannel
+        val ch2 = List(1,2,3,4,5,6).asReadChannel
         val zipped = ch1 zip ch2
         for {ar <- zipped.atake(5)
-             _ <- assert(ar(0) == (1, 1))
-             l <- assert(ar(4) == (5, 5))
+             _ = assert(ar(0) == (1, 1))
+             l = assert(ar(4) == (5, 5))
         } yield l
     }
-
+    
+    
     test("taking from iterator-input") {
-        val ch1 = Input.asInput(List(1,2,3,4,5),gopherApi)
+        val ch1 = List(1,2,3,4,5).asReadChannel
         for( ar <- ch1.atake(5) ) yield assert(ar(4)==5)
     }
 
+    
     test("zip with self will no dup channels, but generate (odd, even) pairs. It's a feature, not a bug") {
-        val ch = gopherApi.makeChannel[Int]()
+        val ch = makeChannel[Int]()
         val zipped = ch zip ch
         ch.awriteAll(List(1,2,3,4,5,6,7,8))
         for{ r1 <- zipped.aread
@@ -99,24 +109,27 @@ class InputOpsSuite extends FunSuite  {
         } yield a3
     }
 
+    
     test("reading from Q1|Q2") {
 
-        val ch1 = gopherApi.makeChannel[Int]()
-        val ch2 = gopherApi.makeChannel[Int]()
+        val ch1 = makeChannel[Int]()
+        val ch2 = makeChannel[Int]()
 
         val ar1 = (ch1 | ch2).aread
         ch1.awrite(1)
         for{
             r1 <- ar1
-            a1 <- assert( r1==1 )
             ar2 = (ch1 | ch2).aread
             _ = ch2.awrite(2)
             r2 <- ar2
-            a2 <- assert( r2==2 )
-        } yield a1
+        } yield {
+            assert( r1 == 1 )
+            assert( r2 == 2)
+        }
 
     }
 
+    /*
     test("simultanuos reading from Q1|Q2") {
 
         val ch1 = gopherApi.makeChannel[Int]()
