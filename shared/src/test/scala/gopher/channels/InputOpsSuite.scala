@@ -6,7 +6,7 @@ import munit._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.language._
+import scala.language.postfixOps
 
 import cps.monads.FutureAsyncMonad
 
@@ -129,11 +129,11 @@ class InputOpsSuite extends FunSuite  {
 
     }
 
-    /*
+    
     test("simultanuos reading from Q1|Q2") {
 
-        val ch1 = gopherApi.makeChannel[Int]()
-        val ch2 = gopherApi.makeChannel[Int]()
+        val ch1 = makeChannel[Int]()
+        val ch2 = makeChannel[Int]()
 
         val ar1 = (ch1 | ch2).aread
         val ar2 = (ch1 | ch2).aread
@@ -148,14 +148,24 @@ class InputOpsSuite extends FunSuite  {
              } else {
                  assert(r2 == 1)
              }
-             r3 <- recoverToSucceededIf[TimeoutException] {
-                timeouted( (ch1 | ch2).aread, 300 milliseconds)
+             //r3 <- recoverToSucceededIf[TimeoutException] {
+             //   timeouted( (ch1 | ch2).aread, 300 milliseconds)
+             //}
+             r3 <- async {
+                 try {
+                     await((ch1 | ch2).aread.withTimeout(300 milliseconds))
+                 } catch {
+                     case ex: TimeoutException =>
+                        assert(true)
+                 }
              }
         } yield r3
 
     }
+    
 
 
+    /*
     test("reflexive or  Q|Q") {
         val ch = gopherApi.makeChannel[Int]()
         val aw1 = ch.awrite(1)
