@@ -156,6 +156,8 @@ trait ReadChannel[F[_], A]:
    def |(other: ReadChannel[F,A]):ReadChannel[F,A] =
       new OrReadChannel(this,other)   
 
+   def append(other: ReadChannel[F,A]): ReadChannel[F, A] =
+      new AppendReadChannel(this, other)
 
    class DoneReadChannel extends ReadChannel[F,Unit]:
 
