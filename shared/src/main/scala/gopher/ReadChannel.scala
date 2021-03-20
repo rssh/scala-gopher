@@ -112,6 +112,9 @@ trait ReadChannel[F[_], A]:
    def afold[S](s0:S)(f: (S,A)=>S): F[S] =
       fold_async(s0)((s,e) => asyncMonad.pure(f(s,e)))
 
+   def afold_async[S](s0: S)(f: (S,A)=>F[S]): F[S] =
+      fold_async(s0)(f)
+
    def fold_async[S](s0:S)(f: (S,A) => F[S] ): F[S] =
       given CpsSchedulingMonad[F] = asyncMonad
       async[F] {

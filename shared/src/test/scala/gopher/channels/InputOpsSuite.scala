@@ -313,9 +313,9 @@ class InputOpsSuite extends FunSuite  {
              r2 <- a2} yield assert(monotonic)
     }
 
-    /*
+    
     test("order of reading from unbuffered channel") {
-        val ch = gopherApi.makeChannel[Int]()
+        val ch = makeChannel[Int]()
         ch.awriteAll(List(10,12,34,43))
 
         for{
@@ -325,26 +325,13 @@ class InputOpsSuite extends FunSuite  {
             r4 <- ch.aread
         } yield assert((r1,r2,r3,r4) == (10,12,34,43) )
 
-
     }
 
-
-    def gopherApi = CommonTestObjects.gopherApi
-
-    def timeouted[T](f:Future[T],timeout:FiniteDuration):Future[T] =
-    {
-        val p = Promise[T]()
-        p.completeWith(f)
-        gopherApi.actorSystem.scheduler.scheduleOnce(timeout){
-            p.tryFailure(new TimeoutException)
-        }
-        p.future
-    }
 
 
     test("append for empty stream") {
-        val ch1 = gopherApi.makeChannel[Int]()
-        val ch2 = gopherApi.makeChannel[Int]()
+        val ch1 = makeChannel[Int]()
+        val ch2 = makeChannel[Int]()
         val appended = ch1 append ch2
         val f = appended.atake(10).map(_.sum)
         ch1.close()
@@ -352,38 +339,30 @@ class InputOpsSuite extends FunSuite  {
         for(r <- f) yield assert(r==55)
     }
 
-*/
 
-}
-
-
-/*
-class InputOpsSyncSuiteDisabled extends FunSuite with Waiters {
-
-
-
-  test("channel fold with async operation inside") {
-      val ch1 = gopherApi.makeChannel[Int](10) 
-      val ch2 = gopherApi.makeChannel[Int](10) 
-      val fs = go {
-        val sum = ch1.fold(0){ (s,n) =>
-                    val n1 = ch2.read
-                    //s+(n1+n2) -- stack overflow in 2.11.8 compiler. TODO: submit bug
-                    s+(n+n1)
-                  }
-        sum
-      }
-      go {
-       ch1.writeAll(1 to 10)
-       ch2.writeAll(1 to 10)
-       ch1.close()
-      }
-      val r = Await.result(fs, 10 seconds)
-      assert(r==110)
-  }
-
-
-
+    test("channel fold with async operation inside") {
+        val ch1 = makeChannel[Int](10) 
+        val ch2 = makeChannel[Int](10) 
+        val fs = async {
+          val sum = ch1.fold(0){ (s,n) =>
+                      val n1 = ch2.read
+                      //s+(n1+n2) -- stack overflow in 2.11.8 compiler. TODO: submit bug
+                      s+(n+n1)
+                    }
+          sum
+        }
+        async {
+         ch1.writeAll(1 to 10)
+         ch2.writeAll(1 to 10)
+         ch1.close()
+        }
+        async {
+            val r = await(fs)
+            assert(r == 110)
+        }
+    }
   
+
 }
-*/
+
+
