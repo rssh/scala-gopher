@@ -119,17 +119,16 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
       this
 
 
-    def  onWriteAsync[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): this.type =
-      addWriter[A](ch,a,{
-        case Success(()) => m.tryImpure(f(a))
-        case Failure(ex) => m.error(ex)
-      })
+    def  onWriteAsync[A](ch: WriteChannel[F,A], a: ()=>F[A]) (f: A => F[S] ): this.type =
+      m.map(a()){ x => 
+        addWriter[A](ch,x,{
+          case Success(()) => m.tryImpure(f(x))
+          case Failure(ex) => m.error(ex)
+        })
+      }
       this
+      
 
-    def  onWrite_async[A](ch: WriteChannel[F,A], a:A) (f: A => F[S] ): F[this.type] =
-      m.pure(onWriteAsync(ch,a)(f))
-
-    
     def onTimeout(t:FiniteDuration)(f: FiniteDuration => S): this.type =
       setTimeout(t,{
          case  Success(x) => m.tryPure(f(x))

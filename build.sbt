@@ -30,7 +30,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .settings(sharedSettings)
     .disablePlugins(SitePlugin)
     .jvmSettings(
-        scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros" ),
+        scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types" ),
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").withDottyCompat(scalaVersion.value),
         // TODO: switch to ModuleES ?

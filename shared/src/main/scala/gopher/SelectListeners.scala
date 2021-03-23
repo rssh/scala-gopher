@@ -24,6 +24,8 @@ trait SelectListeners[F[_],S, R]:
 abstract class SelectGroupBuilder[F[_],S, R](api: Gopher[F]) extends SelectListeners[F,S, R]:
 
   protected var  groupBuilder: SelectGroup[F,S] => SelectGroup[F,S] = identity   
+
+  val m = api.asyncMonad
  
   def onRead[A](ch: ReadChannel[F,A])(f: A => S): this.type =
     groupBuilder = groupBuilder.andThen{
@@ -32,7 +34,9 @@ abstract class SelectGroupBuilder[F[_],S, R](api: Gopher[F]) extends SelectListe
     this
 
   def onReadAsync[A](ch: ReadChannel[F,A])(f: A => F[S]): this.type =
-    groupBuilder = groupBuilder.andThen( _.onReadAsync(ch)(f) )
+    groupBuilder = groupBuilder.andThen( 
+      _.onReadAsync(ch)(f)  
+    )
     this
 
   
@@ -41,11 +45,11 @@ abstract class SelectGroupBuilder[F[_],S, R](api: Gopher[F]) extends SelectListe
 
   def onWrite[A](ch: WriteChannel[F,A], a: =>A)(f: A=>S): this.type =
     groupBuilder = groupBuilder.andThen{
-      g => g.onWrite(ch,a)(f)
+       g => g.onWrite(ch,a)(f) 
     }
     this
 
-  def onWriteAsync[A](ch: WriteChannel[F,A], a: =>A)(f: A=>F[S]): this.type =
+  def onWriteAsync[A](ch: WriteChannel[F,A], a: ()=>F[A])(f: A=>F[S]): this.type =
     groupBuilder = groupBuilder.andThen{
       g => g.onWriteAsync(ch,a)(f)
     }
@@ -64,17 +68,10 @@ abstract class SelectGroupBuilder[F[_],S, R](api: Gopher[F]) extends SelectListe
 
   def onTimeoutAsync(t: FiniteDuration)(f: FiniteDuration => F[S]): this.type =
     groupBuilder = groupBuilder.andThen{
-        g => g.onTimeoutAsync(t)(f)
+       g => g.onTimeoutAsync(t)(f) 
     }
     this
   
   def  asyncMonad: CpsSchedulingMonad[F] = api.asyncMonad
-
- 
-
-
-
-
- 
 
 

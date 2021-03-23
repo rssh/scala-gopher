@@ -14,11 +14,12 @@ class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Uni
     }
       
   def runAsync(): F[Unit] = 
-    given CpsSchedulingMonad[F] = api.asyncMonad
+    given m: CpsSchedulingMonad[F] = api.asyncMonad
     async[F]{
       while{
         val group = api.select.group[Boolean]
-        val r = groupBuilder(group).run()
+        val build = groupBuilder(group)
+        val r = build.run()
         r
       } do ()
     }

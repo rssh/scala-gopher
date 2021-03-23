@@ -1,56 +1,68 @@
 package gopher.channels
 
+import cps._
 import gopher._
-import gopher.channels._
-import gopher.tags._
+import munit._
 
-import org.scalatest._
-
-import scala.language._
+import scala.language.postfixOps
 import scala.concurrent._
 import scala.concurrent.duration._
+
+import cps.monads.FutureAsyncMonad
+
 
 class SelectErrorSuite extends FunSuite
 {
 
    import scala.concurrent.ExecutionContext.Implicits.global
-
+   given Gopher[Future] = SharedGopherAPI.apply[Future]()
   
-
+/*
    test("select error handling for foreach")  {
-     import gopherApi._
      val channel = makeChannel[Int](100)
 
      var svEx: Throwable = null
 
-     val g = go {
-       var nWrites = 0
-       var nErrors = 0
-       for (s <- select.forever) {
-         s match {
-           case x: channel.write if (x == nWrites) =>
+   
+     var nWrites = 0
+     var nErrors = 0
+   
+     //implicit val printCode = cps.macroFlags.PrintCode
+     //implicit val debugLevel = cps.macroFlags.DebugLevel(10)
+
+
+     async{
+       //try {
+         
+        select.loop{
+           case x: channel.write if x == nWrites => 
              nWrites = nWrites + 1
-             if (nWrites == 50) {
-               throw new RuntimeException("Be-be-be")
-             }
-             if (nWrites == 100) {
-               select.exit(())
-             }
-           case ex: select.error =>
-             { };  svEx = ex  // macro-system errors: assignments accepts as default argument
-         }
-       }
+             if (nWrites == 50) then
+                throw new RuntimeException("Be-be-be")
+             (nWrites != 100)
+          // case t: Time.after if t == (100 milliseconds) =>
+          //   false
+        }
+       //} catch {
+       //   case ex: RuntimeException =>
+       //     svEx = ex
+       //} 
+       
      }
 
-     val tf = channel.atake(60)
-
-     Await.ready(tf, 10 seconds)
-
-     assert(svEx.getMessage == "Be-be-be")
+     /*
+     async {
+       val tf = channel.atake(50)
+       await(g)
+       assert(svEx.getMessage == "Be-be-be")
+     }
+     */
 
    }
 
+*/   
 
+/*
   test("select error handling for once")  {
     import gopherApi._
     val channel = makeChannel[Int](100)
@@ -158,5 +170,6 @@ class SelectErrorSuite extends FunSuite
 
 
     lazy val gopherApi = CommonTestObjects.gopherApi
+    */
    
 }
