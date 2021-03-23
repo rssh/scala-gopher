@@ -17,7 +17,7 @@ class SelectErrorSuite extends FunSuite
    import scala.concurrent.ExecutionContext.Implicits.global
    given Gopher[Future] = SharedGopherAPI.apply[Future]()
   
-/*
+
    test("select error handling for foreach")  {
      val channel = makeChannel[Int](100)
 
@@ -31,8 +31,8 @@ class SelectErrorSuite extends FunSuite
      //implicit val debugLevel = cps.macroFlags.DebugLevel(10)
 
 
-     async{
-       //try {
+     val g = async{
+      try {
          
         select.loop{
            case x: channel.write if x == nWrites => 
@@ -40,27 +40,26 @@ class SelectErrorSuite extends FunSuite
              if (nWrites == 50) then
                 throw new RuntimeException("Be-be-be")
              (nWrites != 100)
-          // case t: Time.after if t == (100 milliseconds) =>
-          //   false
+          case t: Time.after if t == (100 milliseconds) =>
+             false
         }
-       //} catch {
-       //   case ex: RuntimeException =>
-       //     svEx = ex
-       //} 
-       
+      } catch {
+          case ex: RuntimeException =>
+            svEx = ex
+        } 
      }
 
-     /*
+     
      async {
        val tf = channel.atake(50)
        await(g)
        assert(svEx.getMessage == "Be-be-be")
      }
-     */
+     
 
    }
 
-*/   
+
 
 /*
   test("select error handling for once")  {

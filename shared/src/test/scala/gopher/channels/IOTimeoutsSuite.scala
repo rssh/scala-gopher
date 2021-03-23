@@ -95,7 +95,7 @@ class IOTimeoutsSuite extends FunSuite {
     
     test("during 'normal' processing timeouts are absent") {
 
-        implicit val printCode = cps.macroFlags.PrintCode
+        //implicit val printCode = cps.macroFlags.PrintCode
   
         val ch = makeChannel[Int]()
         //val (chInputReady, chInputTimeout) = ch.withInputTimeouts(300 milliseconds)
