@@ -1,55 +1,62 @@
 package gopher.channels
 
+import cps._
 import gopher._
-import gopher.channels._
-import gopher.tags._
+import munit._
 
-import org.scalatest._
-
-import scala.language._
+import scala.language.postfixOps
 import scala.concurrent._
 import scala.concurrent.duration._
 
-import akka.util.Timeout
+import cps.monads.FutureAsyncMonad
 
 class SelectTimeoutSuite extends FunSuite 
 {
 
    import scala.concurrent.ExecutionContext.Implicits.global
 
+   given Gopher[Future] = SharedGopherAPI.apply[Future]()
+
   
    test("select with constant timeout which not fire")  {
-     //pending
-     import gopherApi._
-     val ch1 = makeChannel[Int](10)
-     val r = select.amap {
-       case x:ch1.read =>
+     async {
+      val ch1 = makeChannel[Int](10)
+      val r = select.map{ s =>
+         s.apply{
+           case x:ch1.read =>
                   //System.err.println(s"readed ${x}")
                   x
-       case y:select.timeout if (y==500.milliseconds) =>
+           case y:  Time.after if (y==500.milliseconds) =>
                  //System.err.println(s"timeout ${y}")
                  -1
+         }
+      }
+      val f1 = ch1.awrite(1)
+      val x =  r.read
+      assert(x==1)
      }
-     val f1 = ch1.awrite(1)
-     val x = Await.result(r.aread, 10 seconds)
-     assert(x==1)
    }
 
+   
    test("select with constant timeout which fire")  {
-     import gopherApi._
-     val ch1 = makeChannel[Int](10)
-     val r = select.amap {
-       case x:ch1.read =>
+     async {
+      val ch1 = makeChannel[Int](10)
+      val r = select.map{ s =>
+        s.apply{
+          case x:ch1.read =>
                   //System.err.println(s"readed ${x}")
                   x
-       case x:select.timeout if (x==500.milliseconds) =>
+          case x:Time.after if (x==500.milliseconds) =>
                  //System.err.println(s"timeout ${x}")
                  -1
+        }
+      }
+      val x = r.read
+      assert(x == -1)
      }
-     val x = Await.result(r.aread, 10 seconds)
-     assert(x == -1)
    }
 
+   /*
    test("timeout in select.forever")  {
      import gopherApi._
      val ch1 = makeChannel[Int](10)
@@ -108,5 +115,6 @@ class SelectTimeoutSuite extends FunSuite
    }
 
    lazy val gopherApi = CommonTestObjects.gopherApi
+   */
    
 }
