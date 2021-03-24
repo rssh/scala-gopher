@@ -56,65 +56,63 @@ class SelectTimeoutSuite extends FunSuite
      }
    }
 
-   /*
-   test("timeout in select.forever")  {
-     import gopherApi._
-     val ch1 = makeChannel[Int](10)
-     val ch2 = makeChannel[Int]()
-     val chS = makeChannel[String](10)
-     var s = 0
-     implicit val timeout = Timeout(100 milliseconds)
-     val f = select.forever{
-               case x: ch1.read => 
+   
+   test("timeout in select.loop")  {
+     async {
+      val ch1 = makeChannel[Int](10)
+      val ch2 = makeChannel[Int]()
+      val chS = makeChannel[String](10)
+      var s = 0
+      select.loop{ 
+                  case x: ch1.read => 
                              chS.write("1") 
-               case x: ch2.read => 
-                             chS.write("2") 
-               case x:select.timeout =>
+                             true
+                  case x: ch2.read => 
+                             chS.write("2")
+                             true 
+                  case x: Time.after if x == (100 millis) =>
                              s += 1
                              chS.write("t") 
-                             if (s > 2) select.exit(())
-             }
-     val x = Await.result(f, 10 seconds)
-     assert(s > 2)
+                             (! (s > 2) ) 
+      }
+      assert(s > 2)
+     }
    }
 
+   
    test("timeout in select.fold")  {
-     import gopherApi._
-     val ch1 = makeChannel[Int](10)
-     val f = select.afold(0) { (state,sl) => 
-                sl match {
-                   case x: ch1.read => state+1
-                   case x: select.timeout if (x == 100.milliseconds)  => 
-                                                     select.exit(state+10)
+        val ch1 = makeChannel[Int](10)
+        val f = async {
+                 select.fold(0) { (state,sl) => 
+                    sl.apply{
+                      case x: ch1.read => state+1
+                      case x: Time.after if (x == 100.milliseconds)  => 
+                                                     SelectFold.Done((state+10))
+                    }
                 }
-             } 
-     ch1.awrite(1)
-     val x = Await.result(f, 10 seconds)
-     assert(x==11) 
+        } 
+        ch1.awrite(1)
+        async {
+          val x = await(f)
+          assert(x==11)
+        } 
    }
 
+   
    test("timeout in select.once")  {
-     import gopherApi._
-     implicit val timeout = Timeout(100 milliseconds)
      val ch1 = makeChannel[Int](10)
      var x = 0
-     val f = go {
-       for(s <- select.once)  {
-        s match {
-            case y: ch1.read => info("ch1 readed")
+     async {
+       select.once{
+            case y: ch1.read => //println("ch1 readed")
                                 x=1
-            case y: select.timeout => 
-                                info("ch2 readed")
-                                x=10
-        }
+            case y: Time.after if y == (100 milliseconds) => 
+                                //println("ch2 readed")
+                                x=10 
        }
+       assert(x==10) 
      }
-     Await.ready(f, 10 seconds)
-     assert(x==10) 
-     
    }
 
-   lazy val gopherApi = CommonTestObjects.gopherApi
-   */
    
 }
