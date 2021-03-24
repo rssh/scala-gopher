@@ -206,7 +206,7 @@ object Select:
     def handleWrite(bind: Bind, valName: String, channel:Term, tp:TypeRepr): SelectorCaseExpr[F,S,R] =   
       val writeFun = makeLambda(valName,tp, bind.symbol, caseDef.rhs)
       val e = caseDefGuard.getOrElse(valName,
-        reportError(s"not found binding ${valName} in write condition", caseDef.pattern.asExpr)
+        reportError(s"not found binding ${valName} in write condition", channel.asExpr)
       )
       if (channel.tpe <:< TypeRepr.of[WriteChannel[F,?]]) then
         tp.asType match
@@ -324,7 +324,7 @@ object Select:
                 body: quotes.reflect.Term): quotes.reflect.Term =
     import quotes.reflect._
     val widenReturnType = TransformUtil.veryWiden(body.tpe)
-    val mt = MethodType(List(argName))(_ => List(argType), _ => widenReturnType)
+    val mt = MethodType(List(argName))(_ => List(argType.widen), _ => widenReturnType)
     Lambda(Symbol.spliceOwner, mt, (owner,args) =>
       substIdent(body,oldArgSymbol, args.head.asInstanceOf[Term], owner).changeOwner(owner))
 
