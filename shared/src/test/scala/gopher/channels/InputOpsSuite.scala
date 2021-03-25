@@ -33,7 +33,7 @@ class InputOpsSuite extends FunSuite  {
         val ch = makeChannel[String]()
         ch.awriteAll(List("qqq", "AAA","123","1234","12345"))
         val filteredCh = ch filter (_.contains("A"))
-        filteredCh.aread map { x => assert(x == "AAA")  }
+        filteredCh.aread() map { x => assert(x == "AAA")  }
     }
 
 
@@ -44,15 +44,15 @@ class InputOpsSuite extends FunSuite  {
         val ch2 = makeChannel[Int]()
         ch2.awriteAll(List(1, 2, 3, 4, 5, 6))
         val zipped = ch1 zip ch2
-        for{ r1 <- zipped.aread
+        for{ r1 <- zipped.aread()
              _ = assert( r1 == ("qqq",1) )
-             r2 <- zipped.aread
+             r2 <- zipped.aread()
              _ = assert( r2 == ("AAA",2) )
-             r3 <- zipped.aread
+             r3 <- zipped.aread()
              _ = assert( r3 == ("123",3) )
-             r4 <- zipped.aread
+             r4 <- zipped.aread()
              _ = assert( r4 == ("1234",4) )
-             r5 <- zipped.aread
+             r5 <- zipped.aread()
              l = assert( r5 == ("12345",5) )
         } yield l
     }
@@ -63,13 +63,13 @@ class InputOpsSuite extends FunSuite  {
         val ch2 = List(1,2,3,4,5,6).asReadChannel
         val zipped = ch1 zip ch2
         for{
-            r1 <- zipped.aread
+            r1 <- zipped.aread()
             a1 = assert(r1 == (1, 1))
-            r2 <- zipped.aread
+            r2 <- zipped.aread()
             a2 = assert( (r2 == (2,2)) )
             r3 <- async{
                 try 
-                    zipped.read
+                    zipped.read()
                     assert(""=="exception should be called before")
                 catch
                     case ex: Throwable =>
@@ -100,11 +100,11 @@ class InputOpsSuite extends FunSuite  {
         val ch = makeChannel[Int]()
         val zipped = ch zip ch
         ch.awriteAll(List(1,2,3,4,5,6,7,8))
-        for{ r1 <- zipped.aread
+        for{ r1 <- zipped.aread()
              a1 = assert( Set((1,2),(2,1)) contains r1  )
-             r2 <- zipped.aread
+             r2 <- zipped.aread()
              a2 = assert( Set((3,4),(4,3)) contains r2  )
-             r3 <- zipped.aread
+             r3 <- zipped.aread()
              a3 = assert( Set((5,6),(6,5)) contains r3  )
         } yield a3
     }
@@ -115,11 +115,11 @@ class InputOpsSuite extends FunSuite  {
         val ch1 = makeChannel[Int]()
         val ch2 = makeChannel[Int]()
 
-        val ar1 = (ch1 | ch2).aread
+        val ar1 = (ch1 | ch2).aread()
         ch1.awrite(1)
         for{
             r1 <- ar1
-            ar2 = (ch1 | ch2).aread
+            ar2 = (ch1 | ch2).aread()
             _ = ch2.awrite(2)
             r2 <- ar2
         } yield {
@@ -135,8 +135,8 @@ class InputOpsSuite extends FunSuite  {
         val ch1 = makeChannel[Int]()
         val ch2 = makeChannel[Int]()
 
-        val ar1 = (ch1 | ch2).aread
-        val ar2 = (ch1 | ch2).aread
+        val ar1 = (ch1 | ch2).aread()
+        val ar2 = (ch1 | ch2).aread()
 
         ch1.awrite(1)
         ch2.awrite(2)
@@ -153,7 +153,7 @@ class InputOpsSuite extends FunSuite  {
              //}
              r3 <- async {
                  try {
-                     await((ch1 | ch2).aread.withTimeout(300 milliseconds))
+                     await((ch1 | ch2).aread().withTimeout(300 milliseconds))
                  } catch {
                      case ex: TimeoutException =>
                         assert(true)
@@ -167,10 +167,10 @@ class InputOpsSuite extends FunSuite  {
     test("reflexive or  Q|Q") {
         val ch = makeChannel[Int]()
         val aw1 = ch.awrite(1)
-        val ar1 = (ch | ch).aread
+        val ar1 = (ch | ch).aread()
         for {r1 <- ar1
              _ = assert(r1 == 1)
-             ar2 = (ch | ch).aread
+             ar2 = (ch | ch).aread()
              //r2_1 <- recoverToSucceededIf[TimeoutException] {
              //    timeouted(ar2, 300 milliseconds)
              //}
@@ -195,8 +195,8 @@ class InputOpsSuite extends FunSuite  {
         val aw1 = ch1.awrite(1)
         val aw2 = ch2.awrite(2)
         val chOr = (ch1 | ch2)
-        val ar1 = chOr.aread
-        val ar2 = chOr.aread
+        val ar1 = chOr.aread()
+        val ar2 = chOr.aread()
         for {r1 <- ar1
              r2 <- ar2
         } yield assert( ((r1,r2)==(1,2)) ||((r1,r2)==(2,1)) )
@@ -319,10 +319,10 @@ class InputOpsSuite extends FunSuite  {
         ch.awriteAll(List(10,12,34,43))
 
         for{
-            r1 <- ch.aread
-            r2 <- ch.aread
-            r3 <- ch.aread
-            r4 <- ch.aread
+            r1 <- ch.aread()
+            r2 <- ch.aread()
+            r3 <- ch.aread()
+            r4 <- ch.aread()
         } yield assert((r1,r2,r3,r4) == (10,12,34,43) )
 
     }
@@ -345,7 +345,7 @@ class InputOpsSuite extends FunSuite  {
         val ch2 = makeChannel[Int](10) 
         val fs = async {
           val sum = ch1.fold(0){ (s,n) =>
-                      val n1 = ch2.read
+                      val n1 = ch2.read()
                       //s+(n1+n2) -- stack overflow in 2.11.8 compiler. TODO: submit bug
                       s+(n+n1)
                     }

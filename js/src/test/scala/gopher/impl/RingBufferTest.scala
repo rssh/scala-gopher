@@ -26,7 +26,7 @@ class RingBufferTests extends munit.FunSuite{
            // we should be blocked before sending next
            JSExecutionContext.queue.execute{ () =>
               x = 1
-              ch.aread
+              ch.aread()
            }
            ch.write(4)
            assert(x != 0)

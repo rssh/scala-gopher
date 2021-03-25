@@ -20,8 +20,8 @@ class DuppedChannelsSuite extends FunSuite  {
     val ch = makeChannel[String]()
     val dupped = ch.dup()
     val r0 = ch.awrite("1")
-    val r1 = dupped._1.aread
-    val r2 = dupped._2.aread
+    val r1 = dupped._1.aread()
+    val r2 = dupped._2.aread()
     val r = for(v1 <- r1; v2 <- r2) yield (v1,v2)
 
     r map {x => 
@@ -55,8 +55,8 @@ class DuppedChannelsSuite extends FunSuite  {
       ch.close()
     }
     for{ fx <- f1
-         x <- in1.aread
-         r <- in1.aread.transformWith {
+         x <- in1.aread()
+         r <- in1.aread().transformWith {
            case Success(u) => 
                Future failed new IllegalStateException("Mist be closed")
            case Failure(u) => 

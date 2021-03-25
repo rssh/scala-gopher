@@ -23,7 +23,7 @@ class ExpireChannelSuite extends FunSuite {
         val ch = makeChannel[Int](10).withExpiration(300 milliseconds, false)
         val emptyRead = for {_ <- ch.awrite(1)
              _ <- Time.asleep(400 milliseconds)
-             r <- ch.aread
+             r <- ch.aread()
         } yield r
 
         async {
@@ -46,7 +46,7 @@ class ExpireChannelSuite extends FunSuite {
         for {
               _ <- ch.awrite(1)
               _ <- Time.asleep(10 milliseconds)
-              r <- ch.aread
+              r <- ch.aread()
         } yield assert(r==1)
     }
 
@@ -68,12 +68,12 @@ class ExpireChannelSuite extends FunSuite {
     
     test("expire must be an order") {
         val ch = makeChannel[Int](10).withExpiration(300 milliseconds, false)
-        val fr1 = ch.aread
-        val fr2 = ch.aread
+        val fr1 = ch.aread()
+        val fr2 = ch.aread()
         for {
             _ <- ch.awriteAll(List(1,2))
             _ <- Time.asleep(10 milliseconds)
-            fr3 = ch.aread
+            fr3 = ch.aread()
             r3 <-  fr3.withTimeout(1 second).transform{
                 case Failure(ex: TimeoutException) => 
                     Success(())

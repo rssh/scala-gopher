@@ -45,7 +45,7 @@ class FoldSelectSuite extends FunSuite
 
     val read = async {
       for(i <- 1 to 100) yield {
-        val x = out.read
+        val x = out.read()
         x
       }
     }

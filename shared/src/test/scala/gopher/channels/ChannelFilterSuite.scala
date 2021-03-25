@@ -28,7 +28,7 @@ class ChannelFilterSuite extends FunSuite:
      async {
         var i = 0
         while(i < 50) {
-          val x = filtered.read
+          val x = filtered.read()
           assert( x % 2 == 0)
           i=i+1
         }

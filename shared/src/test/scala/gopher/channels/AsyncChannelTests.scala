@@ -21,7 +21,7 @@ class AsyncChannelTests extends FunSuite {
         
         val consumer = async{
           var sum = 0
-          while{val a = channel.read
+          while{val a = channel.read()
                 sum += a 
                 a < MAX_N
           } do ()

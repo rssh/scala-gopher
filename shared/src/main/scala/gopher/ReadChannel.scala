@@ -32,12 +32,12 @@ trait ReadChannel[F[_], A]:
     * async version of read. Immediatly return future, which will contains result of read or failur with StreamClosedException
     * in case of stream is closed.
     */
-   def aread:F[A] = 
+   def aread():F[A] = 
       asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))
                                
-   transparent inline def read: A = await(aread)(using rAsyncMonad)
+   transparent inline def read(): A = await(aread())(using rAsyncMonad)
 
-   transparent inline def ? : A = await(aread)(using rAsyncMonad)
+   transparent inline def ? : A = await(aread())(using rAsyncMonad)
 
   /**
    * return F which contains sequence from first `n` elements.
@@ -49,7 +49,7 @@ trait ReadChannel[F[_], A]:
          try {
             var c = 0
             while(c < n) {
-               val a = read
+               val a = read()
                b.addOne(a)
                c = c + 1
             }
@@ -59,7 +59,7 @@ trait ReadChannel[F[_], A]:
          b.result()
       }   
 
-   def aOptRead: F[Option[A]] =
+   def aOptRead(): F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>
                    addReader(SimpleReader{ x => x match
                                             case Failure(ex: ChannelClosedException) => f(Success(None)) 
@@ -68,14 +68,14 @@ trait ReadChannel[F[_], A]:
                                          })
        )
 
-   transparent inline def optRead: Option[A] = await(aOptRead)(using rAsyncMonad)
+   transparent inline def optRead(): Option[A] = await(aOptRead())(using rAsyncMonad)
 
    def foreach_async(f: A=>F[Unit]): F[Unit] =
       given CpsAsyncMonad[F] = asyncMonad
       async[F]{
          var done = false
          while(!done) {
-            optRead match
+            optRead() match
                case Some(v) => await(f(v))
                case None => done = true
          }
@@ -120,7 +120,7 @@ trait ReadChannel[F[_], A]:
       async[F] {
          var s = s0
          while{
-           optRead match
+           optRead() match
              case Some(a) => 
                   s = await(f(s,a))
                   true
@@ -139,9 +139,9 @@ trait ReadChannel[F[_], A]:
       asyncMonad.spawn(async[F]{
          var done = false
          while(!done) {
-            this.optRead match
+            this.optRead() match
                case Some(a) =>
-                  x.optRead match
+                  x.optRead() match
                      case Some(b) =>
                         retval.write((a,b))
                      case None =>

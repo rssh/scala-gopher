@@ -22,11 +22,11 @@ class ChFlatMappedReadChannel[F[_], A, B](prev: ReadChannel[F,A], f: A=>ReadChan
     given CpsSchedulingMonad[F] = gopherApi.asyncMonad
     async[F]{
       while{
-        prev.optRead match
+        prev.optRead() match
           case Some(a) =>
             val internal = f(a)
             while{
-              internal.optRead match
+              internal.optRead() match
                 case Some(b) => 
                   bChannel.write(b)
                   true

@@ -19,7 +19,7 @@ class ApiAccessTests extends FunSuite {
         val ch = makeChannel[Int](0)
         val fw1 = ch.awrite(1)
         //println("after awrite")
-        val fr1 = ch.aread
+        val fr1 = ch.aread()
         //println("after aread, waiting result")
         val r1 = Await.result(fr1, 1 second)
         assert( r1 == 1 )
@@ -29,7 +29,7 @@ class ApiAccessTests extends FunSuite {
         given Gopher[Future] = JVMGopher[Future]()
         val ch = makeChannel[Int](1)
         val fw1 = ch.awrite(1)
-        val fr1 = ch.aread
+        val fr1 = ch.aread()
         val r1 = Await.result(fr1, 1 second)
         assert( r1 == 1 )
     }

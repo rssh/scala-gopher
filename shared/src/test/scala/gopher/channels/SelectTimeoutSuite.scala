@@ -32,7 +32,7 @@ class SelectTimeoutSuite extends FunSuite
          }
       }
       val f1 = ch1.awrite(1)
-      val x =  r.read
+      val x =  r.read()
       assert(x==1)
      }
    }
@@ -51,7 +51,7 @@ class SelectTimeoutSuite extends FunSuite
                  -1
         }
       }
-      val x = r.read
+      val x = r.read()
       assert(x == -1)
      }
    }

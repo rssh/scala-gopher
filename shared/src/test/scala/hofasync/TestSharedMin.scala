@@ -14,7 +14,7 @@ class TestSharedMin extends munit.FunSuite {
          val gopherApi = SharedGopherAPI.apply[Future]()
          val ch = gopherApi.makeChannel[Int](1)
          val fw1 = ch.awrite(2)
-         val fr1 = ch.aread
+         val fr1 = ch.aread()
          //implicit val printCode = cps.macroFlags.PrintCode
          async[Future] {
             val r1 = await(fr1)

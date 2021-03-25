@@ -61,10 +61,10 @@ class ChannelCloseSuite extends FunSuite
     val p = async {
       channel <~ 1
       channel.close()
-      q1 = channel.read
+      q1 = channel.read()
     }
     val afterClose = p flatMap { _ => async{
-      val a = channel.read
+      val a = channel.read()
       q2 = 2
     } }
 
@@ -87,10 +87,10 @@ class ChannelCloseSuite extends FunSuite
     val p = async {
       channel <~ 1
       channel.close()
-      q1 = channel.read   // will be unblocked after close and tbrwo exception
+      q1 = channel.read()   // will be unblocked after close and tbrwo exception
     }
     val consumer = async{
-      q3 = channel.read   // will be run
+      q3 = channel.read()   // will be run
       q2 = 2
     } 
 
@@ -116,7 +116,7 @@ class ChannelCloseSuite extends FunSuite
       channel.close()
       @volatile var q = 0
       val fp = async {
-        val done = channel.done.read
+        val done = channel.done.read()
         q = 1
       }
       fp map (_ => assert(q == 1))

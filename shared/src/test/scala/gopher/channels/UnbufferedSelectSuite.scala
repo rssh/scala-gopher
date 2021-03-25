@@ -24,7 +24,7 @@ class UnbufferedSelectSuite extends FunSuite
 
        assert(!w1.isCompleted)
 
-       val r1 = channel1.aread
+       val r1 = channel1.aread()
 
        async {
           await(w1)

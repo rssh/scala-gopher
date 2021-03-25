@@ -55,7 +55,7 @@ class SelectSuite extends FunSuite
       // but when reading instead onRead
       // TODO: submit bug to doty
       val consumer = select.loop.onRead(channel1) { i1 =>
-                                       val i2 = channel2.read
+                                       val i2 = channel2.read()
                                        sum = sum+i1 + i2
                                        (i1 < 1000) 
                                       } .runAsync()

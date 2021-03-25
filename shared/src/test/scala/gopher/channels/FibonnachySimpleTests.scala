@@ -54,7 +54,7 @@ class FibbonachySimpleTest extends FunSuite {
     val start = starter(fib,q)
     async{
       for( i <- 1 to n) {
-        val x = fib.read
+        val x = fib.read()
         acceptor(x)
       }
       q <~ 1

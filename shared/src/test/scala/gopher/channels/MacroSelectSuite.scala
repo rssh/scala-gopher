@@ -383,8 +383,8 @@ class MacroSelectSuite extends FunSuite
                   case x:ch2.read => x*5
                 }
               }
-        val fs1 = chs.aread
-        val fs2 = chs.aread
+        val fs1 = chs.aread()
+        val fs2 = chs.aread()
         val s1 = await(fs1)
         val s2 = await(fs2)
         assert(s1==3 || s1==10)
@@ -398,7 +398,7 @@ class MacroSelectSuite extends FunSuite
         val f1 = ch.awrite(1)
         val f2 = ch.awrite(2)
         async {
-            val x = await(ch.aread)
+            val x = await(ch.aread())
             val x2 = Try(await(f2.failed)) 
             assert(x == 1)
             assert(x2.get.isInstanceOf[ChannelClosedException])
