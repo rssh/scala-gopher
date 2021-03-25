@@ -1,11 +1,14 @@
 package gopher.channels
 
 import gopher._
-import org.scalatest._
+import cps._
+import munit._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent._
+import scala.concurrent.{Channel=>_,_}
 import scala.concurrent.duration._
+
+import cps.monads.FutureAsyncMonad
 
 /*
  * Go analog:
@@ -35,21 +38,22 @@ import scala.concurrent.duration._
    * 
    */
 object ReadCoroutines {
-  
-  lazy val integers:InputOutput[Int,Int] =
-  {
-    val y = gopherApi.makeChannel[Int]()
+
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
+
+  lazy val integers:Channel[Future,Int,Int] = {
+    val y = makeChannel[Int]()
     @volatile var count = 0
-    go {
+    async {
       while(true) {
-        y <~ count
+        y.write(count)
         count = count + 1;
       }
     }
     y
   }
   
-  def gopherApi = CommonTestObjects.gopherApi
+  
   
 }
 
@@ -61,7 +65,7 @@ class ReadCoroutinesSuite extends FunSuite {
   import language.postfixOps
   
   test("get few numbers from generarator") {
-   val p = go {
+   val p = async {
       val x0 = (integers ?)
       assert(x0 == 0)
       val x1 = (integers ?)
@@ -69,7 +73,6 @@ class ReadCoroutinesSuite extends FunSuite {
       val x2 = (integers ?)
       assert(x2 == 2)
    }
-   Await.ready(p, 10 seconds)
   }
   
   
