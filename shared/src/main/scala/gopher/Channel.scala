@@ -31,6 +31,8 @@ trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Clo
   override def filterAsync(p: R=>F[Boolean]): Channel[F,W,R] =
     FilteredAsyncChannel(this,p)
 
+  def isClosed: Boolean  
+
 
 end Channel
 

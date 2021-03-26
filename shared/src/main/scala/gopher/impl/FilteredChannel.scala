@@ -11,6 +11,9 @@ class FilteredChannel[F[_],W,R](internal: Channel[F,W,R], p: R => Boolean) exten
   override def close(): Unit =
     internal.close()
 
+  override def isClosed: Boolean =
+    internal.isClosed
+
 
 class FilteredAsyncChannel[F[_],W,R](internal: Channel[F,W,R], p:  R => F[Boolean]) extends FilteredAsyncReadChannel[F,R](internal, p)
                                                                              with Channel[F,W,R]:
@@ -20,3 +23,8 @@ class FilteredAsyncChannel[F[_],W,R](internal: Channel[F,W,R], p:  R => F[Boolea
 
   override def close(): Unit =
     internal.close()
+
+  override def isClosed: Boolean =
+    internal.isClosed
+    
+  

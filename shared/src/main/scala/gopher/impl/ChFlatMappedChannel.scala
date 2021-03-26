@@ -11,3 +11,7 @@ class ChFlatMappedChannel[F[_],W,RA,RB](internal: Channel[F,W,RA], f: RA=>ReadCh
   override def close(): Unit =
     internal.close()
 
+  override def isClosed: Boolean =
+    internal.isClosed
+    
+

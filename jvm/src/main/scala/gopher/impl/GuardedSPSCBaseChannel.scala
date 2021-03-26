@@ -58,6 +58,9 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
     publishedClosed.set(true)
     controlExecutor.submit(stepRunnable)    
 
+  def isClosed: Boolean =
+    publishedClosed.get()
+
   protected def step(): Unit
   
 

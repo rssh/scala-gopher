@@ -11,6 +11,9 @@ class MappedChannel[F[_],W,RA,RB](internal: Channel[F,W,RA], f: RA=>RB) extends 
   override def close(): Unit =
     internal.close()
 
+  override def isClosed: Boolean =
+    internal.isClosed
+
 
 class MappedAsyncChannel[F[_],W,RA,RB](internal: Channel[F,W,RA], f: RA=>F[RB]) extends MappedAsyncReadChannel[F,RA,RB](internal, f)
                                                                              with Channel[F,W,RB]:
@@ -20,3 +23,6 @@ class MappedAsyncChannel[F[_],W,RA,RB](internal: Channel[F,W,RA], f: RA=>F[RB]) 
 
   override def close(): Unit =
     internal.close()
+
+  override def isClosed: Boolean =
+    internal.isClosed

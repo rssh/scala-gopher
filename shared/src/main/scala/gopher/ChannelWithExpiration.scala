@@ -26,6 +26,8 @@ class ChannelWithExpiration[F[_],W,R](internal: Channel[F,W,R], ttl: FiniteDurat
 
   override def close(): Unit = internal.close()
 
+  override def isClosed: Boolean = internal.isClosed
+
 
   def qqq: Int = 0
 

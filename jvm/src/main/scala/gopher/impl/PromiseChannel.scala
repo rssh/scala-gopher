@@ -70,7 +70,8 @@ import scala.util.Failure
       if (ref.get() eq null) 
         closeAll() 
     
-        
+    def isClosed: Boolean =
+      closed.get()    
     
     def step(): Unit =
       val ar = ref.get()

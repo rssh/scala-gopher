@@ -20,6 +20,9 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
     closed = true
     processClose()
 
+  override def isClosed: Boolean =
+    closed
+
   protected def submitTask(f: ()=>Unit ): Unit =
     JSExecutionContext.queue.execute{ () =>
       try
