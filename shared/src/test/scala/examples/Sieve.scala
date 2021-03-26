@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 
-object Sieve {
+object Sieve1 {
 
    given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
