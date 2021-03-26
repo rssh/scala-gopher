@@ -23,7 +23,6 @@ Scala-gopher is open source (license is Apache2); binaries are available from th
 Note, which this is not an emulation of go language structures in Scala, but rather a reimplementation of the main ideas in 'scala-like' manner.
   
 
-
 ### Initialization
  
  You need a given of gopherApi for creating channels and selectors.  
@@ -40,7 +39,7 @@ Note, which this is not an emulation of go language structures in Scala, but rat
 ## Channels
 
 Channels are used for asynchronous communication between execution flows.
-When using channel inside *async* block, you can look at one as on classic blocked queue with fixed size with methods read and write:
+When using channel inside async block, you can look at one as on classic blocked queue with fixed size with methods read and write:
 
 
      val channel = makeChannel[Int];
@@ -50,7 +49,7 @@ When using channel inside *async* block, you can look at one as on classic block
      }
      ......
      async {
-       val i = channel.read 
+       val i = channel.read()
      }
 
   
@@ -62,7 +61,7 @@ Blocking operations can be used only inside `await` blocks.
 Outside we can use asynchronous version:
 
 * `channel.awrite(x)` will write `x` and return to us `Future[Unit]` which will be executed after x will send
-* `channel.aread` will return future to the value, which will be read.
+* `channel.aread()` will return future to the value, which will be read.
 
 
 Channels can be closed. After this attempt to write will cause throwing 'ClosedChannelException.' Reading will be still possible up to 'last written value', after this attempt to read will cause the same exception. Also, each channel provides `done` input for firing close events.
@@ -85,13 +84,12 @@ val producer = channel.awrite(1 to 1000)
 val consumer = async {
     var done = false
     while(!done)
-      val i = channel.read
+      val i = channel.read()
       sum = sum + i
       if i==1000 then
            done = true
 }
      
-Await.ready(consumer, 5.second)
 ~~~
 
 last loop can be repharased in more scala wat as:
@@ -100,19 +98,11 @@ last loop can be repharased in more scala wat as:
 val sum = (channel.take(1000)).fold(0)((s,i) => s+i)
 ~~~
 
-Scala Iterable can be represented as `channels.Input` via method `gopherApi.iterableInput`. Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
+Scala Iterable can be represented as `ReadChannel` via extension method `asReadChannel`. 
+ 
+Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
 
 `|` (i.e. or) operator used for merged inputs, i.e. `(x|y).read` will read a value from channel x or y when one will be available.
-
-For each input and output you can create a facility with tracked timeout, i.e. if `in` is input, then
-~~~ scala
- val (inReady, inTimeouts) = in.withInputTimeouts(10 seconds)
-~~~
-will return two inputs, where reading from `inReady` will return the same as reading from `in`. And if waiting for reading takes longer than 10 seconds then the value of timeout will be available in `inTimeouts`. Analogically we can create output with timeouts:
-~~~ scala
- val (outReady, outTimeouts) = out.withOutputTimeouts(10 seconds)
-~~~
-
 
 Also, note that you can provide own Input and Output implementations by implementing callback `cbread` and `cbwrite` methods.
 
@@ -141,10 +131,8 @@ async[Future]{
   select accepts partial functions syntax, left parts in `case` clauses must have the following form
    
   * `v:channel.read` (for reading from channel) 
-  * `v:Type if (v==read(ch))` (for reading from channel or future) 
   * `v:channel.write if (v==expr)` (for writing `expr` into channel).
-  * `v:Type if (v==write(ch,expr))` (for writing `expr` into channel).
-  * `_` - for 'idle' action in unblocking select. (TODO: ..  )
+  * `v:Time.after if (v==expr)` (for timeouts).
 
 
   Inside case actions, we can use blocking read/writes and await operations.  
@@ -165,7 +153,7 @@ TODO
    More than one variables in state can be modeled with partial function case syntax:
 
 ~~~ scala
-val fib = select.afold((0,1)) { case ((x,y), s) =>
+val fib = select.fold((0,1)) { case ((x,y), s) =>
     s match {
       case x:channel.write => (y,y+x)
       case q:quit.read => select.exit((x,y))

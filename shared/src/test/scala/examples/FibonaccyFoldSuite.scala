@@ -1,10 +1,15 @@
 package example
 
-import gopher.channels._
-import org.scalatest._
+import gopher._
+import cps._
+import munit._
 
 import scala.concurrent._
 import scala.language._
+
+import cps.monads.FutureAsyncMonad 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 /*
  * code from go tutorial: http://tour.golang.org/#66 but with fold instead foreach
@@ -13,18 +18,18 @@ import scala.language._
 
 object FibonaccyFold {
 
-  import CommonTestObjects.gopherApi._
+  given Gopher[Future] = SharedGopherAPI.apply[Future]()
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   
-  def fibonacci(c: Output[Long], quit: Input[Int]): Future[(Long,Long)] = 
-     select.afold((0L,1L)) { case ((x,y),s) =>
-      s match {
-        case x: c.write =>  (y, x+y)
+  def fibonacci(c: WriteChannel[Future,Long], quit: ReadChannel[Future,Int]): Future[(Long,Long)] = async {
+     select.fold((0L,1L)) { case ((x,y),s) =>
+      s.select{
+        case wx: c.write if wx == x  =>  (y, x+y)
         case q: quit.read =>
-                   select.exit((x,y))
+                   SelectFold.Done((x,y))
       }
      }
+  }
   
   def run(n:Int, acceptor: Long => Unit ): Future[(Long,Long)] =
   {
@@ -39,8 +44,9 @@ object FibonaccyFold {
   
 }
 
-class FibonaccyFoldSuite extends AsyncFunSuite
+class FibonaccyFoldSuite extends FunSuite
 {
+ 
   
   test("fibonaccy must be processed up to 50") {
     FibonaccyFold.run(50, _ => () ).map(last => assert(last._2 != 0))
