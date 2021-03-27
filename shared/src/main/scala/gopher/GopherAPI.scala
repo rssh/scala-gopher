@@ -9,7 +9,6 @@ case object DefaultGopherConfig extends GopherConfig
   
 trait GopherAPI: 
 
-
   def apply[F[_]:CpsSchedulingMonad](cfg:GopherConfig = DefaultGopherConfig): Gopher[F]
           
 /**

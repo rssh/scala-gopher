@@ -45,3 +45,6 @@ object JSGopher extends GopherAPI:
 
    val timer = new Timer("gopher")
 
+
+val Gopher = JSGopher   
+

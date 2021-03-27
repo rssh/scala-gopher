@@ -171,8 +171,6 @@ class SelectSuite extends FunSuite
     }
   }
 
-
-
   test("basic compound select with loop select syntax")  {
     
 

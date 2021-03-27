@@ -71,3 +71,5 @@ object JVMGopher extends GopherAPI:
          logger.log(level, message, ex)
       }
       
+
+val Gopher = JVMGopher
