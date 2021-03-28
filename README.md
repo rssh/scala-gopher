@@ -183,7 +183,7 @@ async{
 }
 ~~~
 
-  Here, the branch inside select should return true or false.  If true -- loop is continued, if false - interrupted.
+  Here, the branch inside select should return true or false.  If true -- loop will be continued, if false - finished.
 
  
   select.fold (or afold - as variant which is alredy wrapped in async) provide an abstraction for iterating over set of
@@ -193,8 +193,8 @@ async{
 def filter1(in:Channel[Future,Int,Int]):ReadChannel[Future,Int] =
    val q = makeChannel[Int]()
    val filtered = makeChannel[Int]()
-   select.afold(in){ (ch, s) => 
-     s.select{
+   select.afold(in){ ch => 
+     select{
        case prime: ch.read => 
                 filtered.write(prime)
                 ch.filter(_ % prime != 0)
@@ -203,13 +203,13 @@ def filter1(in:Channel[Future,Int,Int]):ReadChannel[Future,Int] =
    filtered
 ~~~
 
- The argument to the fold function is state and special 'select group' marker, for which we can call `select` statement.
+ The argument to the fold function is state.
  Function should or produce next state (as in `filter1` example) or produce special value SelectFold.Done(x):
 
 
 ~~~ scala
-val fib = select.fold((0,1)) { case ((x,y), s) =>
-    s.select{
+val fib = select.fold((0,1)) { case (x,y) =>
+    select{
       case x:channel.write => (y,y+x)
       case q:quit.read => SelectFold.Done((x,y))
     }
