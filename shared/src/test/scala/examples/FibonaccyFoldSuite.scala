@@ -22,8 +22,8 @@ object FibonaccyFold {
 
   
   def fibonacci(c: WriteChannel[Future,Long], quit: ReadChannel[Future,Int]): Future[(Long,Long)] = async {
-     select.fold((0L,1L)) { case ((x,y),s) =>
-      s.select{
+     select.fold((0L,1L)) { case (x,y) =>
+      select{
         case wx: c.write if wx == x  =>  (y, x+y)
         case q: quit.read =>
                    SelectFold.Done((x,y))

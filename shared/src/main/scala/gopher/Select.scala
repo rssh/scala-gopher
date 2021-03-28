@@ -20,39 +20,37 @@ class Select[F[_]](api: Gopher[F]):
 
   def loop: SelectLoop[F] = new SelectLoop[F](api)
 
-  def fold[S](s0:S)(step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> S | SelectFold.Done[S]): S = {
-      var s: S = s0
-      while{
-         val g = SelectGroup[F,S|SelectFold.Done[S]](api)
-         step(s,g) match {
-            case SelectFold.Done(r:S) => 
-              s=r
-              false
-            case other =>
-              s=other.asInstanceOf[S]
-              true
-         }
-      } do ()
-      s
+    
+  def fold[S](s0:S)(step: S => S | SelectFold.Done[S]): S = {
+    var s: S = s0
+    while{
+        step(s) match
+          case SelectFold.Done(r) =>
+            s = r.asInstanceOf[S]
+            false
+          case other =>
+            s = other.asInstanceOf[S]
+            true
+    } do ()
+    s
   }
 
-  def fold_async[S](s0:S)(step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> F[S | SelectFold.Done[S]]): F[S] = {
-    var g = SelectGroup[F,S|SelectFold.Done[S]](api)
-    api.asyncMonad.flatMap(step(s0,g)){ s =>
-       s match
+  def fold_async[S](s0:S)(step: S => F[S | SelectFold.Done[S]]): F[S] = {
+    api.asyncMonad.flatMap(step(s0)){ s =>
+      s match 
         case SelectFold.Done(r) => api.asyncMonad.pure(r.asInstanceOf[S])
         case other => fold_async[S](other.asInstanceOf[S])(step)
     }
   }
-  
-  transparent inline def afold[S](s0:S)(inline step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> S | SelectFold.Done[S]) : F[S] =
+
+  transparent inline def afold[S](s0:S)(inline step: S => S | SelectFold.Done[S]) : F[S] =
     async[F](using api.asyncMonad).apply{
       fold(s0)(step)
     }
 
-  def afold_async[S](s0:S)(step: (S,SelectGroup[F,S|SelectFold.Done[S]])=> F[S | SelectFold.Done[S]]) : F[S] =
+  def afold_async[S](s0:S)(step: S => F[S | SelectFold.Done[S]]) : F[S] =
     fold_async(s0)(step)
-  
+
     
   //def map[A](step: PartialFunction[SelectGroup[F,A],A|SelectFold.Done[Unit]]): ReadChannel[F,A] =
   

@@ -10,8 +10,11 @@ import scala.util.control.NonFatal
 class PromiseChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends BaseChannel[F,A](gopherApi):
 
   private var value: Option[A] = None
+  private var readed = false
+  
+  protected def isEmpty: Boolean = value.isEmpty || readed
 
-  protected def isEmpty: Boolean = value.isEmpty
+  //override def addDoneReader(reader: Reader[Unit]): Unit =
 
   protected def process(): Unit =
     var done = false
@@ -32,33 +35,26 @@ class PromiseChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends Base
               throw new DeadlockDetected()
     }
     if (!readers.isEmpty && value.isDefined) {
-      var readed = false
-      while(!readers.isEmpty) {
+      while(!readers.isEmpty && !readed) {
         val r = readers.dequeue()
         if (!r.isExpired) then
           r.capture() match
             case Some(f) =>
-              if (!readed) then
                 r.markUsed()
                 submitTask(()=>f(Success(value.get)))
                 readed = true
-              else
-                r.markFree()
-                processCloseDone() // to have .done call befor channel-closed.
-                if (!r.isExpired) then
-                  r.capture().foreach{ f => 
-                    r.markUsed()
-                    submitTask(()=>f(Failure(ChannelClosedException())))
-                  }
             case None =>
               if (!r.isExpired) 
                 throw new DeadlockDetected()  
       }
+      //if (readed) {
+       // processCloseDone()
+      //}
     }
     if (closed) then
       processClose()
     
 
-
+  
   
     

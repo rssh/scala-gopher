@@ -152,7 +152,7 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
     trait Expiration:
       def canExpire: Boolean = true
       def isExpired: Boolean = waitState.get()==2
-      def markUsed(): Unit = waitState.lazySet(2)
+      def markUsed(): Unit = waitState.set(2)
       def markFree(): Unit = {
         waitState.set(0)
       }

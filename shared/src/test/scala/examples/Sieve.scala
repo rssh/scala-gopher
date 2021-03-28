@@ -34,8 +34,7 @@ object Sieve1 {
    
    def runFold(in:Channel[Future,Int, Int], out: Channel[Future,Int, Int]) = async {  // ???
 
-
-       select.fold(in){ (s, g) =>
+       select.fold(in){ s =>
             val x = s.read()
             out.write(x)
             s.filter(_ % x != 0)

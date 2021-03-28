@@ -26,8 +26,8 @@ class FoldSelectSuite extends FunSuite
 
     // dotty bug,
     val generator = async {
-      select.fold(in){ (ch,s) =>
-        s.select{
+      select.fold(in){ ch =>
+        select{
           case p: ch.read =>
             r0 = r0 :+ p
             out.write(p)
@@ -63,11 +63,11 @@ class FoldSelectSuite extends FunSuite
     val quit = makeChannel[Boolean]()
 
     val generator = async {
-      select.fold((in1,in2,0)){ case ((in1,in2,n),s) =>
-        s select {
+      select.fold((in1,in2,0)){ case (in1,in2,n)  =>
+        select {
           case x:in1.read =>
             if (x >= 100) {
-              s.done((in1, in2, n))
+              SelectFold.Done((in1, in2, n))
             } else {
               (in2, in1, n + x)
             }

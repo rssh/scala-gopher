@@ -43,8 +43,8 @@ class UnbufferedSelectSuite extends FunSuite
      val quit = Promise[Boolean]()
      val quitChannel = quit.future.asChannel
      val r = async {
-        select.fold(0){ (x,s) =>
-               s.apply{
+        select.fold(0){ x =>
+               select{
                  case a:ch.read =>  x+a
                  case q: quitChannel.read => SelectFold.Done(x) 
                }

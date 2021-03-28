@@ -50,8 +50,8 @@ object Sieve
   {
    val q = makeChannel[Int]()
    val filtered = makeChannel[Int]()
-   select.afold(in){ (ch, s) => 
-     s.select{
+   select.afold(in){ ch => 
+     select{
        case prime: ch.read => 
                          filtered.write(prime)
                          ch.filter(_ % prime != 0)

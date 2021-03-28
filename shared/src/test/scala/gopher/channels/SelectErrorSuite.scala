@@ -145,9 +145,9 @@ class SelectErrorSuite extends FunSuite
     var svEx: Throwable = null
 
     val g = 
-      select.afold((ch1,ch2,0,List[Int]())) { case ((x,y,z,l),s) =>
+      select.afold((ch1,ch2,0,List[Int]())) { case (x,y,z,l) =>
         try {
-          s.apply{
+          select{
             case z1: ch3.read =>
                if (z1==10) {
                  throw new RuntimeException("Be-be-be!")

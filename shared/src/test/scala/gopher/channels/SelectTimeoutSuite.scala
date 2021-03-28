@@ -83,8 +83,8 @@ class SelectTimeoutSuite extends FunSuite
    test("timeout in select.fold")  {
         val ch1 = makeChannel[Int](10)
         val f = async {
-                 select.fold(0) { (state,sl) => 
-                    sl.apply{
+                 select.fold(0) { state => 
+                    select{
                       case x: ch1.read => state+1
                       case x: Time.after if (x == 100.milliseconds)  => 
                                                      SelectFold.Done((state+10))

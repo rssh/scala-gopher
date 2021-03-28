@@ -263,12 +263,12 @@ class MacroSelectSuite extends FunSuite
             val quit = Promise[Boolean]()
             val quitChannel = futureInput(quit.future)
             val r = async {
-                select.fold(0){ (x,g) =>
-                    g.select {
+                select.fold(0){ x =>
+                    select {
                         case a:ch.read => back <~ a
                             x+a
                         case q: quitChannel.read => 
-                            g.done(x)
+                            SelectFold.Done(x)
                     }
                 }
             }
@@ -290,12 +290,12 @@ class MacroSelectSuite extends FunSuite
         //implicit val debugLevel = cps.macroFlags.DebugLevel(20)
         for {
             _ <- Future.successful(())
-            sf = select.afold((0, 0, 0)) { case ((n1, n2, nIdle), s) =>
-                s.select{
+            sf = select.afold((0, 0, 0)) { case (n1, n2, nIdle) =>
+                select{
                     case x: ch1.read =>
                         val nn1 = n1 + 1
                         if (nn1 > 100) {
-                            s.done((nn1, n2, nIdle))
+                            SelectFold.Done((nn1, n2, nIdle))
                         } else {
                             ch2.write(x)
                             (nn1, n2, nIdle)
@@ -309,14 +309,14 @@ class MacroSelectSuite extends FunSuite
             } 
             (n1, n2, ni) <- sf
             _ = assert(n1 + n2 + ni > 100)
-            sf2 = select.afold((0, 0)) { case ((n1, nIdle), s) =>
-                s.select{
+            sf2 = select.afold((0, 0)) { case (n1, nIdle) =>
+                select{
                     case x: ch1.read =>
                         (n1 + 1, nIdle)
                     case t: Time.after if t == (50 milliseconds) =>
                         val nni = nIdle + 1
                         if (nni > 3) {
-                            s.done((n1, nni))
+                            SelectFold.Done((n1, nni))
                         } else {
                             (n1, nni)
                         }
@@ -328,7 +328,7 @@ class MacroSelectSuite extends FunSuite
     }
 
        
-    test("map over selector".only)  {
+    test("map over selector")  {
         val ch1 = makeChannel[Int](10)
         val ch2 = makeChannel[Int](10)
         val quit = Promise[Boolean]()
@@ -409,10 +409,12 @@ class MacroSelectSuite extends FunSuite
    
     test("check for done signal from one-time channel")  {
         val ch = makeOnceChannel[Int]()
-        val sf = select.afold((0)){ (x,s) =>
-            s.select{
-                case v: ch.read => x + v
-                case v: ch.done.read => s.done(x)
+        val sf = select.afold((0)){ x =>
+            select{
+                case v: ch.read => 
+                    x + v
+                case v: ch.done.read =>
+                    SelectFold.Done(x)
             }
         }
         val f1 = ch.awrite(1)
@@ -425,10 +427,10 @@ class MacroSelectSuite extends FunSuite
    
     test("check for done signal from unbuffered channel")  {
         val ch = makeChannel[Int]()
-        val sf = select.afold((0)){ (x,s) =>
-            s.select{
+        val sf = select.afold((0)){ x =>
+            select{
                 case v: ch.read => x + v
-                case v: ch.done.read => s.done(x)
+                case v: ch.done.read => SelectFold.Done(x)
             }
         }
         val f1 = ch.awriteAll(1 to 5) map (_ =>ch.close)
@@ -441,10 +443,10 @@ class MacroSelectSuite extends FunSuite
    
     test("check for done signal from buffered channel")  {
         val ch = makeChannel[Int](10)
-        val sf = select.afold((0)){ (x,s) =>
-            s.select {
+        val sf = select.afold((0)){ x =>
+            select {
                 case v: ch.read => x + v
-                case c: ch.done.read => s.done(x)
+                case c: ch.done.read => SelectFold.Done(x)
             }
         }
         val f1 = async {
@@ -473,12 +475,12 @@ class MacroSelectSuite extends FunSuite
                         throw ChannelClosedException()
                 }
             }
-            val chs2 = select.afold(0){ (n,s) =>
-                s.select{
+            val chs2 = select.afold(0){ n =>
+                select{
                     case x:chs.read =>
                         n + x
                     case x:chs.done.read =>
-                        s.done(n)
+                        SelectFold.Done(n)
                 }
             }
             // note, that if we want call of quit after last write,
@@ -487,7 +489,8 @@ class MacroSelectSuite extends FunSuite
                       _ <- ch2.awriteAll(1 to 10) 
                       _ <- q.awrite(true) } yield 1
             val r = await(chs2)
-            assert( r ==  (1 to 10).map(_ * 5).sum + 1)
+
+            assert( r ==  (1 to 10).map(_ * 5).sum )
         }
     }
 

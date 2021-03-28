@@ -84,12 +84,18 @@ import scala.util.Failure
                  r.capture() match
                   case Some(f) =>
                     done = true
-                    r.markUsed()
                     if (readed.compareAndSet(false,true)) then
+                      r.markUsed()
                       val a = ar.nn.asInstanceOf[A]
                       taskExecutor.execute(() => f(Success(a)))
                     else
-                      taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
+                      // before throw channel-close exception, let's check
+                      if (doneReaders.isEmpty) then
+                        r.markUsed()
+                        taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
+                      else
+                        r.markFree()
+                        readers.addLast(r)  // called later after done
                   case None =>
                     if (!r.isExpired) {
                       if (readers.isEmpty)

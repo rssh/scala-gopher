@@ -65,6 +65,7 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
             process()
     } else {
         doneReaders.enqueue(reader)
+        process()
     }    
 
   protected def processClose(): Unit =
@@ -91,6 +92,7 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
   protected def processCloseDone(): Unit =
     val success = Success(())
     exhauseQueue(doneReaders, f => f(success))
+
     
   protected def processCloseReaders(): Unit =
     val channelClosed = Failure(ChannelClosedException())

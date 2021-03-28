@@ -56,13 +56,11 @@ class GuardedSPSCUnbufferedChannel[F[_]:CpsAsyncMonad,A](
                 }
         }
         if (isClosed && (readers.isEmpty || writers.isEmpty) ) then
-          progress |= (
-            processWriteClose()
-            ||
-            processReadClose()
-            ||
-            processDoneClose()
-          ) 
+          progress |= processWriteClose()
+          while(! doneReaders.isEmpty) {
+             progress |= processDoneClose()
+          }
+          progress |= processReadClose() 
         if (!progress) then
           if !checkLeaveStep() then
             progress = true
