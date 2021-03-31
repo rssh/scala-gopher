@@ -208,6 +208,9 @@ object ReadChannel:
    def fromFuture[F[_],A](f: F[A])(using Gopher[F]): ReadChannel[F,A] =
       futureInput(f)
 
+   def fromValues[F[_],A](values: A*)(using Gopher[F]): ReadChannel[F,A] =
+      fromIterable(values)
+
 end ReadChannel
 
 
