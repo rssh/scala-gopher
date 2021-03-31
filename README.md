@@ -12,7 +12,8 @@ For scala2:
 
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.15"
 
-    (Documentation for scala2 look at README at 0.99x branch)
+(For 0.99.x documentation look at README at 0.99x branch: https://github.com/rssh/scala-gopher/tree/0.99x)
+The main differences between 0.99 and 2.0.0 is described in https://github.com/rssh/scala-gopher/blob/develop/docs/changes-2.0.0.md
 
 Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
 
@@ -36,7 +37,7 @@ Note, which this is not an emulation of go language structures in Scala, but rat
      
       given Gopher[Future]()    
  
- type parameter can be a monad, which should implement CpsSchedulingMonad typeclass.
+ type parameter can be any monad, which should implement CpsSchedulingMonad typeclass.
 
  
 
@@ -77,7 +78,7 @@ Channels can be buffered and unbuffered. In a unbuffered channel, write return c
 Also, you can use only `ReadChannel` or `WriteChannel` interfaces, where an appropriative read/write operations are defined. 
 For `ReadChannel`, exists usual stream functions, like `map`, `zip`, `takeN`, `fold` ... etc. 
 
-For example, let we have the direct analouf of golang code:
+For example, here is direct translation of golang code:
 ~~~ scala
 
 val channel = gopher.makeChannel[Int](100)
@@ -119,8 +120,10 @@ val sum = (channel.take(1000)).fold(0)((s,i) => s+i)
     filtered
 ~~~
   
+(less imperative way to do the same, described later in `select.fold`).
 
-Scala Iterable can be represented as `ReadChannel` via extension method `asReadChannel`. 
+
+Any Iterable can be represented as `ReadChannel` via extension method `asReadChannel`. 
  
 Also, we can use Scala futures as channels, which produce one value and then closes. For obtaining such input use  `gopherApi.futureInput`.
 
