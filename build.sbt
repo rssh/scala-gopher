@@ -2,9 +2,9 @@
 val dottyVersion = "3.0.0-RC2"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
+ThisBuild/version := "2.0.0-RC2"
 
 val sharedSettings = Seq(
-    version := "2.0.0-RC2",
     organization := "com.github.rssh",
     scalaVersion := dottyVersion,
     name := "scala-gopher",
@@ -21,8 +21,8 @@ lazy val root = project
     Sphinx / sourceDirectory := baseDirectory.value / "docs",
     git.remoteRepo := "git@github.com:rssh/scala-gopher.git",
     publishArtifact := false,
-  ).enablePlugins(SphinxPlugin)
-   .enablePlugins(GhpagesPlugin)
+  ).enablePlugins(GhpagesPlugin)
+  
 
 
 lazy val gopher = crossProject(JSPlatform, JVMPlatform)
@@ -34,7 +34,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").withDottyCompat(scalaVersion.value),
         // TODO: switch to ModuleES ?
-        // scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+        scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         scalaJSUseMainModuleInitializer := true,
     )
 
