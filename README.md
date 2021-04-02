@@ -13,7 +13,7 @@ For scala2:
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "0.99.15"
 
 (For 0.99.x documentation look at README at 0.99x branch: https://github.com/rssh/scala-gopher/tree/0.99x)
-The main differences between 0.99 and 2.0.0 is described in https://github.com/rssh/scala-gopher/blob/develop/docs/changes-2.0.0.md
+The main differences between 0.99 and 2.0.0 is described in https://github.com/rssh/scala-gopher/blob/master/docs/changes-2.0.0.md
 
 Scala-gopher is open source (license is Apache2); binaries are available from the maven-central repository.
 
