@@ -4,9 +4,9 @@
 
 ### Dependences:    
  
-For scala 3.0.0-RC2:
+For scala 3.0.0-RC3:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.0-RC2"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.0-RC3"
 
 For scala2: 
 
