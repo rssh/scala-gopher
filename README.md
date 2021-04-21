@@ -261,7 +261,6 @@ val multiplexed = select amap {
 ##  CSP-Related links:
 * [Communicating Sequential Processes book by Tony Hoare](http://www.usingcsp.com)
 * [brief history of CSP in Bell-labs](http://swtch.com/~rsc/thread/)
-* [introduction article about go defer/recover](http://blog.golang.org/defer-panic-and-recover)   
     
 
 
