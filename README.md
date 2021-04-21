@@ -231,17 +231,37 @@ val multiplexed = select amap {
 
 ## Done signals. 
 
-  Sometimes it is useful to receive a message when some `ReadChannel` becomes closed. Such inputs are named 'CloseableInputs' and provides a way to receive close notification in selector using `done` pseudo-type.
+  Sometimes it is useful to receive a message when some `ReadChannel` becomes closed. Exists way to receive close notification in selector using `done` pseudo-channel, which is available for each 'normal' channel. When channel is closed, all readers of done channels receive notifications.
 
 ~~~ scala
  while(!done) 
    select{
      case x:ch.read => Console.println(s"received: ${x}")
-     case _:ch.done => Console.println(s"done")
+     case _:ch.done.read => Console.println(s"done")
                        done = true
    }
 ~~~
 
 
+# References:
+----------------------
+
+## Current implementation
+* source code: https://github.com/rssh/scala-gopher
+
+## Obsolete [0.99.x] implementation:
+* source code: https://github.com/rssh/scala-gopher/tree/0.99x
+* presentations: 
+     * Odessa Java/Scala Labs; Kiev Scala Meetup: Oct. 2014: http://www.slideshare.net/rssh1/scala-gopher2014  
+     * Wix R&D meetup. Mart 2016: http://www.slideshare.net/rssh1/csp-scala-wixmeetup2016
+     * Scala Symposium. Oct. 2016. Amsterdam.  http://www.slideshare.net/rssh1/scalagopher-cspstyle-programming-techniques-with-idiomatic-scala
+* techreport: https://arxiv.org/abs/1611.00602
+
+
+##  CSP-Related links:
+* [Communicating Sequential Processes book by Tony Hoare](http://www.usingcsp.com)
+* [brief history of CSP in Bell-labs](http://swtch.com/~rsc/thread/)
+* [introduction article about go defer/recover](http://blog.golang.org/defer-panic-and-recover)   
+    
 
 
