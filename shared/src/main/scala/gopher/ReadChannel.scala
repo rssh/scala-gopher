@@ -35,8 +35,15 @@ trait ReadChannel[F[_], A]:
    def aread():F[A] = 
       asyncMonad.adoptCallbackStyle(f => addReader(SimpleReader(f)))
                                
+   /**
+    * blocked read: if currently not element available - wait for one.
+    * Can be used only inside async block
+    **/   
    transparent inline def read(): A = await(aread())(using rAsyncMonad)
 
+   /**
+   * Synonim for read.
+   */
    transparent inline def ? : A = await(aread())(using rAsyncMonad)
 
   /**
@@ -57,7 +64,10 @@ trait ReadChannel[F[_], A]:
             case ex: ChannelClosedException =>
          }
          b.result()
-      }   
+      }
+
+   transparent inline def take(n: Int): IndexedSeq[A] =
+      await(atake(n))(using rAsyncMonad)
 
    def aOptRead(): F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>
@@ -191,6 +201,12 @@ end ReadChannel
 
 object ReadChannel:
 
+
+   def empty[F[_],A](using Gopher[F]): ReadChannel[F,A] =
+      val retval = summon[Gopher[F]].makeChannel[A]()
+      retval.close()
+      retval
+
    def fromIterable[F[_],A](c: IterableOnce[A])(using Gopher[F]): ReadChannel[F,A] =
       given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
       val retval = makeChannel[A]()
@@ -205,11 +221,14 @@ object ReadChannel:
       retval
 
 
+
    def fromFuture[F[_],A](f: F[A])(using Gopher[F]): ReadChannel[F,A] =
       futureInput(f)
 
    def fromValues[F[_],A](values: A*)(using Gopher[F]): ReadChannel[F,A] =
       fromIterable(values)
+
+   
 
 end ReadChannel
 
