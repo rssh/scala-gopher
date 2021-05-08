@@ -12,6 +12,8 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
+import java.util.logging.{Level => LogLevel}
+
 
 /**
  * Guarded channel work in the next way:
@@ -33,7 +35,6 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
   protected val stepGuard = new AtomicInteger(STEP_FREE)
 
   protected val stepRunnable: Runnable = (()=>entryStep())
-
  
   def addReader(reader: Reader[A]): Unit =
     if (reader.canExpire) then
@@ -66,6 +67,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
 
   protected def entryStep(): Unit =
     var done = false
+    var nSpins = 0
     while(!done) {
        if (stepGuard.compareAndSet(STEP_FREE,STEP_BUSY)) {
           done = true
@@ -77,6 +79,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
           done = true
        } else {
          // other set updates, we should spinLock
+         nSpins = nSpins + 1
          Thread.onSpinWait()
        }
     }
@@ -99,7 +102,7 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
     while(!readers.isEmpty) {
       val r = readers.poll()
       if (!(r eq null) && !r.isExpired) then
-         r.capture() match
+        r.capture() match
             case Some(f) =>
               progress = true
               taskExecutor.execute(() => f(Failure(new ChannelClosedException())) )
@@ -173,7 +176,10 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
     if (!v.isExpired) 
       if (queue.isEmpty)
         Thread.onSpinWait()
+        // if (nSpins > JVMGopher.MAX_SPINS)
+        //   Thread.`yield`()
       queue.addLast(v)
+
 
 
 object GuardedSPSCBaseChannel:

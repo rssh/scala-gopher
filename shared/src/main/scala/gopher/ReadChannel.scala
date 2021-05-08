@@ -7,6 +7,9 @@ import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.duration.Duration
 
+import java.util.logging.{Level => LogLevel}
+
+
 trait ReadChannel[F[_], A]:
 
    thisReadChannel =>

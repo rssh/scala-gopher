@@ -10,6 +10,8 @@ import scala.util._
 import scala.concurrent.duration._
 import scala.language.postfixOps
   
+import java.util.logging.{Level => LogLevel}
+
 
 /**
  * Select group is a virtual 'lock' object, where only

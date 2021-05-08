@@ -5,6 +5,9 @@ import scala.quoted._
 import scala.compiletime._
 import scala.concurrent.duration._
 
+import java.util.logging.{Level => LogLevel}
+
+
 class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Unit](api):
 
 
@@ -23,9 +26,5 @@ class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Uni
         r
       } do ()
     }
-
-
-   
-  
 
 

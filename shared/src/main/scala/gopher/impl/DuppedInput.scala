@@ -8,6 +8,7 @@ import scala.util._
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
+import java.util.logging.{Level => LogLevel}
 
 
 
@@ -21,15 +22,16 @@ class DuppedInput[F[_],A](origin:ReadChannel[F,A], bufSize: Int=1)(using api:Gop
 
   given CpsSchedulingMonad[F] = api.asyncMonad
 
-  val runner = SelectLoop[F](api).onReadAsync(origin){a => async{
-    val f1 = sink1.write(a)
-    val f2 = sink2.write(a)
-    true
-  }}.onRead(origin.done){ _ => 
-    sink1.close()
-    sink2.close()
-    false
-  }.runAsync()
-  api.asyncMonad.spawn(runner)
+  val runner = SelectLoop[F](api).
+    onRead(origin.done){ _ => 
+      sink1.close()
+      sink2.close()
+      false
+    }.onReadAsync(origin){a => async{
+      val f1 = sink1.write(a)
+      val f2 = sink2.write(a)
+      true
+    }}.runAsync()
+    api.asyncMonad.spawn(runner)
 
 }

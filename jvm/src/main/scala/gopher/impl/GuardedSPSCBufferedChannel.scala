@@ -9,6 +9,7 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
+import java.util.logging.{Level => LogLevel}
 
 class GuardedSPSCBufferedChannel[F[_]:CpsAsyncMonad,A](gopherApi: JVMGopher[F], bufSize: Int,
 controlExecutor: ExecutorService, 

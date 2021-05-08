@@ -72,4 +72,6 @@ object JVMGopher extends GopherAPI:
       }
       
 
+   final val MAX_SPINS = 400
+
 val Gopher = JVMGopher
