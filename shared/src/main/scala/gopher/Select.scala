@@ -106,7 +106,7 @@ object Select:
      type Monad[X] = F[X]
      def appended[L <: SelectListeners[F,S,R] : Type](base: Expr[L])(using Quotes): Expr[L]
 
-  case class ReadExpression[F[_]:Type, A:Type, S:Type, R:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S]) extends SelectorCaseExpr[F,S,R]:
+  case class ReadExpression[F[_]:Type, A:Type, S:Type, R:Type](ch: Expr[ReadChannel[F,A]], f: Expr[A => S], isDone: Boolean) extends SelectorCaseExpr[F,S,R]:
      def appended[L <: SelectListeners[F,S,R]: Type](base: Expr[L])(using Quotes): Expr[L] =
        '{  $base.onRead($ch)($f) }
        
@@ -183,7 +183,16 @@ object Select:
         //if (caseExprs.find(_.isInstanceOf[DefaultExpression[?]]).isDefined) {
         //  report.error("default is not supported")
         //}
-        builder(cases.map(parseCaseDef[F,A,B](_)))
+        val unorderedCases = cases.map(parseCaseDef[F,A,B](_))
+        // done should be 
+        val (isDone,notDone) = unorderedCases.partition{ x =>
+          x match
+            case DoneExression(_,_) => true
+            case ReadExpression(_,_,isDone) => isDone
+            case _ => false
+        }
+        val doneFirstCases = isDone ++ notDone
+        builder(doneFirstCases)
     
 
   def parseCaseDef[F[_]:Type,S:Type,R:Type](using Quotes)(caseDef: quotes.reflect.CaseDef): SelectorCaseExpr[F,S,R] =
@@ -195,7 +204,11 @@ object Select:
       val readFun = makeLambda(valName,tp,bind.symbol,caseDef.rhs)
       if (channel.tpe <:< TypeRepr.of[ReadChannel[F,?]]) 
         tp.asType match
-          case '[a] => ReadExpression(channel.asExprOf[ReadChannel[F,a]],readFun.asExprOf[a=>S])
+          case '[a] => 
+            val isDone = channel match
+              case quotes.reflect.Select(ch1,"done") if (ch1.tpe <:< TypeRepr.of[ReadChannel[F,?]]) => true
+              case _ => false
+            ReadExpression(channel.asExprOf[ReadChannel[F,a]],readFun.asExprOf[a=>S],isDone)
           case _ => 
             reportError("can't determinate read type", caseDef.pattern.asExpr)
       else
