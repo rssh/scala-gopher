@@ -37,7 +37,7 @@ given ReadTryChannelCpsMonad[F[_]](using Gopher[F]): CpsAsyncMonad[ [A] =>> Read
   def error[A](e: Throwable): ReadChannel[F,Try[A]] = 
     val r = makeChannel[Try[A]]()
     given fm: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
-    fm.spawn{ async[F] {
+    summon[Gopher[F]].spawnAndLogFail{ async[F] {
       r.write(Failure(e))
       r.close()
     } }
@@ -48,7 +48,7 @@ given ReadTryChannelCpsMonad[F[_]](using Gopher[F]): CpsAsyncMonad[ [A] =>> Read
     val r = makeOnceChannel[Try[A]]()
     given fm: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
     val fv = fm.adoptCallbackStyle(source)
-    fm.spawn{
+    summon[Gopher[F]].spawnAndLogFail{
         fm.flatMapTry( fv ){ tryV =>
            r.awrite(tryV)
         }      

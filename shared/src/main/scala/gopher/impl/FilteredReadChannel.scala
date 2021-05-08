@@ -62,7 +62,7 @@ class FilteredAsyncReadChannel[F[_],A](internal: ReadChannel[F,A], p: A=>F[Boole
 
     def wrappedFun(fun: (Try[A] => Unit) ): (Try[A] => Unit) = {
       case Success(a) =>
-        gopherApi.asyncMonad.spawn(
+        gopherApi.spawnAndLogFail(
           gopherApi.asyncMonad.mapTry(p(a)){
             case Success(v) =>
               if (v) {

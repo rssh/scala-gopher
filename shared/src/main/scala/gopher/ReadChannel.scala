@@ -149,7 +149,7 @@ trait ReadChannel[F[_], A]:
    def zip[B](x: ReadChannel[F,B]): ReadChannel[F,(A,B)] = 
       given CpsSchedulingMonad[F] = asyncMonad
       val retval = gopherApi.makeChannel[(A,B)]()
-      asyncMonad.spawn(async[F]{
+      gopherApi.spawnAndLogFail(async[F]{
          var done = false
          while(!done) {
             this.optRead() match
@@ -213,7 +213,7 @@ object ReadChannel:
    def fromIterable[F[_],A](c: IterableOnce[A])(using Gopher[F]): ReadChannel[F,A] =
       given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
       val retval = makeChannel[A]()
-      asyncMonad.spawn(async{
+      summon[Gopher[F]].spawnAndLogFail(async{
          val it = c.iterator
          while(it.hasNext) {
             val a = it.next()

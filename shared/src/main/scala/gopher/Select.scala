@@ -60,7 +60,7 @@ class Select[F[_]](api: Gopher[F]):
   def mapAsync[A](step: SelectGroup[F,A] => F[A]): ReadChannel[F,A] =
     val r = makeChannel[A]()(using api)
     given CpsSchedulingMonad[F] = api.asyncMonad
-    api.asyncMonad.spawn{
+    api.spawnAndLogFail{
       async{
         var done = false
         while(!done) 

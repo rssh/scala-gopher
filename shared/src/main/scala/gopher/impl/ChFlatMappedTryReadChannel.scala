@@ -45,7 +45,7 @@ class ChFlatMappedTryReadChannel[F[_], A, B](prev: ReadChannel[F,Try[A]], f: Try
     }
   } 
 
-  gopherApi.asyncMonad.spawn(run())
+  gopherApi.spawnAndLogFail(run())
 
 
 }

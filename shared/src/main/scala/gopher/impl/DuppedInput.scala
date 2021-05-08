@@ -32,6 +32,6 @@ class DuppedInput[F[_],A](origin:ReadChannel[F,A], bufSize: Int=1)(using api:Gop
       val f2 = sink2.write(a)
       true
     }}.runAsync()
-    api.asyncMonad.spawn(runner)
+    api.spawnAndLogFail(runner)
 
 }

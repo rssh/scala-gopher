@@ -51,7 +51,7 @@ class MappedAsyncReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> F[B])
     def wrappedFun(fun: (Try[B] => Unit) ): (Try[A] => Unit) = {
       case Success(a) =>
         try{
-          asyncMonad.spawn(
+          gopherApi.spawnAndLogFail(
             asyncMonad.mapTry(f(a))(fun)
           )
         }catch{

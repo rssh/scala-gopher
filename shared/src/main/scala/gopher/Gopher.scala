@@ -2,7 +2,7 @@ package gopher
 
 import cps._
 import scala.concurrent.duration.Duration
-import scala.util.Try
+import scala.util._
 
 import java.util.logging.{Level => LogLevel}
 
@@ -33,6 +33,14 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
   protected[gopher] def logImpossible(ex: Throwable): Unit =
     log(LogLevel.WARNING, "impossible", ex)
 
+  protected[gopher] def spawnAndLogFail[T](op: =>F[T]): F[Unit] =
+     asyncMonad.mapTry(asyncMonad.spawn(op)){
+           case Success(_) => ()
+           case Failure(ex) =>
+             log(LogLevel.WARNING, "exception in spawned process", ex)
+             ()
+     }
+
   
 def makeChannel[A](bufSize:Int = 0, 
                   autoClose: Boolean = false)(using g:Gopher[?]):Channel[g.Monad,A,A] =
@@ -46,7 +54,7 @@ def select(using g:Gopher[?]):Select[g.Monad] =
 
 def futureInput[F[_],A](f: F[A])(using g: Gopher[F]): ReadChannel[F,A] =
       val ch = g.makeOnceChannel[Try[A]]()
-      g.asyncMonad.spawn{
+      g.spawnAndLogFail{
             g.asyncMonad.flatMapTry(f)(r => ch.awrite(r))
       } 
       ch.map(_.get)

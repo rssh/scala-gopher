@@ -169,7 +169,7 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
              if waitState.compareAndSet(0,1) then
                  Some(v => {
                     timeoutScheduled.foreach(_.cancel())
-                    m.spawn(
+                    api.spawnAndLogFail(
                       m.mapTry(action(v))(x => call(x))
                     )
                  })
@@ -189,7 +189,7 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
             if waitState.compareAndSet(0,1) then
               Some((element, (v:Try[Unit]) => {
                         timeoutScheduled.foreach(_.cancel())
-                        m.spawn(
+                        api.spawnAndLogFail(
                           m.mapTry(action(v))(x=>call(x))
                         )}
                   ))
@@ -204,7 +204,7 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
       def capture(): Option[Try[FiniteDuration] => Unit] =
         if (waitState.compareAndSet(0,1)) then
           Some((v:Try[FiniteDuration]) =>
-            m.spawn(m.mapTry(action(v))(x => call(x)))
+            api.spawnAndLogFail(m.mapTry(action(v))(x => call(x)))
           )
         else
           None
