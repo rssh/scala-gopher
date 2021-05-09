@@ -8,8 +8,7 @@ import scala.concurrent.duration.*
 import scala.collection.SortedSet
 
 import cps.monads.FutureAsyncMonad
-//import gopher.monads.given
-import gopher.monads.ReadChannelCpsMonad
+import gopher.monads.given
 
 
 class QueensSuite extends FunSuite {
