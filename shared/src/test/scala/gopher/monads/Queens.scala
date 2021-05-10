@@ -19,7 +19,8 @@ class QueensSuite extends FunSuite {
   case class State(
      busyRows:Set[Int],
      busyColumns:Set[Int],
-     busyDiagonals:Set[Int],
+     busyLRDiagonals:Set[Int],
+     busyRLDiagonals:Set[Int],
      queens: Set[(Int,Int)]
   );
 
@@ -31,12 +32,14 @@ class QueensSuite extends FunSuite {
       for{ 
         i <- 0 until N  if !state.busyRows.contains(i)  
         j <- 0 until N  if !state.busyColumns.contains(j) &&
-                         !(state.busyDiagonals.contains(i-j)) 
+                         !state.busyLRDiagonals.contains(i-j) &&
+                         !state.busyRLDiagonals.contains(i+j)  
         } {
           val newPos = (i,j)
           val nState = state.copy( busyRows = state.busyRows + i,
                                  busyColumns = state.busyColumns + j,
-                                 busyDiagonals = state.busyDiagonals + (i-j),
+                                 busyLRDiagonals = state.busyLRDiagonals + (i-j),
+                                 busyRLDiagonals = state.busyRLDiagonals + (i+j),
                                  queens = state.queens + newPos  )
           ch.write(nState)
       }
@@ -53,7 +56,7 @@ class QueensSuite extends FunSuite {
         state    
     }
 
-  val emptyState = State(Set.empty, Set.empty, Set.empty, Set.empty)
+  val emptyState = State(Set.empty, Set.empty, Set.empty, Set.empty, Set.empty)
                         
   test("first solution for 8 queens problem") {
      async[Future] {
@@ -63,6 +66,5 @@ class QueensSuite extends FunSuite {
      }
   }
     
-
 
 }
