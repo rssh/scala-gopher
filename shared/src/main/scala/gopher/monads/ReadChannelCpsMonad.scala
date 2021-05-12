@@ -6,8 +6,6 @@ import cps._
 import gopher.impl._
 
 
-
-
 given ReadChannelCpsMonad[F[_]](using Gopher[F]): CpsMonad[ [A] =>> ReadChannel[F,A]] with
 
   def pure[T](t:T): ReadChannel[F,T] = 
@@ -20,11 +18,9 @@ given ReadChannelCpsMonad[F[_]](using Gopher[F]): CpsMonad[ [A] =>> ReadChannel[
     new ChFlatMappedReadChannel[F,A,B](fa,f)   
 
 
-given futureToReadChannel[F[_]](using Gopher[F]): CpsMonadConversion[F, [A]=>>ReadChannel[F,A]] with
-   
-   def apply[T](m: CpsMonad[F], mg: CpsMonad[[A] =>> ReadChannel[F,A]], ft: F[T]): ReadChannel[F,T] =
-      futureInput(ft)
+given futureToReadChannel[F[_],T](using Gopher[F]): Conversion[F[T], ReadChannel[F,T]] with
 
+   def apply(ft: F[T]): ReadChannel[F,T] = futureInput(ft)
 
 
    
