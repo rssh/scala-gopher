@@ -1,16 +1,16 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.0.0-RC3"
+val dottyVersion = "3.0.0"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "2.0.1-RC3"
+ThisBuild/version := "2.0.2"
 
 val sharedSettings = Seq(
     organization := "com.github.rssh",
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.7.0-SNAPSHOT",
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.25" % Test,
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.7.0",
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.26" % Test,
     testFrameworks += new TestFramework("munit.Framework")
 )
 
@@ -32,7 +32,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .jvmSettings(
         scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types" ),
     ).jsSettings(
-        libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").withDottyCompat(scalaVersion.value),
+        libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         scalaJSUseMainModuleInitializer := true,

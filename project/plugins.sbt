@@ -1,4 +1,3 @@
-addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.3")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.3")
