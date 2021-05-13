@@ -4,9 +4,9 @@
 
 ### Dependences:    
  
-For scala 3.0.0-RC3:
+For scala 3:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.1-RC3"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.2"
 
 For scala2: 
 
@@ -231,7 +231,7 @@ val multiplexed = select amap {
 
 ## Done signals. 
 
-  Sometimes it is useful to receive a message when some `ReadChannel` becomes closed. Exists way to receive close notification in selector using `done` pseudo-channel, which is available for each 'normal' channel. When channel is closed, all readers of done channels receive notifications.
+  Sometimes it is useful to receive a message when some `ReadChannel` becomes closed. Exists a way to receive close notification in selector using `done` pseudo-channel, which is available for each 'normal' channel. When the channel is closed, all readers of done channels receive notifications.
 
 ~~~ scala
  while(!done) 
@@ -241,6 +241,8 @@ val multiplexed = select amap {
                        done = true
    }
 ~~~
+
+  Note, that if we query some channel and it's done channel in the same select, and done channel is not aliased in some vairable, then done handler will be called first after channel close. 
 
 
 # References:
