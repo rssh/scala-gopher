@@ -18,9 +18,9 @@ given ReadChannelCpsMonad[F[_]](using Gopher[F]): CpsMonad[ [A] =>> ReadChannel[
     new ChFlatMappedReadChannel[F,A,B](fa,f)   
 
 
-given futureToReadChannel[F[_],T](using Gopher[F]): Conversion[F[T], ReadChannel[F,T]] with
+given futureToReadChannel[F[_]](using Gopher[F]): CpsMonadConversion[F, [A] =>> ReadChannel[F,A]] with
 
-   def apply(ft: F[T]): ReadChannel[F,T] = futureInput(ft)
+   def apply[T](ft: F[T]): ReadChannel[F,T] = futureInput(ft)
 
 
    

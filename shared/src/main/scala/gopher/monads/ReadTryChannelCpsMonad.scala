@@ -58,9 +58,10 @@ given ReadTryChannelCpsMonad[F[_]](using Gopher[F]): CpsAsyncMonad[ [A] =>> Read
 
 
 
-given readChannelToTryReadChannel[F[_],T](using Gopher[F]): Conversion[ ReadChannel[F,T], ReadChannel[F,Try[T]]] with
+given readChannelToTryReadChannel[F[_]](using Gopher[F]): 
+                    CpsMonadConversion[ [A]=>>ReadChannel[F,A], [A]=>>ReadChannel[F,Try[A]]] with
 
-  def apply(ft: ReadChannel[F,T]): ReadChannel[F,Try[T]] =ft.map(x => Success(x))
+  def apply[T](ft: ReadChannel[F,T]): ReadChannel[F,Try[T]] = ft.map(x => Success(x))
       
 
 
