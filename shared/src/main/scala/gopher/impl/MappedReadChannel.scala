@@ -11,8 +11,12 @@ class MappedReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> B) extends
 
     def wrappedFun(fun: (Try[B] => Unit) ): (Try[A] => Unit) = {
       case Success(a) =>
-        val b = f(a)
-        fun(Success(b))
+        try
+          val b = f(a)
+          fun(Success(b))
+        catch
+          case NonFatal(ex) =>
+            fun(Failure(ex))
       case Failure(ex) =>
         fun(Failure(ex))
     }
@@ -50,14 +54,14 @@ class MappedAsyncReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> F[B])
 
     def wrappedFun(fun: (Try[B] => Unit) ): (Try[A] => Unit) = {
       case Success(a) =>
-        try{
-          gopherApi.spawnAndLogFail(
-            asyncMonad.mapTry(f(a))(fun)
-          )
-        }catch{
-          case NonFatal(ex) =>
-            fun(Failure(ex))
-        }
+        gopherApi.spawnAndLogFail(
+            try 
+              asyncMonad.mapTry(f(a))(fun)
+            catch
+              case NonFatal(ex) =>
+                fun(Failure(ex))
+                asyncMonad.pure(())
+        )
       case Failure(ex) =>
         fun(Failure(ex))
     }

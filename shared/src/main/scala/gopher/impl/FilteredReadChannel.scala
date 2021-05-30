@@ -68,7 +68,7 @@ class FilteredAsyncReadChannel[F[_],A](internal: ReadChannel[F,A], p: A=>F[Boole
               if (v) {
                 if (markedUsed.get()) {
                   nested.markUsed()
-                }
+                } 
                 fun(Success(a))
               } else {
                 nested.markFree()

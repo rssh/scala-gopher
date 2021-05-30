@@ -5,6 +5,7 @@ import gopher.impl._
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import scala.util.control.NonFatal
 import scala.concurrent.duration.Duration
 
 import java.util.logging.{Level => LogLevel}
@@ -231,7 +232,35 @@ object ReadChannel:
    def fromValues[F[_],A](values: A*)(using Gopher[F]): ReadChannel[F,A] =
       fromIterable(values)
 
-   
+   def unfold[S,F[_],A](s:S)(f:S => Option[(A,S)])(using Gopher[F]): ReadChannel[F,A] =
+      unfoldAsync[S,F,A](s)( state => summon[Gopher[F]].asyncMonad.tryPure(f(state)) )
+      
+   def unfoldAsync[S,F[_],A](s:S)(f:S => F[Option[(A,S)]])(using Gopher[F]): ReadChannel[F,A]=
+      given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
+      val retval = makeChannel[Try[A]]()
+      summon[Gopher[F]].spawnAndLogFail(async{
+         var done = false
+         var state = s
+         try
+            while(!done) {
+               await(f(state)) match
+                  case Some((a,next)) =>
+                     retval.write(Success(a))
+                     state = next
+                  case None =>
+                     done = true
+            }
+         catch
+            case NonFatal(ex) =>
+               retval.write(Failure(ex))
+         finally
+            retval.close();
+      })
+      retval.map{
+         case Success(x) => x
+         case Failure(ex) =>
+            throw ex
+      }   
 
 end ReadChannel
 
