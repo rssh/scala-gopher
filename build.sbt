@@ -2,7 +2,7 @@
 val dottyVersion = "3.0.0"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "2.0.3"
+ThisBuild/version := "2.0.4-SNAPSHOT"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
