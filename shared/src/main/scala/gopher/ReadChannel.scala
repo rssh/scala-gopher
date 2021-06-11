@@ -10,7 +10,10 @@ import scala.concurrent.duration.Duration
 
 import java.util.logging.{Level => LogLevel}
 
-
+/**
+ * ReadChannel:  Interface providing reading API.  
+ * 
+ **/
 trait ReadChannel[F[_], A]:
 
    thisReadChannel =>

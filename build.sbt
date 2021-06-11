@@ -19,10 +19,12 @@ lazy val root = project
   .in(file("."))
   .aggregate(gopher.js, gopher.jvm)
   .settings(
-    Sphinx / sourceDirectory := baseDirectory.value / "docs",
     git.remoteRepo := "git@github.com:rssh/scala-gopher.git",
+    SiteScaladocPlugin.scaladocSettings(GopherJVM, gopher.jvm / Compile / packageDoc / mappings, "api/jvm"),
+    SiteScaladocPlugin.scaladocSettings(GopherJS,  gopher.js / Compile / packageDoc / mappings, "api/js"),
+    siteDirectory :=  baseDirectory.value / "target" / "site",
     publishArtifact := false,
-  ).enablePlugins(GhpagesPlugin)
+  ).enablePlugins(GhpagesPlugin, SiteScaladocPlugin)
   
 
 
@@ -30,6 +32,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .in(file("."))
     .settings(sharedSettings)
     .disablePlugins(SitePlugin)
+    .disablePlugins(SitePreviewPlugin)
     .jvmSettings(
         scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types" ),
     ).jsSettings(
@@ -39,3 +42,5 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
         scalaJSUseMainModuleInitializer := true,
     )
 
+lazy val GopherJVM = config("gopher.jvm")
+lazy val GopherJS = config("gopher.js")

@@ -6,9 +6,26 @@ import scala.quoted._
 import scala.compiletime._
 import scala.concurrent.duration._
 
-
+/** Organize waiting for read/write from multiple async channels
+ *  
+ *  Gopher[F] provide a function `select` of this type.
+ */
 class Select[F[_]](api: Gopher[F]):
 
+  /** wait until some channels from the list in <code> pf </code>.
+   *
+   *```Scala
+   *async{
+   *  ....  
+   *  select {
+   *    case vx:xChannel.read => doSomethingWithX 
+   *    case vy:yChannel.write if (vy == valueToWrite) => doSomethingAfterWrite(vy)
+   *    case t: Time.after if (t == 1.minute) => processTimeout
+   *  }
+   *  ...
+   *}
+   *```
+   */
   transparent inline def apply[A](inline pf: PartialFunction[Any,A]): A =
     ${  
       Select.onceImpl[F,A]('pf, 'api )  
@@ -51,9 +68,7 @@ class Select[F[_]](api: Gopher[F]):
   def afold_async[S](s0:S)(step: S => F[S | SelectFold.Done[S]]) : F[S] =
     fold_async(s0)(step)
 
-    
-  //def map[A](step: PartialFunction[SelectGroup[F,A],A|SelectFold.Done[Unit]]): ReadChannel[F,A] =
-  
+      
   def map[A](step: SelectGroup[F,A] => A): ReadChannel[F,A] =
     mapAsync[A](x => api.asyncMonad.pure(step(x)))
 
