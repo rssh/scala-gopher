@@ -7,9 +7,9 @@ import scala.compiletime._
 import scala.concurrent.duration._
 
 /** Organize waiting for read/write from multiple async channels
- *  
- *  Gopher[F] provide a function `select` of this type.
- */
+  *  
+  *  Gopher[F] provide a function `select` of this type.
+  */
 class Select[F[_]](api: Gopher[F]):
 
   /** wait until some channels from the list in <code> pf </code>.
