@@ -13,7 +13,7 @@ class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Uni
 
   transparent inline def apply(inline pf: PartialFunction[Any,Boolean]): Unit =
     ${  
-      Select.loopImpl[F]('pf,  'api )  
+      SelectMacro.loopImpl[F]('pf,  'api )  
     }
       
   def runAsync(): F[Unit] = 

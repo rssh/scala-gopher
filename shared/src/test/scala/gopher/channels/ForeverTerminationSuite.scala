@@ -19,11 +19,14 @@ class ForeverSuite extends FunSuite
 
 
   test("forevr not propagate signals after exit") {
+    implicit val printCode = cps.macros.flags.PrintCode
     val channel = makeChannel[Int](100)
     var sum = 0
-    val f0 = select.aforever {
-                case x: channel.read => sum += x
-                             throw ChannelClosedException()
+    val f0: Future[Unit] = select.aforever{
+                case x: channel.read => {
+                          sum += x
+                          throw ChannelClosedException()
+                        }
             }
     for {r2 <- channel.awrite(1)
          r3 <- channel.awrite(2)

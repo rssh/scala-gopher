@@ -65,12 +65,12 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
 
     transparent inline def apply(inline pf: PartialFunction[Any,S]): S =
     ${  
-        Select.onceImpl[F,S]('pf, 'api )  
+        SelectMacro.onceImpl[F,S]('pf, 'api )  
     }    
   
     transparent inline def select(inline pf: PartialFunction[Any,S]): S =
     ${  
-        Select.onceImpl[F,S]('pf, 'api )  
+        SelectMacro.onceImpl[F,S]('pf, 'api )  
     }
 
     /**
