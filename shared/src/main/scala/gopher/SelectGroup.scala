@@ -14,8 +14,18 @@ import java.util.logging.{Level => LogLevel}
 
 
 /**
- * Select group is a virtual 'lock' object, where only
- * ne fro rieader and writer can exists at the sae time.
+ * Select group is a virtual 'lock' object.
+ * Readers and writers are grouped into select groups. When
+ * event about avaiability to read or to write is arrived and 
+ * no current event group members is running, than run of one of the members
+ * is triggered.
+ * I.e. only one from group can run.
+ *
+ * Note, that application develeper usually not work with `SelectGroup` directly, 
+ * it is created internally by `select`  pseudostatement.
+ * 
+ *@see [gopher.Select]
+ *@see [gopher.select]
  **/
 class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]: 
 
@@ -28,10 +38,10 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
      * 2 - expired
      **/
     val waitState: AtomicInteger = new AtomicInteger(0)
-    var call: Try[S] => Unit = { _ => () }
+    private var call: Try[S] => Unit = { _ => () }
     private inline def m = api.asyncMonad
-    val retval = m.adoptCallbackStyle[S](f => call=f)
-    val startTime = new AtomicLong(0L)
+    private val retval = m.adoptCallbackStyle[S](f => call=f)
+    private val startTime = new AtomicLong(0L)
     var timeoutScheduled: Option[Time.Scheduled] = None
 
     override def asyncMonad = api.asyncMonad  

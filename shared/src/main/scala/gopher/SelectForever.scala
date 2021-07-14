@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 
 
 /**
- * forever Apply
+ * Result of `select.forever`: apply method accept partial pseudofunction which evalueated forever.
  **/
 class SelectForever[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Unit, Unit](api):
 
@@ -17,10 +17,6 @@ class SelectForever[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Unit, Uni
       SelectMacro.foreverImpl('pf,'api)
     }
 
-  transparent inline def applyAsync(inline pf: PartialFunction[Any,Unit]): F[Unit] =
-    ${
-      SelectMacro.aforeverImpl('pf, 'api)
-    }
 
   def runAsync(): F[Unit] = 
     given CpsSchedulingMonad[F] = api.asyncMonad

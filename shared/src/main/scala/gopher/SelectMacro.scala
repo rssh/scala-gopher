@@ -38,7 +38,7 @@ object SelectMacro:
         '{  $base.onRead($ch.done)($f) }
 
 
-  def selectListenerBuilder1[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](
+  def selectListenerBuilder[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](
       constructor: Expr[L], 
       caseDefs: List[SelectorCaseExpr[F,S,R]])(using Quotes): Expr[L] =
         val s0 = constructor
@@ -51,7 +51,7 @@ object SelectMacro:
            constructor: Expr[L], 
            caseDefs: List[SelectorCaseExpr[F,S,R]], 
            api:Expr[Gopher[F]])(using Quotes): Expr[R] =
-            val g = selectListenerBuilder1(constructor, caseDefs)
+            val g = selectListenerBuilder(constructor, caseDefs)
             //  dotty bug if g.run
             val r = '{ await($g.runAsync())(using ${api}.asyncMonad) } 
             r.asExprOf[R]
@@ -60,7 +60,7 @@ object SelectMacro:
               constructor: Expr[L], 
               caseDefs: List[SelectorCaseExpr[F,S,R]], 
               api:Expr[Gopher[F]])(using Quotes): Expr[F[R]] =
-                val g = selectListenerBuilder1(constructor, caseDefs)
+                val g = selectListenerBuilder(constructor, caseDefs)
                 //  dotty bug if g.run
                 val r = '{ $g.runAsync() } 
                 r.asExprOf[F[R]]

@@ -107,14 +107,6 @@ class Select[F[_]](api: Gopher[F]):
   transparent inline def aforever(inline pf: PartialFunction[Any,Unit]): F[Unit] =
     ${  SelectMacro.aforeverImpl('pf, 'api)  }
 
-  /*  
-  transparent inline def aforever_async(inline pf: PartialFunction[Any,F[Unit]]): F[Unit] =
-      given CpsSchedulingMonad[F] = api.asyncMonad
-      async(using api.asyncMonad).apply {
-        val runner = new SelectForever[F](api)
-        runner.applyAsync(pf)
-      }
-  */  
   
 
 
