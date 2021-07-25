@@ -214,6 +214,10 @@ object ReadChannel:
       retval.close()
       retval
 
+   /**
+    *@param c - iteratable to read from.
+    *@return channel, which will emit all elements from 'c' and then close.
+    **/   
    def fromIterable[F[_],A](c: IterableOnce[A])(using Gopher[F]): ReadChannel[F,A] =
       given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
       val retval = makeChannel[A]()
@@ -225,6 +229,28 @@ object ReadChannel:
          }
          retval.close()
       })
+      retval
+
+   /**
+    *@return one copy of `a` and close.
+   **/   
+   def once[F[_],A](a: A)(using Gopher[F]): ReadChannel[F,A] =
+      fromIterable(List(a))   
+
+   /**
+    *@param a - value to produce
+    *@return channel which emit value of a in loop and never close
+    **/  
+   def always[F[_],A](a: A)(using Gopher[F]): ReadChannel[F,A] =
+      given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
+      val retval = makeChannel[A]()
+      summon[Gopher[F]].spawnAndLogFail(
+         async{
+            while(true) {
+               retval.write(a)
+            }
+         }
+      )
       retval
 
 

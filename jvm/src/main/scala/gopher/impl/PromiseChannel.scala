@@ -34,8 +34,10 @@ import scala.util.Failure
             case Some((a,f)) =>
               val ar: AnyRef = a.asInstanceOf[AnyRef] //
               if (ref.compareAndSet(null,ar) && !closed.get() ) then
-                closed.lazySet(true)
-                taskExecutor.execute(()=> f(Success(())))
+                closed.set(true)
+                taskExecutor.execute{ ()=> 
+                  f(Success(()))
+                }
                 writer.markUsed()
                 step()
               else 
@@ -48,21 +50,24 @@ import scala.util.Failure
               
 
     def addDoneReader(reader: Reader[Unit]): Unit =
-      if (!closed.get()) then
+      if (!closed.get() || !readed.get) then
         doneReaders.add(reader)
+        if (closed.get()) then
+          step()
       else 
         var done = false
         while(!done & !reader.isExpired) {
-          reader.capture() match
-            case Some(f) => 
-              reader.markUsed()
-              taskExecutor.execute(()=>f(Success(())))
-              done = true
-            case None =>
-              if (!reader.isExpired)
-                Thread.onSpinWait()
+            reader.capture() match
+              case Some(f) => 
+                reader.markUsed()
+                taskExecutor.execute(()=>f(Success(())))
+                done = true
+              case None =>
+                if (!reader.isExpired)
+                  Thread.onSpinWait()
         }
 
+          
 
 
     def close(): Unit =

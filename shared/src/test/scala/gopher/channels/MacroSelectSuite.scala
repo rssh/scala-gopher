@@ -419,6 +419,7 @@ class MacroSelectSuite extends FunSuite
         }
         val f1 = ch.awrite(1)
         async {
+            await(f1)
             val r = await(sf)
             assert(r==1)
         }

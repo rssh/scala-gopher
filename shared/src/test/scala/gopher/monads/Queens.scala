@@ -22,7 +22,25 @@ class QueensSuite extends FunSuite {
      busyLRDiagonals:Set[Int],
      busyRLDiagonals:Set[Int],
      queens: Vector[(Int,Int)]
-  );
+  )  {
+
+    def isBusy(i:Int, j:Int): Boolean = 
+      busyRows.contains(i) ||
+      busyColumns.contains(j) ||
+      busyLRDiagonals.contains(i-j) ||
+      busyRLDiagonals.contains(i+j)
+      
+
+    def put(i:Int, j:Int): State =
+      copy( busyRows = busyRows + i,
+            busyColumns = busyColumns + j,
+            busyLRDiagonals = busyLRDiagonals + (i-j),
+            busyRLDiagonals = busyRLDiagonals + (i+j),
+            queens = queens :+ (i,j)
+          )
+
+
+  }
 
   val N = 8
 
@@ -31,19 +49,8 @@ class QueensSuite extends FunSuite {
     async[Future] {
       val i = state.queens.length
       if i < N then 
-        for{    
-          j <- 0 until N  if !state.busyColumns.contains(j) &&
-                         !state.busyLRDiagonals.contains(i-j) &&
-                         !state.busyRLDiagonals.contains(i+j)  
-          } {
-            val newPos = (i,j)
-            val nState = state.copy( busyRows = state.busyRows + i,
-                                 busyColumns = state.busyColumns + j,
-                                 busyLRDiagonals = state.busyLRDiagonals + (i-j),
-                                 busyRLDiagonals = state.busyRLDiagonals + (i+j),
-                                 queens = state.queens :+ newPos  )
-            ch.write(nState)
-        }
+        for{ j <- 0 until N  if !state.isBusy(i,j) } 
+          ch.write(state.put(i,j))
       ch.close()
     }
     ch
@@ -51,9 +58,7 @@ class QueensSuite extends FunSuite {
   def solutions(state: State): ReadChannel[Future,State] =
     async[[X] =>> ReadChannel[Future,X]] {
       if(state.queens.size < N) then
-        //println("state:"+state.queens)
         val nextState = await(putQueen(state))
-        //println("next-state:"+state.queens)
         await(solutions(nextState))
       else
         state    

@@ -23,6 +23,6 @@ given futureToReadChannel[F[_]](using Gopher[F]): CpsMonadConversion[F, [A] =>> 
    def apply[T](ft: F[T]): ReadChannel[F,T] = futureInput(ft)
 
 
-   
 
+   
 
