@@ -2,7 +2,7 @@
 val dottyVersion = "3.0.1"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "2.0.5"
+ThisBuild/version := "2.0.6"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -10,9 +10,8 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.1",
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.26" % Test,
-    testFrameworks += new TestFramework("munit.Framework")
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.2",
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.27" % Test,
 )
 
 lazy val root = project
