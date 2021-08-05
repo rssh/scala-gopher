@@ -6,7 +6,7 @@
  
 For scala 3:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.5"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.0.6"
 
 For scala2: 
 
