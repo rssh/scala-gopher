@@ -54,6 +54,10 @@ class GuardedSPSCUnbufferedChannel[F[_]:CpsAsyncMonad,A](
                           progress = true
                           progressWaitReader(reader)
                 }
+                if !writersLoopDone then
+                   // we have reader, should return one back if we want to start again
+                   // TODO: write test for this case
+                   readers.addFirst(reader)
         }
         if (isClosed && (readers.isEmpty || writers.isEmpty) ) then
           progress |= processWriteClose()

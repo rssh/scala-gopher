@@ -81,7 +81,6 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
       while(progress) {
         progress = false
         if !state.isEmpty() then 
-          val a = state.startRead()
           progress |= processReadsStep()
         else
           if isClosed then 
