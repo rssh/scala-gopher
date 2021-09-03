@@ -6,6 +6,7 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 import scala.util.control.NonFatal
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 
 import java.util.logging.{Level => LogLevel}
@@ -197,7 +198,7 @@ trait ReadChannel[F[_], A]:
       def canExpire: Boolean = false
       def isExpired: Boolean = false
 
-      def capture(): Option[Try[A]=>Unit] = Some(f)
+      def capture(): Expirable.Capture[Try[A]=>Unit] = Expirable.Capture.Ready(f)
 
       def markUsed(): Unit = ()
       def markFree(): Unit = ()
@@ -264,7 +265,7 @@ object ReadChannel:
    def unfold[S,F[_],A](s:S)(f:S => Option[(A,S)])(using Gopher[F]): ReadChannel[F,A] =
       unfoldAsync[S,F,A](s)( state => summon[Gopher[F]].asyncMonad.tryPure(f(state)) )
       
-   def unfoldAsync[S,F[_],A](s:S)(f:S => F[Option[(A,S)]])(using Gopher[F]): ReadChannel[F,A]=
+   def unfoldAsync[S,F[_],A](s:S)(f:S => F[Option[(A,S)]])(using Gopher[F]): ReadChannel[F,A] = 
       given asyncMonad: CpsSchedulingMonad[F] = summon[Gopher[F]].asyncMonad
       val retval = makeChannel[Try[A]]()
       summon[Gopher[F]].spawnAndLogFail(async{
@@ -281,8 +282,10 @@ object ReadChannel:
             }
          catch
             case NonFatal(ex) =>
+               summon[Gopher[F]].log(LogLevel.FINE, s"exception (ch: $retval)", ex)
                retval.write(Failure(ex))
          finally
+            summon[Gopher[F]].log(LogLevel.FINE, s"closing $retval")
             retval.close();
       })
       retval.map{
@@ -290,6 +293,20 @@ object ReadChannel:
          case Failure(ex) =>
             throw ex
       }   
+
+
+
+   import cps.stream._ 
+
+   given emitAbsorber[F[_]: CpsSchedulingMonad,T](using gopherApi: Gopher[F]): BaseUnfoldCpsAsyncEmitAbsorber[ReadChannel[F,T],F,T](
+                                                using gopherApi.asyncMonad, gopherApi.taskExecutionContext) with
+         
+      override type Element = T
+
+      def unfold[S](s0:S)(f: S => F[Option[(T,S)]]): ReadChannel[F,T] = 
+         val r: ReadChannel[F,T] = unfoldAsync(s0)(f)
+         r
+         
 
 end ReadChannel
 

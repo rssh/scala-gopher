@@ -1,12 +1,18 @@
 package gopher
 
 import cps._
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 import scala.util._
 
 import java.util.logging.{Level => LogLevel}
+import java.util.concurrent.Executor
 
 
+/**
+ * core of GopherAPI.
+ *Given instance of Gopher[F] need for using most of Gopher operations.
+ **/
 trait Gopher[F[_]:CpsSchedulingMonad]:
 
   type Monad[X] = F[X]
@@ -30,6 +36,8 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
   def log(level: LogLevel, message: String): Unit =
     log(level,message, null)
 
+  def taskExecutionContext: ExecutionContext
+
   protected[gopher] def logImpossible(ex: Throwable): Unit =
     log(LogLevel.WARNING, "impossible", ex)
 
@@ -41,6 +49,7 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
              ()
      }
 
+  
   
 def makeChannel[A](bufSize:Int = 0, 
                   autoClose: Boolean = false)(using g:Gopher[?]):Channel[g.Monad,A,A] =

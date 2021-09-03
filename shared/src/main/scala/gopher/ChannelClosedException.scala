@@ -1,3 +1,5 @@
 package gopher
 
-class ChannelClosedException extends RuntimeException("channel is closed")
+class ChannelClosedException(
+  debugInfo: String = ""
+) extends RuntimeException(s"channel is closed. ${debugInfo}")

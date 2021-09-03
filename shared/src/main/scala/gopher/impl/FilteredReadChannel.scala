@@ -27,7 +27,7 @@ class FilteredReadChannel[F[_],A](internal: ReadChannel[F,A], p: A=>Boolean) ext
         fun(Failure(ex))
     }
 
-    override def capture(): Option[Try[A]=>Unit] =   
+    override def capture(): Expirable.Capture[Try[A]=>Unit] =   
       nested.capture().map{ fun =>
           wrappedFun(fun)   
       }
@@ -82,7 +82,7 @@ class FilteredAsyncReadChannel[F[_],A](internal: ReadChannel[F,A], p: A=>F[Boole
         fun(Failure(ex))
     }
 
-    override def capture(): Option[Try[A]=>Unit] = 
+    override def capture(): Expirable.Capture[Try[A]=>Unit] = 
       nested.capture().map{ fun =>
          wrappedFun(fun)   
       }

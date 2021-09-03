@@ -11,7 +11,7 @@ class SimpleWriter[A](a:A, f: Try[Unit]=>Unit) extends Writer[A]:
 
   def isExpired: Boolean = false
 
-  def capture(): Option[(A,Try[Unit]=>Unit)] = Some((a,f))
+  def capture(): Expirable.Capture[(A,Try[Unit]=>Unit)] = Expirable.Capture.Ready((a,f))
 
   def markUsed(): Unit = ()
 

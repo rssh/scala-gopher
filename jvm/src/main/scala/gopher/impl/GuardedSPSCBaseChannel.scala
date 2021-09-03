@@ -38,22 +38,30 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
  
   def addReader(reader: Reader[A]): Unit =
     if (reader.canExpire) then
-      readers.removeIf( _.isExpired )        
+      readers.removeIf( _.isExpired )   
+    // if (publishedClosed.get()) then
+    //  tryClosedRead()
+    // else 
     readers.add(reader)
     controlExecutor.submit(stepRunnable)
 
   def addWriter(writer: Writer[A]): Unit =
     if (writer.canExpire) then
-        writers.removeIf( _.isExpired )  
+      writers.removeIf( _.isExpired )
     if (publishedClosed.get()) then
-        closeWriter(writer)
-    else      
-        writers.add(writer)
-        controlExecutor.submit(stepRunnable)
+      closeWriter(writer)
+    else
+      writers.add(writer)
+      controlExecutor.submit(stepRunnable)
 
   def addDoneReader(reader: Reader[Unit]): Unit =
-    doneReaders.add(reader)
-    controlExecutor.submit(stepRunnable)
+    if (reader.canExpire)
+      doneReaders.removeIf( _.isExpired )
+    if (publishedClosed.get()) then
+      closeDoneReader(reader)
+    else
+      doneReaders.add(reader)
+      controlExecutor.submit(stepRunnable)
       
   def close(): Unit =
     publishedClosed.set(true)
@@ -96,38 +104,55 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
       // impossible, let'a r
       false
 
-  
+  // precondition: writers are empty
   protected def processReadClose(): Boolean  = 
+    require(writers.isEmpty)
     var progress = false
     while(!readers.isEmpty) {
       val r = readers.poll()
       if (!(r eq null) && !r.isExpired) then
         r.capture() match
-            case Some(f) =>
+            case Expirable.Capture.Ready(f) =>
               progress = true
-              taskExecutor.execute(() => f(Failure(new ChannelClosedException())) )
+              //println("sending signal in processReadClose");
+              //val prevEx = new RuntimeException("prev")
+              taskExecutor.execute(() => {
+                //try
+                  //println(s"calling $f, channel = ${GuardedSPSCBaseChannel.this}")
+                  // prevEx.printStackTrace()
+                  val debugInfo = s"channel=${this}, writersEmpty=${writers.isEmpty}, readersEmpty=${readers.isEmpty}, r=$r, f=$f"
+                  f(Failure(new ChannelClosedException(debugInfo))) 
+                //catch
+                //  case ex: Exception =>
+                //    println(s"exception in close-reader, channel=${GuardedSPSCBaseChannel.this}, f=$f, r=$r")
+                //    throw ex
+              })
               r.markUsed()
-            case None =>
-              progress = true
+            case Expirable.Capture.WaitChangeComplete =>
               progressWaitReader(r)
+            case Expirable.Capture.Expired =>  
+              progress = true
     }
     progress
 
+  // TODO: remove.  If we have writers in queue, 
   protected def processWriteClose(): Boolean =
     var progress = false
     while(!writers.isEmpty) {
       val w = writers.poll()
       if !(w eq null) && !w.isExpired then
         w.capture() match
-          case Some((a,f)) =>
+          case Expirable.Capture.Ready((a,f)) =>
             progress = true
             taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
             w.markUsed()
-          case None =>
-            progress = true
+          case Expirable.Capture.WaitChangeComplete =>
             progressWaitWriter(w)
+          case Expirable.Capture.Expired =>
+            progress = true
     }
     progress
+  
 
   protected def processDoneClose(): Boolean  = {
     var progress = false
@@ -135,28 +160,45 @@ abstract class GuardedSPSCBaseChannel[F[_]:CpsAsyncMonad,A](override val gopherA
       val r = doneReaders.poll()
       if !(r eq null) && !r.isExpired then
         r.capture() match
-          case Some(f) =>
+          case Expirable.Capture.Ready(f) =>
             progress = true
             taskExecutor.execute(() => f(Success(())))
-            r.markUsed()
-          case None =>
+            r.markUsed()  
+          case Expirable.Capture.WaitChangeComplete =>
             progressWaitDoneReader(r)
+          case Expirable.Capture.Expired =>
+            progress = true
     }
     progress
   }
   
+  protected def closeDoneReader(r: Reader[Unit]): Unit = {
+    while 
+      r.capture() match
+        case Expirable.Capture.Ready(f) =>
+          taskExecutor.execute(()=>f(Success(())))
+          r.markUsed()
+          false
+        case Expirable.Capture.WaitChangeComplete =>
+          progressWaitDoneReader(r)
+          true
+        case Expirable.Capture.Expired =>
+          false
+    do ()
+  }
 
   protected def closeWriter(w: Writer[A]): Unit = {
     var done = false
     while (!done && !w.isExpired)
       w.capture() match
-        case Some((a,f)) => 
+        case Expirable.Capture.Ready((a,f)) => 
           taskExecutor.execute(() => f(Failure(new ChannelClosedException)) )
           w.markUsed()
           done = true
-        case None =>
-          if (!w.isExpired) then
-            Thread.onSpinWait()
+        case Expirable.Capture.WaitChangeComplete =>
+          Thread.onSpinWait()
+        case Expirable.Capture.Expired =>
+          done = true
   }
 
 

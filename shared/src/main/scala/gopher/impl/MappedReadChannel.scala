@@ -22,7 +22,7 @@ class MappedReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> B) extends
     }
 
     //TODO: think, are we want to pass error to the next level ?
-    override def capture(): Option[Try[A]=>Unit] = 
+    override def capture(): Expirable.Capture[Try[A]=>Unit] = 
       nested.capture().map{ fun =>
          wrappedFun(fun)   
       }
@@ -67,7 +67,7 @@ class MappedAsyncReadChannel[F[_],A, B](internal: ReadChannel[F,A], f: A=> F[B])
     }
 
     //TODO: think, are we want to pass error to the next level ?
-    override def capture(): Option[Try[A]=>Unit] = 
+    override def capture(): Expirable.Capture[Try[A]=>Unit] = 
       nested.capture().map{ fun =>
          wrappedFun(fun)   
       }

@@ -25,21 +25,25 @@ class UnbufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends B
              findWriter() match 
                 case Some(writer) =>
                   reader.capture() match 
-                    case Some(readFun) =>
+                    case Expirable.Capture.Ready(readFun) =>
                       writer.capture() match 
-                        case Some((a,writeFun)) =>
+                        case Expirable.Capture.Ready((a,writeFun)) =>
                           submitTask( () => readFun(Success(a)))
                           submitTask( () => writeFun(Success(())) )
                           progress = true
                           done = true
                           writer.markUsed()
                           reader.markUsed()
-                        case None =>
+                        case _ =>
                           // impossible, because in js we have-no interleavinf, bug anyway
                           // let's fallback
                           reader.markFree()
                           readers.prepend(reader)
-                    case None =>
+                    case Expirable.Capture.WaitChangeComplete =>
+                      // impossible, but let's fallback
+                      // TODO: prepend reader and skip event
+                      writers.prepend(writer)
+                    case Expirable.Capture.Expired =>
                       // impossible, but let's fallback
                       writers.prepend(writer)
                 case None =>

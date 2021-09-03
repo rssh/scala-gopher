@@ -15,7 +15,7 @@ class SimpleWriterWithExpireTime[A](a:A, f: Try[Unit] => Unit, expireTimeMillis:
     //TODO: way to mock current time
     System.currentTimeMillis >= expireTimeMillis
 
-  def capture(): Option[(A,Try[Unit]=>Unit)] = Some((a,f))
+  def capture(): Expirable.Capture[(A,Try[Unit]=>Unit)] = Expirable.Capture.Ready((a,f))
 
   def markUsed(): Unit = ()
 
@@ -29,8 +29,8 @@ class NesteWriterWithExpireTime[A](nested: Writer[A], expireTimeMillis: Long) ex
   def isExpired: Boolean =
     (System.currentTimeMillis >= expireTimeMillis) ||  nested.isExpired
 
-  def capture(): Option[(A,Try[Unit]=>Unit)] = 
-    if (isExpired) None else nested.capture()
+  def capture(): Expirable.Capture[(A,Try[Unit]=>Unit)] = 
+    if (isExpired) Expirable.Capture.Expired else nested.capture()
 
   def markUsed(): Unit = nested.markUsed()
 
@@ -48,8 +48,11 @@ class NestedWriterWithExpireTimeThrowing[F[_],A](nested: Writer[A], expireTimeMi
   def isExpired: Boolean =
     (gopherApi.time.now().toMillis >= expireTimeMillis) ||  nested.isExpired
 
-  def capture(): Option[(A,Try[Unit]=>Unit)] = 
-    nested.capture()
+  def capture(): Expirable.Capture[(A,Try[Unit]=>Unit)] = 
+    if (gopherApi.time.now().toMillis > expireTimeMillis) then
+      Expirable.Capture.Expired
+    else
+      nested.capture()
 
   def markUsed(): Unit = 
     scheduledThrow.cancel()
@@ -63,14 +66,18 @@ class NestedWriterWithExpireTimeThrowing[F[_],A](nested: Writer[A], expireTimeMi
     if (gopherApi.time.now().toMillis > expireTimeMillis) then
       if (!nested.isExpired) then
         nested.capture() match
-          case Some((a,f)) => 
+          case Expirable.Capture.Ready((a,f)) => 
             nested.markUsed()
             try
               f(Failure(new TimeoutException()))
             catch
               case ex: Throwable =>
                 ex.printStackTrace()
-          case None =>
+          case Expirable.Capture.WaitChangeComplete =>
+            gopherApi.time.schedule(
+              () => checkExpire(),
+              FiniteDuration(100, TimeUnit.MILLISECONDS)   )
+          case Expirable.Capture.Expired =>
             // none, will be colled after markFree is needed.
   
 

@@ -33,38 +33,39 @@ class GuardedSPSCUnbufferedChannel[F[_]:CpsAsyncMonad,A](
                    if (!(writer eq null) && !writer.isExpired) then
                      // now we have reader and writer
                      reader.capture() match
-                        case Some(readFun) =>
+                        case Expirable.Capture.Ready(readFun) =>
+                          progress = true
                           writer.capture() match
-                            case Some((a,writeFun)) =>
+                            case Expirable.Capture.Ready((a,writeFun)) =>
                               // great, now we have all 
                               taskExecutor.execute(()=>readFun(Success(a)))
                               taskExecutor.execute(()=>writeFun(Success(())))
-                              progress = true
                               reader.markUsed()
                               writer.markUsed()
                               writersLoopDone = true
-                            case None =>
-                              // reader same, other writer
+                            case Expirable.Capture.WaitChangeComplete =>
                               reader.markFree()
-                              progress = true // return when
                               progressWaitWriter(writer)
-                        case None =>
+                            case Expirable.Capture.Expired =>
+                              reader.markFree()
+                        case Expirable.Capture.WaitChangeComplete =>
+                          writers.addFirst(writer)
+                          writersLoopDone = true
+                          progress = true // TODO: ???
+                          progressWaitReader(reader)
+                        case Expirable.Capture.Expired =>
                           writers.addFirst(writer)
                           writersLoopDone = true
                           progress = true
-                          progressWaitReader(reader)
                 }
-                if !writersLoopDone then
-                   // we have reader, should return one back if we want to start again
-                   // TODO: write test for this case
-                   readers.addFirst(reader)
         }
         if (isClosed && (readers.isEmpty || writers.isEmpty) ) then
-          progress |= processWriteClose()
+          // progress |= processWriteClose()
           while(! doneReaders.isEmpty) {
              progress |= processDoneClose()
           }
-          progress |= processReadClose() 
+          if (writers.isEmpty)
+             progress |= processReadClose() 
         if (!progress) then
           if !checkLeaveStep() then
             progress = true

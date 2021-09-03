@@ -4,6 +4,7 @@ import cps._
 import gopher._
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicBoolean
@@ -15,7 +16,7 @@ import scala.util.Failure
 /**
  * Channel is closed immediatly after successfull write.
  **/
- class PromiseChannel[F[_],A](override val gopherApi: JVMGopher[F], taskExecutor: ExecutorService) extends Channel[F,A,A]:
+ class PromiseChannel[F[_],A](override val gopherApi: JVMGopher[F], taskExecutor: Executor) extends Channel[F,A,A]:
 
     protected val readers = new ConcurrentLinkedDeque[Reader[A]]()
     protected val doneReaders = new ConcurrentLinkedDeque[Reader[Unit]]()
@@ -31,7 +32,7 @@ import scala.util.Failure
         var done = false
         while(!done && !writer.isExpired)
           writer.capture() match
-            case Some((a,f)) =>
+            case Expirable.Capture.Ready((a,f)) =>
               val ar: AnyRef = a.asInstanceOf[AnyRef] //
               if (ref.compareAndSet(null,ar) && !closed.get() ) then
                 closed.set(true)
@@ -44,9 +45,9 @@ import scala.util.Failure
                 taskExecutor.execute(() => f(Failure(new ChannelClosedException())))
                 writer.markUsed() 
               done = true
-            case None =>   
-              if (!writer.isExpired) then
+            case Expirable.Capture.WaitChangeComplete => 
                 Thread.onSpinWait()
+            case Expirable.Capture.Expired =>
               
 
     def addDoneReader(reader: Reader[Unit]): Unit =
@@ -58,13 +59,13 @@ import scala.util.Failure
         var done = false
         while(!done & !reader.isExpired) {
             reader.capture() match
-              case Some(f) => 
+              case Expirable.Capture.Ready(f) => 
                 reader.markUsed()
                 taskExecutor.execute(()=>f(Success(())))
                 done = true
-              case None =>
-                if (!reader.isExpired)
-                  Thread.onSpinWait()
+              case Expirable.Capture.WaitChangeComplete =>
+                Thread.onSpinWait()
+              case Expirable.Capture.Expired =>
         }
 
           
@@ -87,7 +88,7 @@ import scala.util.Failure
           if ! (r eq null) then
               while (!done && !r.isExpired) {
                  r.capture() match
-                  case Some(f) =>
+                  case Expirable.Capture.Ready(f) =>
                     done = true
                     if (readed.compareAndSet(false,true)) then
                       r.markUsed()
@@ -101,12 +102,11 @@ import scala.util.Failure
                       else
                         r.markFree()
                         readers.addLast(r)  // called later after done
-                  case None =>
-                    if (!r.isExpired) {
-                      if (readers.isEmpty)
+                  case Expirable.Capture.WaitChangeComplete =>
+                      if (readers.isEmpty) then
                         Thread.onSpinWait()
                       readers.addLast(r)
-                    }
+                  case Expirable.Capture.Expired =>
               }
         }
       else if (closed.get()) then
@@ -115,29 +115,29 @@ import scala.util.Failure
     def closeAll(): Unit =
       while(!doneReaders.isEmpty) {
         val r = doneReaders.poll()
-        if !((r eq null) || r.isExpired) then
+        if !(r eq null) then
           r.capture() match
-            case Some(f) => 
+            case Expirable.Capture.Ready(f) => 
               r.markUsed()
               taskExecutor.execute(()=>f(Success(())))
-            case None =>
-              if (!r.isExpired) then
-                if (doneReaders.isEmpty) then
-                  Thread.onSpinWait()
-                doneReaders.addLast(r)
+            case Expirable.Capture.WaitChangeComplete =>
+              if (doneReaders.isEmpty) then
+                Thread.onSpinWait()
+              doneReaders.addLast(r)
+            case Expirable.Capture.Expired =>
       }
       while(!readers.isEmpty) {
         val r = readers.poll()
-        if (!(r eq null) && !r.isExpired) then
+        if !(r eq null) then
           r.capture() match
-            case Some(f) =>
+            case Expirable.Capture.Ready(f) =>
               r.markUsed()
               taskExecutor.execute(() => f(Failure(new ChannelClosedException)))
-            case None =>
-              if (!r.isExpired) then
-                if (readers.isEmpty) then
-                  Thread.onSpinWait()
-                readers.addLast(r)
+            case Expirable.Capture.WaitChangeComplete =>
+              if (readers.isEmpty) then
+                Thread.onSpinWait()
+              readers.addLast(r)
+            case Expirable.Capture.Expired =>
       }
 
 

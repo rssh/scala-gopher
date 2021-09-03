@@ -33,7 +33,7 @@ case class AppendReadChannel[F[_],A](x: ReadChannel[F,A], y: ReadChannel[F,A]) e
 
         def isExpired: Boolean = nested.isExpired
 
-        def capture():Option[Try[A]=>Unit] =
+        def capture():Expirable.Capture[Try[A]=>Unit] =
           nested.capture().map{ readFun =>
             {
               case r@Success(a) => if (inUsage.get()) then

@@ -71,15 +71,15 @@ class BufferedChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F], bufSize: In
     if (!writers.isEmpty && !isFull) then
       val writer = writers.dequeue()
       writer.capture() match
-        case Some((a,f)) =>
+        case Expirable.Capture.Ready((a,f)) =>
           internalEnqueue(a)
           writer.markUsed()
           submitTask(  () => f(Success(())) )
           progress = true
-        case None =>
-          if (!writer.isExpired) then
-            // impossible, we have no parallel execution
-            throw DeadlockDetected()
+        case Expirable.Capture.WaitChangeComplete =>
+          // impossible, we have no parallel execution
+          throw DeadlockDetected()
+        case Expirable.Capture.Expired =>
     progress
 
   

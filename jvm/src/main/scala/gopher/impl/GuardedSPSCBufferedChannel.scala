@@ -85,11 +85,12 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
         else
           if isClosed then 
             progress |= processDoneClose()
-            progress |= processReadClose()
-        if (!state.isFull() && !isClosed) then
+            if (writers.isEmpty) then
+              progress |= processReadClose()
+        if (!state.isFull()) then
           progress |= processWriteStep()
-        if (isClosed)
-           progress |= processWriteClose()
+        //if (isClosed)
+        //   progress |= processWriteClose()
         if (!progress) {
             state.publish()
             if (! checkLeaveStep()) {
@@ -111,16 +112,17 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
           val reader = readers.poll()
           if !(reader eq null) && !reader.isExpired then
             reader.capture() match
-              case Some(f) =>
+              case Expirable.Capture.Ready(f) =>
                 // try/cath arround f is a reader reponsability
                 taskExecutor.execute(() => f(Success(a)))  
                 reader.markUsed()
                 state.finishRead()
                 progress = true
                 done = true
-              case None =>
-                if !reader.isExpired then
-                  nonExpiredBusyReads = nonExpiredBusyReads.enqueue(reader) 
+              case Expirable.Capture.WaitChangeComplete =>
+                  nonExpiredBusyReads = nonExpiredBusyReads.enqueue(reader)
+              case Expirable.Capture.Expired =>
+                progress = true
         }
         while(nonExpiredBusyReads.nonEmpty) {
           // not in this thread, but progress.
@@ -140,10 +142,12 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
         val writer = writers.poll()
         if !(writer eq null ) && ! writer.isExpired then
           writer.capture() match
-            case Some((a,f)) => 
+            case Expirable.Capture.Ready((a,f)) => 
               done = true
               if (state.write(a)) then 
-                 taskExecutor.execute(() => f(Success(())))
+                 taskExecutor.execute(
+                   () => f(Success(()))
+                  )
                  progress = true
                  writer.markUsed()
               else
@@ -152,9 +156,10 @@ taskExecutor: ExecutorService) extends GuardedSPSCBaseChannel[F,A](gopherApi,con
                  //log("impossibe,unsuccesfull write after !isFull")
                  writer.markFree()
                  writers.addFirst(writer)
-            case None =>
-              if (!writer.isExpired)
-                nonExpiredBusyWriters = nonExpiredBusyWriters.enqueue(writer)
+            case Expirable.Capture.WaitChangeComplete =>
+                 nonExpiredBusyWriters = nonExpiredBusyWriters.enqueue(writer)
+            case Expirable.Capture.Expired =>
+                 progress = true
       }
       while(nonExpiredBusyWriters.nonEmpty) {
         progress = true

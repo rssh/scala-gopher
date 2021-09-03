@@ -26,7 +26,7 @@ trait Expirable[A]:
    /**
     * capture object, and after this we can or use one (markUsed will be called) or abandon (markFree)
     **/
-   def capture(): Option[A]
+   def capture(): Expirable.Capture[A]
 
    /**
     * Called when we submitt to task executor readFunction and now is safe to make exprire all other readers/writers in the 
@@ -35,7 +35,26 @@ trait Expirable[A]:
    def markUsed(): Unit
 
    /**
-    * Called when it was a race condition and we can't use captured function.
+    * Called when  we can't use captured function (i.e. get function but ).
     **/
    def markFree(): Unit
 
+
+
+object Expirable:
+
+   enum Capture[+A]:   
+      case Ready(value: A)
+      case WaitChangeComplete
+      case Expired
+
+      def map[B](f: A=>B): Capture[B] =
+         this match
+            case Ready(a) => Ready(f(a))
+            case WaitChangeComplete => WaitChangeComplete
+            case Expired => Expired
+
+      def foreach(f: A=>Unit): Unit =
+         this match
+            case Ready(a) => f(a)
+            case _  =>

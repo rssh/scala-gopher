@@ -1,9 +1,11 @@
 package gopher
 
-import cps._
+import cps.*
 import java.util.Timer
-import java.util.logging._
-import scala.concurrent.duration._
+import java.util.logging.*
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.*
+import scala.scalajs.concurrent.*
 
 class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
 
@@ -28,6 +30,8 @@ class JSGopher[F[_]:CpsSchedulingMonad](cfg: JSGopherConfig) extends Gopher[F]:
    def log(level: Level, message: String, ex: Throwable| Null): Unit =
       currentLogFun.apply(level,message,ex)
 
+   def taskExecutionContext: ExecutionContext = JSExecutionContext.queue 
+
    private var currentLogFun: (Level, String, Throwable|Null )=> Unit = { (level,message,ex) =>
       System.err.println(s"${level}:${message}");
       if !(ex eq null) then
@@ -44,6 +48,7 @@ object JSGopher extends GopherAPI:
       new JSGopher[F](jsConfig)
 
    val timer = new Timer("gopher")
+
 
 
 val Gopher = JSGopher   

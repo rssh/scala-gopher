@@ -58,7 +58,7 @@ class DuppedChannelsSuite extends FunSuite  {
          x <- in1.aread()
          r <- in1.aread().transformWith {
            case Success(u) => 
-               Future failed new IllegalStateException("Mist be closed")
+               Future failed new IllegalStateException("Must be closed")
            case Failure(u) => 
                Future successful (assert(x == 1))
          }

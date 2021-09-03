@@ -22,16 +22,20 @@ class DuppedInput[F[_],A](origin:ReadChannel[F,A], bufSize: Int=1)(using api:Gop
 
   given CpsSchedulingMonad[F] = api.asyncMonad
 
-  val runner = SelectLoop[F](api).
-    onRead(origin.done){ _ => 
-      sink1.close()
-      sink2.close()
-      false
-    }.onReadAsync(origin){a => async{
-      val f1 = sink1.write(a)
-      val f2 = sink2.write(a)
-      true
-    }}.runAsync()
-    api.spawnAndLogFail(runner)
+  val runner = async{
+    while
+      origin.optRead() match
+        case Some(a) => 
+          sink1.write(a)
+          sink2.write(a)
+          true
+        case None =>
+          false
+    do ()
+    sink1.close()
+    sink2.close()  
+  }   
+
+  api.spawnAndLogFail(runner)
 
 }

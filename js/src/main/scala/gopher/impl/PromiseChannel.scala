@@ -21,31 +21,30 @@ class PromiseChannel[F[_]:CpsAsyncMonad, A](gopherApi: JSGopher[F]) extends Base
     // we have only one writer.
     while (!writers.isEmpty && value.isEmpty) {
       val w = writers.dequeue()
-      if (!w.isExpired) then
-        w.capture() match
-          case Some((a,f)) =>
+      w.capture() match
+          case Expirable.Capture.Ready((a,f)) =>
             w.markUsed()
             submitTask(()=>f(Success(())))
             value = Some(a)
             closed = true
             // we can't havw more than one unexpired 
-          case None =>
-            if (!w.isExpired) then
+          case Expirable.Capture.WaitChangeComplete =>
               // impossible in js, 
+              //  (mb processNextTick()?)
               throw new DeadlockDetected()
+          case Expirable.Capture.Expired =>
     }
     if (!readers.isEmpty && value.isDefined) {
       while(!readers.isEmpty && !readed) {
         val r = readers.dequeue()
-        if (!r.isExpired) then
-          r.capture() match
-            case Some(f) =>
+        r.capture() match
+            case Expirable.Capture.Ready(f) =>
                 r.markUsed()
                 submitTask(()=>f(Success(value.get)))
                 readed = true
-            case None =>
-              if (!r.isExpired) 
+            case Expirable.Capture.WaitChangeComplete =>
                 throw new DeadlockDetected()  
+            case Expirable.Capture.Expired =>
       }
       //if (readed) {
        // processCloseDone()

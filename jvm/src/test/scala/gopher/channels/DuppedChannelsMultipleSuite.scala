@@ -10,24 +10,32 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util._
 
+import gopher.util.Debug
+
+import java.util.logging.{Level => LogLevel}
+
 class DuppedChannelsMultipleSuite extends FunSuite  {
 
   import scala.concurrent.ExecutionContext.Implicits.global
   given gopherApi: Gopher[Future] = SharedGopherAPI.apply[Future]()
 
-  val inMemoryLog = new java.util.concurrent.ConcurrentLinkedQueue[(Int, Long, String, Throwable)]()
+  val inMemoryLog = new Debug.InMemoryLog()
     
 
   test("on closing of main stream dupped outputs also closed N times.") {
     val N = 1000
     var logIndex = 0
-    gopherApi.setLogFun( (level,msg, ex) => inMemoryLog.add((logIndex, Thread.currentThread().getId(), msg,ex)) )
+    gopherApi.setLogFun(Debug.inMemoryLogFun(inMemoryLog))
     for(i <- 1 to N) {
+      inMemoryLog.clear()
       logIndex = i
       val ch = makeChannel[Int](1)
+      gopherApi.log(LogLevel.FINE, s"created origin ch=${ch}")
       val (in1, in2) = ch.dup()
       val f1 = async{
+        gopherApi.log(LogLevel.FINE, s"before ch.write(1), ch=${ch}")
         ch.write(1)
+        gopherApi.log(LogLevel.FINE, s"before ch.close, ch=${ch}")
         ch.close()
       }
       val f = for{ fx <- f1
@@ -44,43 +52,15 @@ class DuppedChannelsMultipleSuite extends FunSuite  {
       try {
         val r = Await.result(f, 30 seconds);
       }catch{
-        case ex: TimeoutException =>
-          showTraces(20)
+        case ex: Throwable =>  //: TimeoutException =>
+          Debug.showTraces(20)
           println("---")
-          showInMemoryLog()
+          Debug.showInMemoryLog(inMemoryLog)
           throw ex
       }
     }
 
   }
-
-  def showTraces(maxTracesToShow: Int): Unit = {
-    val traces = Thread.getAllStackTraces();
-    val it = traces.entrySet().iterator()
-    while(it.hasNext()) {
-      val e = it.next();
-      println(e.getKey());
-      val elements = e.getValue()
-      var sti = 0
-      var wasPark = false
-      while(sti < elements.length && sti < maxTracesToShow && !wasPark) {
-        val st = elements(sti)
-        println(" "*10 + st)
-        sti = sti + 1;
-        wasPark = (st.getMethodName == "park")
-      }
-    }
-  } 
-
-  def showInMemoryLog(): Unit = {
-    while(!inMemoryLog.isEmpty) {
-      val r = inMemoryLog.poll()
-      if (r != null) {
-        println(r)
-      }
-    }
-  }
-
 
 }
 

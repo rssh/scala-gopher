@@ -42,12 +42,13 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
     
   def addWriter(writer: Writer[A]): Unit =
     if (closed) {
-        writer.capture().foreach{ (a,f) =>
-          writer.markUsed()
-          submitTask( () =>
-            f(Failure(new ChannelClosedException()))
-          )
-        }
+        writer.capture() match
+          case Expirable.Capture.Ready((a,f)) =>
+            writer.markUsed()
+            submitTask( () =>
+              f(Failure(new ChannelClosedException()))
+            )
+          case _ =>  
     } else {
         writers.enqueue(writer)
         process()
@@ -56,13 +57,14 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
   def addDoneReader(reader: Reader[Unit]): Unit =
     if (closed && isEmpty) {
         reader.capture() match
-          case Some(f) =>
+          case Expirable.Capture.Ready(f) =>
             reader.markUsed()
             submitTask( () => f(Success(())))
-          case None =>
+          case Expirable.Capture.WaitChangeComplete =>
             // mb is blocked and will be evaluated in 
             doneReaders.enqueue(reader)
             process()
+          case Expirable.Capture.Expired  =>
     } else {
         doneReaders.enqueue(reader)
         process()
@@ -79,10 +81,10 @@ abstract class BaseChannel[F[_],A](override val gopherApi: JSGopher[F]) extends 
       val v = queue.dequeue()
       if (!v.isExpired) then
         v.capture() match
-          case Some(a) =>
+          case Expirable.Capture.Ready(a) =>
             v.markUsed()
             action(a)
-          case None =>
+          case _ =>
             // do nothing.
             //   exists case, when this is possible: wheb we close channel from
             // select-group callback, which is evaluated now.

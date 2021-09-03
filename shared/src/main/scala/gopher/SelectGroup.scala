@@ -175,16 +175,34 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
       type Element = A
       type State = S
 
-      override def capture(): Option[Try[A]=>Unit] =
+      val ready = Expirable.Capture.Ready[Try[A]=>Unit](v => {
+            timeoutScheduled.foreach(_.cancel())
+            api.spawnAndLogFail(m.mapTry(action(v))(x => call(x)))
+      })
+
+      override def capture(): Expirable.Capture[Try[A]=>Unit] =
+             // fast path 
              if waitState.compareAndSet(0,1) then
-                 Some(v => {
-                    timeoutScheduled.foreach(_.cancel())
-                    api.spawnAndLogFail(
-                      m.mapTry(action(v))(x => call(x))
-                    )
-                 })
+               ready
              else 
-                None
+               var retval: Expirable.Capture[Try[A]=>Unit] = Expirable.Capture.Expired
+               while {
+                 waitState.get() match
+                  case 2 => retval = Expirable.Capture.Expired
+                          false
+                  case 1 => retval = Expirable.Capture.WaitChangeComplete
+                          false
+                  case 0 => // was just freed
+                          if (waitState.compareAndSet(0,1)) then
+                            retval = ready
+                            false
+                          else
+                            true
+                  case _ => // impossible.
+                          throw new IllegalStateException("Imposible state of busy flag")
+               } do ()
+               retval
+                
 
 
 
@@ -195,16 +213,32 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
       type Element = A
       type State = S
 
-      override def capture(): Option[(A,Try[Unit]=>Unit)] =
+      val ready: Expirable.Capture.Ready[(A,Try[Unit]=>Unit)] =
+        Expirable.Capture.Ready((element,
+          (v:Try[Unit]) => {
+            timeoutScheduled.foreach(_.cancel())
+            api.spawnAndLogFail(m.mapTry(action(v))(x=>call(x)))
+          }
+        ))
+
+      override def capture(): Expirable.Capture[(A,Try[Unit]=>Unit)] =
             if waitState.compareAndSet(0,1) then
-              Some((element, (v:Try[Unit]) => {
-                        timeoutScheduled.foreach(_.cancel())
-                        api.spawnAndLogFail(
-                          m.mapTry(action(v))(x=>call(x))
-                        )}
-                  ))
+              ready
             else
-              None
+              var retval: Expirable.Capture[(A,Try[Unit]=>Unit)] = Expirable.Capture.Expired
+              while{
+                waitState.get() match
+                  case 2 => false
+                  case 1 => retval = Expirable.Capture.WaitChangeComplete
+                            false 
+                  case 0 => 
+                    if (waitState.compareAndSet(0,1)) then
+                        retval = ready
+                        false
+                    else
+                        true
+              } do ()
+              retval
 
 
     case class TimeoutRecord(duration: FiniteDuration, 

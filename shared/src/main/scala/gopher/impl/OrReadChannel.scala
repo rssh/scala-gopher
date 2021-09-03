@@ -60,14 +60,17 @@ case class OrReadChannel[F[_],A](x: ReadChannel[F,A], y: ReadChannel[F,A]) exten
         }
       }
 
-      def capture(fromChannel: ReadChannel[F,A]): Option[Try[B]=>Unit] =
+      def capture(fromChannel: ReadChannel[F,A]): Expirable.Capture[Try[B]=>Unit] =
         if inUse.compareAndSet(null,fromChannel) then
           nested.capture() match
-            case Some(readFun) => Some(intercept(readFun))
-            case None => inUse.set(null)
-                         None
+            case Expirable.Capture.Ready(readFun) => Expirable.Capture.Ready(intercept(readFun))
+            case Expirable.Capture.WaitChangeComplete => 
+                                              inUse.set(null)
+                                              Expirable.Capture.WaitChangeComplete
+            case Expirable.Capture.Expired => inUse.set(null)
+                                              Expirable.Capture.Expired                      
         else
-          None
+          Expirable.Capture.WaitChangeComplete
 
       def markFree(fromChannel: ReadChannel[F,A]): Unit =
         if(inUse.get() eq fromChannel) then
@@ -103,7 +106,7 @@ case class OrReadChannel[F[_],A](x: ReadChannel[F,A], y: ReadChannel[F,A]) exten
 
   class WrappedReader[B](common: CommonBase[B], owner: ReadChannel[F,A]) extends Reader[B] {
 
-    def capture(): Option[Try[B]=>Unit] =
+    def capture(): Expirable.Capture[Try[B]=>Unit] =
       common.capture(owner)
 
     def canExpire: Boolean = common.canExpire
