@@ -1,5 +1,5 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.0.1"
+val dottyVersion = "3.0.2"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
 ThisBuild/version := "2.1.0"
