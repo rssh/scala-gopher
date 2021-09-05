@@ -7,6 +7,7 @@ import scala.annotation.targetName
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
+
 trait WriteChannel[F[_], A]:
 
    type write = A

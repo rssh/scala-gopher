@@ -12,13 +12,17 @@ import scala.concurrent.duration.Duration
 import java.util.logging.{Level => LogLevel}
 
 /**
- * ReadChannel:  Interface providing reading API.  
+ * ReadChannel:  Interface providing asynchronous reading API.  
  * 
  **/
 trait ReadChannel[F[_], A]:
 
    thisReadChannel =>
 
+   /**
+    * Special type which is used in select statement.
+    *@see [gopher.Select]
+    **/   
    type read = A
 
    def gopherApi: Gopher[F]
@@ -45,7 +49,8 @@ trait ReadChannel[F[_], A]:
                                
    /**
     * blocked read: if currently not element available - wait for one.
-    * Can be used only inside async block
+    * Can be used only inside async block.
+    * If stream is closed and no values to read left in the stream - throws StreamClosedException
     **/   
    transparent inline def read(): A = await(aread())(using rAsyncMonad)
 
@@ -74,9 +79,18 @@ trait ReadChannel[F[_], A]:
          b.result()
       }
 
+   /**
+   * take first `n` elements.
+   * should be called inside async block. 
+   **/   
    transparent inline def take(n: Int): IndexedSeq[A] =
       await(atake(n))(using rAsyncMonad)
 
+   /**
+    * read value and return future with
+    * - Some(value)  if value is available to read
+    * - None if stream is closed.
+    **/   
    def aOptRead(): F[Option[A]] =
        asyncMonad.adoptCallbackStyle( f =>
                    addReader(SimpleReader{ x => x match
@@ -86,6 +100,13 @@ trait ReadChannel[F[_], A]:
                                          })
        )
 
+   /**
+    * read value and return 
+    * - Some(value)  if value is available to read
+    * - None if stream is closed.
+    *
+    * should be called inside async block.
+    **/   
    transparent inline def optRead(): Option[A] = await(aOptRead())(using rAsyncMonad)
 
    def foreach_async(f: A=>F[Unit]): F[Unit] =
@@ -111,6 +132,7 @@ trait ReadChannel[F[_], A]:
    **/  
    transparent inline def foreach(inline f: A=>Unit): Unit = 
       await(aforeach(f))(using rAsyncMonad)
+
 
    def map[B](f: A=>B): ReadChannel[F,B] =
       new MappedReadChannel(this, f)

@@ -66,13 +66,9 @@ class BasicGeneratorSuite extends FunSuite {
         }  }
      }
 
-     
-     
-
+    
   }
 
-
-  /*
   test("exception should break loop in gopher generator") {
     val channel = asyncStream[ReadChannel[Future, Int]] { out =>
       for(i <- 1 to N) {
@@ -89,7 +85,8 @@ class BasicGeneratorSuite extends FunSuite {
       
     res.failed.map(ex => assert(ex.getMessage()=="bye"))
     
-  }*/
+  }
+
 
 
 }

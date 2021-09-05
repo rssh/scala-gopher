@@ -47,6 +47,9 @@ object Channel:
   case class FRead[F[_],A](a:A, ch: F[A])
   case class Write[F[_],A](a: A, ch: WriteChannel[F,A])
 
+  import cps.stream._ 
+
+
   
 end Channel
 
