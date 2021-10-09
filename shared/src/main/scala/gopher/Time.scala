@@ -21,6 +21,10 @@ import java.util.TimerTask
   */
 abstract class Time[F[_]](gopherAPI: Gopher[F]) {
 
+    /**
+     * type for using in `select` paterns.
+     * @see [gopher.Select]
+     **/
     type after = FiniteDuration
 
     def after(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =

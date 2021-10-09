@@ -2,7 +2,7 @@
 val dottyVersion = "3.0.2"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "2.1.0"
+ThisBuild/version := "2.1.1-SNAPSHOT"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -42,7 +42,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
          s"-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_3/0.5.0/jars/trackedfuture_3-assembly.jar"
         )
         */
-        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "2.0.6")
+        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "2.1.0")
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?

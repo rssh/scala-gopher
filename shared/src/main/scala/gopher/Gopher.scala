@@ -11,13 +11,19 @@ import java.util.concurrent.Executor
 
 /**
  * core of GopherAPI.
- *Given instance of Gopher[F] need for using most of Gopher operations.
+ * Given instance of Gopher[F] need for using most of Gopher operations.
+ * 
+ * Gopehr API ia a framework, which implements CSP (Communication Sequence Process).
+ * Process here - scala units of execution (i.e. )
  **/
 trait Gopher[F[_]:CpsSchedulingMonad]:
 
   type Monad[X] = F[X]
+  
+  
   def asyncMonad: CpsSchedulingMonad[F] = summon[CpsSchedulingMonad[F]]
 
+  
   def makeChannel[A](bufSize:Int = 0,
                     autoClose: Boolean = false): Channel[F,A,A]                  
 
