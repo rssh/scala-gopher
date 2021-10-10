@@ -250,6 +250,7 @@ val multiplexed = select amap {
 
 ## 2.0.x implementation
 * source code: https://github.com/rssh/scala-gopher
+* scaladoc: https://rssh.github.io/scala-gopher/api/jvm/index.html
 
 ## [0.99.x] implementation:
 * source code: https://github.com/rssh/scala-gopher/tree/0.99x
