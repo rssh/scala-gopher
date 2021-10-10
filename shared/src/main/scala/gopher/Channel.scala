@@ -6,6 +6,11 @@ import scala.concurrent.duration.FiniteDuration
 
 import gopher.impl._
 
+/**
+ * Channel with ability to read and to write.
+ * @see [[gopher.ReadChannel]]
+ * @see [[gopher.WriteChannel]]
+ **/
 trait Channel[F[_],W,R] extends WriteChannel[F,W] with ReadChannel[F,R] with Closeable:
 
   override def gopherApi: Gopher[F]

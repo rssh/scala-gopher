@@ -16,8 +16,8 @@ import java.util.concurrent.Executor
  * Process here - scala units of execution (i.e. functions, blok of code, etc). 
  * Communication channels represented by [gopher.Channel]
  * 
- * @see [gopher.Channel]
- * @see [gopher#select]
+ * @see [[gopher.Channel]]
+ * @see [[gopher#select]]
  **/
 trait Gopher[F[_]:CpsSchedulingMonad]:
 
@@ -48,13 +48,14 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
 
   /***
    *Create a select statement, which used for choosing one action from a set of potentially concurrent asynchronics events.
-   *[@see gopher.Select] 
+   *[@see [[gopher.Select#apply]] 
    **/
   def select: Select[F] =
     new Select[F](this)  
 
   /**
    * get an object with time operations.
+   * @see [[gopher.Time]]
    **/  
   def time: Time[F] 
 

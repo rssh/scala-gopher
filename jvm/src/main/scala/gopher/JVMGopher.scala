@@ -54,8 +54,6 @@ object JVMGopher extends GopherAPI:
                         case jcfg:JVMGopherConfig => jcfg
       new JVMGopher[F](jvmConfig)
    
-   //lazy val timer = new Timer("gopher")   
-
    lazy val scheduledExecutor = Executors.newScheduledThreadPool(1) 
 
    lazy val defaultConfig=JVMGopherConfig(
