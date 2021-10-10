@@ -31,7 +31,7 @@ class Select[F[_]](api: Gopher[F]):
       SelectMacro.onceImpl[F,A]('pf, 'api )  
      }    
 
-  /***
+  /**
    * create select groop
    *@see [gopher.SelectGroup]
    **/   
@@ -39,6 +39,9 @@ class Select[F[_]](api: Gopher[F]):
 
   def once[S]: SelectGroup[F,S] = new SelectGroup[F,S](api)   
 
+  /**
+   * create Select Loop.
+   **/
   def loop: SelectLoop[F] = new SelectLoop[F](api)
 
     

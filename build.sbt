@@ -1,5 +1,5 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.0.2"
+val dottyVersion = "3.1.0-RC2"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
 ThisBuild/version := "2.1.1-SNAPSHOT"
@@ -42,12 +42,18 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
          s"-javaagent:${System.getProperty("user.home")}/.ivy2/local/com.github.rssh/trackedfuture_3/0.5.0/jars/trackedfuture_3-assembly.jar"
         )
         */
+        Compile / doc / scalacOptions := Seq("-groups",
+                "-source-links:shared=github://rssh/scala-gopher/master#shared",
+                "-source-links:jvm=github://rssh/scala-gopher/master#jvm"),
         mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "2.1.0")
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?
         scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
         scalaJSUseMainModuleInitializer := true,
+        Compile / doc / scalacOptions := Seq("-groups",
+            "-source-links:shared=github://rssh/scala-gopher/master#shared",
+            "-source-links:js=github://rssh/scala-gopher/master#js"),
     )
 
 lazy val GopherJVM = config("gopher.jvm")

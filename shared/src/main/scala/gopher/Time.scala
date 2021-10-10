@@ -27,6 +27,9 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
      **/
     type after = FiniteDuration
 
+    /**
+     * return channel, then after `duration` ellapses, send signal to this channel. 
+     **/
     def after(duration: FiniteDuration): ReadChannel[F,FiniteDuration] =
     {
         val ch = gopherAPI.makeOnceChannel[FiniteDuration]()
@@ -39,6 +42,9 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
         ch    
     }
 
+    /**
+     * return future which will be filled after time will ellapse.
+     **/
     def asleep(duration: FiniteDuration): F[FiniteDuration] =
     {
         var fun: Try[FiniteDuration] => Unit = _ => ()
@@ -51,6 +57,9 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
         retval
     }
 
+    /**
+     * synonim for `await(asleep(duration))`.  Should be used inside async block.
+     **/
     transparent inline def sleep(duration: FiniteDuration): FiniteDuration = 
         given CpsSchedulingMonad[F] = gopherAPI.asyncMonad
         await(asleep(duration))
@@ -66,7 +75,9 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
      newTicker(duration).channel
     }
 
-    
+    /**
+    * ticker which hold channel with expirable tick messages and iterface to stop one.
+    **/
     class Ticker(duration: FiniteDuration) {
         
         val channel = gopherAPI.makeChannel[FiniteDuration](0).withExpiration(duration, false)
@@ -97,6 +108,10 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
         
     }
 
+    /**
+     * create ticker with given `duration` between ticks.
+     *@see [gopher.Time.Ticker]
+     **/
     def newTicker(duration: FiniteDuration): Ticker =
     {
         new Ticker(duration)
@@ -108,7 +123,7 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
 
 
     /**
-    * Low lwvel interface for scheduler
+    * Low level interface for scheduler
     */
     def schedule(fun: () => Unit, delay: FiniteDuration): Time.Scheduled
 
@@ -131,6 +146,9 @@ object Time:
     type after = FiniteDuration
 
 
+    /**
+     * return channl on which event will be delivered after `duration`
+     **/
     def after[F[_]](duration: FiniteDuration)(using Gopher[F]): ReadChannel[F,FiniteDuration] =
         summon[Gopher[F]].time.after(duration)
 
