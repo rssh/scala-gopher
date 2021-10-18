@@ -61,6 +61,10 @@ object JVMGopher extends GopherAPI:
       taskExecutor=ForkJoinPool.commonPool(),
    )
 
+   // need for binary compability
+   @deprecated("use summon[Gopher].time instead")
+   lazy val timer = new Timer("gopher") 
+
    val logger = Logger.getLogger("JVMGopher")
 
    def defaultLogFun(level: Level, message:String, ex: Throwable|Null): Unit = 
