@@ -1,7 +1,7 @@
 package gopher.impl
 
-import cps._
-import gopher._
+import cps.*
+import gopher.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicReferenceArray
 import java.util.concurrent.atomic.AtomicInteger

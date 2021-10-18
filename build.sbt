@@ -1,5 +1,5 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.1.0-RC2"
+val dottyVersion = "3.1.0"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
 ThisBuild/version := "2.1.1-SNAPSHOT"
@@ -10,7 +10,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.3",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.4",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.27" % Test,
 )
 

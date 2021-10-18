@@ -6,6 +6,7 @@ import cps._
 import scala.quoted._
 import scala.compiletime._
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 
 
@@ -194,7 +195,13 @@ object SelectMacro:
       else
         reportError("Incorrect select pattern, expected or x:channel.{read,write} or Channel.{Read,Write}",chObj.asExpr)
 
-
+    def safeShow(t:Tree): String =
+      try 
+        t.show
+      catch
+        case NonFatal(ex) => 
+          ex.printStackTrace()
+          s"(exception durign show:${ex.getMessage()})"
 
     caseDef.pattern match 
       case Inlined(_,List(),body) => 
@@ -232,7 +239,7 @@ object SelectMacro:
                               "unapply"),targs),
                             impl,List(b@Bind(e,ePat),Bind(ch,chPat))) =>
             handleUnapply(chObj, nameReadOrWrite, b, e, ePat, ch)
-      case pat@Typed(Unapply(TypeApply(quotes.reflect.Select(
+      case pat@TypedOrTest(Unapply(TypeApply(quotes.reflect.Select(
                 quotes.reflect.Select(chobj,nameReadOrWrite),
                 "unapply"),targs),
               impl,List(b@Bind(e,ePat),Bind(ch,chPat))),a) =>
@@ -245,7 +252,7 @@ object SelectMacro:
                      v: channel.write if v == expr
                      v: Time.after if v == expr
               we have
-                    ${caseDef.pattern.show}
+                    ${safeShow(caseDef.pattern)}
                     (tree:  ${caseDef.pattern})
           """, caseDef.pattern.asExpr)
         reportError(s"unparsed caseDef pattern: ${caseDef.pattern}", caseDef.pattern.asExpr)
