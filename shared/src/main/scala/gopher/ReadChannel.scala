@@ -52,12 +52,12 @@ trait ReadChannel[F[_], A]:
     * Can be used only inside async block.
     * If stream is closed and no values to read left in the stream - throws StreamClosedException
     **/   
-   transparent inline def read(): A = await(aread())(using rAsyncMonad)
+   transparent inline def read()(using CpsMonadContext[F]): A = await(aread())(using rAsyncMonad)
 
    /**
    * Synonim for read.
    */
-   transparent inline def ? : A = await(aread())(using rAsyncMonad)
+   transparent inline def ?(using CpsMonadContext[F]) : A = await(aread())(using rAsyncMonad)
 
   /**
    * return F which contains sequence from first `n` elements.
@@ -83,7 +83,7 @@ trait ReadChannel[F[_], A]:
    * take first `n` elements.
    * should be called inside async block. 
    **/   
-   transparent inline def take(n: Int): IndexedSeq[A] =
+   transparent inline def take(n: Int)(using CpsMonadContext[F]): IndexedSeq[A] =
       await(atake(n))(using rAsyncMonad)
 
    /**
@@ -107,7 +107,7 @@ trait ReadChannel[F[_], A]:
     *
     * should be called inside async block.
     **/   
-   transparent inline def optRead(): Option[A] = await(aOptRead())(using rAsyncMonad)
+   transparent inline def optRead()(using CpsMonadContext[F]): Option[A] = await(aOptRead())(using rAsyncMonad)
 
    def foreach_async(f: A=>F[Unit]): F[Unit] =
       given CpsAsyncMonad[F] = asyncMonad
@@ -130,7 +130,7 @@ trait ReadChannel[F[_], A]:
    * run code each time when new object is arriced.
    * until end of stream is not reached
    **/  
-   transparent inline def foreach(inline f: A=>Unit): Unit = 
+   transparent inline def foreach(inline f: A=>Unit)(using CpsMonadContext[F]): Unit = 
       await(aforeach(f))(using rAsyncMonad)
 
 
@@ -170,8 +170,8 @@ trait ReadChannel[F[_], A]:
          s
       }
    
-   transparent inline def fold[S](inline s0:S)(inline f: (S,A) => S ): S =
-      await[F,S](afold(s0)(f))(using rAsyncMonad)   
+   transparent inline def fold[S](inline s0:S)(inline f: (S,A) => S )(using mc:CpsMonadContext[F]): S =
+      await[F,S,F](afold(s0)(f))(using rAsyncMonad, mc)   
    
    def zip[B](x: ReadChannel[F,B]): ReadChannel[F,(A,B)] = 
       given CpsSchedulingMonad[F] = asyncMonad
@@ -317,13 +317,17 @@ object ReadChannel:
       }   
 
 
-
+   
    import cps.stream._ 
 
-   given emitAbsorber[F[_]: CpsSchedulingMonad,T](using gopherApi: Gopher[F]): BaseUnfoldCpsAsyncEmitAbsorber[ReadChannel[F,T],F,T](
-                                                using gopherApi.asyncMonad, gopherApi.taskExecutionContext) with
+   given emitAbsorber[F[_], C<:CpsMonadContext[F], T](using auxMonad: CpsSchedulingMonad[F]{ type Context = C },  gopherApi: Gopher[F]): BaseUnfoldCpsAsyncEmitAbsorber[ReadChannel[F,T],F,C,T](
+                                                using gopherApi.taskExecutionContext, auxMonad) with
          
       override type Element = T
+
+      def asSync(fs: F[ReadChannel[F,T]]): ReadChannel[F,T] =
+         DelayedReadChannel(fs)
+         
 
       def unfold[S](s0:S)(f: S => F[Option[(T,S)]]): ReadChannel[F,T] = 
          val r: ReadChannel[F,T] = unfoldAsync(s0)(f)

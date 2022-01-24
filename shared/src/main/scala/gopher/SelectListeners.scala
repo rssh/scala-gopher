@@ -16,7 +16,7 @@ trait SelectListeners[F[_],S, R]:
 
   def  runAsync():F[R]
  
-  transparent inline def run(): R = await(runAsync())(using asyncMonad)
+  transparent inline def run()(using CpsMonadContext[F]): R = await(runAsync())(using asyncMonad)
 
 
 

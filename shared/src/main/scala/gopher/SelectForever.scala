@@ -12,9 +12,9 @@ import scala.concurrent.duration._
 class SelectForever[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Unit, Unit](api):
 
 
-  transparent inline def apply(inline pf: PartialFunction[Any,Unit]): Unit =
+  transparent inline def apply(inline pf: PartialFunction[Any,Unit])(using mc:CpsMonadContext[F]): Unit =
     ${  
-      SelectMacro.foreverImpl('pf,'api)
+      SelectMacro.foreverImpl('pf,'api, 'mc)
     }
 
 

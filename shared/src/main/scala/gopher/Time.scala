@@ -60,7 +60,7 @@ abstract class Time[F[_]](gopherAPI: Gopher[F]) {
     /**
      * synonim for `await(asleep(duration))`.  Should be used inside async block.
      **/
-    transparent inline def sleep(duration: FiniteDuration): FiniteDuration = 
+    transparent inline def sleep(duration: FiniteDuration)(using CpsMonadContext[F]): FiniteDuration = 
         given CpsSchedulingMonad[F] = gopherAPI.asyncMonad
         await(asleep(duration))
 
@@ -156,7 +156,7 @@ object Time:
     def asleep[F[_]](duration: FiniteDuration)(using Gopher[F]): F[FiniteDuration] =
         summon[Gopher[F]].time.asleep(duration)
 
-    transparent inline def sleep[F[_]](duration: FiniteDuration)(using Gopher[F]): FiniteDuration = 
+    transparent inline def sleep[F[_]](duration: FiniteDuration)(using Gopher[F], CpsMonadContext[F]): FiniteDuration = 
         summon[Gopher[F]].time.sleep(duration)    
     
 

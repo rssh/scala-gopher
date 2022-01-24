@@ -83,7 +83,7 @@ trait Gopher[F[_]:CpsSchedulingMonad]:
      }
 
 end Gopher
-  
+
 
 /**
 * Create Read/Write channel. 

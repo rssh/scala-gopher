@@ -48,6 +48,7 @@ object Sieve
 
   def filter1(in:Channel[Future,Int,Int]):ReadChannel[Future,Int] =
   {
+   //implicit val printCode = cps.macros.flags.PrintCode 
    val q = makeChannel[Int]()
    val filtered = makeChannel[Int]()
    select.afold(in){ ch => 

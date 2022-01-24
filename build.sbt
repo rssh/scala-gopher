@@ -1,8 +1,8 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.1.0"
+val dottyVersion = "3.1.1"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "2.1.2-SNAPSHOT"
+ThisBuild/version := "3.0.0"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -10,7 +10,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.4",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.6",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
 )
 
@@ -45,7 +45,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
         Compile / doc / scalacOptions := Seq("-groups",
                 "-source-links:shared=github://rssh/scala-gopher/master#shared",
                 "-source-links:jvm=github://rssh/scala-gopher/master#jvm"),
-        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "2.1.0")
+        mimaPreviousArtifacts := Set()  //Set( "com.github.rssh" %% "scala-gopher" % "2.1.0")
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?

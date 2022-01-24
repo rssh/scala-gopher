@@ -51,10 +51,12 @@ object SelectMacro:
   def buildSelectListenerRun[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](
            constructor: Expr[L], 
            caseDefs: List[SelectorCaseExpr[F,S,R]], 
-           api:Expr[Gopher[F]])(using Quotes): Expr[R] =
+           api:Expr[Gopher[F]],
+           monadContext: Expr[CpsMonadContext[F]],
+           )(using Quotes): Expr[R] =
             val g = selectListenerBuilder(constructor, caseDefs)
             //  dotty bug if g.run
-            val r = '{ await($g.runAsync())(using ${api}.asyncMonad) } 
+            val r = '{ await($g.runAsync())(using ${api}.asyncMonad, $monadContext) } 
             r.asExprOf[R]
 
   def buildSelectListenerRunAsync[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](
@@ -68,31 +70,31 @@ object SelectMacro:
    
    
 
-  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], api: Expr[Gopher[F]])(using Quotes): Expr[A] =
+  def onceImpl[F[_]:Type, A:Type](pf: Expr[PartialFunction[Any,A]], api: Expr[Gopher[F]], monadContext: Expr[CpsMonadContext[F]])(using Quotes): Expr[A] =
        def builder(caseDefs: List[SelectorCaseExpr[F,A,A]]):Expr[A] = {
           val s0 = '{
              new SelectGroup[F,A]($api)
           }
-          buildSelectListenerRun(s0, caseDefs, api)
+          buildSelectListenerRun(s0, caseDefs, api, monadContext)
        }
        runImpl(builder, pf)
 
-  def loopImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Boolean]], api: Expr[Gopher[F]])(using Quotes): Expr[Unit] =
+  def loopImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Boolean]], api: Expr[Gopher[F]], monadContext: Expr[CpsMonadContext[F]])(using Quotes): Expr[Unit] =
       def builder(caseDefs: List[SelectorCaseExpr[F,Boolean,Unit]]):Expr[Unit] = {
           val s0 = '{
               new SelectLoop[F]($api)
           }
-          buildSelectListenerRun(s0, caseDefs, api)
+          buildSelectListenerRun(s0, caseDefs, api, monadContext)
       }
       runImpl( builder, pf)
       
 
-  def foreverImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Unit]], api:Expr[Gopher[F]])(using Quotes): Expr[Unit] =
+  def foreverImpl[F[_]:Type](pf: Expr[PartialFunction[Any,Unit]], api:Expr[Gopher[F]], monadContext: Expr[CpsMonadContext[F]])(using Quotes): Expr[Unit] =
       def builder(caseDefs: List[SelectorCaseExpr[F,Unit,Unit]]):Expr[Unit] = {
           val s0 = '{
               new SelectForever[F]($api)
           }
-          buildSelectListenerRun(s0, caseDefs, api)
+          buildSelectListenerRun(s0, caseDefs, api, monadContext)
       }
       runImpl(builder, pf)
 

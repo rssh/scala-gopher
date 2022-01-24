@@ -11,9 +11,9 @@ import java.util.logging.{Level => LogLevel}
 class SelectLoop[F[_]](api: Gopher[F]) extends SelectGroupBuilder[F,Boolean, Unit](api):
 
 
-  transparent inline def apply(inline pf: PartialFunction[Any,Boolean]): Unit =
+  transparent inline def apply(inline pf: PartialFunction[Any,Boolean])(using mc: CpsMonadContext[F]): Unit =
     ${  
-      SelectMacro.loopImpl[F]('pf,  'api )  
+      SelectMacro.loopImpl[F]('pf,  'api, 'mc )  
     }
       
   def runAsync(): F[Unit] = 

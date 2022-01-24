@@ -26,9 +26,9 @@ class Select[F[_]](api: Gopher[F]):
    *}
    *```
    */
-  transparent inline def apply[A](inline pf: PartialFunction[Any,A]): A =
+  transparent inline def apply[A](inline pf: PartialFunction[Any,A])(using mc:CpsMonadContext[F]): A =
     ${  
-      SelectMacro.onceImpl[F,A]('pf, 'api )  
+      SelectMacro.onceImpl[F,A]('pf, 'api, 'mc )  
      }    
 
   /**
@@ -68,7 +68,8 @@ class Select[F[_]](api: Gopher[F]):
   }
 
   transparent inline def afold[S](s0:S)(inline step: S => S | SelectFold.Done[S]) : F[S] =
-    async[F](using api.asyncMonad).apply{
+    given CpsAsyncMonad[F] = api.asyncMonad
+    async[F]{ 
       fold(s0)(step)
     }
 

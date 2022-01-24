@@ -73,14 +73,14 @@ class SelectGroup[F[_], S](api: Gopher[F])  extends SelectListeners[F,S,S]:
     def runAsync():F[S] =
        retval
 
-    transparent inline def apply(inline pf: PartialFunction[Any,S]): S =
+    transparent inline def apply(inline pf: PartialFunction[Any,S])(using mc: CpsMonadContext[F]): S =
     ${  
-        SelectMacro.onceImpl[F,S]('pf, 'api )  
+        SelectMacro.onceImpl[F,S]('pf, 'api, 'mc )  
     }    
   
-    transparent inline def select(inline pf: PartialFunction[Any,S]): S =
+    transparent inline def select(inline pf: PartialFunction[Any,S])(using mc: CpsMonadContext[F]): S =
     ${  
-        SelectMacro.onceImpl[F,S]('pf, 'api )  
+        SelectMacro.onceImpl[F,S]('pf, 'api, 'mc )  
     }
 
     /**

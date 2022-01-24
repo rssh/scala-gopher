@@ -7,7 +7,7 @@ import cps._
 import gopher.impl._
 
 
-given ReadTryChannelCpsMonad[F[_]](using Gopher[F]): CpsAsyncMonad[ [A] =>> ReadChannel[F,Try[A]] ] with
+given ReadTryChannelCpsMonad[F[_]](using Gopher[F]): CpsAsyncMonad[[A] =>> ReadChannel[F,Try[A]]] with CpsMonadInstanceContext[[A] =>> ReadChannel[F,Try[A]]] with
 
   type FW[T] = [A] =>> ReadChannel[F,Try[A]]
 
