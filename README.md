@@ -6,13 +6,13 @@
  
 For scala 3.1.1+:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "3.0.0"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "3.0.1"
 
 For scala 3 and 3.1.0:
 
     libraryDependencies += "com.github.rssh" %% "scala-gopher" % "2.1.0"
 
-Note, that 3.0.0 have no new functionality agains 2.1.0 but need to be a next major release because of binary incompability caused by difference between dotty-cps-async-0.9.5 and 0.9.6.
+Note, that 3.0.x have no new functionality agains 2.1.0 but need to be a next major release because of binary incompability caused by difference between dotty-cps-async-0.9.5 and 0.9.7.
 
 For scala2: 
 
