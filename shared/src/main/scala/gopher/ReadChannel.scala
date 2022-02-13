@@ -52,12 +52,12 @@ trait ReadChannel[F[_], A]:
     * Can be used only inside async block.
     * If stream is closed and no values to read left in the stream - throws StreamClosedException
     **/   
-   transparent inline def read()(using CpsMonadContext[F]): A = await(aread())(using rAsyncMonad)
+   transparent inline def read[G[_]]()(using mc:CpsMonadContext[G]): A = await(aread())(using rAsyncMonad, mc)
 
    /**
    * Synonim for read.
    */
-   transparent inline def ?(using CpsMonadContext[F]) : A = await(aread())(using rAsyncMonad)
+   transparent inline def ?(using mc:CpsMonadContext[F]) : A = await(aread())(using rAsyncMonad, mc)
 
   /**
    * return F which contains sequence from first `n` elements.

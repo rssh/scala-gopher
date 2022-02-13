@@ -8,8 +8,8 @@ import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.collection.SortedSet
 
-import cps.monads.FutureAsyncMonad
-import gopher.monads.given
+import cps.monads.{given,*}
+import gopher.monads.{given,*}
 
 class ChannelMonadSuite extends FunSuite {
 
@@ -19,17 +19,21 @@ class ChannelMonadSuite extends FunSuite {
 
   test("using channel as monad and read inside") {
 
-       val chX = ReadChannel.fromValues(1,2,3,4,5)
-       val chY = ReadChannel.fromValues(1,2,3,4,5)
+       
+       val chX = ReadChannel.fromValues[Future,Int](1,2,3,4,5)
+       val chY = ReadChannel.fromValues[Future,Int](1,2,3,4,5)
 
-       val squares = async[[X] =>> ReadChannel[Future,X]] {
-        val x = await(chX)
+       
+       val squares: ReadChannel[Future,Int] = async[[X] =>> ReadChannel[Future,X]] { 
+        val x: Int = await(chX)
         //println(s"reading from X $x")
-        val y = chY.read()
+        val y: Int = chY.read()
         //println(s"reading from Y  $y")
         x*y
        }
+       
 
+       
        async[Future] {
          val a1 = squares.read()
          //println(s"a1==${a1}")
@@ -46,6 +50,7 @@ class ChannelMonadSuite extends FunSuite {
        }
 
   }
+  
 
   test("using channel with flatMap") {
 

@@ -67,7 +67,7 @@ class Select[F[_]](api: Gopher[F]):
     }
   }
 
-  transparent inline def afold[S](s0:S)(inline step: S => S | SelectFold.Done[S]) : F[S] =
+  transparent inline def afold[S](s0:S)(inline step: CpsMonadContext[F] ?=> S => S | SelectFold.Done[S]) : F[S] =
     given CpsAsyncMonad[F] = api.asyncMonad
     async[F]{ 
       fold(s0)(step)

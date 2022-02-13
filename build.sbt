@@ -1,5 +1,6 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
 val dottyVersion = "3.1.1"
+//val dottyVersion = "3.1.3-RC1-bin-SNAPSHOT"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
 ThisBuild/version := "3.0.2-SNAPSHOT"
@@ -10,7 +11,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.7",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.8",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
 )
 
@@ -26,14 +27,14 @@ lazy val root = project
   ).enablePlugins(GhpagesPlugin, SiteScaladocPlugin)
   
 
-
+// for scala-native support we need munit 
 lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .in(file("."))
     .settings(sharedSettings)
     .disablePlugins(SitePlugin)
     .disablePlugins(SitePreviewPlugin)
     .jvmSettings(
-        scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types" ),
+        scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types", "-explain" ),
         fork := true,
         /*
         javaOptions ++= Seq(
@@ -45,7 +46,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
         Compile / doc / scalacOptions := Seq("-groups",
                 "-source-links:shared=github://rssh/scala-gopher/master#shared",
                 "-source-links:jvm=github://rssh/scala-gopher/master#jvm"),
-        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "3.0.0" )  
+        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "3.0.1" )  
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?
