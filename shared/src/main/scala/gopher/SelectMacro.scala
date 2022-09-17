@@ -13,7 +13,7 @@ import scala.util.control.NonFatal
 
 object SelectMacro:
 
-  import cps.macros.forest.TransformUtil
+  import cps.macros.common.TransformUtil
 
   sealed trait SelectGroupExpr[F[_],S, R]:
     def  toExprOf[X <: SelectListeners[F,S, R]]: Expr[X]
