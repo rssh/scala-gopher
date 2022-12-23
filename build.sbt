@@ -3,7 +3,7 @@ val dottyVersion = "3.2.1"
 //val dottyVersion = "3.1.3-RC1-bin-SNAPSHOT"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "3.0.5"
+ThisBuild/version := "3.0.6-SNAPSHOT"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -11,7 +11,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     //resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.12",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.14-SNAPSHOT",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
 )
 
@@ -34,7 +34,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .disablePlugins(SitePlugin)
     .disablePlugins(SitePreviewPlugin)
     .jvmSettings(
-        scalacOptions ++= Seq( "-unchecked", "-Ycheck:macros", "-uniqid", "-Xprint:types", "-explain" ),
+        scalacOptions ++= Seq( "-unchecked", "-Xcheck-macros", "-Ycheck:macro", "-uniqid", "-Xprint:types", "-explain" ),
         fork := true,
         /*
         javaOptions ++= Seq(
@@ -46,7 +46,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
         Compile / doc / scalacOptions := Seq("-groups",
                 "-source-links:shared=github://rssh/scala-gopher/master#shared",
                 "-source-links:jvm=github://rssh/scala-gopher/master#jvm"),
-        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "3.0.2" )  
+        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "3.0.5" )  
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?
