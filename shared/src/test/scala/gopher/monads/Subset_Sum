@@ -1,0 +1,29 @@
+import scala.util.{Try, Success, Failure}
+object Sum_subset {
+  def recss(arr: List[Int], sum: Int, res: List[Int] = Nil): Try[List[List[Int]]] = {
+    if (sum == 0) Success(List(res))
+    else if (sum < 0) Success(Nil)
+    else if (arr.isEmpty && sum != 0) Success(Nil)
+    else if (arr.nonEmpty) {
+      val head :: tail = arr
+      val select = recss(tail, sum - head, head :: res)
+      val reject = recss(tail, sum, res)
+      for {
+        s <- select
+        r <- reject
+      } yield s ++ r
+    } else Success(Nil)
+  }
+
+
+  def main(args: Array[String]) = {
+    val arr = List( 4, 5, 2)
+    val sum = 14
+    recss(arr, sum) match {
+      case Success(result) =>
+        if (result.isEmpty) println("No subset found")
+        else println("Subset Exist")
+      case Failure(ex) => println(s"Error: ${ex.getMessage}")
+    }
+  }
+}
