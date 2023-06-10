@@ -7,7 +7,7 @@ import gopher.impl._
 
 
 
-given ReadChannelCpsMonad[F[_]](using Gopher[F]): CpsMonadInstanceContext[[A] =>> ReadChannel[F,A]] with
+given ReadChannelCpsMonad[F[_]](using Gopher[F]): CpsPureMonadInstanceContext[[A] =>> ReadChannel[F,A]] with
 
 
   def pure[T](t:T): ReadChannel[F,T] = 

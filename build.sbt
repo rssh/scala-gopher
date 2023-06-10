@@ -1,9 +1,9 @@
 //val dottyVersion = "3.0.0-RC2-bin-SNAPSHOT"
-val dottyVersion = "3.2.2"
+val dottyVersion = "3.3.0"
 //val dottyVersion = "3.1.3-RC1-bin-SNAPSHOT"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "3.0.7"
+ThisBuild/version := "3.0.8-SNAPSHOT"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -11,7 +11,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     //resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.16",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.17-RC1",
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
 )
 
@@ -34,7 +34,9 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
     .disablePlugins(SitePlugin)
     .disablePlugins(SitePreviewPlugin)
     .jvmSettings(
-        scalacOptions ++= Seq( "-unchecked", "-Xcheck-macros", "-Ycheck:macro", "-uniqid", "-Xprint:types", "-explain" ),
+        //scalacOptions ++= Seq( "-unchecked", "-Xcheck-macros", "-Ycheck:macro", "-uniqid", "-Xprint:types", "-explain" ),
+        // Error in dotty
+        scalacOptions ++= Seq( "-unchecked", "-Xprint:types" ),
         fork := true,
         /*
         javaOptions ++= Seq(

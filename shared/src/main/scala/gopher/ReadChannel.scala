@@ -52,12 +52,13 @@ trait ReadChannel[F[_], A]:
     * Can be used only inside async block.
     * If stream is closed and no values to read left in the stream - throws StreamClosedException
     **/   
-   transparent inline def read[G[_]]()(using mc:CpsMonadContext[G]): A = await(aread())(using rAsyncMonad, mc)
+   transparent inline def read[G[_]]()(using mc:CpsMonadContext[G], fg:CpsMonadConversion[F,G]): A = 
+     await(aread())
 
    /**
    * Synonim for read.
    */
-   transparent inline def ?(using mc:CpsMonadContext[F]) : A = await(aread())(using rAsyncMonad, mc)
+   transparent inline def ?(using mc:CpsMonadContext[F]) : A = await(aread())
 
   /**
    * return F which contains sequence from first `n` elements.
@@ -84,7 +85,7 @@ trait ReadChannel[F[_], A]:
    * should be called inside async block. 
    **/   
    transparent inline def take(n: Int)(using CpsMonadContext[F]): IndexedSeq[A] =
-      await(atake(n))(using rAsyncMonad)
+      await(atake(n))
 
    /**
     * read value and return future with
@@ -107,7 +108,7 @@ trait ReadChannel[F[_], A]:
     *
     * should be called inside async block.
     **/   
-   transparent inline def optRead()(using CpsMonadContext[F]): Option[A] = await(aOptRead())(using rAsyncMonad)
+   transparent inline def optRead()(using CpsMonadContext[F]): Option[A] = await(aOptRead())
 
    def foreach_async(f: A=>F[Unit]): F[Unit] =
       given CpsAsyncMonad[F] = asyncMonad
@@ -131,7 +132,7 @@ trait ReadChannel[F[_], A]:
    * until end of stream is not reached
    **/  
    transparent inline def foreach(inline f: A=>Unit)(using CpsMonadContext[F]): Unit = 
-      await(aforeach(f))(using rAsyncMonad)
+      await(aforeach(f))
 
 
    def map[B](f: A=>B): ReadChannel[F,B] =
@@ -171,7 +172,7 @@ trait ReadChannel[F[_], A]:
       }
    
    transparent inline def fold[S](inline s0:S)(inline f: (S,A) => S )(using mc:CpsMonadContext[F]): S =
-      await[F,S,F](afold(s0)(f))(using rAsyncMonad, mc)   
+      await[F,S,F](afold(s0)(f))
    
    def zip[B](x: ReadChannel[F,B]): ReadChannel[F,(A,B)] = 
       given CpsSchedulingMonad[F] = asyncMonad

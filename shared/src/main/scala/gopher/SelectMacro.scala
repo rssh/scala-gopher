@@ -56,7 +56,7 @@ object SelectMacro:
            )(using Quotes): Expr[R] =
             val g = selectListenerBuilder(constructor, caseDefs)
             //  dotty bug if g.run
-            val r = '{ await($g.runAsync())(using ${api}.asyncMonad, $monadContext) } 
+            val r = '{ await($g.runAsync())(using $monadContext, CpsMonadConversion.identityConversion[F]) } 
             r.asExprOf[R]
 
   def buildSelectListenerRunAsync[F[_]:Type, S:Type, R:Type, L <: SelectListeners[F,S,R]:Type](

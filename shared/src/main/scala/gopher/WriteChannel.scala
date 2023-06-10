@@ -23,13 +23,13 @@ trait WriteChannel[F[_], A]:
    //   inline def apply(a:A): Unit = await(awrite(a))(using asyncMonad) 
    //   inline def unapply(a:A): Some[A] = ???
 
-   transparent inline def write(inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a))(using asyncMonad)
+   transparent inline def write(inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a))
 
    @targetName("write1")
-   transparent inline def <~ (inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a))(using asyncMonad) 
+   transparent inline def <~ (inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a))
 
    @targetName("write2")
-   transparent inline def ! (inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a))(using asyncMonad) 
+   transparent inline def ! (inline a:A)(using CpsMonadContext[F]): Unit = await(awrite(a)) 
 
 
    //def Write(x:A):WritePattern = new WritePattern(x)
@@ -52,7 +52,7 @@ trait WriteChannel[F[_], A]:
       }
 
    transparent inline def writeAll(inline collection: IterableOnce[A])(using mc: CpsMonadContext[F]): Unit = 
-      await(awriteAll(collection))(using asyncMonad, mc)
+      await(awriteAll(collection))
 
 
    def withWriteExpiration(ttl: FiniteDuration, throwTimeouts: Boolean)(using gopherApi: Gopher[F]): WriteChannelWithExpiration[F,A] =
