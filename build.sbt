@@ -3,7 +3,7 @@ val dottyVersion = "3.3.0"
 //val dottyVersion = "3.1.3-RC1-bin-SNAPSHOT"
 //val dottyVersion = dottyLatestNightlyBuild.get
 
-ThisBuild/version := "4.0.0"
+ThisBuild/version := "4.0.1"
 ThisBuild/versionScheme := Some("semver-spec")
 
 val sharedSettings = Seq(
@@ -11,7 +11,7 @@ val sharedSettings = Seq(
     scalaVersion := dottyVersion,
     name := "scala-gopher",
     //resolvers += "Local Ivy Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local",
-    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.17",
+    libraryDependencies += "com.github.rssh" %%% "dotty-cps-async" % "0.9.18",
     libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M8" % Test,
 )
 
@@ -48,7 +48,7 @@ lazy val gopher = crossProject(JSPlatform, JVMPlatform)
         Compile / doc / scalacOptions := Seq("-groups",
                 "-source-links:shared=github://rssh/scala-gopher/master#shared",
                 "-source-links:jvm=github://rssh/scala-gopher/master#jvm"),
-        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "3.0.7" )  
+        mimaPreviousArtifacts := Set( "com.github.rssh" %% "scala-gopher" % "4.0.0" )  
     ).jsSettings(
         libraryDependencies += ("org.scala-js" %%% "scalajs-java-logging" % "1.0.0").cross(CrossVersion.for3Use2_13),
         // TODO: switch to ModuleES ?
