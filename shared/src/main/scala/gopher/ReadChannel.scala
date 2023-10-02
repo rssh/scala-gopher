@@ -36,7 +36,7 @@ trait ReadChannel[F[_], A]:
 
    def addDoneReader(reader: Reader[Unit]): Unit 
 
-   lazy val done: ReadChannel[F,Unit] = DoneReadChannel()
+   final lazy val done: ReadChannel[F,Unit] = DoneReadChannel()
 
    type done = Unit
 
