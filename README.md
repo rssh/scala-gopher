@@ -10,7 +10,7 @@ My country, Ukraine, [is being invaded by the Russian Federation, right now](htt
  
 For scala 3.1.1+:
 
-    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "3.0.7"
+    libraryDependencies += "com.github.rssh" %% "scala-gopher" % "4.0.2"
 
 For scala 3 and 3.1.0:
 
